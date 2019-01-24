@@ -1,0 +1,6 @@
+__pycache__
+.backup
+
+/build
+*.egg-info
+/mrdna/RELEASE-VERSION
