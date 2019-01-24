@@ -7,7 +7,7 @@ systems out of point-like particles interacting through bonded and
 non-bonded potentials. Rigid body particles are not yet supported.
 The interface presently communicates with ARBD through files.
 
-## Example: Consstructing a coarse-grained ssDNA model
+## Example: Constructing a coarse-grained ssDNA model
 
 ```python
 import numpy as np
