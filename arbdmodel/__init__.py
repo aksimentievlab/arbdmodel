@@ -9,6 +9,9 @@ from copy import copy, deepcopy
 from inspect import ismethod
 import os, sys, subprocess
 
+_RESOURCE_DIR = Path(__file__).parent / 'resources'
+def get_resource_path(relative_path):
+    return _RESOURCE_DIR / relative_path
 
 ## Abstract classes
 class Transformable():
@@ -310,22 +313,32 @@ class ParticleType():
                           "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, **kargs):
-        # parent = None
-        # if "parent" in kargs: parent = kargs["parent"]
-        # Child.__init__(self, parent)
+    def __init__(self, name, charge=0, parent=None, **kargs):
+        """ Parent type is used to fall back on for nonbonded interactions if this type is not specifically referenced """
 
         self.name        = name
         self.charge = charge
+        self.parent = parent
+
         for key in ParticleType.excludedAttributes:
             assert( key not in kargs )
 
         for key,val in kargs.items():
             self.__dict__[key] = val
 
+    def is_same_type(self, other):
+        assert(isinstance(other,ParticleType))
+        if self == other:
+            return True
+        elif self.parent is not None and self.parent == other:
+            return True
+        else:
+            return False
+
     def __hash_key(self):
         l = [self.name,self.charge]
         for keyval in sorted(self.__dict__.items()):
+            if isinstance(keyval[1], list): keyval = (keyval[0],tuple(keyval[1]))
             l.extend(keyval)
         return tuple(l)
 
@@ -352,7 +365,10 @@ class ParticleType():
     def __ge__(a,b):
         a._equal_check(b)
         return a.name >= b.name
-    
+
+    def __repr__(self):
+        return '<{} {}{}>'.format( type(self), self.name, '[{}]'.format(self.parent) if self.parent is not None else '' )
+
 
 class PointParticle(Transformable, Child):
     def __init__(self, type_, position, name="A", **kwargs):
@@ -661,11 +677,11 @@ class ArbdModel(PdbModel):
             if A is None or B is None:
                 if A is None and B is None:
                     return s
-                elif A is None and typeB == B:
+                elif A is None and typeB.is_same_type(B):
                     return s
-                elif B is None and typeA == A:
+                elif B is None and typeA.is_same_type(A):
                     return s
-            elif typeA == A and typeB == B:
+            elif typeA.is_same_type(A) and typeB.is_same_type(B):
                 return s
         raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
 
@@ -996,7 +1012,7 @@ component "data" value 3
 
     def _writeArbdBondFile( self ):
         for b in list( set( [b for i,j,b,ex in self.get_bonds()] ) ):
-            if type(b) is not str:
+            if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         with open(self._bond_filename,'w') as fh:
@@ -1009,7 +1025,7 @@ component "data" value 3
 
     def _writeArbdAngleFile( self ):
         for b in list( set( [b for i,j,k,b in self.get_angles()] ) ):
-            if type(b) is not str:
+            if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         with open(self._angle_filename,'w') as fh:
@@ -1019,7 +1035,7 @@ component "data" value 3
 
     def _writeArbdDihedralFile( self ):
         for b in list( set( [b for i,j,k,l,b in self.get_dihedrals()] ) ):
-            if type(b) is not str:
+            if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         with open(self._dihedral_filename,'w') as fh:
