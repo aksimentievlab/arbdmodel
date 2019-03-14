@@ -1,0 +1,73 @@
+#VRML V2.0 utf8
+Transform {
+  translation  -0.45362E+00  -0.11172E+01   0.60272E-01
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation  -0.30105E+00  -0.50216E+00  -0.34204E+00
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation  -0.37239E+00   0.25315E+00   0.60709E-03
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation  -0.85319E+00   0.68340E+00  -0.42082E+00
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation  -0.51600E+00   0.19023E+00   0.75918E+00
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation   0.39776E+00   0.56724E+00  -0.69582E-01
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation   0.97636E+00   0.16692E+00   0.19842E+00
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}
+Transform {
+  translation   0.11221E+01  -0.24157E+00  -0.18605E+00
+  children [
+    Shape {
+      geometry Sphere { radius   0.15123E+01 }
+      appearance Appearance { material Material{ diffuseColor 1.0 1.0 0.0 }                                                                                                                           }
+    }
+  ]
+}

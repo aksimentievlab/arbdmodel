@@ -638,15 +638,21 @@ class PdbModel(Transformable, Parent):
 
 
 class ArbdModel(PdbModel):
-    def __init__(self, children, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6, cutoff=50, decompPeriod=10000, pairlistDistance=None, nonbondedResolution=0.1, remove_duplicate_bonded_terms=True):
+    def __init__(self, children, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
+                 particle_integrator = 'Brown',
+                 cutoff=50, decompPeriod=10000, pairlistDistance=None, nonbondedResolution=0.1,
+                 remove_duplicate_bonded_terms=True):
+
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.temperature = temperature
 
         self.timestep = timestep
         self.cutoff  =  cutoff
 
+        self.particle_integrator = particle_integrator
+        
         if pairlistDistance == None:
-            pairlistDistance = cutoff+2
+            pairlistDistance = cutoff+10
         
         self.decompPeriod = decompPeriod
         self.pairlistDistance = pairlistDistance
@@ -812,9 +818,22 @@ class ArbdModel(PdbModel):
 
     def _writeArbdParticleFile(self, filename):
         with open(filename,'w') as fh:
-            for p in self.particles:
-                data = tuple([p.idx,p.type_.name] + [x for x in p.collapsedPosition()])
-                fh.write("ATOM %d %s %f %f %f\n" % data)
+            if self.particle_integrator == "Brown":
+                for p in self.particles:
+                    data = tuple([p.idx,p.type_.name] + [x for x in p.collapsedPosition()])
+                    fh.write("ATOM %d %s %f %f %f\n" % data)
+            else:
+                for p in self.particles:
+                    data = [p.idx,p.type_.name] + [x for x in p.collapsedPosition()]
+                    try:
+                        data = data + p.momentum
+                    except:
+                        try:
+                            data = data + p.velocity*p.mass
+                        except:
+                            data = data + [0,0,0]
+                    fh.write("ATOM %d %s %f %f %f %f %f %f\n" % tuple(data))
+                
 
         
     def _writeArbdConf(self, prefix, randomSeed=None, numSteps=100000000, outputPeriod=10000, restartCoordinateFile=None):
@@ -854,6 +873,7 @@ numberFluct 0                   # deprecated
 interparticleForce 1            # other values deprecated
 fullLongRange 0                 # deprecated
 temperature {temperature}
+ParticleDynamicType {particle_integrator}
 
 outputPeriod {outputPeriod}
 ## Energy doesn't actually get printed!
@@ -874,10 +894,28 @@ systemSize {dimX} {dimY} {dimZ}
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
                 particleParams['num'] = num
+                if self.particle_integrator in ('Brown','Brownian'):
+                    try:
+                        D = pt.diffusivity
+                    except:
+                        """ units "k K/(amu/ns)" "AA**2/ns" """
+                        D = 831447.2 * self.temperature / (pt.mass * pt.damping_coefficient)
+                    particleParams['dynamics'] = 'diffusion {D}'.format(D = D)
+                elif self.particle_integrator == 'Langevin':
+                    try:
+                        gamma = pt.damping_coefficient
+                    except:
+                        """ units "k K/(AA**2/ns)" "amu/ns" """
+                        gamma = 831447.2 * self.temperature / (pt.mass*pt.diffusivity)
+                    particleParams['dynamics'] = """mass {mass}
+transDamping {g} {g} {g}
+""".format(mass=pt.mass, g=gamma)
+                else:
+                    raise ValueError("Unrecognized particle integrator '{}'".format(self.particle_integrator))
                 fh.write("""
 particle {name}
 num {num}
-diffusion {diffusivity}
+{dynamics}
 """.format(**particleParams))
                 if 'grid' in particleParams:
                     if not isinstance(pt.grid, list): pt.grid = [pt.grid]
@@ -1091,7 +1129,7 @@ set prefix {prefix}
 set nLast 0;			# increment when continueing a simulation
 set n [expr $nLast+1]
 set out {output_directory}/$prefix-$n
-set temperature    300
+set temperature {temperature}
 
 structure          $prefix.psf
 coordinates        $prefix.pdb

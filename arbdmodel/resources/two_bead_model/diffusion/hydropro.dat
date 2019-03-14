@@ -1,0 +1,18 @@
+b                        !Name of molecule
+b-bead.hydropro                        !Name for output file 
+b-bead.pdb     !Strucutural (PBD) file       
+1               !Type of calculation
+2.9,            !AER, hydrodynamic radius of primary elements
+6,              !NSIG
+1.2,            !Minimum radius of beads in the shell (SIGMIN)	
+2.0,            !Maximum radius of beads in the shell (SIGMAX)	
+22.,            !T (temperature, centigrade)
+0.01,           !ETA (Viscosity of the solvent in poises)
+181,         !RM (Molecular weight)
+1.0,	        !Partial specific volume, cm3/g
+1.0,            !Solvent density, g/cm3
+-1              !Number of values of Q
+-1  		!Number of intervals
+0,              !Number of trials for MC calculation of covolume
+1               !IDIF=1 (yes) for full diffusion tensors
+*
