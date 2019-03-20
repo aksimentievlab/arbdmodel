@@ -174,6 +174,9 @@ class PolymerSection(ConnectableElement):
         if 'segname' not in kwargs:
             self.segname = name
 
+        for key,val in kwargs.items():
+            self.__dict__[key] = val
+
         self.num_monomers = int(num_monomers)
         self.monomer_length = monomer_length
         

@@ -418,6 +418,10 @@ class PointParticle(Transformable, Child):
         except:
             segname = "A"
         try:
+            chain = p.chain
+        except:
+            chain = "A"
+        try:
             resname = p.resname
         except:
             resname = p.name[:3]
@@ -438,7 +442,7 @@ class PointParticle(Transformable, Child):
         data = dict(segname = segname,
                     resname = resname,
                     name = str(p.name)[:4],
-                    chain = "A",
+                    chain = chain[0],
                     resid = int(resid),
                     idx = p.idx+1,
                     type = p.type_.name[:4],
