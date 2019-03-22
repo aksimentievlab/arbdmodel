@@ -445,7 +445,7 @@ class PointParticle(Transformable, Child):
                     chain = chain[0],
                     resid = int(resid),
                     idx = p.idx+1,
-                    type = p.type_.name[:4],
+                    type = p.type_.name[:7],
                     charge = p.charge,
                     mass = p.mass,
                     occupancy = occ,
