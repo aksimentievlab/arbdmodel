@@ -78,6 +78,9 @@ class HarmonicPotential():
     def __str__(self):
         return self.filename()
 
+    def potential(self, dr):
+        return 0.5*self.k*dr**2
+
     def write_file(self):
         r = np.arange( self.rRange[0], 
                        self.rRange[1]+self.resolution, 
@@ -89,7 +92,7 @@ class HarmonicPotential():
             assert(rSpan > 0)
             dr = np.mod( dr+0.5*rSpan, rSpan) - 0.5*rSpan 
 
-        u = 0.5*self.k*dr**2
+        u = self.potential(dr)
 
         maxForce = self.maxForce
         if maxForce is not None:
