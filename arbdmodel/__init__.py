@@ -429,6 +429,10 @@ class PointParticle(Transformable, Child):
             resid = p.resid
         except:
             resid = p.idx+1
+        try:
+            mass = p.mass
+        except:
+            mass = 1
 
         try:
             occ = p.occupancy
@@ -447,7 +451,7 @@ class PointParticle(Transformable, Child):
                     idx = p.idx+1,
                     type = p.type_.name[:7],
                     charge = p.charge,
-                    mass = p.mass,
+                    mass = mass,
                     occupancy = occ,
                     beta = beta
                 )
