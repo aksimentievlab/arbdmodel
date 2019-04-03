@@ -727,7 +727,7 @@ class ArbdModel(PdbModel):
         if typeA != typeB:
             self.nbSchemes.append( (nbScheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', replicas=1):
+    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1):
         assert(type(gpu) is int)
         num_steps = int(num_steps)
 
@@ -771,7 +771,7 @@ class ArbdModel(PdbModel):
 
             self.writePdb( output_name + ".pdb" )
             self.writePsf( output_name + ".psf" )
-            self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period )
+            self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period, restart_file=restart_file )
             os.sync()
 
             ## http://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
@@ -798,7 +798,7 @@ class ArbdModel(PdbModel):
     # Methods for printing model #
     # -------------------------- #
 
-    def writeArbdFiles(self, prefix, numSteps=100000000, outputPeriod=10000):
+    def writeArbdFiles(self, prefix, numSteps=100000000, outputPeriod=10000, restart_file=None):
         ## TODO: save and reference directories and prefixes using member data
         d = self.potential_directory = "potentials"
         if not os.path.exists(d):
@@ -817,7 +817,7 @@ class ArbdModel(PdbModel):
         self._writeArbdDihedralFile()
         self._writeArbdExclusionFile()
         self._writeArbdPotentialFiles( prefix, directory = d )
-        self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod )
+        self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
         
     # def _writeArbdCoordFile(self, filename):
     #     with open(filename,'w') as fh:
@@ -844,7 +844,7 @@ class ArbdModel(PdbModel):
                 
 
         
-    def _writeArbdConf(self, prefix, randomSeed=None, numSteps=100000000, outputPeriod=10000, restartCoordinateFile=None):
+    def _writeArbdConf(self, prefix, randomSeed=None, numSteps=100000000, outputPeriod=10000, restart_file=None):
         ## TODO: raise exception if _writeArbdPotentialFiles has not been called
         filename = "%s.bd" % prefix
 
@@ -859,10 +859,10 @@ class ArbdModel(PdbModel):
 
         # params['coordinateFile'] = "%s.coord.txt" % prefix
         params['particleFile'] = "%s.particles.txt" % prefix
-        if restartCoordinateFile is None:
+        if restart_file is None:
             params['restartCoordinates'] = ""
         else:
-            params['restartCoordinates'] = "restartCoordinates %s" % restartCoordinateFile
+            params['restartCoordinates'] = "restartCoordinates %s" % restart_file
         params['outputPeriod'] = outputPeriod
 
         for k,v in zip('XYZ', self.dimensions):
