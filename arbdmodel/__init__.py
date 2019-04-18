@@ -648,7 +648,7 @@ class PdbModel(Transformable, Parent):
 class ArbdModel(PdbModel):
     def __init__(self, children, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
                  particle_integrator = 'Brown',
-                 cutoff=50, decompPeriod=10000, pairlistDistance=None, nonbondedResolution=0.1,
+                 cutoff=50, decompPeriod=1000, pairlistDistance=None, nonbondedResolution=0.1,
                  remove_duplicate_bonded_terms=True):
 
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
@@ -660,7 +660,7 @@ class ArbdModel(PdbModel):
         self.particle_integrator = particle_integrator
         
         if pairlistDistance == None:
-            pairlistDistance = cutoff+10
+            pairlistDistance = cutoff+30
         
         self.decompPeriod = decompPeriod
         self.pairlistDistance = pairlistDistance
