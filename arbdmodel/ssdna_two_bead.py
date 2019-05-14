@@ -30,7 +30,7 @@ class DnaStrandFromPolymer(Group):
     p = PointParticle(_P, (0,0,0), "P")
     b = PointParticle(_B, (3,0,1), "B")
     nt = Group( name = "nt", children = [p,b])
-    nt.add_bond( i=p, j=b, bond = get_resource_path('two_bead_model/BPB.dat') )
+    nt.add_bond( i=p, j=b, bond = get_resource_path('two_bead_model/BPB.dat'), exclude = True )
 
     def __init__(self, polymer, **kwargs):
         self.polymer = polymer
