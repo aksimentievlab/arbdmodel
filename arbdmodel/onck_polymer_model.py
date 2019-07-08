@@ -66,7 +66,7 @@ _types = dict(
                      charge = 0,
                      epsilon = 0.98,
                  ),
-    L = ParticleType("LUE",
+    L = ParticleType("LEU",
                      mass = 120,
                      charge = 0,
                      epsilon = 1.0,
