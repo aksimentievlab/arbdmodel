@@ -85,6 +85,19 @@ class Parent():
         x.parent = self
         self.children.append(x)
 
+    def insert(self,idx,x):
+        ## TODO: check the parent-child tree to make sure there are no cycles
+        if not isinstance(x,Child):
+            raise Exception('Attempted to add an object to a group that does not inherit from the "Child" type')
+
+        if x.parent is not None and x.parent is not self:
+            raise Exception("Child {} already belongs to some group".format(x))
+        x.parent = self
+        self.children.insert(idx,x)
+
+    def index(self, x):
+        return self.children.index(x)
+
     def clear_all(self, keep_children=False):
         if keep_children == False:
             for x in self.children:
@@ -99,7 +112,8 @@ class Parent():
     def remove(self,x):
         if x in self.children:
             self.children.remove(x)
-            x.parent = None
+            if x.parent is self:
+                x.parent = None
 
     def add_bond(self, i,j, bond, exclude=False):
         ## TODO: how to handle duplicating and cloning bonds
