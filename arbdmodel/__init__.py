@@ -72,8 +72,9 @@ class Parent():
         self.impropers = []
         self.exclusions = []
 
-        ## TODO: self.cacheInvalid = True # What will be in the cache?
+        self.rigid = False
 
+        ## TODO: self.cacheInvalid = True # What will be in the cache?
 
     def add(self,x):
         ## TODO: check the parent-child tree to make sure there are no cycles
@@ -252,10 +253,16 @@ class Child():
     def __getattr__(self, name):
         """
         Try to get attribute from the parent
+
         """
         # if self.parent is not None:
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name is "children":
             raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+
+
+        excluded_attributes = ['parent','rigid']
+        if name in excluded_attributes:
+            raise AttributeError("'{}' object has no attribute '{}' and cannot look it up from the parent".format(type(self).__name__, name))
 
         ## TODO: determine if there is a way to avoid __getattr__ if a method is being looked up  
         try:
@@ -324,7 +331,7 @@ class ParticleType():
     excludedAttributes = ("idx","type_",
                           "position",
                           "children",
-                          "parent", "excludedAttributes",
+                          "parent", "excludedAttributes","rigid"
     )
 
     def __init__(self, name, charge=0, parent=None, **kargs):
@@ -866,8 +873,32 @@ class ArbdModel(PdbModel):
                             data = data + [0,0,0]
                     fh.write("ATOM %d %s %f %f %f %f %f %f\n" % tuple(data))
                 
+    def _write_rigid_group_file(self, filename, groups):
+        with open(filename,'w') as fh:
+            for g in groups:
+                fh.write("#Group\n")
+                try:
+                    if len(g.trans_damping) != 3: raise
+                    fh.write(" ".join(str(v) for v in g.trans_damping) + " ")
+                except:
+                    raise ValueError("Group {} lacks 3-value 'trans_damping' attribute")
+                try:
+                    if len(g.rot_damping) != 3: raise
+                    fh.write(" ".join(str(v) for v in g.rot_damping) + " ")
+                except:
+                    raise ValueError("Group {} lacks 3-value 'rot_damping' attribute")
+                fh.write("{}\n".format(len(g)))
+                particles = [p for p in g]
 
-        
+                def chunks(l, n):
+                    """Yield successive n-sized chunks from l."""
+                    for i in range(0, len(l), n):
+                        yield l[i:i + n]
+
+                for c in chunks(particles,8):
+                    fh.write(" ".join(str(p.idx) for p in c) + "\n")
+
+
     def _writeArbdConf(self, prefix, randomSeed=None, numSteps=100000000, outputPeriod=10000, restart_file=None):
         ## TODO: raise exception if _writeArbdPotentialFiles has not been called
         filename = "%s.bd" % prefix
@@ -894,6 +925,26 @@ class ArbdModel(PdbModel):
             params['dim'+k] = v
         
         params['pairlistDistance'] -= params['cutoff'] 
+
+        """ Find rigid groups """
+        rigid_groups = []
+        def get_rigid_groups(parent):
+            ret_list = []
+            for c in parent.children:
+                is_rigid = c.rigid if 'rigid' in c.__dict__ else False
+                if is_rigid:
+                    rigid_groups.append(c)
+                elif isinstance(c,Group):
+                    get_rigid_groups(c)
+        get_rigid_groups(self)
+
+        if len(rigid_groups) > 0:
+            self.particle_integrator = 'FusDynamic'
+            rb_group_filename = "{}.rb-group.txt".format(prefix)
+            params['particle_integrator'] = """FusDynamics
+groupFileName {}
+scaleFactor 0.05""".format(rb_group_filename)
+            self._write_rigid_group_file(rb_group_filename, rigid_groups)
 
         ## Actually write the file
         with open(filename,'w') as fh:
@@ -933,7 +984,7 @@ systemSize {dimX} {dimY} {dimZ}
                         """ units "k K/(amu/ns)" "AA**2/ns" """
                         D = 831447.2 * self.temperature / (pt.mass * pt.damping_coefficient)
                     particleParams['dynamics'] = 'diffusion {D}'.format(D = D)
-                elif self.particle_integrator == 'Langevin':
+                elif self.particle_integrator in ('Langevin','FusDynamic'):
                     try:
                         gamma = pt.damping_coefficient
                     except:
