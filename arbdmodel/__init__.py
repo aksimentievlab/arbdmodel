@@ -727,7 +727,7 @@ class ArbdModel(PdbModel):
         if typeA != typeB:
             self.nbSchemes.append( (nbScheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1):
+    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, dry_run = False):
         assert(type(gpu) is int)
         num_steps = int(num_steps)
 
@@ -782,11 +782,14 @@ class ArbdModel(PdbModel):
             cmd = cmd + ["%s.bd" % output_name, "%s/%s" % (output_directory, output_name)]
             cmd = tuple(str(x) for x in cmd)
 
-            print("Running ARBD with: %s" % " ".join(cmd))
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-            for line in process.stdout:
-                sys.stdout.write(line)
-                sys.stdout.flush()
+            if dry_run:
+                print("Run with: %s" % " ".join(cmd))
+            else:
+                print("Running ARBD with: %s" % " ".join(cmd))
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+                for line in process.stdout:
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
 
         except:
             raise
