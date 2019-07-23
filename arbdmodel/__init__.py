@@ -760,22 +760,26 @@ class ArbdModel(PdbModel):
 
             if output_directory == '': output_directory='.'
 
-            if arbd is None:
-                for path in os.environ["PATH"].split(os.pathsep):
-                    path = path.strip('"')
-                    fname = os.path.join(path, "arbd")
-                    if os.path.isfile(fname) and os.access(fname, os.X_OK):
-                        arbd = fname
-                        break 
+            if dry_run:
+                if arbd is None: arbd='arbd'
+            else:
+                if arbd is None:
+                    for path in os.environ["PATH"].split(os.pathsep):
+                        path = path.strip('"')
+                        fname = os.path.join(path, "arbd")
+                        if os.path.isfile(fname) and os.access(fname, os.X_OK):
+                            arbd = fname
+                            break
 
-            if arbd is None: raise Exception("ARBD was not found")
+                if arbd is None: raise Exception("ARBD was not found")
 
-            if not os.path.exists(arbd):
-                raise Exception("ARBD was not found")
-            if not os.path.isfile(arbd):
-                raise Exception("ARBD was not found")
-            if not os.access(arbd, os.X_OK):
-                raise Exception("ARBD is not executable")
+                if not os.path.exists(arbd):
+                    raise Exception("ARBD was not found")
+                if not os.path.isfile(arbd):
+                    raise Exception("ARBD was not found")
+                if not os.access(arbd, os.X_OK):
+                    raise Exception("ARBD is not executable")
+
 
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
