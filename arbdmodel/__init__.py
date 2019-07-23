@@ -408,6 +408,9 @@ class PointParticle(Transformable, Child):
     def get_restraints(self):
         return [(self,r) for r in self.restraints]
 
+    def duplicate(self):
+        new = deepcopy(self)
+        return new
 
     def __getattr__(self, name):
         """

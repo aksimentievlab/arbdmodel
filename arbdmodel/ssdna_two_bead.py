@@ -76,7 +76,7 @@ class DnaStrandFromPolymer(Group):
             self.add_exclusion( i=b1, j=p3 )
 
         ## Four consecutive nts 
-        for i in range(len(nts)-4):
+        for i in range(len(nts)-3):
             p1,b1 = nts[i].children
             p2,b2 = nts[i+1].children
             p3,b3 = nts[i+2].children
