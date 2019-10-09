@@ -117,17 +117,21 @@ class Parent():
                 x.parent = None
 
     def add_bond(self, i,j, bond, exclude=False):
+        assert( i is not j )
         ## TODO: how to handle duplicating and cloning bonds
         # beads = [b for b in self]
         # for b in (i,j): assert(b in beads)
         self.bonds.append( (i,j, bond, exclude) )
 
     def add_angle(self, i,j,k, angle):
+        assert( len(set((i,j,k))) == 3 )
         # beads = [b for b in self]
         # for b in (i,j,k): assert(b in beads)
         self.angles.append( (i,j,k, angle) )
 
     def add_dihedral(self, i,j,k,l, dihedral):
+        assert( len(set((i,j,k,l))) == 4 )
+
         # beads = [b for b in self]
         # for b in (i,j,k,l): assert(b in beads)
         self.dihedrals.append( (i,j,k,l, dihedral) )
@@ -670,11 +674,10 @@ class PdbModel(Transformable, Parent):
 
 
 class ArbdModel(PdbModel):
-    def __init__(self, children, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
-                 particle_integrator = 'Brown',
+    def __init__(self, children, dimensions=(1000,1000,1000), temperature=291,
+                 timestep=50e-6, particle_integrator = 'Brown',
                  cutoff=50, decompPeriod=1000, pairlistDistance=None, nonbondedResolution=0.1,
-                 remove_duplicate_bonded_terms=True):
-
+                 remove_duplicate_bonded_terms=True, extra_bd_file_lines=""):
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.temperature = temperature
 
@@ -688,6 +691,8 @@ class ArbdModel(PdbModel):
         
         self.decompPeriod = decompPeriod
         self.pairlistDistance = pairlistDistance
+
+        self.extra_bd_file_lines = extra_bd_file_lines
 
         self.numParticles = 0
         self.particles = []
@@ -751,7 +756,7 @@ class ArbdModel(PdbModel):
         if typeA != typeB:
             self.nbSchemes.append( (nbScheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, dry_run = False):
+    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, log_file=None, dry_run = False):
         assert(type(gpu) is int)
         num_steps = int(num_steps)
 
@@ -814,10 +819,16 @@ class ArbdModel(PdbModel):
                 print("Run with: %s" % " ".join(cmd))
             else:
                 print("Running ARBD with: %s" % " ".join(cmd))
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-                for line in process.stdout:
-                    sys.stdout.write(line)
-                    sys.stdout.flush()
+                if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
+                    fd = sys.stdout if log_file is None else log_file
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+                    for line in process.stdout:
+                        fd.write(line)
+                        fd.flush()
+                else:
+                    with open(log_file,'w') as fd:
+                        process = subprocess.Popen(cmd, stdout=log_file, universal_newlines=True)
+                        process.communicate()
 
         except:
             raise
@@ -970,6 +981,8 @@ pairlistDistance {pairlistDistance}
 
 origin {originX} {originY} {originZ}
 systemSize {dimX} {dimY} {dimZ}
+
+{extra_bd_file_lines}
 \n""".format(**params))
             
             ## Write entries for each type of particle
