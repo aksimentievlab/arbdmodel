@@ -25,14 +25,14 @@ class NonbondedScheme():
 
 class LennardJones(NonbondedScheme):
     def potential(self, r, typeA, typeB):
-        epsilon = sqrt( typeA.epsilon**2 + typeB.epsilon**2 )
+        epsilon = np.sqrt( typeA.epsilon**2 + typeB.epsilon**2 )
         r0 = 0.5 * (typeA.radius + typeB.radius)
         r6 = (r0/r)**6
         r12 = r6**2
         u = epsilon * (r12-2*r6)
         u[0] = u[1]             # Remove NaN
         return u
-LennardJones = LennardJones()
+# LennardJones = LennardJones()
 
 class HalfHarmonic(NonbondedScheme):
     def potential(self, r, typeA, typeB):
@@ -41,7 +41,7 @@ class HalfHarmonic(NonbondedScheme):
         u =  0.5 * k * (r-r0)**2
         u[r > r0] = np.zeros( np.shape(u[r > r0]) )
         return u
-HalfHarmonic = HalfHarmonic()
+# HalfHarmonic = HalfHarmonic()
 
 class TabulatedPotential(NonbondedScheme):
     def __init__(self, tableFile, typesA=None, typesB=None, resolution=0.1, rMin=0):

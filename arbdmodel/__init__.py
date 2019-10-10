@@ -676,7 +676,7 @@ class PdbModel(Transformable, Parent):
 class ArbdModel(PdbModel):
     def __init__(self, children, dimensions=(1000,1000,1000), temperature=291,
                  timestep=50e-6, particle_integrator = 'Brown',
-                 cutoff=50, decompPeriod=1000, pairlistDistance=None, nonbondedResolution=0.1,
+                 cutoff=50, decomp_period=1000, pairlist_distance=None, nonbonded_resolution=0.1,
                  remove_duplicate_bonded_terms=True, extra_bd_file_lines=""):
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.temperature = temperature
@@ -686,11 +686,11 @@ class ArbdModel(PdbModel):
 
         self.particle_integrator = particle_integrator
         
-        if pairlistDistance == None:
-            pairlistDistance = cutoff+30
+        if pairlist_distance == None:
+            pairlist_distance = cutoff+30
         
-        self.decompPeriod = decompPeriod
-        self.pairlistDistance = pairlistDistance
+        self.decomp_period = decomp_period
+        self.pairlist_distance = pairlist_distance
 
         self.extra_bd_file_lines = extra_bd_file_lines
 
@@ -752,9 +752,12 @@ class ArbdModel(PdbModel):
         # self.initialCoords = np.array([p.initialPosition for p in self.particles])
 
     def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
-        self.nbSchemes.append( (nbScheme, typeA, typeB) )
+        self.add_nonbonded_scheme(nbScheme, typeA, typeB)
+
+    def add_nonbonded_scheme(self, nonbonded_scheme, typeA=None, typeB=None):
+        self.nbSchemes.append( (nonbonded_scheme, typeA, typeB) )
         if typeA != typeB:
-            self.nbSchemes.append( (nbScheme, typeB, typeA) )
+            self.nbSchemes.append( (nonbonded_scheme, typeB, typeA) )
 
     def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, log_file=None, dry_run = False):
         assert(type(gpu) is int)
@@ -935,7 +938,7 @@ class ArbdModel(PdbModel):
             params['origin'+k] = -v*0.5
             params['dim'+k] = v
         
-        params['pairlistDistance'] -= params['cutoff'] 
+        params['pairlist_distance'] -= params['cutoff'] 
 
         """ Find rigid groups """
         rigid_groups = []
@@ -975,9 +978,9 @@ outputEnergyPeriod {outputPeriod}
 outputFormat dcd
 
 ## Infrequent domain decomposition because this kernel is still very slow
-decompPeriod {decompPeriod}
+decompPeriod {decomp_period}
 cutoff {cutoff}
-pairlistDistance {pairlistDistance}
+pairlistDistance {pairlist_distance}
 
 origin {originX} {originY} {originZ}
 systemSize {dimX} {dimY} {dimZ}
@@ -1324,4 +1327,3 @@ run {num_steps:d}
         self.writePsf( output_name + ".psf" )
         self.write_namd_configuration( output_name, output_directory = output_directory )
         os.sync()
-
