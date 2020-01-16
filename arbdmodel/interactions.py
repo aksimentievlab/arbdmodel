@@ -1,8 +1,9 @@
-from shutil import copyfile
+from abc import abstractmethod, ABCMeta
 import os, sys
 import numpy as np
+from shutil import copyfile
 
-class NonbondedScheme():
+class NonbondedInteraction(metaclass=ABCMeta):
     """ Abstract class for writing nonbonded interactions """
 
     def __init__(self, typesA=None, typesB=None, resolution=0.1, rMin=0):
@@ -14,27 +15,37 @@ class NonbondedScheme():
         self.rMax = simSystem.cutoff
         self.r = np.arange(rMin,rMax,resolution)
 
+    @abstractmethod
     def potential(self, r, typeA, typeB):
         raise NotImplementedError
     
+    def __remove_nans(self, u):
+        left = np.isnan(u[:-1])
+        right = np.where(left)[0]+1
+        while np.any(np.isnan(u[right])):
+            right[np.isnan(u[right])] += 1
+        u[:-1][left] = u[right]
+
     def write_file(self, filename, typeA, typeB, rMax):
         r = np.arange(self.rMin, rMax+self.resolution, self.resolution)
-        u = self.potential(r, typeA, typeB)
+        with np.errstate(divide='ignore',invalid='ignore'):
+            u = self.potential(r, typeA, typeB)
+        self.__remove_nans(u)
         np.savetxt(filename, np.array([r,u]).T)
 
 
-class LennardJones(NonbondedScheme):
+class LennardJones(NonbondedInteraction):
     def potential(self, r, typeA, typeB):
         epsilon = np.sqrt( typeA.epsilon**2 + typeB.epsilon**2 )
         r0 = 0.5 * (typeA.radius + typeB.radius)
         r6 = (r0/r)**6
         r12 = r6**2
-        u = epsilon * (r12-2*r6)
-        u[0] = u[1]             # Remove NaN
+        u = 4 * epsilon * (r12-r6)
+        # u[0] = u[1]             # Remove NaN
         return u
 # LennardJones = LennardJones()
 
-class HalfHarmonic(NonbondedScheme):
+class HalfHarmonic(NonbondedInteraction):
     def potential(self, r, typeA, typeB):
         k = 10                   # kcal/mol AA**2
         r0 = (typeA.radius + typeB.radius)
@@ -43,7 +54,7 @@ class HalfHarmonic(NonbondedScheme):
         return u
 # HalfHarmonic = HalfHarmonic()
 
-class TabulatedPotential(NonbondedScheme):
+class TabulatedNonbonded(NonbondedInteraction):
     def __init__(self, tableFile, typesA=None, typesB=None, resolution=0.1, rMin=0):
         """If typesA is None, and typesB is None, then """
         self.tableFile = tableFile

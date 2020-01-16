@@ -83,6 +83,10 @@ class DnaStrandFromPolymer(Group):
             p4,b4 = nts[i+3].children
             self.add_dihedral( i=p1, j=p2, k=p3, l=p4, dihedral = get_resource_path('two_bead_model/p0p1p2p3.dat') )
 
+    def _apply_grids(self):
+        for p in self.polymer:
+            ...
+
 # def hybridize(strand1, strand2, parent=None, num_bp=None, start1=None, end2=None): 
 
 #     """ hybridize num_bp basepairs between strand1 and strand2,

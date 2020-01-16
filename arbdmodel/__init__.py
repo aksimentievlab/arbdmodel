@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
+from abc import abstractmethod, ABCMeta
 
 from .version import get_version
 __version__ = get_version() 
@@ -13,6 +14,16 @@ import shutil
 _RESOURCE_DIR = Path(__file__).parent / 'resources'
 def get_resource_path(relative_path):
     return _RESOURCE_DIR / relative_path
+
+def _get_properties_and_dict_keys(obj):
+    import inspect
+    cls = obj.__class__
+
+    def filter_props(name_type):
+        nt = name_type
+        return not nt[0].startswith('_') and isinstance(nt[1],property)
+    properties = [name for name,type_ in filter(filter_props, inspect.getmembers(obj.__class__))]
+    return properties + list(obj.__dict__.keys())
 
 ## Abstract classes
 class Transformable():
@@ -391,7 +402,7 @@ class ParticleType():
                           "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, parent=None, rigid=False, rigid_body_potential=None, **kargs):
+    def __init__(self, name, charge=0, parent=None, rigid=False, rigid_body_potential=None, **kwargs):
         """ Parent type is used to fall back on for nonbonded interactions if this type is not specifically referenced """
 
         if parent is not None:
@@ -628,7 +639,7 @@ class PdbModel(Transformable, Parent):
     def _updateParticleOrder(self):
         pass
 
-    def writePdb(self, filename, beta_from_fixed=False):
+    def write_pdb(self, filename, beta_from_fixed=False):
         if self.cacheInvalid:
             self._updateParticleOrder()
         with open(filename,'w') as fh:
@@ -696,8 +707,8 @@ class PdbModel(Transformable, Parent):
                     data['radius'] = 2 * (data['mass']/16)**0.333333
                 fh.write( formatString.format(**data) )
         return
-
-    def writePsf(self, filename):
+        
+    def write_psf(self, filename):
         if self.cacheUpToDate == False:
             self._updateParticleOrder()
         with open(filename,'w') as fh:
@@ -809,38 +820,26 @@ class ArbdModel(PdbModel):
             return [(self,r) for r in self.restraints]
 
 
-    def __init__(self, children, origin=None, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
-                 particle_integrator = 'Brown',
-                 cutoff=50, decomp_period=1000, pairlist_distance=None, nonbonded_resolution=0.1,
-                 remove_duplicate_bonded_terms=True, dummy_types=tuple(), extra_bd_file_lines=""):
+    def __init__(self, children, origin=None, dimensions=(1000,1000,1000),
+                 remove_duplicate_bonded_terms=True, nonbonded_resolution=0.1,
+                 configuration=None, dummy_types=tuple(), **conf_params):
 
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.origin = origin
-        self.temperature = temperature
 
-        self.timestep = timestep
-        self.cutoff  =  cutoff
+        self.nonbonded_resolution = nonbonded_resolution
+        if configuration is None: 
+            configuration = SimConf(**conf_params)
+        self.configuration = configuration
 
-        self.particle_integrator = particle_integrator
-        
-        if pairlist_distance == None:
-            pairlist_distance = cutoff+30
-        
-        self.decomp_period = decomp_period
-        self.pairlist_distance = pairlist_distance
-
-        self.extra_bd_file_lines = extra_bd_file_lines
-
-        self.numParticles = 0
+        self.num_particles = 0
         self.particles = []
         self.type_counts = None
-        self.dummy_types = dummy_types
-        
-        self.nbSchemes = []
-        self._nbParamFiles = [] # This could be made more robust
-        self.nbResolution = 0.1
 
-        self._written_bond_files = dict()        
+        self.dummy_types = dummy_types # TODO, determine whether these are really needed
+        
+        self.nonbonded_interactions = []
+        self._nonbonded_interaction_files = [] # This could be made more robust
 
         self.cacheUpToDate = False
 
@@ -854,15 +853,14 @@ class ArbdModel(PdbModel):
     def clear_all(self, keep_children=False):
         Parent.clear_all(self, keep_children=keep_children)
         self.particles = []
-        self.numParticles = 0
+        self.num_particles = 0
         self.type_counts = None
-        self._nbParamFiles = []
-        self._written_bond_files = dict()
         self.group_sites = []
+        self._nonbonded_interaction_files = []
 
-    def _getNbScheme(self, typeA, typeB):
+    def _get_nonbonded_interaction(self, typeA, typeB):
         scheme = None
-        for s,A,B in self.nbSchemes:
+        for s,A,B in self.nonbonded_interactions:
             if A is None or B is None:
                 if A is None and B is None:
                     return s
@@ -906,77 +904,185 @@ class ArbdModel(PdbModel):
         # self.initialCoords = np.array([p.initialPosition for p in self.particles])
 
     def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
+        """ deprecated """
         self.add_nonbonded_scheme(nbScheme, typeA, typeB)
 
-    def add_nonbonded_scheme(self, nonbonded_scheme, typeA=None, typeB=None):
-        self.nbSchemes.append( (nonbonded_scheme, typeA, typeB) )
+    def add_nonbonded_interaction(self, nonbonded_scheme, typeA=None, typeB=None):
+        self.nonbonded_interactions.append( (nonbonded_scheme, typeA, typeB) )
         if typeA != typeB:
-            self.nbSchemes.append( (nonbonded_scheme, typeB, typeA) )
+            self.nonbonded_interactions.append( (nonbonded_scheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, random_seed=None, write_pqr=False, log_file=None, dry_run = False):
+    def prepare_for_simulation(self):
+        ...
+    
+    def getParticleTypesAndCounts(self):
+        ## TODO: remove(?)
+        if self.type_counts is None:
+            self._countParticleTypes()
+            self._updateParticleOrder()
+
+        return sorted( self.type_counts.items(), key=lambda x: x[0] )
+
+    def _particleTypePairIter(self):
+        typesAndCounts = self.getParticleTypesAndCounts()
+        for i in range(len(typesAndCounts)):
+            t1 = typesAndCounts[i][0]
+            for j in range(i,len(typesAndCounts)):
+                t2 = typesAndCounts[j][0]
+                yield( (i,j,t1,t2) )
+
+    def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
+        raise(NotImplementedError)
+
+class SimConf():
+    """ Class describing properties for a (ARBD or NAMD) simulation """
+
+    def __init__(self, num_steps=None, output_period=None,
+                 integrator=None, timestep=None, thermostat=None, barostat=None,
+                 temperature=None, pressure=None,
+                 cutoff=None, pairlist_distance=None, decomp_period=None,
+                 seed=None, restart_file=None):
+
+        self.num_steps = num_steps
+        self.output_period = output_period
+
+        self.integrator = integrator
+        self.timestep = timestep
+        self.thermostat = thermostat
+        self.barostat = barostat
+
+        self.temperature = temperature
+        self.pressure = pressure
+        self.cutoff = cutoff
+        self.pairlist_distance = pairlist_distance
+        self.decomp_period = decomp_period
+        self.seed = seed
+        self.restart_file = restart_file
+        
+        # num_steps=100000000, timestep=None, output_period=1e4
+        ...
+
+    @property
+    def temperature(self):
+        return self.__temperature
+    @temperature.setter
+    def temperature(self,value):
+        if value is not None and value <= 0:
+            raise ValueError("Temperature must be positive")
+        self.__temperature = value
+
+    def combine(self, other):
+        """ 
+        Creates a new SimConf object whose properties are
+        initialized to be from "self", but are overridden with
+        properties in "other", provided they are not None
+        """
+
+        new_conf = copy(self)
+        for attr in _get_properties_and_dict_keys(other):
+            val = other.__getattribute__(attr)
+            if val is not None:
+                new_conf.__setattr__(attr, val)
+        return new_conf
+
+    def items(self):
+        for attr in _get_properties_and_dict_keys(self):
+            val = self.__getattribute__(attr)
+            yield attr,val
+
+class DefaultSimConf(SimConf):
+    """ Generic class describing properties for a simulation """
+
+    def __init__(self, num_steps=1e5, output_period=1e3,
+                 integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
+                 temperature=295, pressure=1,
+                 cutoff=50, pairlist_distance=None, decomp_period=40,
+                 seed=None, restart_file=None):
+        SimConf.__init__(self, num_steps=num_steps, output_period=output_period,
+                         integrator=integrator, timestep=timestep, thermostat=thermostat, barostat=barostat,
+                         temperature=temperature, pressure=pressure,
+                         cutoff=cutoff, pairlist_distance=pairlist_distance, decomp_period=decomp_period,
+                         seed=seed, restart_file=restart_file)
+        
+        self.num_steps = num_steps
+        self.output_period = output_period
+        self.__temperature = temperature
+        self.pressure = pressure
+        
+        # num_steps=100000000, timestep=None, output_period=1e4
+        ...
+
+    @property
+    def temperature(self):
+        return self.__temperature
+    @temperature.setter
+    def temperature(self,value):
+        if (value <= 0):
+            raise ValueError("Temperature must be positive")
+        self.__temperature = value
+        
+
+class SimEngine(metaclass=ABCMeta):
+    """ Abstract class for running a simulation of a model """
+    def __init__(self, configuration=None):
+        self.configuration = configuration
+
+    @property
+    @abstractmethod
+    def default_binary(self):
+        ...
+
+    @abstractmethod
+    def _generate_command_string(self, binary, output_name, output_directory, gpu=0, replicas=1):
+        ...
+
+    @abstractmethod
+    def write_simulation_files(self, model, output_name):
+        ...
+
+    @abstractmethod
+    def get_default_conf(self):
+        ...
+        
+    def simulate(self, model, output_name, output_directory='output',
+                 directory='.', log_file=None,
+                 binary=None, num_procs=None, gpu=0, dry_run = False, configuration = None, replicas = 1, **conf_params):
         assert(type(gpu) is int)
-        num_steps = int(num_steps)
+    
+        if num_procs is None:
+            import multiprocessing
+            num_procs = max(1,multiprocessing.cpu_count()-1)
 
+        
         d_orig = os.getcwd()
         try:
             if not os.path.exists(directory):
                 os.makedirs(directory)
             os.chdir(directory)
 
-            if timestep is not None:
-                self.timestep = timestep
-
-            if self.cacheUpToDate == False: # TODO: remove cache?
-                self._countParticleTypes()
-                self._updateParticleOrder()
+            model.prepare_for_simulation()
 
             if output_directory == '': output_directory='.'
 
             if dry_run:
-                if arbd is None: arbd='arbd'
+                if binary is None: binary=self.default_binary
             else:
-                if arbd is None:
-                    for path in os.environ["PATH"].split(os.pathsep):
-                        path = path.strip('"')
-                        fname = os.path.join(path, "arbd")
-                        if os.path.isfile(fname) and os.access(fname, os.X_OK):
-                            arbd = fname
-                            break
-
-                if arbd is None: raise Exception("ARBD was not found")
-
-                if not os.path.exists(arbd):
-                    raise Exception("ARBD was not found")
-                if not os.path.isfile(arbd):
-                    raise Exception("ARBD was not found")
-                if not os.access(arbd, os.X_OK):
-                    raise Exception("ARBD is not executable")
-
+                binary = self._get_binary(binary)
 
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
             elif not os.path.isdir(output_directory):
                 raise Exception("output_directory '%s' is not a directory!" % output_directory)
 
-
-            self.writePdb( output_name + ".pdb" )
-            if write_pqr: self.write_pqr( output_name + ".pqr" )
-            self.writePsf( output_name + ".psf" )
-            self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period, restart_file=restart_file, random_seed=random_seed )
-            # os.sync()
+            self.write_simulation_files(model, output_name, configuration, **conf_params)
 
             ## http://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
-
-            cmd = [arbd, '-g', "%d" % gpu]
-            if replicas > 1:
-                cmd = cmd + ['-r',replicas]
-            cmd = cmd + ["%s.bd" % output_name, "%s/%s" % (output_directory, output_name)]
-            cmd = tuple(str(x) for x in cmd)
+            cmd = self._generate_command_string(binary, output_name, output_directory, num_procs, gpu, replicas)
 
             if dry_run:
                 print("Run with: %s" % " ".join(cmd))
             else:
-                print("Running ARBD with: %s" % " ".join(cmd))
+                print("Running {} with: {}".format(binary," ".join(cmd)))
                 if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
                     fd = sys.stdout if log_file is None else log_file
                     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
@@ -996,51 +1102,123 @@ class ArbdModel(PdbModel):
         finally:
             os.chdir(d_orig)
 
+    def _get_binary(self, binary=None):
+        if binary is None:
+            for path in os.environ["PATH"].split(os.pathsep):
+                path = path.strip('"')
+                fname = os.path.join(path, self.default_binary)
+                if os.path.isfile(fname) and os.access(fname, os.X_OK):
+                    binary = fname
+                    break
 
+        if binary is None: raise Exception("{} was not found".format(self.default_binary))
+
+        if not os.path.exists(binary):
+            raise Exception("{} was not found".format(self.default_binary))
+        if not os.path.isfile(binary):
+            raise Exception("{} was not found".format(self.default_binary))
+        if not os.access(binary, os.X_OK):
+            raise Exception("{} is not executable".format(self.default_binary))
+
+        return binary
+
+    def _get_combined_conf(self, model, **conf_params):
+        conf = self.get_default_conf() 
+        conf = conf.combine(model.configuration)
+        conf = conf.combine(self.configuration)
+        conf = conf.combine(SimConf(**conf_params))
+        return conf
+
+    """ TODO: Remove
+    # def _configuration_as_dict(self, model):
+    #     params = dict()
+    #     for o in (self.configuration, self, model):
+    #         for k in _get_properties_and_dict_keys(o):
+    #             params[k] = o.__get_attribute__(k)
+    #     return params
+    """
+
+class ArbdEngine(SimEngine):
+    """ Interface to ARBD simulation engine """
+    def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
+        
+        self.extra_bd_file_lines = extra_bd_file_lines
+        
+        if configuration is None: 
+            configuration = SimConf(**conf_params)
+        SimEngine.__init__(self, configuration)
+
+        self.num_particles = 0
+        self.particles = []     # TODO decide if this should belong here, or with model
+        self.type_counts = None # TODO decide if this should belong here, or with model
+
+        self._written_bond_files = dict()        
+
+        self.cacheUpToDate = False
+
+    @property
+    def default_binary(self):
+        return 'arbd'
+
+    def _generate_command_string(self, binary, output_name, output_directory, num_procs=None, gpu=0, replicas=1):
+        cmd = [binary, '-g', "%d" % gpu]
+        if replicas > 1:
+            cmd = cmd + ['-r',replicas]
+        cmd = cmd + ["%s.bd" % output_name, "%s/%s" % (output_directory, output_name)]
+        cmd = tuple(str(x) for x in cmd)
+        return cmd
+
+    def get_default_conf(self):
+        conf = SimConf(num_steps=1e5, output_period=1e3,
+                 integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
+                 temperature=295, pressure=1,
+                 cutoff=50, pairlist_distance=None, decomp_period=40,
+                 seed=None, restart_file=None)
+        return conf
+    
     # -------------------------- #
     # Methods for printing model #
     # -------------------------- #
 
-    def writeArbdFiles(self, prefix, numSteps=100000000, outputPeriod=10000, restart_file=None, random_seed=None):
+    def write_simulation_files(self, model, output_name, configuration=None, **conf_params):
+        
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
+        
         ## TODO: save and reference directories and prefixes using member data
         d = self.potential_directory = "potentials"
         if not os.path.exists(d):
             os.makedirs(d)
-        self._restraint_filename = "%s/%s.restraint.txt" % (d, prefix)
-        self._bond_filename = "%s/%s.bonds.txt" % (d, prefix)
-        self._angle_filename = "%s/%s.angles.txt" % (d, prefix)
-        self._dihedral_filename = "%s/%s.dihedrals.txt" % (d, prefix)
-        self._exclusion_filename = "%s/%s.exculsions.txt" % (d, prefix)
-        self._bond_angle_filename = "%s/%s.bondangles.txt" % (d, prefix)
-        self._product_potential_filename = "%s/%s.prodpot.txt" % (d, prefix)
-        self._group_sites_filename = "%s/%s.groups.txt" % (d, prefix)
-        
-        # self._writeArbdCoordFile( prefix + ".coord.txt" )
-        self._writeArbdParticleFile( prefix + ".particles.txt" )
-        self._writeArbdRestraintFile()
-        self._writeArbdBondFile()
-        self._writeArbdAngleFile()
-        self._writeArbdDihedralFile()
-        self._writeArbdExclusionFile()
-        self._writeArbdBondAngleFile()
-        self._writeArbdProductPotentialFile()
-        self._writeArbdGroupSitesFile()
-        self._writeArbdPotentialFiles( prefix, directory = d )
-        self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file, random_seed=random_seed )
-        
-    # def _writeArbdCoordFile(self, filename):
-    #     with open(filename,'w') as fh:
-    #         for p in self.particles:
-    #             fh.write("%f %f %f\n" % tuple(x for x in p.collapsedPosition()))
+ 
+        model.write_psf( output_name+'.psf' )
+        model.write_pdb( output_name+'.pdb' )
 
-    def _writeArbdParticleFile(self, filename):
+        self._write_particle_file( model, output_name + ".particles.txt", configuration )
+
+        self._write_restraint_file( model, "{}/{}.restraint.txt".format(d, output_name) )
+        self._write_bond_file( model, "{}/{}.bond.txt".format(d, output_name) )
+        self._write_angle_file( model, "{}/{}.angle.txt".format(d, output_name) )
+        self._write_dihedral_file( model, "{}/{}.dihedral.txt".format(d, output_name) )
+        self._write_exclusion_file( model, "{}/{}.exclusion.txt".format(d, output_name) )
+        self._write_bond_angle_file( model, f"{d}/{output_name}.bond-angle.txt" )
+        self._write_product_potential_file( model, f"{d}/{output_name}.product_potential.txt" )
+        self._write_group_sites_file( model, f"{d}/{output_name}.group_sites.txt" )
+
+        self._write_potential_files( model, output_name, directory = d, configuration = configuration )
+        self._write_conf( model, output_name, configuration )
+        ## , numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
+
+    def _write_particle_file(self, model, filename, configuration=None, **conf_params):
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
+
         with open(filename,'w') as fh:
-            if self.particle_integrator == "Brown":
-                for p in self.particles:
+            if configuration.integrator == "BD":
+                for p in model.particles:
                     data = tuple([p.idx,p.type_.name] + [x for x in p.collapsedPosition()])
                     fh.write("ATOM %d %s %f %f %f\n" % data)
             else:
-                for p in self.particles:
+                for p in model.particles:
                     data = [p.idx,p.type_.name] + [x for x in p.collapsedPosition()]
                     try:
                         data = data + p.momentum
@@ -1051,7 +1229,7 @@ class ArbdModel(PdbModel):
                             data = data + [0,0,0]
                     fh.write("ATOM %d %s %f %f %f %f %f %f\n" % tuple(data))
                 
-    def _write_rigid_group_file(self, filename, groups):
+    def _write_rigid_group_file(self, model, filename, groups):
         with open(filename,'w') as fh:
             for g in groups:
                 fh.write("#Group\n")
@@ -1077,38 +1255,179 @@ class ArbdModel(PdbModel):
                     fh.write(" ".join(str(p.idx) for p in c) + "\n")
 
 
-    def _writeArbdConf(self, prefix, random_seed=None, numSteps=100000000, outputPeriod=10000, restart_file=None):
+    def getParticleTypesAndCounts(self):
+        ## TODO: remove(?)
+        return sorted( model.type_counts.items(), key=lambda x: x[0] )
+
+    def _particleTypePairIter(self):
+        typesAndCounts = self.getParticleTypesAndCounts()
+        for i in range(len(typesAndCounts)):
+            t1 = typesAndCounts[i][0]
+            for j in range(i,len(typesAndCounts)):
+                t2 = typesAndCounts[j][0]
+                yield( (i,j,t1,t2) )
+    
+    def _write_potential_files(self, model, prefix, directory = "potentials", configuration=None, **conf_params):
+        try: 
+            os.makedirs(directory)
+        except OSError:
+            if not os.path.isdir(directory):
+                raise
+
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
+
+        path_prefix = "{}/{}".format(directory,prefix)
+        self._write_nonbonded_parameter_files( model, path_prefix + "-nb", configuration )
+                
+    def _write_nonbonded_parameter_files(self, model, prefix, configuration=None, **conf_params):
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
+
+        x = np.arange(0, configuration.cutoff, model.nonbonded_resolution)
+        for i,j,t1,t2 in model._particleTypePairIter():
+            f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
+            scheme = model._get_nonbonded_interaction(t1,t2)
+            scheme.write_file(f, t1, t2, rMax = configuration.cutoff)
+            model._nonbonded_interaction_files.append(f)
+
+    def _write_restraint_file( self, model, filename ):
+        self._restraint_filename = filename
+        with open(self._restraint_filename,'w') as fh:
+            for i,restraint in model.get_restraints():
+                item = [i.idx]
+                if len(restraint) == 1:
+                    item.append(restraint[0])
+                    item.extend(i.get_collapsed_position())
+                elif len(restraint) == 2:
+                    item.append(restraint[0])
+                    item.extend(restraint[1])
+                elif len(restraint) == 5:
+                    item.extend(restraint)
+                fh.write("RESTRAINT %d %f %f %f %f\n" % tuple(item))
+
+    def _write_bond_file( self, model, filename ):
+        self._bond_filename = filename
+        for b in list( set( [b for i,j,b,ex in model.get_bonds()] ) ):
+            if type(b) is not str and not isinstance(b, Path):
+                b.write_file()
+
+        with open(self._bond_filename,'w') as fh:
+            for i,j,b,ex in model.get_bonds():
+                item = (i.idx, j.idx, str(b))
+                if ex:
+                    fh.write("BOND REPLACE %d %d %s\n" % item)
+                else:
+                    fh.write("BOND ADD %d %d %s\n" % item)
+
+    def _write_angle_file( self, model, filename ):
+        self._angle_filename = filename
+        for b in list( set( [b for i,j,k,b in model.get_angles()] ) ):
+            if type(b) is not str and not isinstance(b, Path):
+                b.write_file()
+
+        with open(self._angle_filename,'w') as fh:
+            for b in model.get_angles():
+                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
+                fh.write("ANGLE %d %d %d %s\n" % item)
+
+    def _write_dihedral_file( self, model, filename ):
+        self._dihedral_filename = filename
+        for b in list( set( [b for i,j,k,l,b in model.get_dihedrals()] ) ):
+            if type(b) is not str and not isinstance(b, Path):
+                b.write_file()
+
+        with open(self._dihedral_filename,'w') as fh:
+            for b in model.get_dihedrals():
+                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
+                fh.write("DIHEDRAL %d %d %d %d %s\n" % item)
+
+    def _write_exclusion_file( self, model, filename ):
+        self._exclusion_filename = filename
+        with open(self._exclusion_filename,'w') as fh:
+            for ex in model.get_exclusions():
+                item = tuple(int(p.idx) for p in ex)
+                fh.write("EXCLUDE %d %d\n" % item)
+
+    def _write_bond_angle_file( self, model, filename ):
+        self._bond_angle_filename = filename
+        if len(model.bond_angles) > 0:
+            with open(self._bond_angle_filename,'w') as fh:
+                for b in model.get_bond_angles():
+                    item = tuple([p.idx for p in b[:-1]] + [str(p) for p in b[-1]])
+                    fh.write("BONDANGLE %d %d %d %d %s %s %s\n" % item)
+
+    def _write_product_potential_file( self, model, filename ):
+        self._product_potential_filename = filename
+        if len(model.product_potentials) > 0:
+            with open(self._product_potential_filename,'w') as fh:
+                for pot in model.get_product_potentials():
+                    line = "PRODUCTPOTENTIAL "
+                    for ijk_tb in pot:
+                        ijk = ijk_tb[:-1]
+                        tb = ijk_tb[-1]
+                        if type(tb) is tuple or type(tb) is list:
+                            if len(tb) != 2: raise ValueError("Invalid product potential")
+                            type_,b = tb
+                            if type(type_) is not str: raise ValueError("Invalid product potential: unrecognized specification of potential type")
+                        else:
+                            type_ = ""
+                            b = tb
+                        if type(b) is not str and not isinstance(b, Path):
+                            b.write_file()
+                        line = line+" ".join([str(x.idx) for x in ijk])+" "
+                        line = line+" ".join([str(x) for x in [type_,b] if x != ""])+" "
+                    fh.write(line)
+
+    def _write_group_sites_file( self, model, filename ):
+        self._group_sites_filename = filename
+        if len(model.group_sites) > 0:
+            with open(self._group_sites_filename,'w') as fh:
+                for i,g in enumerate(model.group_sites):
+                    assert( i+len(model.particles) == g.idx )
+                    ids = " ".join([str(int(p.idx)) for p in g.particles])
+                    fh.write("GROUP %s\n" % ids)
+
+    def _write_conf(self, model, prefix, configuration=None, **conf_params):
+        # num_steps=100000000, output_period=10000, restart_file=None,
         ## TODO: raise exception if _writeArbdPotentialFiles has not been called
-        filename = "%s.bd" % prefix
+        filename = f'{prefix}.bd'
 
         ## Prepare a dictionary to fill in placeholders in the configuration file
-        params = self.__dict__.copy() # get parameters from System object
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
 
-        if random_seed is None:
-            params['randomSeed']     = ""
+        params = dict()
+        for k,v in configuration.items():
+            params[k] = v
+
+        if configuration.seed is None:
+            params['seed']     = f'seed {int(np.random.default_rng().integers(1,99999,1))}'
         else:
-            params['randomSeed'] = "seed %s" % random_seed
-        params['numSteps']       = int(numSteps)
+            params['seed'] = "seed {:d}".format(configuration.seed)
+        params['num_steps']       = int(configuration.num_steps)
 
         # params['coordinateFile'] = "%s.coord.txt" % prefix
-        params['particleFile'] = "%s.particles.txt" % prefix
-        if restart_file is None:
-            params['restartCoordinates'] = ""
+        params['particle_file'] = "%s.particles.txt" % prefix
+        if configuration.restart_file is None:
+            params['restart_coordinates'] = ""
         else:
-            params['restartCoordinates'] = "restartCoordinates %s" % restart_file
-        params['outputPeriod'] = outputPeriod
+            params['restart_coordinates'] = "restart_coordinates %s" % configuration.restart_file
 
-        for k,v in zip('XYZ', self.dimensions):
+        for k,v in zip('XYZ', model.dimensions):
             params['dim'+k] = v
 
-        if self.origin is None:
-            for k,v in zip('XYZ', self.dimensions):
+        if model.origin is None:
+            for k,v in zip('XYZ', model.dimensions):
                 params['origin'+k] = -v*0.5
         else:
-            for k,v in zip('XYZ', self.origin):
+            for k,v in zip('XYZ', model.origin):
                 params['origin'+k] = v
-        
-        params['pairlist_distance'] -= params['cutoff'] 
+             
+        if params['pairlist_distance'] is None:
+            params['pairlist_distance'] = 10
+        else:
+            params['pairlist_distance'] -= params['cutoff'] 
 
         """ Find rigid groups """
         rigid_groups = []
@@ -1120,31 +1439,34 @@ class ArbdModel(PdbModel):
                     rigid_groups.append(c)
                 elif isinstance(c,Group):
                     get_rigid_groups(c)
-        get_rigid_groups(self)
+        get_rigid_groups(model)
 
         if len(rigid_groups) > 0:
-            self.particle_integrator = 'FusDynamic'
+            configuration.integrator = 'FusDynamic'
             rb_group_filename = "{}.rb-group.txt".format(prefix)
-            params['particle_integrator'] = """FusDynamics
+            params['integrator'] = """FusDynamics
 groupFileName {}
 scaleFactor 0.05""".format(rb_group_filename)
             self._write_rigid_group_file(rb_group_filename, rigid_groups)
 
+        if params['integrator'] == 'MD':
+            params['integrator'] = 'Langevin'
+
         ## Actually write the file
         with open(filename,'w') as fh:
-            fh.write("""{randomSeed}
+            fh.write("""{seed}
 timestep {timestep}
-steps {numSteps}
+steps {num_steps}
 numberFluct 0                   # deprecated
 
 interparticleForce 1            # other values deprecated
 fullLongRange 0                 # deprecated
 temperature {temperature}
-ParticleDynamicType {particle_integrator}
+ParticleDynamicType {integrator}
 
-outputPeriod {outputPeriod}
+outputPeriod {output_period}
 ## Energy doesn't actually get printed!
-outputEnergyPeriod {outputPeriod}
+outputEnergyPeriod {output_period}
 outputFormat dcd
 
 ## Infrequent domain decomposition because this kernel is still very slow
@@ -1156,31 +1478,31 @@ origin {originX} {originY} {originZ}
 systemSize {dimX} {dimY} {dimZ}
 
 {extra_bd_file_lines}
-\n""".format(**params))
+\n""".format(extra_bd_file_lines=self.extra_bd_file_lines, **params))
             
             ## Write entries for each type of particle
-            for pt,num in self.getParticleTypesAndCounts():
+            for pt,num in model.getParticleTypesAndCounts():
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
                 particleParams['num'] = num
-                if self.particle_integrator in ('Brown','Brownian'):
+                if configuration.integrator in ('Brown','Brownian'):
                     try:
                         D = pt.diffusivity
                     except:
                         """ units "k K/(amu/ns)" "AA**2/ns" """
-                        D = 831447.2 * self.temperature / (pt.mass * pt.damping_coefficient)
+                        D = 831447.2 * configuration.temperature / (pt.mass * pt.damping_coefficient)
                     particleParams['dynamics'] = 'diffusion {D}'.format(D = D)
-                elif self.particle_integrator in ('Langevin','FusDynamic'):
+                elif configuration.integrator in ('MD','Langevin','FusDynamic'):
                     try:
                         gamma = pt.damping_coefficient
                     except:
                         """ units "k K/(AA**2/ns)" "amu/ns" """
-                        gamma = 831447.2 * self.temperature / (pt.mass*pt.diffusivity)
+                        gamma = 831447.2 * configuration.temperature / (pt.mass*pt.diffusivity)
                     particleParams['dynamics'] = """mass {mass}
 transDamping {g} {g} {g}
 """.format(mass=pt.mass, g=gamma)
                 else:
-                    raise ValueError("Unrecognized particle integrator '{}'".format(self.particle_integrator))
+                    raise ValueError("Unrecognized particle integrator '{}'".format(configuration.particle_integrator))
                 if pt.rigid_body_potential is not None:
                     particleParams['rigid_potential'] = "rigidBodyPotential {}".format(pt.rigid_body_potential)
                 else:
@@ -1228,35 +1550,35 @@ num {num}
             ## Write coordinates and interactions
             fh.write("""
 ## Input coordinates
-inputParticles {particleFile}
-{restartCoordinates}
+inputParticles {particle_file}
+{restart_coordinates}
 
 ## Interaction potentials
 tabulatedPotential  1
 ## The i@j@file syntax means particle type i will have NB interactions with particle type j using the potential in file
 """.format(**params))
-            for pair,f in zip(self._particleTypePairIter(), self._nbParamFiles):
+            for pair,f in zip(model._particleTypePairIter(), model._nonbonded_interaction_files):
                 if f is not None:
                     i,j,t1,t2 = pair
                     fh.write("tabulatedFile %d@%d@%s\n" % (i,j,f))
 
             ## Bonded interactions
-            restraints = self.get_restraints()
-            bonds = self.get_bonds()
-            angles = self.get_angles()
-            dihedrals = self.get_dihedrals()
-            exclusions = self.get_exclusions()
-            bond_angles = self.get_bond_angles()
-            prod_pots = self.get_product_potentials()
-            # group_sites = self.get_group_sites()
-            group_sites = self.group_sites
+            restraints = model.get_restraints()
+            bonds = model.get_bonds()
+            angles = model.get_angles()
+            dihedrals = model.get_dihedrals()
+            exclusions = model.get_exclusions()
+            bond_angles = model.get_bond_angles()
+            prod_pots = model.get_product_potentials()
+            # group_sites = model.get_group_sites()
+            group_sites = model.group_sites
 
             if len(bonds) > 0:
-                for b in self._get_bond_potentials():
+                for b in model._get_bond_potentials():
                     fh.write("tabulatedBondFile %s\n" % b)
 
             if len(angles) > 0:
-                for b in self._get_angle_potentials():
+                for b in model._get_angle_potentials():
                     fh.write("tabulatedAngleFile %s\n" % b)
 
             if len(dihedrals) > 0:
@@ -1281,7 +1603,7 @@ tabulatedPotential  1
                 fh.write("inputGroups %s\n" % self._group_sites_filename)
      
         write_null_dx = False
-        for pt,num in self.getParticleTypesAndCounts():
+        for pt,num in model.getParticleTypesAndCounts():
             if "grid" not in pt.__dict__: 
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:
@@ -1303,146 +1625,65 @@ component "data" value 3
 """.format(**params))
                     break
 
-    def getParticleTypesAndCounts(self):
-        ## TODO: remove(?)
-        return sorted( self.type_counts.items(), key=lambda x: x[0] )
+class NamdEngine(SimEngine):
+    """ Partial interface to NAMD simulation engine """
 
-    def _particleTypePairIter(self):
-        typesAndCounts = self.getParticleTypesAndCounts()
-        for i in range(len(typesAndCounts)):
-            t1 = typesAndCounts[i][0]
-            for j in range(i,len(typesAndCounts)):
-                t2 = typesAndCounts[j][0]
-                yield( (i,j,t1,t2) )
-    
-    def _writeArbdPotentialFiles(self, prefix, directory = "potentials"):
-        try: 
-            os.makedirs(directory)
-        except OSError:
-            if not os.path.isdir(directory):
-                raise
+    def __init__(self, configuration=None, **conf_params):
+        if configuration is None: 
+            configuration = SimConf(**conf_params)
+        SimEngine.__init__(self, configuration)
 
-        pathPrefix = "%s/%s" % (directory,prefix)
-        self._writeNonbondedParameterFiles( pathPrefix + "-nb" )
-        # self._writeBondParameterFiles( pathPrefix )
-        # self._writeAngleParameterFiles( pathPrefix )
-        # self._writeDihedralParameterFiles( pathPrefix )
-                
-    def _writeNonbondedParameterFiles(self, prefix):
-        x = np.arange(0, self.cutoff, self.nbResolution)
-        for i,j,t1,t2 in self._particleTypePairIter():
-            f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
-            scheme = self._getNbScheme(t1,t2)
-            scheme.write_file(f, t1, t2, rMax = self.cutoff)
-            self._nbParamFiles.append(f)
-            # try:
-            #     scheme = self._getNbScheme(t1,t2)
-            #     scheme.write_file(f, t1, t2, rMax = self.cutoff)
-            #     self._nbParamFiles.append(f)
-            # except:
-            #     self._nbParamFiles.append(None)
-                
-                
-    def _getNonbondedPotential(self,x,a,b):
-        return a*(np.exp(-x/b))    
+        self.num_particles = 0
+        self.particles = []     # TODO decide if this should belong here, or with model
+        self.type_counts = None # TODO decide if this should belong here, or with model
+        self.cacheUpToDate = False
 
-    def _writeArbdRestraintFile( self ):
-        with open(self._restraint_filename,'w') as fh:
-            for i,restraint in self.get_restraints():
-                item = [i.idx]
-                if len(restraint) == 1:
-                    item.append(restraint[0])
-                    item.extend(i.collapsedPosition())
-                elif len(restraint) == 2:
-                    item.append(restraint[0])
-                    item.extend(restraint[1])
-                elif len(restraint) == 5:
-                    item.extend(restraint)
-                fh.write("RESTRAINT %d %f %f %f %f\n" % tuple(item))
+    @property
+    def default_binary(self):
+        return 'namd2'
 
-    def _writeArbdBondFile( self ):
-        for b in self._get_bond_potentials():
-            if type(b) is not str and not isinstance(b, Path):
-                b.write_file()
+    def _generate_command_string(self, binary, output_name, output_directory, num_procs=1, gpu=None, replicas=1):
+        cmd = [binary]
+        if gpu is not None and len(gpu) > 0:
+            cmd.extend(['+devices'] + [','.join([str(int(g)) for g in gpu])])
+        cmd.extend([f'+p{str(num_procs)}'])    
+        if replicas > 1:
+            raise NotImplementedError
+        cmd = cmd + [f'{output_name}.namd']
+        cmd = tuple(str(x) for x in cmd)
+        return cmd
 
-        with open(self._bond_filename,'w') as fh:
-            for i,j,b,ex in self.get_bonds():
-                item = (i.idx, j.idx, str(b))
-                if ex:
-                    fh.write("BOND REPLACE %d %d %s\n" % item)
-                else:
-                    fh.write("BOND ADD %d %d %s\n" % item)
+    def get_default_conf(self):
+        conf = SimConf(num_steps=1e5, output_period=1e3,
+                 integrator='MD', timestep=2e-6, thermostat='Langevin', barostat=None,
+                 temperature=295, pressure=1,
+                 cutoff=12, pairlist_distance=14, decomp_period=12,
+                 seed=None, restart_file=None)
+        return conf
 
-    def _writeArbdAngleFile( self ):
-        for b in self._get_angle_potentials():
-            if type(b) is not str and not isinstance(b, Path):
-                b.write_file()
+    def write_simulation_files(self, model, output_name, configuration=None, write_pqr=False, copy_ff_from=get_resource_path("charmm36.nbfix"), **conf_params):
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
 
-        with open(self._angle_filename,'w') as fh:
-            for b in self.get_angles():
-                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
-                fh.write("ANGLE %d %d %d %s\n" % item)
+            model.write_psf( output_name+'.psf' )
+            model.write_pdb( output_name+'.pdb' )
+            model.write_pdb( output_name + ".fixed.pdb", beta_from_fixed=True )
+            if write_pqr: model.write_pqr( output_name + ".pqr" )        
 
-    def _writeArbdDihedralFile( self ):
-        for b in list( set( [b for i,j,k,l,b in self.get_dihedrals()] ) ):
-            if type(b) is not str and not isinstance(b, Path):
-                b.write_file()
+            if copy_ff_from is not None and copy_ff_from != '':
+                try:
+                    shutil.copytree( copy_ff_from, Path(copy_ff_from).stem )
+                except FileExistsError:
+                    pass
 
-        with open(self._dihedral_filename,'w') as fh:
-            for b in self.get_dihedrals():
-                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
-                fh.write("DIHEDRAL %d %d %d %d %s\n" % item)
+            self._write_conf( model, output_name, configuration )
 
-    def _writeArbdExclusionFile( self ):
-        with open(self._exclusion_filename,'w') as fh:
-            for ex in self.get_exclusions():
-                item = tuple(int(p.idx) for p in ex)
-                fh.write("EXCLUDE %d %d\n" % item)
+    def write_conf( self, output_name, minimization_steps=4800, num_steps = 1e6,
+                    output_directory = 'output',
+                    update_dimensions=True, extrabonds=True ): 
 
-    def _writeArbdBondAngleFile( self ):
-        if len(self.bond_angles) > 0:
-            with open(self._bond_angle_filename,'w') as fh:
-                for b in self.get_bond_angles():
-                    item = tuple([p.idx for p in b[:-1]] + [str(p) for p in b[-1]])
-                    fh.write("BONDANGLE %d %d %d %d %s %s %s\n" % item)
-
-    def _writeArbdProductPotentialFile( self ):
-        if len(self.product_potentials) > 0:
-            with open(self._product_potential_filename,'w') as fh:
-                for pot in self.get_product_potentials():
-                    line = "PRODUCTPOTENTIAL "
-                    for ijk_tb in pot:
-                        ijk = ijk_tb[:-1]
-                        tb = ijk_tb[-1]
-                        if type(tb) is tuple or type(tb) is list:
-                            if len(tb) != 2: raise ValueError("Invalid product potential")
-                            type_,b = tb
-                            if type(type_) is not str: raise ValueError("Invalid product potential: unrecognized specification of potential type")
-                        else:
-                            type_ = ""
-                            b = tb
-                        if type(b) is not str and not isinstance(b, Path):
-                            b.write_file()
-                        line = line+" ".join([str(x.idx) for x in ijk])+" "
-                        line = line+" ".join([str(x) for x in [type_,b] if x != ""])+" "
-                    fh.write(line)
-
-    def _writeArbdGroupSitesFile( self ):
-        if len(self.group_sites) > 0:
-            with open(self._group_sites_filename,'w') as fh:
-                for i,g in enumerate(self.group_sites):
-                    assert( i+len(self.particles) == g.idx )
-                    ids = " ".join([str(int(p.idx)) for p in g.particles])
-                    fh.write("GROUP %s\n" % ids)
-
-    def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
-        ## TODO: cache coordinates using numpy arrays for quick min/max
-        raise(NotImplementedError)
-
-    def write_namd_configuration( self, output_name, minimization_steps=4800, num_steps = 1e6,
-                                  output_directory = 'output',
-                                  update_dimensions=True, extrabonds=True ):
-
+        """ Write a NAMD configuration file (developed for the mrdna package) """
+        
         num_steps = int(num_steps//12)*12
         minimization_steps = int(minimization_steps//24)*24
         if num_steps < 12:
@@ -1450,7 +1691,7 @@ component "data" value 3
         if minimization_steps < 24:
             raise ValueError("Must run with at least 24 minimization steps")
 
-        format_data = self.__dict__.copy() # get parameters from System object
+        format_data = model.__dict__.copy() # get parameters from System object
 
         format_data['extrabonds'] = """extraBonds on
 extraBondsFile $prefix.exb
@@ -1467,7 +1708,7 @@ tclForcesScript $prefix.forces.tcl
             format_data['tcl_forces'] = ""
 
         if update_dimensions:
-            format_data['dimensions'] = self.dimensions_from_structure()
+            format_data['dimensions'] = model.dimensions_from_structure()
 
         for k,v in zip('XYZ', format_data['dimensions']):
             format_data['origin'+k] = -v*0.5
@@ -1572,67 +1813,3 @@ if {{$nLast == 0}} {{
 
 run {num_steps:d}
 """.format(**format_data))
-
-    def atomic_simulate(self, output_name, output_directory='output', dry_run = False, namd2=None, log_file=None, num_procs=None, gpu=None, minimization_steps=4800, num_steps=1e6, write_pqr=False, copy_ff_from=get_resource_path("charmm36.nbfix") ):
-
-        if self.cacheUpToDate == False: # TODO: remove cache?
-            self._countParticleTypes()
-            self._updateParticleOrder()
-
-        if output_directory == '': output_directory='.'
-        self.writePdb( output_name + ".pdb" )
-        self.writePdb( output_name + ".fixed.pdb", beta_from_fixed=True )
-        if write_pqr: self.write_pqr( output_name + ".pqr" )        
-        self.writePsf( output_name + ".psf" )
-        self.write_namd_configuration( output_name, output_directory = output_directory, minimization_steps=minimization_steps, num_steps=num_steps )
-
-        if copy_ff_from is not None and copy_ff_from != '':
-            try:
-                shutil.copytree( copy_ff_from, Path(copy_ff_from).stem )
-            except FileExistsError:
-                pass
-
-        
-        # os.sync()
-
-        if not dry_run:
-            if namd2 is None:
-                for path in os.environ["PATH"].split(os.pathsep):
-                    path = path.strip('"')
-                    fname = os.path.join(path, "namd2")
-                    if os.path.isfile(fname) and os.access(fname, os.X_OK):
-                        namd2 = fname
-                        break
-
-            if namd2 is None: raise Exception("NAMD2 was not found")
-
-            if not os.path.exists(namd2):
-                raise Exception("NAMD2 was not found")
-            if not os.path.isfile(namd2):
-                raise Exception("NAMD2 was not found")
-            if not os.access(namd2, os.X_OK):
-                raise Exception("NAMD2 is not executable")
-
-            if not os.path.exists(output_directory):
-                os.makedirs(output_directory)
-            elif not os.path.isdir(output_directory):
-                raise Exception("output_directory '%s' is not a directory!" % output_directory)
-
-            if num_procs is None:
-                import multiprocessing
-                num_procs = max(1,multiprocessing.cpu_count()-1)
-
-            cmd = [namd2, '+p{}'.format(num_procs), "%s.namd" % output_name]
-            cmd = tuple(str(x) for x in cmd)
-
-            print("Running NAMD2 with: %s" % " ".join(cmd))
-            if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
-                fd = sys.stdout if log_file is None else log_file
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-                for line in process.stdout:
-                    fd.write(line)
-                    fd.flush()
-            else:
-                with open(log_file,'w') as fd:
-                    process = subprocess.Popen(cmd, stdout=log_file, universal_newlines=True)
-                    process.communicate()
