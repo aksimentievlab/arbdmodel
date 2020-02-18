@@ -674,11 +674,13 @@ class PdbModel(Transformable, Parent):
 
 
 class ArbdModel(PdbModel):
-    def __init__(self, children, dimensions=(1000,1000,1000), temperature=291,
-                 timestep=50e-6, particle_integrator = 'Brown',
+    def __init__(self, children, origin=None, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
+                 particle_integrator = 'Brown',
                  cutoff=50, decomp_period=1000, pairlist_distance=None, nonbonded_resolution=0.1,
                  remove_duplicate_bonded_terms=True, extra_bd_file_lines=""):
+
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
+        self.origin = origin
         self.temperature = temperature
 
         self.timestep = timestep
@@ -935,8 +937,14 @@ class ArbdModel(PdbModel):
         params['outputPeriod'] = outputPeriod
 
         for k,v in zip('XYZ', self.dimensions):
-            params['origin'+k] = -v*0.5
             params['dim'+k] = v
+
+        if self.origin is None:
+            for k,v in zip('XYZ', self.dimensions):
+                params['origin'+k] = -v*0.5
+        else:
+            for k,v in zip('XYZ', self.origin):
+                params['origin'+k] = v
         
         params['pairlist_distance'] -= params['cutoff'] 
 
@@ -1316,7 +1324,7 @@ if {{$nLast == 0}} {{
 run {num_steps:d}
 """.format(**format_data))
 
-    def atomic_simulate(self, output_name, output_directory='output'):
+    def atomic_simulate(self, output_name, output_directory='output', dry_run = False, namd2=None, log_file=None, num_procs=None, gpu=None):
         if self.cacheUpToDate == False: # TODO: remove cache?
             self._countParticleTypes()
             self._updateParticleOrder()
@@ -1327,3 +1335,45 @@ run {num_steps:d}
         self.writePsf( output_name + ".psf" )
         self.write_namd_configuration( output_name, output_directory = output_directory )
         os.sync()
+
+        if not dry_run:
+            if namd2 is None:
+                for path in os.environ["PATH"].split(os.pathsep):
+                    path = path.strip('"')
+                    fname = os.path.join(path, "namd2")
+                    if os.path.isfile(fname) and os.access(fname, os.X_OK):
+                        namd2 = fname
+                        break
+
+            if namd2 is None: raise Exception("NAMD2 was not found")
+
+            if not os.path.exists(namd2):
+                raise Exception("NAMD2 was not found")
+            if not os.path.isfile(namd2):
+                raise Exception("NAMD2 was not found")
+            if not os.access(namd2, os.X_OK):
+                raise Exception("NAMD2 is not executable")
+
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+            elif not os.path.isdir(output_directory):
+                raise Exception("output_directory '%s' is not a directory!" % output_directory)
+
+            if num_procs is None:
+                import multiprocessing
+                num_procs = max(1,multiprocessing.cpu_count()-1)
+
+            cmd = [namd2, '+p{}'.format(num_procs), "%s.namd" % output_name]
+            cmd = tuple(str(x) for x in cmd)
+
+            print("Running NAMD2 with: %s" % " ".join(cmd))
+            if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
+                fd = sys.stdout if log_file is None else log_file
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+                for line in process.stdout:
+                    fd.write(line)
+                    fd.flush()
+            else:
+                with open(log_file,'w') as fd:
+                    process = subprocess.Popen(cmd, stdout=log_file, universal_newlines=True)
+                    process.communicate()
