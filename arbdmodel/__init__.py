@@ -8,6 +8,7 @@ import numpy as np
 from copy import copy, deepcopy
 from inspect import ismethod
 import os, sys, subprocess
+import shutil
 
 _RESOURCE_DIR = Path(__file__).parent / 'resources'
 def get_resource_path(relative_path):
@@ -71,7 +72,10 @@ class Parent():
         self.dihedrals = []
         self.impropers = []
         self.exclusions = []
-
+        self.bond_angles = []
+        self.product_potentials = []
+        self.group_sites = []
+        
         self.rigid = False
 
         ## TODO: self.cacheInvalid = True # What will be in the cache?
@@ -148,9 +152,28 @@ class Parent():
         # for b in (i,j): assert(b in beads)
         self.exclusions.append( (i,j) )
 
+    def add_bond_angle(self, i,j,k,l, bond_angle, exclude=False):
+        assert( len(set((i,j,k,l))) == 4 )
+        ## TODO: how to handle duplicating and cloning bonds
+        # beads = [b for b in self]
+        # for b in (i,j): assert(b in beads)
+        self.bond_angles.append( (i,j,k,l, bond_angle) )
+
+    def add_product_potential(self, potential_list):
+        """ potential_list: list of tuples of form (particle_i, particle_j,..., TabulatedPotential) """
+        if len(potential_list) < 2: raise ValueError("Too few potentials")
+        for elem in potential_list:
+            beads = elem[:-1]
+            pot = elem[-1]
+            if len(beads) < 2: raise ValueError("Too few particles specified in product_potential")
+            if len(beads) > 4: raise ValueError("Too many particles specified in product_potential")
+
+        self.product_potentials.append(potential_list)
+        ## TODO: how to handle duplicating and cloning bonds
+
     def get_restraints(self):
         ret = []
-        for c in self.children:
+        for c in self.children +  self.group_sites:
             ret.extend( c.get_restraints() )
         return ret
 
@@ -199,6 +222,36 @@ class Parent():
             return list(set(ret))
         else:
             return ret
+
+    def get_bond_angles(self):
+        ret = self.bond_angles
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.get_bond_angles() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(ret))
+        else:
+            return ret
+
+    def get_product_potentials(self):
+        ret = self.product_potentials
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.get_product_potentials() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(ret))
+        else:
+            return ret
+
+    def _get_bond_potentials(self):
+        bonds =  [b for i,j,b,ex in self.get_bonds()]
+        bondangles1 = [b[1] for i,j,k,l,b in self.get_bond_angles()]
+        return list(set( bonds+bondangles1 ))
+
+    def _get_angle_potentials(self):
+        angles =  [b for i,j,k,b in self.get_angles()]
+        bondangles1 = [b[0] for i,j,k,l,b in self.get_bond_angles()]
+        bondangles2 = [b[2] for i,j,k,l,b in self.get_bond_angles()]
+        return list(set( angles+bondangles1+bondangles2 ))
+
 
     ## Removed because prohibitively slow
     # def remove_duplicate_terms(self):
@@ -260,7 +313,7 @@ class Child():
 
         """
         # if self.parent is not None:
-        if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name is "children":
+        if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
             raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
 
 
@@ -341,7 +394,12 @@ class ParticleType():
     def __init__(self, name, charge=0, parent=None, **kargs):
         """ Parent type is used to fall back on for nonbonded interactions if this type is not specifically referenced """
 
-        self.name        = name
+        if parent is not None:
+            for k,v in parent.__dict__.items():
+                if k not in ParticleType.excludedAttributes:
+                    self.__dict__[k] = v
+
+        self.name   = name
         self.charge = charge
         self.parent = parent
 
@@ -360,6 +418,28 @@ class ParticleType():
         else:
             return False
 
+    def __getattr__(self, name):
+        """
+        Try to get attribute from the parent
+
+        """
+        if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
+            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+
+        excluded_attributes = ParticleType.excludedAttributes
+        if name in excluded_attributes:
+            raise AttributeError("'{}' object has no attribute '{}' and cannot look it up from the parent".format(type(self).__name__, name))
+
+        ## TODO: determine if there is a way to avoid __getattr__ if a method is being looked up
+        try:
+            ret = getattr(self.parent,name)
+        except:
+            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+        if ismethod(ret):
+            raise AttributeError("'{}' object has no method '{}'".format(type(self).__name__, name))
+        return ret 
+
+        
     def __hash_key(self):
         l = [self.name,self.charge]
         for keyval in sorted(self.__dict__.items()):
@@ -584,7 +664,37 @@ class PdbModel(Transformable, Parent):
                 fh.write( formatString.format(**data) )
 
         return
-        
+
+    def write_pqr(self, filename):
+        if self.cacheInvalid:
+            self._updateParticleOrder()
+        with open(filename,'w') as fh:
+            ## Write header
+            fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
+
+            ## Write coordinates
+            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s} {resid:>5.5s}   {x:.6f} {y:.6f} {z:.6f} {charge} {radius}\n"
+            for p in self.particles:
+                data = p._get_psfpdb_dictionary()
+
+                idx = data['idx']
+                if np.log10(idx) >= 5:
+                    idx = " *****"
+                else:
+                    idx = "{:>6d}".format(idx)
+                data['idx'] = idx
+
+                x,y,z = p.collapsedPosition()
+                data['x'] = x
+                data['y'] = y
+                data['z'] = z
+                assert(data['resid'] < 1e5)
+                data['resid'] = "{:<4d}".format(data['resid'])
+                if 'radius' not in data:
+                    data['radius'] = 2 * (data['mass']/16)**0.333333
+                fh.write( formatString.format(**data) )
+        return
+
     def writePsf(self, filename):
         if self.cacheUpToDate == False:
             self._updateParticleOrder()
@@ -674,6 +784,29 @@ class PdbModel(Transformable, Parent):
 
 
 class ArbdModel(PdbModel):
+
+    class _GroupSite():
+        """ Class to represent a collection of particles that can be used by bond potentials """
+        def __init__(self, particles, weights=None):
+            if weights is not None:
+                raise NotImplementedError
+            self.particles = particles
+            self.idx = None
+            self.restraints = []
+            
+        def get_center(self):
+            c = np.array((0,0,0))
+            for p in self.particles:
+                c = c + p.collapsedPosition()
+            c = c / len(self.particles)
+            return c
+
+        def add_restraint(self, restraint):
+            self.restraints.append( restraint )
+        def get_restraints(self):
+            return [(self,r) for r in self.restraints]
+
+
     def __init__(self, children, origin=None, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
                  particle_integrator = 'Brown',
                  cutoff=50, decomp_period=1000, pairlist_distance=None, nonbonded_resolution=0.1,
@@ -708,6 +841,13 @@ class ArbdModel(PdbModel):
 
         self.cacheUpToDate = False
 
+        self.group_sites = []
+
+    def add_group_site(self, particles, weights=None):
+        g = ArbdModel._GroupSite(particles, weights)
+        self.group_sites.append(g)
+        return g
+
     def clear_all(self, keep_children=False):
         Parent.clear_all(self, keep_children=keep_children)
         self.particles = []
@@ -715,6 +855,7 @@ class ArbdModel(PdbModel):
         self.type_counts = None
         self._nbParamFiles = []
         self._written_bond_files = dict()
+        self.group_sites = []
 
     def _getNbScheme(self, typeA, typeB):
         scheme = None
@@ -748,8 +889,12 @@ class ArbdModel(PdbModel):
         # self.particles = sorted(particles, key=lambda p: (p.type_, p.idx))
         
         ## Update particle indices
-        for p,i in zip(self.particles,range(len(self.particles))):
+        for i,p in enumerate(self.particles):
             p.idx = i
+
+        ## TODO recurse through childrens' group_sites
+        for i,g in enumerate(self.group_sites):
+            g.idx = len(self.particles)+i
             
         # self.initialCoords = np.array([p.initialPosition for p in self.particles])
 
@@ -761,7 +906,7 @@ class ArbdModel(PdbModel):
         if typeA != typeB:
             self.nbSchemes.append( (nonbonded_scheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, log_file=None, dry_run = False):
+    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, write_pqr=False, log_file=None, dry_run = False):
         assert(type(gpu) is int)
         num_steps = int(num_steps)
 
@@ -808,9 +953,10 @@ class ArbdModel(PdbModel):
 
 
             self.writePdb( output_name + ".pdb" )
+            if write_pqr: self.write_pqr( output_name + ".pqr" )
             self.writePsf( output_name + ".psf" )
             self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period, restart_file=restart_file )
-            os.sync()
+            # os.sync()
 
             ## http://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
 
@@ -828,7 +974,10 @@ class ArbdModel(PdbModel):
                     fd = sys.stdout if log_file is None else log_file
                     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
                     for line in process.stdout:
-                        fd.write(line)
+                        try:
+                            fd.write(line)
+                        except:
+                            print("WARNING: could not encode line; your locale might not be set correctly")
                         fd.flush()
                 else:
                     with open(log_file,'w') as fd:
@@ -855,6 +1004,9 @@ class ArbdModel(PdbModel):
         self._angle_filename = "%s/%s.angles.txt" % (d, prefix)
         self._dihedral_filename = "%s/%s.dihedrals.txt" % (d, prefix)
         self._exclusion_filename = "%s/%s.exculsions.txt" % (d, prefix)
+        self._bond_angle_filename = "%s/%s.bondangles.txt" % (d, prefix)
+        self._product_potential_filename = "%s/%s.prodpot.txt" % (d, prefix)
+        self._group_sites_filename = "%s/%s.groups.txt" % (d, prefix)
         
         # self._writeArbdCoordFile( prefix + ".coord.txt" )
         self._writeArbdParticleFile( prefix + ".particles.txt" )
@@ -863,6 +1015,9 @@ class ArbdModel(PdbModel):
         self._writeArbdAngleFile()
         self._writeArbdDihedralFile()
         self._writeArbdExclusionFile()
+        self._writeArbdBondAngleFile()
+        self._writeArbdProductPotentialFile()
+        self._writeArbdGroupSitesFile()
         self._writeArbdPotentialFiles( prefix, directory = d )
         self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
         
@@ -1025,15 +1180,18 @@ num {num}
 {dynamics}
 """.format(**particleParams))
                 if 'grid' in particleParams:
-                    if not isinstance(pt.grid, list): pt.grid = [pt.grid]
+                    grids = []
+                    scales = []
                     for g,s in pt.grid:
                         ## TODO, use Path.relative_to?
                         try:
-                            fh.write("gridFile {}\n".format(g.relative_to(os.getcwd())))
+                            grids.append(str( g.relative_to(os.getcwd()) ))
                         except:
-                            fh.write("gridFile {}\n".format(g))
+                            grids.append(str(g))
+                        scales.append(str(s))
 
-                        fh.write("gridFileScale {}\n".format(s))
+                    fh.write("gridFile {}\n".format(" ".join(grids)))
+                    fh.write("gridFileScale {}\n".format(" ".join(scales)))
 
                 else:
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
@@ -1058,13 +1216,17 @@ tabulatedPotential  1
             angles = self.get_angles()
             dihedrals = self.get_dihedrals()
             exclusions = self.get_exclusions()
+            bond_angles = self.get_bond_angles()
+            prod_pots = self.get_product_potentials()
+            # group_sites = self.get_group_sites()
+            group_sites = self.group_sites
 
             if len(bonds) > 0:
-                for b in list(set([b for i,j,b,ex in bonds])):
+                for b in self._get_bond_potentials():
                     fh.write("tabulatedBondFile %s\n" % b)
 
             if len(angles) > 0:
-                for b in list(set([b for i,j,k,b in angles])):
+                for b in self._get_angle_potentials():
                     fh.write("tabulatedAngleFile %s\n" % b)
 
             if len(dihedrals) > 0:
@@ -1081,6 +1243,12 @@ tabulatedPotential  1
                 fh.write("inputDihedrals %s\n" % self._dihedral_filename)
             if len(exclusions) > 0:
                 fh.write("inputExcludes %s\n" % self._exclusion_filename)
+            if len(bond_angles) > 0:
+                fh.write("inputBondAngles %s\n" % self._bond_angle_filename)
+            if len(prod_pots) > 0:
+                fh.write("inputProductPotentials %s\n" % self._product_potential_filename)
+            if len(group_sites) > 0:
+                fh.write("inputGroups %s\n" % self._group_sites_filename)
      
         write_null_dx = False
         for pt,num in self.getParticleTypesAndCounts():
@@ -1147,7 +1315,7 @@ component "data" value 3
                 item = [i.idx]
                 if len(restraint) == 1:
                     item.append(restraint[0])
-                    item.extend(i.get_collapsed_position())
+                    item.extend(i.collapsedPosition())
                 elif len(restraint) == 2:
                     item.append(restraint[0])
                     item.extend(restraint[1])
@@ -1156,7 +1324,7 @@ component "data" value 3
                 fh.write("RESTRAINT %d %f %f %f %f\n" % tuple(item))
 
     def _writeArbdBondFile( self ):
-        for b in list( set( [b for i,j,b,ex in self.get_bonds()] ) ):
+        for b in self._get_bond_potentials():
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
@@ -1169,7 +1337,7 @@ component "data" value 3
                     fh.write("BOND ADD %d %d %s\n" % item)
 
     def _writeArbdAngleFile( self ):
-        for b in list( set( [b for i,j,k,b in self.get_angles()] ) ):
+        for b in self._get_angle_potentials():
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
@@ -1194,13 +1362,56 @@ component "data" value 3
                 item = tuple(int(p.idx) for p in ex)
                 fh.write("EXCLUDE %d %d\n" % item)
 
+    def _writeArbdBondAngleFile( self ):
+        if len(self.bond_angles) > 0:
+            with open(self._bond_angle_filename,'w') as fh:
+                for b in self.get_bond_angles():
+                    item = tuple([p.idx for p in b[:-1]] + [str(p) for p in b[-1]])
+                    fh.write("BONDANGLE %d %d %d %d %s %s %s\n" % item)
+
+    def _writeArbdProductPotentialFile( self ):
+        if len(self.product_potentials) > 0:
+            with open(self._product_potential_filename,'w') as fh:
+                for pot in self.get_product_potentials():
+                    line = "PRODUCTPOTENTIAL "
+                    for ijk_tb in pot:
+                        ijk = ijk_tb[:-1]
+                        tb = ijk_tb[-1]
+                        if type(tb) is tuple or type(tb) is list:
+                            if len(tb) != 2: raise ValueError("Invalid product potential")
+                            type_,b = tb
+                            if type(type_) is not str: raise ValueError("Invalid product potential: unrecognized specification of potential type")
+                        else:
+                            type_ = ""
+                            b = tb
+                        if type(b) is not str and not isinstance(b, Path):
+                            b.write_file()
+                        line = line+" ".join([str(x.idx) for x in ijk])+" "
+                        line = line+" ".join([str(x) for x in [type_,b] if x != ""])+" "
+                    fh.write(line)
+
+    def _writeArbdGroupSitesFile( self ):
+        if len(self.group_sites) > 0:
+            with open(self._group_sites_filename,'w') as fh:
+                for i,g in enumerate(self.group_sites):
+                    assert( i+len(self.particles) == g.idx )
+                    ids = " ".join([str(int(p.idx)) for p in g.particles])
+                    fh.write("GROUP %s\n" % ids)
+
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
         ## TODO: cache coordinates using numpy arrays for quick min/max
         raise(NotImplementedError)
 
-    def write_namd_configuration( self, output_name, num_steps = 1e6,
+    def write_namd_configuration( self, output_name, minimization_steps=4800, num_steps = 1e6,
                                   output_directory = 'output',
                                   update_dimensions=True, extrabonds=True ):
+
+        num_steps = int(num_steps//12)*12
+        minimization_steps = int(minimization_steps//24)*24
+        if num_steps < 12:
+            raise ValueError("Must run with at least 12  steps")
+        if minimization_steps < 24:
+            raise ValueError("Must run with at least 24 minimization steps")
 
         format_data = self.__dict__.copy() # get parameters from System object
 
@@ -1226,7 +1437,8 @@ tclForcesScript $prefix.forces.tcl
             format_data['cell'+k] = v
 
         format_data['prefix'] = output_name
-        format_data['num_steps'] = int(num_steps//12)*12
+        format_data['minimization_steps'] = int(minimization_steps//2)
+        format_data['num_steps'] = num_steps
         format_data['output_directory'] = output_directory
         filename = '{}.namd'.format(output_name)
 
@@ -1313,9 +1525,9 @@ if {{$nLast == 0}} {{
     fixedAtomsForces on
     fixedAtomsFile $prefix.fixed.pdb
     fixedAtomsCol B
-    minimize 2400
+    minimize {minimization_steps:d}
     fixedAtoms off
-    minimize 2400
+    minimize {minimization_steps:d}
 }} else {{
     bincoordinates  {output_directory}/$prefix-$nLast.restart.coor
     binvelocities   {output_directory}/$prefix-$nLast.restart.vel
@@ -1324,7 +1536,8 @@ if {{$nLast == 0}} {{
 run {num_steps:d}
 """.format(**format_data))
 
-    def atomic_simulate(self, output_name, output_directory='output', dry_run = False, namd2=None, log_file=None, num_procs=None, gpu=None):
+    def atomic_simulate(self, output_name, output_directory='output', dry_run = False, namd2=None, log_file=None, num_procs=None, gpu=None, minimization_steps=4800, num_steps=1e6, write_pqr=False, copy_ff_from=get_resource_path("charmm36.nbfix") ):
+
         if self.cacheUpToDate == False: # TODO: remove cache?
             self._countParticleTypes()
             self._updateParticleOrder()
@@ -1332,9 +1545,18 @@ run {num_steps:d}
         if output_directory == '': output_directory='.'
         self.writePdb( output_name + ".pdb" )
         self.writePdb( output_name + ".fixed.pdb", beta_from_fixed=True )
+        if write_pqr: self.write_pqr( output_name + ".pqr" )        
         self.writePsf( output_name + ".psf" )
-        self.write_namd_configuration( output_name, output_directory = output_directory )
-        os.sync()
+        self.write_namd_configuration( output_name, output_directory = output_directory, minimization_steps=minimization_steps, num_steps=num_steps )
+
+        if copy_ff_from is not None and copy_ff_from != '':
+            try:
+                shutil.copytree( copy_ff_from, Path(copy_ff_from).stem )
+            except FileExistsError:
+                pass
+
+        
+        # os.sync()
 
         if not dry_run:
             if namd2 is None:

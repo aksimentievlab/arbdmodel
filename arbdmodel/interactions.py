@@ -57,29 +57,27 @@ class TabulatedPotential(NonbondedScheme):
             copyfile(self.tableFile, filename)
 
 ## Bonded potentials
-class HarmonicPotential():
-    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
-        self.k = k
+class BasePotential():
+    def __init__(self, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
         self.r0 = r0
         self.rRange = rRange
-        self.resolution = 0.1
+        self.resolution = resolution
         self.maxForce = maxForce
         self.prefix = prefix
+        self.zero = zero
         self.periodic = False
         self.type_ = "None"
         self.max_potential = max_potential
         self.kscale_ = None     # only used for 
 
     def filename(self):
-        # raise NotImplementedError("Not implemented")
-        return "%s%s-%.3f-%.3f.dat" % (self.prefix, self.type_,
-                                       self.k*self.kscale_, self.r0)
+        raise NotImplementedError("Not implemented")
+
+    def potential(self,dr):
+        raise NotImplementedError("Not implemented")
 
     def __str__(self):
         return self.filename()
-
-    def potential(self, dr):
-        return 0.5*self.k*dr**2
 
     def write_file(self):
         r = np.arange( self.rRange[0], 
@@ -114,9 +112,22 @@ class HarmonicPotential():
             u[0] = 0
             u[1:] = np.cumsum(f*np.diff(r))
 
-        u = u - np.min(u)
+        if self.zero == "min":
+            u = u - np.min(u)
 
         np.savetxt( self.filename(), np.array([r, u]).T, fmt="%f" )
+
+class HarmonicPotential(BasePotential):
+    def __init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero="min", correct_geometry=False, prefix='./'):
+        self.k = k
+        self.kscale_ = None
+        BasePotential.__init__(self, r0, rRange, resolution, maxForce, max_potential, zero, prefix)
+
+    def filename(self):
+        return "%s%s-%.3f-%.3f.dat" % (self.prefix, self.type_,
+                                       self.k*self.kscale_, self.r0)
+    def potential(self,dr):
+        return 0.5*self.k*dr**2
 
     def __hash__(self):
         assert(self.type_ != "None")
@@ -134,21 +145,99 @@ class HarmonicPotential():
 #         self.kscale_ = 1.0
 
 class HarmonicBond(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
-        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, prefix)
-        self.type_ = "bond"
+    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/",  zero="min", correct_geometry=False, temperature=295):
+        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, correct_geometry=correct_geometry, prefix=prefix)
+        self.type_ = "gbond" if correct_geometry else "bond"
         self.kscale_ = 1.0
+        self.correct_geometry = correct_geometry
+        self.temperature = temperature
+
+    def potential(self,dr):
+        u = HarmonicPotential.potential(self,dr)
+        if self.correct_geometry:
+            with np.errstate(divide='ignore',invalid='ignore'):
+                du = 2*0.58622592*np.log(dr+self.r0) * self.temperature/295
+            du[np.logical_not(np.isfinite(du))] = 0
+            u = u+du
+        return u
+
 
 class HarmonicAngle(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(0,181), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
-        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, prefix)
+    def __init__(self, k, r0, rRange=(0,181), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
+        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, prefix=prefix)
         self.type_ = "angle"
         self.kscale_ = (180.0/np.pi)**2
 
 class HarmonicDihedral(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(-180,180), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
-        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, prefix)
+    def __init__(self, k, r0, rRange=(-180,180), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
+        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, prefix=prefix)
         self.periodic = True
         self.type_ = "dihedral"
         self.kscale_ = (180.0/np.pi)**2
 
+class WLCSKBond(BasePotential):
+    """ ## https://aip.scitation.org/doi/full/10.1063/1.4968020 """
+    def __init__(self, d, lp, kT, rRange=(0,50), resolution=0.02, maxForce=100, max_potential=None, zero="min", prefix="potentials/"):
+        BasePotential.__init__(self, 0, rRange, resolution, maxForce, max_potential, zero, prefix)
+        self.type_ = "wlcbond"
+        self.d = d          # separation
+        self.lp = lp            # persistence length
+        self.kT = kT
+
+    def filename(self):
+        return "%s%s-%.3f-%.3f.dat" % (self.prefix, self.type_,
+                                       self.d, self.lp)
+    def potential(self, dr):
+        nk = self.d / (2*self.lp)
+        q2 = (dr / self.d)**2
+        a1,a2 = 1, -7.0/(2*nk)
+        a3 = 3.0/32 - 3.0/(8*nk) - 6.0/(4*nk**2)
+        p0,p1,p2,p3,p4 = 13.0/32, 3.4719,2.5064,-1.2906,0.6482
+        a4 = (p0 + p1/(2*nk) + p2*(2*nk)**-2) / (1+p3/(2*nk)+p4*(2*nk)**-2)
+        with np.errstate(divide='ignore',invalid='ignore'):
+            u = self.kT * nk * ( a1/(1-q2) - a2*np.log(1-q2) + a3*q2 - 0.5*a4*q2*(q2-2) )
+        max_force = np.diff(u[q2<1][-2:]) / np.diff(dr).mean()
+        max_u = u[q2<1][-1]
+        max_dr = dr[q2<1][-2]
+        assert( max_force >= 0 )
+        u[q2>=1] = (dr[q2>=1]-max_dr)*max_force + max_u
+        return u
+
+    def __hash__(self):
+        assert(self.type_ != "None")
+        return hash((self.type_, self.d, self.lp, self.kT, self.rRange, self.resolution, self.maxForce, self.max_potential, self.prefix, self.periodic))
+
+    def __eq__(self, other):
+        for a in ("type_", "d", "lp", "kT" "rRange", "resolution", "maxForce", "max_potential", "prefix", "periodic"):
+            if self.__dict__[a] != other.__dict__[a]:
+                return False
+        return True
+
+class WLCSKAngle(BasePotential):
+    ## https://aip.scitation.org/doi/full/10.1063/1.4968020
+    def __init__(self, d, lp, kT, rRange=(0,181), resolution=0.5, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
+        BasePotential.__init__(self, 180, rRange, resolution, maxForce, max_potential, zero, prefix)
+        self.type_ = "wlcangle"
+        self.d = d          # separation
+        self.lp = lp            # persistence length
+        self.kT = kT
+
+    def filename(self):
+        return "%s%s-%.3f-%.3f.dat" % (self.prefix, self.type_,
+                                       self.d, self.lp)
+    def potential(self,dr):
+        nk = self.d / (2*self.lp)
+        p1,p2,p3,p4 = -1.237, 0.8105, -1.0243, 0.4595
+        C = (1 + p1*(2*nk) + p2*(2*nk)**2) / (2*nk+p3*(2*nk)**2+p4*(2*nk)**3)
+        u = self.kT * C * (1-np.cos(dr * np.pi / 180))
+        return u
+
+    def __hash__(self):
+        assert(self.type_ != "None")
+        return hash((self.type_, self.d, self.lp, self.kT, self.rRange, self.resolution, self.maxForce, self.max_potential, self.prefix, self.periodic))
+
+    def __eq__(self, other):
+        for a in ("type_", "d", "lp", "kT" "rRange", "resolution", "maxForce", "max_potential", "prefix", "periodic"):
+            if self.__dict__[a] != other.__dict__[a]:
+                return False
+        return True
