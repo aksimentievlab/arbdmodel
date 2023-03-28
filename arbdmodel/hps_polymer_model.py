@@ -256,8 +256,8 @@ class HpsModel(ArbdModel):
         kwargs['timestep'] = 10e-6
         kwargs['cutoff'] = max(4*debye_length,20)
 
-        if 'decompPeriod' not in kwargs:
-            kwargs['decompPeriod'] = 1000
+        if 'decomp_period' not in kwargs:
+            kwargs['decomp_period'] = 1000
 
         """ Assign sequences """
         if sequences is None:

@@ -114,9 +114,15 @@ _types = dict(
                      sigma = 5.86,
                  )
 )
-for k,t in _types.items():
-    t.resname = t.name
 
+for k,t in list(_types.items()):
+    t.resname = t.name
+    t.is_idp = False
+    
+    ## Add types for IDPs
+    _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
+    
+    
 class KhNonbonded(NonbondedScheme):
     def __init__(self, debye_length=10, resolution=0.1, rMin=0):
         NonbondedScheme.__init__(self, typesA=None, typesB=None, resolution=resolution, rMin=rMin)
@@ -134,13 +140,24 @@ class KhNonbonded(NonbondedScheme):
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
         
         """ KH scale model """
-        # alpha = 0.228
-        # epsilon0 = -1.0
-        # e_mj = epsilon_mj[(typeA.name,typeB.name)]        
-        # epsilon = alpha * np.abs( e_mj - epsilon0 )
-        epsilon = epsilon_mj[(typeA.name,typeB.name)] 
-        lambda_ = -1 if epsilon > 0 else 1
-        epsilon = np.abs(epsilon)
+        A_is_idp = B_is_idp = False
+        try:
+            A_is_idp = A.is_idp
+        except:
+            pass
+        try:
+            B_is_idp = B.is_idp
+        except:
+            pass
+
+        _idp_scale = (int(A_is_idp)+int(A_is_idp)) * 0.5
+        alpha = 0.159 + _idp_scale * (0.228 - 0.159)
+        epsilon0 = -1.0 + _idp_scale * (-1.36 + 1.0)
+
+        e_mj = epsilon_mj[(typeA.name,typeB.name)]        
+        epsilon = alpha * np.abs( e_mj - epsilon0 )
+        # epsilon = epsilon_mj[(typeA.name,typeB.name)] 
+        lambda_ = -1 if epsilon0 > e_mj else 1
 
         sigma = 0.5 * (typeA.sigma + typeB.sigma)
         
@@ -193,6 +210,16 @@ class KhBeadsFromPolymer(Group):
 
         if len(sequence) != polymer.num_monomers:
             raise ValueError("Length of sequence does not match length of polymer")
+
+        try:
+            polymer.idp_array
+            if len(polymer.idp_array) != polymer.num_monomers:
+                raise Exception
+            self.idp_array = polymer.idp_array
+        except:
+            print("Warning: KhBeadsFromPolymer processing a polymer without 'idp_array' set; assuming IDP")
+            self.idp_array = np.ones(len(polymer.num_monomers),dtype=np.bool)
+
         Group.__init__(self, **kwargs)
         
     def _clear_beads(self):
@@ -205,6 +232,8 @@ class KhBeadsFromPolymer(Group):
             c = self.polymer.monomer_index_to_contour(i)
             r = self.polymer.contour_to_position(c)
             s = self.sequence[i]
+            if self.idp_array[i]:
+                s = s + 'IDP'
 
             bead = PointParticle(_types[s], r,
                                  name = s,
@@ -232,6 +261,7 @@ class KhModel(ArbdModel):
                  sequences = None,
                  debye_length = 10,
                  damping_coefficient = 10,
+                 idp_array = None,
                  DEBUG=False,
                  **kwargs):
 
@@ -242,8 +272,8 @@ class KhModel(ArbdModel):
         kwargs['timestep'] = 10e-6
         kwargs['cutoff'] = max(4*debye_length,20)
 
-        if 'decompPeriod' not in kwargs:
-            kwargs['decompPeriod'] = 1000
+        if 'decomp_period' not in kwargs:
+            kwargs['decomp_period'] = 1000
 
         """ Assign sequences """
         if sequences is None:
@@ -253,20 +283,24 @@ class KhModel(ArbdModel):
         self.sequences = sequences
         ArbdModel.__init__(self, [], **kwargs)
 
+
         """ Update type diffusion coefficients """
         self.types = all_types = [t for key,t in _types.items()]
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """
-        nonbonded = KhNonbonded(debye_length)
-        for i in range(len(all_types)):
-            t1 = all_types[i]
-            for j in range(i,len(all_types)):
-                t2 = all_types[j]
-                self.useNonbondedScheme( nonbonded, typeA=t1, typeB=t2 )
+        self.kh_nonbonded = KhNonbonded(debye_length)
+        for t in all_types:
+            self._add_nonbonded_interaction(t)
                 
         """ Generate beads """
         self.generate_beads()
+
+    def _add_nonbonded_interaction(self, type_):
+        i = self.types.index(type_) if type_ in self.types else 0
+        for j in range(i,len(self.types)):
+            t = self.types[j]
+            self.useNonbondedScheme( self.kh_nonbonded, typeA=type_, typeB=t )
 
     def update_splines(self, coords):
         i = 0

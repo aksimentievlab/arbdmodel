@@ -29,9 +29,9 @@ def minimizeRmsd(coordsB, coordsA, weights=None, maxIter=100):
 
 
 def minimizeRmsd(coordsB, coordsA, weights=None):
-    q,comA,comB = _minimizeRmsd(coordsB, coordsA, weights)
+    q,comB,comA = _minimizeRmsd(coordsB, coordsA, weights)
     assert( np.all(np.isreal( q )) )
-    return quaternion_to_matrix(q),comA,comB
+    return quaternion_to_matrix(q),comB,comA
 
 
 ## http://onlinelibrary.wiley.com/doi/10.1002/jcc.21439/full
@@ -163,17 +163,17 @@ def readArbdCoords(fname):
             coords.append([float(x) for x in line.split()[1:]])
     return np.array(coords)
 
-def readAvgArbdCoords(psf,pdb,dcd,rmsdThreshold=3.5):
+def readAvgArbdCoords(psf,pdb,dcd,rmsdThreshold=3.5, first_frame=0, last_frame=-1, stride=1):
     import MDAnalysis as mda
 
     usel = mda.Universe(psf, dcd)
     sel = usel.select_atoms("name D*")
 
     # r0 = ref.xyz[0,ids,:]
-    ts = usel.trajectory[-1]
+    ts = usel.trajectory[last_frame]
     r0 = sel.positions
     pos = []
-    for t in range(ts.frame-1,-1,-1):
+    for t in range(ts.frame-1,first_frame-1,-stride):
         usel.trajectory[t]
         R,comA,comB = minimizeRmsd(sel.positions,r0)
         r = np.array( [(r-comA).dot(R)+comB for r in sel.positions] )
