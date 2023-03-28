@@ -388,10 +388,10 @@ class ParticleType():
     excludedAttributes = ("idx","type_",
                           "position",
                           "children",
-                          "parent", "excludedAttributes","rigid"
+                          "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, parent=None, **kargs):
+    def __init__(self, name, charge=0, parent=None, rigid=False, rigid_body_potential=None, **kargs):
         """ Parent type is used to fall back on for nonbonded interactions if this type is not specifically referenced """
 
         if parent is not None:
@@ -402,7 +402,9 @@ class ParticleType():
         self.name   = name
         self.charge = charge
         self.parent = parent
-
+        self.rigid = rigid            
+        self.rigid_body_potential = rigid_body_potential
+        
         for key in ParticleType.excludedAttributes:
             assert( key not in kargs )
 
@@ -810,7 +812,7 @@ class ArbdModel(PdbModel):
     def __init__(self, children, origin=None, dimensions=(1000,1000,1000), temperature=291, timestep=50e-6,
                  particle_integrator = 'Brown',
                  cutoff=50, decomp_period=1000, pairlist_distance=None, nonbonded_resolution=0.1,
-                 remove_duplicate_bonded_terms=True, extra_bd_file_lines=""):
+                 remove_duplicate_bonded_terms=True, dummy_types=tuple(), extra_bd_file_lines=""):
 
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.origin = origin
@@ -832,7 +834,8 @@ class ArbdModel(PdbModel):
         self.numParticles = 0
         self.particles = []
         self.type_counts = None
-
+        self.dummy_types = dummy_types
+        
         self.nbSchemes = []
         self._nbParamFiles = [] # This could be made more robust
         self.nbResolution = 0.1
@@ -869,7 +872,8 @@ class ArbdModel(PdbModel):
                     return s
             elif typeA.is_same_type(A) and typeB.is_same_type(B):
                 return s
-        raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
+        # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
+        # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
 
     def _countParticleTypes(self):
         ## TODO: check for modifications to particle that require
@@ -881,8 +885,11 @@ class ArbdModel(PdbModel):
                 type_counts[t] += 1
             else:
                 type_counts[t] = 1
+        for t in self.dummy_types:
+            if t not in type_counts:
+                type_counts[t] = 0
         self.type_counts = type_counts
-
+        
     def _updateParticleOrder(self):
         ## Create ordered list
         self.particles = [p for p in self]
@@ -906,7 +913,7 @@ class ArbdModel(PdbModel):
         if typeA != typeB:
             self.nbSchemes.append( (nonbonded_scheme, typeB, typeA) )
 
-    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, write_pqr=False, log_file=None, dry_run = False):
+    def simulate(self, output_name, output_directory='output', num_steps=100000000, timestep=None, gpu=0, output_period=1e4, arbd=None, directory='.', restart_file=None, replicas=1, random_seed=None, write_pqr=False, log_file=None, dry_run = False):
         assert(type(gpu) is int)
         num_steps = int(num_steps)
 
@@ -955,7 +962,7 @@ class ArbdModel(PdbModel):
             self.writePdb( output_name + ".pdb" )
             if write_pqr: self.write_pqr( output_name + ".pqr" )
             self.writePsf( output_name + ".psf" )
-            self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period, restart_file=restart_file )
+            self.writeArbdFiles( output_name, numSteps=num_steps, outputPeriod=output_period, restart_file=restart_file, random_seed=random_seed )
             # os.sync()
 
             ## http://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
@@ -994,7 +1001,7 @@ class ArbdModel(PdbModel):
     # Methods for printing model #
     # -------------------------- #
 
-    def writeArbdFiles(self, prefix, numSteps=100000000, outputPeriod=10000, restart_file=None):
+    def writeArbdFiles(self, prefix, numSteps=100000000, outputPeriod=10000, restart_file=None, random_seed=None):
         ## TODO: save and reference directories and prefixes using member data
         d = self.potential_directory = "potentials"
         if not os.path.exists(d):
@@ -1019,7 +1026,7 @@ class ArbdModel(PdbModel):
         self._writeArbdProductPotentialFile()
         self._writeArbdGroupSitesFile()
         self._writeArbdPotentialFiles( prefix, directory = d )
-        self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
+        self._writeArbdConf( prefix, numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file, random_seed=random_seed )
         
     # def _writeArbdCoordFile(self, filename):
     #     with open(filename,'w') as fh:
@@ -1070,17 +1077,17 @@ class ArbdModel(PdbModel):
                     fh.write(" ".join(str(p.idx) for p in c) + "\n")
 
 
-    def _writeArbdConf(self, prefix, randomSeed=None, numSteps=100000000, outputPeriod=10000, restart_file=None):
+    def _writeArbdConf(self, prefix, random_seed=None, numSteps=100000000, outputPeriod=10000, restart_file=None):
         ## TODO: raise exception if _writeArbdPotentialFiles has not been called
         filename = "%s.bd" % prefix
 
         ## Prepare a dictionary to fill in placeholders in the configuration file
         params = self.__dict__.copy() # get parameters from System object
 
-        if randomSeed is None:
+        if random_seed is None:
             params['randomSeed']     = ""
         else:
-            params['randomSeed'] = "seed %s" % randomSeed
+            params['randomSeed'] = "seed %s" % random_seed
         params['numSteps']       = int(numSteps)
 
         # params['coordinateFile'] = "%s.coord.txt" % prefix
@@ -1174,10 +1181,15 @@ transDamping {g} {g} {g}
 """.format(mass=pt.mass, g=gamma)
                 else:
                     raise ValueError("Unrecognized particle integrator '{}'".format(self.particle_integrator))
+                if pt.rigid_body_potential is not None:
+                    particleParams['rigid_potential'] = "rigidBodyPotential {}".format(pt.rigid_body_potential)
+                else:
+                    particleParams['rigid_potential'] = ''
                 fh.write("""
 particle {name}
 num {num}
 {dynamics}
+{rigid_potential}
 """.format(**particleParams))
                 if 'grid' in particleParams:
                     grids = []
@@ -1192,9 +1204,26 @@ num {num}
 
                     fh.write("gridFile {}\n".format(" ".join(grids)))
                     fh.write("gridFileScale {}\n".format(" ".join(scales)))
-
                 else:
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
+                if 'rb_grid' in particleParams:
+                    grids = []
+                    scales = []
+                    for entry in pt.rb_grid:
+                        try:
+                            g, s = entry
+                        except:
+                            g = entry
+                            s = 1
+                        ## TODO, use Path.relative_to?
+                        try:
+                            grids.append(str( g.relative_to(os.getcwd()) ))
+                        except:
+                            grids.append(str(g))
+                        scales.append(str(s))
+                    fh.write("rigidBodyPotential {}\n".format(" ".join(grids)))
+                    if any([s!=1 for s in scales]):
+                        raise NotImplementedError
 
             ## Write coordinates and interactions
             fh.write("""
@@ -1207,8 +1236,9 @@ tabulatedPotential  1
 ## The i@j@file syntax means particle type i will have NB interactions with particle type j using the potential in file
 """.format(**params))
             for pair,f in zip(self._particleTypePairIter(), self._nbParamFiles):
-                i,j,t1,t2 = pair
-                fh.write("tabulatedFile %d@%d@%s\n" % (i,j,f))
+                if f is not None:
+                    i,j,t1,t2 = pair
+                    fh.write("tabulatedFile %d@%d@%s\n" % (i,j,f))
 
             ## Bonded interactions
             restraints = self.get_restraints()
@@ -1305,7 +1335,14 @@ component "data" value 3
             scheme = self._getNbScheme(t1,t2)
             scheme.write_file(f, t1, t2, rMax = self.cutoff)
             self._nbParamFiles.append(f)
-
+            # try:
+            #     scheme = self._getNbScheme(t1,t2)
+            #     scheme.write_file(f, t1, t2, rMax = self.cutoff)
+            #     self._nbParamFiles.append(f)
+            # except:
+            #     self._nbParamFiles.append(None)
+                
+                
     def _getNonbondedPotential(self,x,a,b):
         return a*(np.exp(-x/b))    
 

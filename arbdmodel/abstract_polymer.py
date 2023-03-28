@@ -195,7 +195,7 @@ class PolymerSection(ConnectableElement):
         # self.sequence = None
 
     def __repr__(self):
-        return "<{} {}[{:d}]>".format( type(self), self.name, self.num_monomers )
+        return "<{} {}[{:d}]>".format( type(self), self.segname, self.num_monomers )
 
     def set_splines(self, contours, coords):
         tck, u = interpolate.splprep( coords.T, u=contours, s=0, k=1)

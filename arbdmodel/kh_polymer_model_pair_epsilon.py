@@ -224,6 +224,14 @@ for line in _txtdata.split('\n'):
     
     __add_value((n1,n2), v)
     __add_value((n2,n1), v)
+
+    __add_value((n1+'IDP',n2), v)
+    __add_value((n2,n1+'IDP'), v)
+    __add_value((n2+'IDP',n1), v)
+    __add_value((n1,n2+'IDP'), v)
+    __add_value((n2+'IDP',n1+'IDP'), v)
+    __add_value((n1+'IDP',n2+'IDP'), v)
+
     
 if __name__ == '__main__':
     print(epsilon_mj)

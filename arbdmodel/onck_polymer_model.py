@@ -270,8 +270,8 @@ class OnckModel(ArbdModel):
         kwargs['timestep'] = 20e-6
         kwargs['cutoff'] = max(5*debye_length,25)
 
-        if 'decompPeriod' not in kwargs:
-            kwargs['decompPeriod'] = 1000
+        if 'decomp_period' not in kwargs:
+            kwargs['decomp_period'] = 1000
 
         """ Assign sequences """
         if sequences is None:

@@ -29,9 +29,9 @@ def minimizeRmsd(coordsB, coordsA, weights=None, maxIter=100):
 
 
 def minimizeRmsd(coordsB, coordsA, weights=None):
-    q,comA,comB = _minimizeRmsd(coordsB, coordsA, weights)
+    q,comB,comA = _minimizeRmsd(coordsB, coordsA, weights)
     assert( np.all(np.isreal( q )) )
-    return quaternion_to_matrix(q),comA,comB
+    return quaternion_to_matrix(q),comB,comA
 
 
 ## http://onlinelibrary.wiley.com/doi/10.1002/jcc.21439/full
