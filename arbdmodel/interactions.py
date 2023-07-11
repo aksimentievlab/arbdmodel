@@ -3,20 +3,28 @@ import os, sys
 import numpy as np
 from shutil import copyfile
 
-class NonbondedInteraction(metaclass=ABCMeta):
-    """ Abstract class for writing nonbonded interactions """
+""" Module providing classes used to describe potentials in ARBD """
 
-    def __init__(self, typesA=None, typesB=None, resolution=0.1, rMin=0):
-        """If typesA is None, and typesB is None, then """
+
+""" Abstract classes """
+class AbstractPotential(metaclass=ABCMeta):
+    """ Abstract class for writing potentials """
+
+    def __init__(self, range_=(0,None), resolution=0.1, 
+                 max_force = None, max_potential = None):
         self.resolution = resolution
-        self.rMin = rMin
+        self.range_ = range_
 
-    def add_sim_system(self, simSystem):
-        self.rMax = simSystem.cutoff
-        self.r = np.arange(rMin,rMax,resolution)
+    @property
+    def range_(self):
+        return self.__range_
+    @range_.setter
+    def range_(self,value):
+        assert(len(value) == 2)
+        self.__range_ = tuple(value)
 
     @abstractmethod
-    def potential(self, r, typeA, typeB):
+    def potential(self, r, types):
         raise NotImplementedError
     
     def __remove_nans(self, u):
@@ -26,16 +34,29 @@ class NonbondedInteraction(metaclass=ABCMeta):
             right[np.isnan(u[right])] += 1
         u[:-1][left] = u[right]
 
-    def write_file(self, filename, typeA, typeB, rMax):
-        r = np.arange(self.rMin, rMax+self.resolution, self.resolution)
+    def write_file(self, filename, types=None):
+        rmin,rmax = self.range_
+        r = np.arange(rmin, rmax+self.resolution, self.resolution)
         with np.errstate(divide='ignore',invalid='ignore'):
-            u = self.potential(r, typeA, typeB)
+            u = self.potential(r, types)
         self.__remove_nans(u)
         np.savetxt(filename, np.array([r,u]).T)
 
+class NonbondedPotential(AbstractPotential):
+    """ Abstract class for writing nonbonded interactions """
+    ## No specialization needed so far
 
-class LennardJones(NonbondedInteraction):
-    def potential(self, r, typeA, typeB):
+class BondedPotential(AbstractPotential):
+    """ Abstract class for writing bonded interactions """
+
+    # def add_sim_system(self, simSystem):
+    #     rmin,rmax = self.range_
+    #     self.r = np.arange(rmin,rmax,resolution)
+
+""" Concrete nonbonded pontentials """
+class LennardJones(AbstractPotential):
+    def potential(self, r, types):
+        typeA, typeB = types
         epsilon = np.sqrt( typeA.epsilon**2 + typeB.epsilon**2 )
         r0 = 0.5 * (typeA.radius + typeB.radius)
         r6 = (r0/r)**6
@@ -43,33 +64,31 @@ class LennardJones(NonbondedInteraction):
         u = 4 * epsilon * (r12-r6)
         # u[0] = u[1]             # Remove NaN
         return u
-# LennardJones = LennardJones()
 
-class HalfHarmonic(NonbondedInteraction):
-    def potential(self, r, typeA, typeB):
+class HalfHarmonic(AbstractPotential):
+    def potential(self, r, types):
+        typeA, typeB = types
         k = 10                   # kcal/mol AA**2
         r0 = (typeA.radius + typeB.radius)
         u =  0.5 * k * (r-r0)**2
         u[r > r0] = np.zeros( np.shape(u[r > r0]) )
         return u
-# HalfHarmonic = HalfHarmonic()
 
-class TabulatedNonbonded(NonbondedInteraction):
-    def __init__(self, tableFile, typesA=None, typesB=None, resolution=0.1, rMin=0):
-        """If typesA is None, and typesB is None, then """
+class TabulatedNonbonded(AbstractPotential):
+    def __init__(self, tableFile, *args, **kwargs):
         self.tableFile = tableFile
-        # self.resolution = resolution
-        # self.rMin = rMin
+        AbstractPotential.__init__(self,*args,**kwargs)
 
         ## TODO: check that tableFile exists and is regular file
         
-    def write_file(self, filename, typeA, typeB, rMax):
+    def write_file(self, filename):
         if filename != self.tableFile:
             copyfile(self.tableFile, filename)
 
-## Bonded potentials
-class BasePotential():
-    def __init__(self, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
+""" Concrete bonded potentials """
+class BaseBondedPotential():
+    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, zero='min', prefix="potentials/"):
+        self.k = k
         self.r0 = r0
         self.rRange = rRange
         self.resolution = resolution
@@ -128,11 +147,11 @@ class BasePotential():
 
         np.savetxt( self.filename(), np.array([r, u]).T, fmt="%f" )
 
-class HarmonicPotential(BasePotential):
+class HarmonicPotential(BaseBondedPotential):
     def __init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero="min", correct_geometry=False, prefix='./'):
         self.k = k
         self.kscale_ = None
-        BasePotential.__init__(self, r0, rRange, resolution, maxForce, max_potential, zero, prefix)
+        BaseBondedPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero, prefix)
 
     def filename(self):
         return "%s%s-%.3f-%.3f.dat" % (self.prefix, self.type_,
@@ -150,13 +169,8 @@ class HarmonicPotential(BasePotential):
                 return False
         return True
 
-# class NonBonded(HarmonicPotential):
-#     def _init_hook(self):
-#         self.type = "nonbonded"
-#         self.kscale_ = 1.0
-
 class HarmonicBond(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/",  zero="min", correct_geometry=False, temperature=295):
+    def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, zero='min', correct_geometry=False, temperature=295, prefix="potentials/"):
         HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, correct_geometry=correct_geometry, prefix=prefix)
         self.type_ = "gbond" if correct_geometry else "bond"
         self.kscale_ = 1.0
@@ -174,22 +188,23 @@ class HarmonicBond(HarmonicPotential):
 
 
 class HarmonicAngle(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(0,181), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
+    def __init__(self, k, r0, rRange=(0,181), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
         HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, prefix=prefix)
         self.type_ = "angle"
         self.kscale_ = (180.0/np.pi)**2
 
 class HarmonicDihedral(HarmonicPotential):
-    def __init__(self, k, r0, rRange=(-180,180), resolution=0.1, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
-        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero=zero, prefix=prefix)
+    def __init__(self, k, r0, rRange=(-180,180), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
+        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, zero, prefix)
         self.periodic = True
         self.type_ = "dihedral"
         self.kscale_ = (180.0/np.pi)**2
 
-class WLCSKBond(BasePotential):
+class WLCSKBond(BaseBondedPotential):
     """ ## https://aip.scitation.org/doi/full/10.1063/1.4968020 """
     def __init__(self, d, lp, kT, rRange=(0,50), resolution=0.02, maxForce=100, max_potential=None, zero="min", prefix="potentials/"):
-        BasePotential.__init__(self, 0, rRange, resolution, maxForce, max_potential, zero, prefix)
+        ## Note, we set k to lp here, but it's not proper and may affect results from max_potential
+        BaseBondedPotential.__init__(self, lp, 0, rRange, resolution, maxForce, max_potential, zero, prefix)
         self.type_ = "wlcbond"
         self.d = d          # separation
         self.lp = lp            # persistence length
@@ -224,10 +239,10 @@ class WLCSKBond(BasePotential):
                 return False
         return True
 
-class WLCSKAngle(BasePotential):
+class WLCSKAngle(BaseBondedPotential):
     ## https://aip.scitation.org/doi/full/10.1063/1.4968020
     def __init__(self, d, lp, kT, rRange=(0,181), resolution=0.5, maxForce=None, max_potential=None, zero="min", prefix="potentials/"):
-        BasePotential.__init__(self, 180, rRange, resolution, maxForce, max_potential, zero, prefix)
+        BaseBondedPotential.__init__(self, 180, rRange, resolution, maxForce, max_potential, zero, prefix)
         self.type_ = "wlcangle"
         self.d = d          # separation
         self.lp = lp            # persistence length

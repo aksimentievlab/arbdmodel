@@ -11,6 +11,7 @@ from inspect import ismethod
 import os, sys, subprocess
 import shutil
 
+
 _RESOURCE_DIR = Path(__file__).parent / 'resources'
 def get_resource_path(relative_path):
     return _RESOURCE_DIR / relative_path
@@ -24,6 +25,8 @@ def _get_properties_and_dict_keys(obj):
         return not nt[0].startswith('_') and isinstance(nt[1],property)
     properties = [name for name,type_ in filter(filter_props, inspect.getmembers(obj.__class__))]
     return properties + list(obj.__dict__.keys())
+
+__active_model = None           # variable to be set temporarily by models as they are doing something, used by AbstractPotential classes
 
 ## Abstract classes
 class Transformable():
@@ -88,7 +91,6 @@ class Parent():
         self.group_sites = []
         
         self.rigid = False
-
         ## TODO: self.cacheInvalid = True # What will be in the cache?
 
     def add(self,x):
@@ -398,6 +400,7 @@ class ParticleType():
 
     excludedAttributes = ("idx","type_",
                           "position",
+                          "orientation",
                           "children",
                           "parent", "excludedAttributes",
     )
@@ -417,9 +420,9 @@ class ParticleType():
         self.rigid_body_potential = rigid_body_potential
         
         for key in ParticleType.excludedAttributes:
-            assert( key not in kargs )
+            assert( key not in kwargs )
 
-        for key,val in kargs.items():
+        for key,val in kwargs.items():
             self.__dict__[key] = val
 
     def is_same_type(self, other):
@@ -501,6 +504,7 @@ class PointParticle(Transformable, Child):
         self.name = name
         self.counter = 0
         self.restraints = []
+        self.rigid = False
 
         for key,val in kwargs.items():
             self.__dict__[key] = val
@@ -578,6 +582,61 @@ class PointParticle(Transformable, Child):
                 )
         return data
 
+class RigidBody(PointParticle):
+
+    def __init__(self, type_, position, orientation, name="A", attached_particles=tuple(), **kwargs):
+        parent = None
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+        Child.__init__(self, parent=parent)
+        Transformable.__init__(self,position, orientation)
+
+        self.type_    = type_                
+        self.idx     = None
+        self.name = name
+        self.counter = 0
+        self.restraints = []
+        self.attached_particles = []
+        for p in attached_particles:
+            self.attach_particle(p)
+        
+        for key,val in kwargs.items():
+            self.__dict__[key] = val
+        
+    def add_restraint(self, restraint):
+        raise NotImplementedError('Harmonic restraints are not yet supported for rigid bodies')
+        ## TODO: how to handle duplicating and cloning bonds
+        self.restraints.append( restraint )
+
+    def get_restraints(self):
+        return [(self,r) for r in self.restraints]
+
+    def duplicate(self):
+        new = deepcopy(self)
+        return new
+
+    def attach_particle(self, particle):
+        """ The particle argument can be a PointParticle or Group (RigidBody children will be ignored). The position/orientation of the attached particle/group is in the RigidBody frame. """
+        if particle.parent is not None:
+            raise ValueError('RigidBody-attached particles are not allowed to have a parent')
+        self.attached_particles.append( particle )
+
+    def __getattr__(self, name):
+        """
+        First try to get attribute from the parent, then type_
+        
+        Note that this data structure seems to be fragile, can result in stack overflow
+        
+        """
+        # return Child.__getattr__(self,name)
+        try:
+            return Child.__getattr__(self,name)
+        except Exception as e:
+            if 'type_' in self.__dict__:
+                return getattr(self.type_, name)
+            else:
+                raise AttributeError(r"'{type(self).__name__}' object has no attribute '{name}'")
+    
 
 class Group(Transformable, Parent, Child):
 
@@ -821,13 +880,12 @@ class ArbdModel(PdbModel):
 
 
     def __init__(self, children, origin=None, dimensions=(1000,1000,1000),
-                 remove_duplicate_bonded_terms=True, nonbonded_resolution=0.1,
+                 remove_duplicate_bonded_terms=True,
                  configuration=None, dummy_types=tuple(), **conf_params):
 
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         self.origin = origin
 
-        self.nonbonded_resolution = nonbonded_resolution
         if configuration is None: 
             configuration = SimConf(**conf_params)
         self.configuration = configuration
@@ -890,7 +948,7 @@ class ArbdModel(PdbModel):
         
     def _updateParticleOrder(self):
         ## Create ordered list
-        self.particles = [p for p in self]
+        self.particles = [p for p in self if not p.rigid]
         # self.particles = sorted(particles, key=lambda p: (p.type_, p.idx))
         
         ## Update particle indices
@@ -905,12 +963,12 @@ class ArbdModel(PdbModel):
 
     def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
         """ deprecated """
-        self.add_nonbonded_scheme(nbScheme, typeA, typeB)
+        self.add_nonbonded_interaction(nbScheme, typeA, typeB)
 
-    def add_nonbonded_interaction(self, nonbonded_scheme, typeA=None, typeB=None):
-        self.nonbonded_interactions.append( (nonbonded_scheme, typeA, typeB) )
+    def add_nonbonded_interaction(self, nonbonded_potential, typeA=None, typeB=None):
+        self.nonbonded_interactions.append( (nonbonded_potential, typeA, typeB) )
         if typeA != typeB:
-            self.nonbonded_interactions.append( (nonbonded_scheme, typeB, typeA) )
+            self.nonbonded_interactions.append( (nonbonded_potential, typeB, typeA) )
 
     def prepare_for_simulation(self):
         ...
@@ -1284,11 +1342,16 @@ class ArbdEngine(SimEngine):
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
 
-        x = np.arange(0, configuration.cutoff, model.nonbonded_resolution)
+        x = np.arange(0, configuration.cutoff)
         for i,j,t1,t2 in model._particleTypePairIter():
             f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
-            scheme = model._get_nonbonded_interaction(t1,t2)
-            scheme.write_file(f, t1, t2, rMax = configuration.cutoff)
+            interaction = model._get_nonbonded_interaction(t1,t2)
+            old_range = interaction.range_
+
+            interaction.range_ = [0, configuration.cutoff]
+            interaction.write_file(f, (t1, t2))
+            interaction.range_ = old_range 
+
             model._nonbonded_interaction_files.append(f)
 
     def _write_restraint_file( self, model, filename ):
