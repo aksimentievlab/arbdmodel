@@ -4,7 +4,7 @@ import sys
 
 ## Local imports
 from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path
-from .abstract_polymer import PolymerSection, AbstractPolymerGroup
+from .polymer import PolymerSection, PolymerGroup
 from .interactions import TabulatedPotential, HarmonicBond, HarmonicAngle, HarmonicDihedral
 from .coords import quaternion_to_matrix
 
@@ -163,7 +163,7 @@ class DnaModel(ArbdModel):
         kwargs['timestep'] = 20e-6
         kwargs['cutoff'] = 35
         
-        self.polymer_group = AbstractPolymerGroup(polymers)
+        self.polymer_group = PolymerGroup(polymers)
         self.strands = [DnaStrandFromPolymer(p) for p in self.polymer_group.polymers]
 
         ArbdModel.__init__(self, self.strands, **kwargs)

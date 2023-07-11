@@ -7,7 +7,7 @@ import sys
 
 ## Local imports
 from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
-from .abstract_polymer import PolymerSection, AbstractPolymerGroup
+from .polymer import PolymerSection, PolymerGroup
 from .interactions import NonbondedScheme, HarmonicBond, HarmonicPotential
 from .coords import quaternion_to_matrix
 
@@ -115,7 +115,7 @@ class FjcModel(ArbdModel):
             # raise NotImplementedError("HpsModel must be provided a sequences argument")
             sequences = [None for i in range(len(polymers))]
 
-        self.polymer_group = AbstractPolymerGroup(polymers)
+        self.polymer_group = PolymerGroup(polymers)
         self.sequences = sequences
         self.rest_length = rest_length
         self.spring_constant = spring_constant

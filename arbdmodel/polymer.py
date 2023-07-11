@@ -402,7 +402,7 @@ class PolymerSection(ConnectableElement):
         for c in cl:
             yield c
             
-class AbstractPolymerGroup():
+class PolymerGroup():
     def __init__(self, polymers=[],
                  **kwargs):
 

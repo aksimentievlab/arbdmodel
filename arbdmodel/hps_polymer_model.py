@@ -7,7 +7,7 @@ import sys
 
 ## Local imports
 from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
-from .abstract_polymer import PolymerSection, AbstractPolymerGroup
+from .polymer import PolymerSection, PolymerGroup
 from .interactions import NonbondedScheme, HarmonicBond, HarmonicAngle, HarmonicDihedral
 from .coords import quaternion_to_matrix
 
@@ -263,7 +263,7 @@ class HpsModel(ArbdModel):
         if sequences is None:
             raise NotImplementedError("HpsModel must be provided a sequences argument")
 
-        self.polymer_group = AbstractPolymerGroup(polymers)
+        self.polymer_group = PolymerGroup(polymers)
         self.sequences = sequences
         ArbdModel.__init__(self, [], **kwargs)
 
