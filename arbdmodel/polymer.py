@@ -1,13 +1,15 @@
+from abc import abstractmethod, ABCMeta
+
+from . import logger
+
 from pathlib import Path
 from copy import copy, deepcopy
 
 import numpy as np
 from scipy import interpolate
 
-from . import ArbdModel
+from . import ArbdModel, Group
 from .coords import rotationAboutAxis, quaternion_from_matrix, quaternion_to_matrix
-
-
 
 """
 TODO:
@@ -157,7 +159,6 @@ class ConnectableElement():
         if A not in l: l.append(A)
         l = B.parent.locations
         if B not in l: l.append(B)
-
 
 class PolymerSection(ConnectableElement):
     """ Base class that describes a linear section of a polymer """
@@ -401,7 +402,7 @@ class PolymerSection(ConnectableElement):
             
         for c in cl:
             yield c
-            
+
 class PolymerGroup():
     def __init__(self, polymers=[],
                  **kwargs):
@@ -546,3 +547,125 @@ class PolymerGroup():
             ## iterate through the model polymers
             for s in self.polymers:
                 draw_cylinder(s,radius,"cyan")
+
+class PolymerBeads(Group, metaclass=ABCMeta):
+    """ Abstract class for bead-based models that are built from Polymer objects """
+
+    def __init__(self, polymer, sequence=None, monomers_per_bead_group = 1, rest_length = None, **kwargs):
+        self.polymer = polymer
+        self.sequence = sequence
+        # self.spring_constant = spring_constant
+        self.monomers_per_bead_group = monomers_per_bead_group
+        
+        if rest_length is None:
+            rest_length = polymer.monomer_length * self.monomers_per_bead_group
+
+        self.rest_length = rest_length
+        
+        for prop in ('segname','chain'):
+            if prop not in kwargs:
+                try:
+                    self.__dict__[prop] = polymer.__dict__[prop]
+                except:
+                    pass
+
+        Group.__init__(self, **kwargs)
+
+    @property
+    def monomers_per_bead_group(self):
+        return self.__monomers_per_bead_group
+
+    @property
+    def num_bead_groups(self):
+        return self.__num_bead_groups    
+    
+    @monomers_per_bead_group.setter
+    def monomers_per_bead_group(self,value):
+        if value <= 0:
+            raise ValueError("monomers_per_bead_group must be positive")
+        self.num_bead_groups = int(np.ceil(self.polymer.num_monomers/value))
+
+    @num_bead_groups.setter
+    def num_bead_groups(self,value):
+        if value <= 0:
+            raise ValueError("num_bead_groups must be positive")
+        self.__num_bead_groups = value
+        self.__monomers_per_bead_group = self.polymer.num_monomers/value # get exact ratio
+            
+    def _clear_beads(self):
+        ## self.children = []
+        self.clear_all()
+
+    @abstractmethod
+    def _generate_ith_bead_group(self, i, r, o):
+        """ Normally a bead, but sometimes a group of beads """
+        bead = PointParticle(type_, r,
+                             resid = i+1)
+        pass
+
+    @abstractmethod
+    def _join_adjacent_bead_groups(self, ids):
+        if len(ids) == 2:
+            b1,b2 = [self.children[i] for i in ids]
+            """ units "10 kJ/N_A" kcal_mol """
+            bond = HarmonicBond(k = self.spring_constant,
+                                r0 = self.rest_length,
+                                rRange = (0,500),
+                                resolution = 0.01,
+                                maxForce = 50)
+            self.add_bond( i=b1, j=b2, bond = bond, exclude=True )
+        else:
+            pass
+        
+    def _generate_beads(self):
+        for i in range(self.num_bead_groups):
+            c = self.polymer.monomer_index_to_contour(i * self.monomers_per_bead_group)
+            r = self.polymer.contour_to_position(c)
+            o = self.polymer.contour_to_orientation(c)
+            
+            obj = self._generate_ith_bead_group(i, r, o)
+            self.add(obj)
+
+        for di in range(1,4):
+            for i in range(len(self.children)-di):
+                ids = tuple(i+_di for _di in range(di+1)) 
+                self._join_adjacent_bead_groups(ids)
+
+class PolymerModel(ArbdModel, metaclass=ABCMeta):
+    def __init__(self, polymers,
+                 sequences = None,
+                 monomers_per_bead_group = 1,
+                 **kwargs):
+
+        """ Assign sequences """
+        if sequences is None:
+            sequences = [None for i in range(len(polymers))]
+
+        self.polymer_group = PolymerGroup(polymers)
+        self.sequences = sequences
+        self.monomers_per_bead_group = monomers_per_bead_group
+        ArbdModel.__init__(self, [], **kwargs)
+                
+        """ Generate beads """
+        self.generate_beads()
+
+    def update_splines(self, coords):
+        i = 0
+        for p,c in zip(self.polymer_group.polymers,self.children):
+            n = len(c.children)
+            p.set_splines(np.linspace(0,1,n), coords[i:i+n])
+            i += n
+
+    @abstractmethod
+    def _generate_polymer_beads(self, polymer, sequence):
+        pass
+            
+    def generate_beads(self):
+        self.clear_all()
+        self.peptides = [self._generate_polymer_beads(p,s)
+                         for p,s in zip(self.polymer_group.polymers,self.sequences)]
+
+        for s in self.peptides:
+            self.add(s)
+            s._generate_beads()
+

@@ -1,3 +1,4 @@
+from . import logger
 import numpy as np
 from scipy.optimize import newton
 
@@ -157,13 +158,21 @@ def rotationAboutAxis(axis,angle, normalizeAxis=True):
     return quaternion_to_matrix(q)
 
 def readArbdCoords(fname):
+    logger.warning('readArbdCoords is deprecated. Please update your code to use read_arbd_coordinates')
+    return read_arbd_coordinates(fname)
+
+def read_arbd_coordinates(fname):
     coords = []
     with open(fname) as fh:
         for line in fh:
             coords.append([float(x) for x in line.split()[1:]])
     return np.array(coords)
 
-def readAvgArbdCoords(psf,pdb,dcd,rmsdThreshold=3.5, first_frame=0, last_frame=-1, stride=1):
+def readAvgArbdCoords(*args,**kwargs):
+    logger.warning('readAvgArbdCoords is deprecated. Please update your code to use read_average_arbd_coordinates')
+    return read_average_arbd_coordinates(*args,**kwargs)
+    
+def read_average_arbd_coordinates(psf,pdb,dcd,rmsd_threshold=3.5, first_frame=0, last_frame=-1, stride=1):
     import MDAnalysis as mda
 
     usel = mda.Universe(psf, dcd)
@@ -180,11 +189,11 @@ def readAvgArbdCoords(psf,pdb,dcd,rmsdThreshold=3.5, first_frame=0, last_frame=-
         rmsd = np.mean( (r-r0)**2 )
         r = np.array( [(r-comA).dot(R)+comB for r in usel.atoms.positions] )
         pos.append( r )
-        if rmsd > rmsdThreshold**2:
+        if rmsd > rmsd_threshold**2:
             break
     t0=t+1
-    print( "Averaging coordinates in %s after frame %d" % (dcd, t0) )
-
+    logger.info("Averaging coordinates in %s after frame %d" % (dcd, t0) )
+    
     pos = np.mean(pos, axis=0)
     return pos
 

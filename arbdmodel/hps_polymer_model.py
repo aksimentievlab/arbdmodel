@@ -8,7 +8,7 @@ import sys
 ## Local imports
 from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
 from .polymer import PolymerSection, PolymerGroup
-from .interactions import NonbondedScheme, HarmonicBond, HarmonicAngle, HarmonicDihedral
+from .interactions import AbstractPotential, HarmonicBond, HarmonicAngle, HarmonicDihedral
 from .coords import quaternion_to_matrix
 
 """Define particle types"""
@@ -137,14 +137,15 @@ _types = dict(
 for k,t in _types.items():
     t.resname = t.name
 
-class HpsNonbonded(NonbondedScheme):
-    def __init__(self, debye_length=10, resolution=0.1, rMin=0):
-        NonbondedScheme.__init__(self, typesA=None, typesB=None, resolution=resolution, rMin=rMin)
+class HpsNonbonded(AbstractPotential):
+    def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
+        AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
         self.maxForce = 50
 
-    def potential(self, r, typeA, typeB):
+    def potential(self, r, types):
         """ Electrostatics """
+        typeA,typeB = types
         ld = self.debye_length 
         q1 = typeA.charge
         q2 = typeB.charge

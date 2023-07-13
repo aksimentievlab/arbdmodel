@@ -4,11 +4,10 @@
 import numpy as np
 import sys
 
-
 ## Local imports
-from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
-from .polymer import PolymerSection, PolymerGroup
-from .interactions import NonbondedScheme, HarmonicBond, HarmonicPotential
+from . import logger, ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
+from .polymer import PolymerSection, PolymerGroup, PolymerBeads, PolymerModel
+from .interactions import AbstractPotential, HarmonicBond
 from .coords import quaternion_to_matrix
 
 
@@ -18,81 +17,48 @@ type_ = ParticleType("X",
                      mass=120
 )
 
-## Bonded potentials
-class FjcNonbonded(NonbondedScheme):
-    def __init__(self, resolution=0.1, rMin=0):
-        NonbondedScheme.__init__(self, typesA=None, typesB=None, resolution=resolution, rMin=rMin)
+# ## Bonded potentials
+# class FjcNonbonded(AbstractPotential):
+#     """ This potential should apply zero force; however, it is required for the arbd engine """
+#     def __init__(self, resolution=0.1, range_=(0,1)):
+#         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
 
-    def potential(self, r, typeA, typeB):
-        """ Constant force excluded volume """
-        force = 10              # kcal_mol/AA
-        radius = 6
-        
-        u = np.zeros(r.shape)
-        # s = r < 2*radius
-        # u[s] = (2*radius - r[s]) * force            
-        return u
+#     def potential(self, r, types):
+#         u = np.zeros(r.shape)
+#         return u
 
-class FjcBeadsFromPolymer(Group):
+class FjcBeadsFromPolymer(PolymerBeads):
 
     def __init__(self, polymer, sequence=None, 
-                 rest_length = 3.8, spring_constant = 25,
+                 rest_length = None, spring_constant = 25, monomers_per_bead_group = 1,
                  **kwargs):
 
-        # if sequence is None:
-        #     raise NotImplementedError
-        #     # ... set random sequence
-
-        self.polymer = polymer
-        self.sequence = sequence
-        self.spring_constant = 25
-        self.rest_length = 3.8
-
-        for prop in ('segname','chain'):
-            if prop not in kwargs:
-                # import pdb
-                # pdb.set_trace()
-                try:
-                    self.__dict__[prop] = polymer.__dict__[prop]
-                except:
-                    pass
-
-        # if len(sequence) != polymer.num_monomers:
-        #     raise ValueError("Length of sequence does not match length of polymer")
-        Group.__init__(self, **kwargs)
+        self.spring_constant = spring_constant
+        PolymerBeads.__init__(self, polymer, sequence, monomers_per_bead_group, rest_length, **kwargs)
         
+    def _generate_ith_bead_group(self, i, r, o):
+        return PointParticle(type_, r,
+                             resid = i+1)
 
-    def _clear_beads(self):
-        ...
-        
-    def _generate_beads(self):
-        # beads = self.children
-        nb = self.polymer.num_monomers
-        
-        for i in range(nb):
-            c = self.polymer.monomer_index_to_contour(i)
-            r = self.polymer.contour_to_position(c)
-
-            bead = PointParticle(type_, r,
-                                 resid = i+1)
-            self.add(bead)
-
-        ## Two consecutive nts 
-        for i in range(len(self.children)-1):
-            b1 = self.children[i]
-            b2 = self.children[i+1]
+    def _join_adjacent_bead_groups(self, ids):
+        if len(ids) == 2:
+            b1,b2 = [self.children[i] for i in ids]
             """ units "10 kJ/N_A" kcal_mol """
             bond = HarmonicBond(k = self.spring_constant,
                                 r0 = self.rest_length,
-                                rRange = (0,500),
+                                range_ = (0,500),
                                 resolution = 0.01,
-                                maxForce = 50)
+                                max_force = 50)
+            logger.info(f'Adding bond to {b1} {b2} with k={self.spring_constant} and r0={self.rest_length}')
             self.add_bond( i=b1, j=b2, bond = bond, exclude=True )
+        else:
+            pass
 
-class FjcModel(ArbdModel):
+class FjcModel(PolymerModel):
     def __init__(self, polymers,
                  sequences = None,
-                 rest_length = 3.8,
+                 rest_length = None,
+                 monomers_per_bead_group = 1,
                  spring_constant = 25,
                  damping_coefficient = 40.9,
                  DEBUG=False,
@@ -101,55 +67,30 @@ class FjcModel(ArbdModel):
         """ 
         [damping_coefficient]: ns
         """
-
-        print("WARNING: diffusion coefficient arbitrarily set to 100 AA**2/ns in FjcModel")
         
-        kwargs['timestep'] = 50e-6
-        kwargs['cutoff'] = 10
+        if 'timestep' not in kwargs: kwargs['timestep'] = 50e-6
+        if 'cutoff' not in kwargs: kwargs['cutoff'] = 5 # no non-bonded interactions, so set this small
+        if 'decomp_period' not in kwargs:
+            kwargs['decomp_period'] = 100000 # Make it huge because we never need to compute FJC NB forces
 
-        if 'decompPeriod' not in kwargs:
-            kwargs['decompPeriod'] = 100000
-
-        """ Assign sequences """
-        if sequences is None:
-            # raise NotImplementedError("HpsModel must be provided a sequences argument")
-            sequences = [None for i in range(len(polymers))]
-
-        self.polymer_group = PolymerGroup(polymers)
-        self.sequences = sequences
         self.rest_length = rest_length
         self.spring_constant = spring_constant
-        ArbdModel.__init__(self, [], **kwargs)
+        PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group, **kwargs)
 
         """ Update type diffusion coefficients """
+        logger.warning("Diffusion coefficient arbitrarily set to 100 AA**2/ns in FjcModel")
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """
-        nonbonded = FjcNonbonded()
-        self.useNonbondedScheme( nonbonded, typeA=type_, typeB=type_ )
-                
-        """ Generate beads """
-        self.generate_beads()
+        # nonbonded = FjcNonbonded()
+        #  self.add_nonbonded_interaction( nonbonded, typeA=type_, typeB=type_ )
 
-    def update_splines(self, coords):
-        i = 0
-        for p,c in zip(self.polymer_group.polymers,self.children):
-            n = len(c.children)
-            p.set_splines(np.linspace(0,1,n), coords[i:i+n])
-            i += n
-
-        self.clear_all()
-        self.generate_beads()
-        ## TODO Apply restraints, etc
-
-    def generate_beads(self):
-        self.peptides = [FjcBeadsFromPolymer(p,s, rest_length = self.rest_length,
-                                             spring_constant = self.spring_constant )
-                         for p,s in zip(self.polymer_group.polymers,self.sequences)]
-
-        for s in self.peptides:
-            self.add(s)
-            s._generate_beads()
+    def _generate_polymer_beads(self, polymer, sequence):
+        return FjcBeadsFromPolymer(polymer, sequence,
+                                   rest_length = self.rest_length,
+                                   spring_constant = self.spring_constant,
+                                   monomers_per_bead_group = self.monomers_per_bead_group,
+                                   )
 
     def set_damping_coefficient(self, damping_coefficient):
         for t in [type_]:

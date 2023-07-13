@@ -1,4 +1,28 @@
 # -*- coding: utf-8 -*-
+
+## Set up loggers
+import logging
+def _get_username():
+    import sys
+    try:
+        return sys.environ['USER']
+    except:
+        return None
+
+logging.basicConfig(format='%(name)s: %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+_ch = logging.StreamHandler()
+_ch.setFormatter(logging.Formatter('%(name)s: %(levelname)s: %(message)s'))
+logger.addHandler(_ch)
+logger.propagate = False
+
+devlogger = logging.getLogger(__name__+'.dev')
+# devlogger.setLevel(logging.DEBUG)
+if _get_username() not in ('cmaffeo2',):
+    devlogger.addHandler(logging.NullHandler())
+
+## Import resources
 from pathlib import Path
 from abc import abstractmethod, ABCMeta
 
@@ -1138,9 +1162,9 @@ class SimEngine(metaclass=ABCMeta):
             cmd = self._generate_command_string(binary, output_name, output_directory, num_procs, gpu, replicas)
 
             if dry_run:
-                print("Run with: %s" % " ".join(cmd))
+                logger.info(f'Run with: {" ".join(cmd)}')
             else:
-                print("Running {} with: {}".format(binary," ".join(cmd)))
+                logger.info(f'Running {self.default_binary} with: {" ".join(cmd)}')
                 if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
                     fd = sys.stdout if log_file is None else log_file
                     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
@@ -1346,6 +1370,7 @@ class ArbdEngine(SimEngine):
         for i,j,t1,t2 in model._particleTypePairIter():
             f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
             interaction = model._get_nonbonded_interaction(t1,t2)
+            if interaction is None: continue
             old_range = interaction.range_
 
             interaction.range_ = [0, configuration.cutoff]
@@ -1377,7 +1402,11 @@ class ArbdEngine(SimEngine):
 
         with open(self._bond_filename,'w') as fh:
             for i,j,b,ex in model.get_bonds():
-                item = (i.idx, j.idx, str(b))
+                try:
+                    bfile = b.filename()
+                except:
+                    bfile = str(b)
+                item = (i.idx, j.idx, bfile)
                 if ex:
                     fh.write("BOND REPLACE %d %d %s\n" % item)
                 else:
@@ -1391,7 +1420,11 @@ class ArbdEngine(SimEngine):
 
         with open(self._angle_filename,'w') as fh:
             for b in model.get_angles():
-                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
+                try:
+                    bfile = b[-1].filename()
+                except:
+                    bfile = str(b[-1])
+                item = tuple([p.idx for p in b[:-1]] + [bfile])
                 fh.write("ANGLE %d %d %d %s\n" % item)
 
     def _write_dihedral_file( self, model, filename ):
@@ -1402,7 +1435,11 @@ class ArbdEngine(SimEngine):
 
         with open(self._dihedral_filename,'w') as fh:
             for b in model.get_dihedrals():
-                item = tuple([p.idx for p in b[:-1]] + [str(b[-1])])
+                try:
+                    bfile = b[-1].filename()
+                except:
+                    bfile = str(b[-1])
+                item = tuple([p.idx for p in b[:-1]] + [bfile])
                 fh.write("DIHEDRAL %d %d %d %d %s\n" % item)
 
     def _write_exclusion_file( self, model, filename ):
@@ -1417,7 +1454,14 @@ class ArbdEngine(SimEngine):
         if len(model.bond_angles) > 0:
             with open(self._bond_angle_filename,'w') as fh:
                 for b in model.get_bond_angles():
-                    item = tuple([p.idx for p in b[:-1]] + [str(p) for p in b[-1]])
+                    bfiles = []
+                    for p in b[-1]:
+                        try:
+                            bfile = p.filename()
+                        except:
+                            bfile = str(p)
+                        bfiles.append(bfile)
+                    item = tuple([p.idx for p in b[:-1]] + bfiles)
                     fh.write("BONDANGLE %d %d %d %d %s %s %s\n" % item)
 
     def _write_product_potential_file( self, model, filename ):
@@ -1438,8 +1482,12 @@ class ArbdEngine(SimEngine):
                             b = tb
                         if type(b) is not str and not isinstance(b, Path):
                             b.write_file()
+                        try:
+                            bfile = b.filename()
+                        except:
+                            bfile = str(b)
                         line = line+" ".join([str(x.idx) for x in ijk])+" "
-                        line = line+" ".join([str(x) for x in [type_,b] if x != ""])+" "
+                        line = line+" ".join([str(x) for x in [type_,bfile] if x != ""])+" "
                     fh.write(line)
 
     def _write_group_sites_file( self, model, filename ):
@@ -1638,15 +1686,27 @@ tabulatedPotential  1
 
             if len(bonds) > 0:
                 for b in model._get_bond_potentials():
-                    fh.write("tabulatedBondFile %s\n" % b)
+                    try:
+                        bfile = b.filename()
+                    except:
+                        bfile = str(b)
+                    fh.write("tabulatedBondFile %s\n" % bfile)
 
             if len(angles) > 0:
                 for b in model._get_angle_potentials():
-                    fh.write("tabulatedAngleFile %s\n" % b)
+                    try:
+                        bfile = b.filename()
+                    except:
+                        bfile = str(b)
+                    fh.write("tabulatedAngleFile %s\n" % bfile)
 
             if len(dihedrals) > 0:
                 for b in list(set([b for i,j,k,l,b in dihedrals])):
-                    fh.write("tabulatedDihedralFile %s\n" % b)
+                    try:
+                        bfile = b.filename()
+                    except:
+                        bfile = str(b)
+                    fh.write("tabulatedDihedralFile %s\n" % bfile)
 
             if len(restraints) > 0:
                 fh.write("inputRestraints %s\n" % self._restraint_filename)
