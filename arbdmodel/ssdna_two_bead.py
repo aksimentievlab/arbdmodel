@@ -3,10 +3,9 @@ import numpy as np
 import sys
 
 ## Local imports
-from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path
-from .polymer import PolymerSection, PolymerGroup
-from .interactions import TabulatedPotential, HarmonicBond, HarmonicAngle, HarmonicDihedral
-from .coords import quaternion_to_matrix
+from . import logger, ParticleType, PointParticle, Group, get_resource_path
+from .polymer import PolymerBeads, PolymerModel
+from .interactions import TabulatedNonbonded, HarmonicBond, HarmonicAngle, HarmonicDihedral
 
 """Define particle types"""
 
@@ -26,36 +25,33 @@ _B = ParticleType("B",
                  nts = 0.5      # made compatible with nbPot
 )
 
-class DnaStrandFromPolymer(Group):
+class DnaStrandBeads(PolymerBeads):
     p = PointParticle(_P, (0,0,0), "P")
     b = PointParticle(_B, (3,0,1), "B")
     nt = Group( name = "nt", children = [p,b])
     nt.add_bond( i=p, j=b, bond = get_resource_path('two_bead_model/BPB.dat'), exclude = True )
 
-    def __init__(self, polymer, **kwargs):
+    def __init__(self, polymer, sequence=None, **kwargs):
         self.polymer = polymer
-        Group.__init__(self, **kwargs)
-        
-    def _clear_beads(self):
-        ...
-        
-    def _generate_beads(self):
-        nts = self.nts = self.children
+        if sequence is not None and sequence != 'T'*len(sequence):
+            logger.warn('Sequence given to DNA model does not appear to be poly(dT)')
+        PolymerBeads.__init__(self, polymer, sequence, **kwargs)
+        assert(self.monomers_per_bead_group == 1)
 
-        for i in range(self.polymer.num_monomers):
-            c = self.polymer.monomer_index_to_contour(i)
-            r = self.polymer.contour_to_position(c)
-            o = self.polymer.contour_to_orientation(c)
-            
-            new = DnaStrandFromPolymer.nt.duplicate()
-            new.orientation = o
-            new.position = r
-            self.add(new)
+    def _generate_ith_bead_group(self, i, r, o):
+        new = DnaStrandBeads.nt.duplicate()
+        new.orientation = o
+        new.position = r
+        new.resid=i+1
+        return new
 
-        ## Two consecutive nts 
-        for i in range(len(nts)-1):
-            p1,b1 = nts[i].children
-            p2,b2 = nts[i+1].children
+    def _join_adjacent_bead_groups(self, ids):
+        nts = self.children
+        
+        ## Two consecutive groups 
+        if len(ids) == 2:
+            p1,b1 = nts[ids[0]].children
+            p2,b2 = nts[ids[1]].children
             self.add_bond( i=b1, j=p2, bond = get_resource_path('two_bead_model/BBP.dat'), exclude=True )
             self.add_bond( i=p1, j=p2, bond = get_resource_path('two_bead_model/BPP.dat'), exclude=True )
             self.add_angle( i=p1, j=p2, k=b2, angle = get_resource_path('two_bead_model/p1p2b2.dat') )
@@ -64,25 +60,25 @@ class DnaStrandFromPolymer(Group):
             self.add_exclusion( i=b1, j=b2 )
             self.add_exclusion( i=p1, j=b2 )
 
-        ## Three consecutive nts 
-        for i in range(len(nts)-2):
-            p1,b1 = nts[i].children
-            p2,b2 = nts[i+1].children
-            p3,b3 = nts[i+2].children
+        elif len(ids) == 3:
+            p1,b1 = nts[ids[0]].children
+            p2,b2 = nts[ids[1]].children
+            p3,b3 = nts[ids[2]].children
             self.add_angle( i=p1, j=p2, k=p3, angle = get_resource_path('two_bead_model/p1p2p3.dat') )
             self.add_angle( i=b1, j=p2, k=p3, angle = get_resource_path('two_bead_model/b1p2p3.dat') )
             self.add_dihedral( i=b1, j=p2, k=p3, l=b3, dihedral = get_resource_path('two_bead_model/b1p2p3b3.dat') )
             self.add_exclusion( i=p1, j=p3 )
             self.add_exclusion( i=b1, j=p3 )
 
-        ## Four consecutive nts 
-        for i in range(len(nts)-3):
-            p1,b1 = nts[i].children
-            p2,b2 = nts[i+1].children
-            p3,b3 = nts[i+2].children
-            p4,b4 = nts[i+3].children
+        elif len(ids) == 4:
+            p1,b1 = nts[ids[0]].children
+            p2,b2 = nts[ids[1]].children
+            p3,b3 = nts[ids[2]].children
+            p4,b4 = nts[ids[3]].children
             self.add_dihedral( i=p1, j=p2, k=p3, l=p4, dihedral = get_resource_path('two_bead_model/p0p1p2p3.dat') )
-
+        else:
+            raise Exception("Programming error; should not be here")
+        
     def _apply_grids(self):
         for p in self.polymer:
             ...
@@ -155,32 +151,29 @@ class DnaStrandFromPolymer(Group):
 #         parent.add_angle( i=p11, j=p12, k=p13, angle=HarmonicAngle(kAngle,150.0) )
 #         parent.add_angle( i=p21, j=p22, k=p23, angle=HarmonicAngle(kAngle,150.0) )
 
-class DnaModel(ArbdModel):
+class DnaModel(PolymerModel):
     def __init__(self, polymers,
+                 sequences = None,
                  DEBUG=False,
                  **kwargs):
 
-        kwargs['timestep'] = 20e-6
-        kwargs['cutoff'] = 35
+        if 'timestep' not in kwargs: kwargs['timestep'] = 20e-6
+        if 'cutoff' not in kwargs: kwargs['cutoff'] = 35
         
-        self.polymer_group = PolymerGroup(polymers)
-        self.strands = [DnaStrandFromPolymer(p) for p in self.polymer_group.polymers]
-
-        ArbdModel.__init__(self, self.strands, **kwargs)
-
-        self.useNonbondedScheme( TabulatedPotential(get_resource_path('two_bead_model/NBBB.dat')), typeA=_B, typeB=_B )
-        self.useNonbondedScheme( TabulatedPotential(get_resource_path('two_bead_model/NBPB.dat')), typeA=_P, typeB=_B )
-        self.useNonbondedScheme( TabulatedPotential(get_resource_path('two_bead_model/NBPP.dat')), typeA=_P, typeB=_P )
+        PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group=1, **kwargs)
+        self.strands = self.children # make a nice alias
+        
+        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBBB.dat')), typeA=_B, typeB=_B )
+        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBPB.dat')), typeA=_P, typeB=_B )
+        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBPP.dat')), typeA=_P, typeB=_P )
 
         self.generate_beads()
                 
-    def generate_beads(self):
-        for s in self.strands:
-            s._generate_beads()
+    def _generate_polymer_beads(self, polymer, sequence):
+        return DnaStrandBeads( polymer, sequence )
         
-
-
 if __name__ == "__main__":
+    """ ## old code 
     strands = []
     for i in range(5,60,5):
 
@@ -202,3 +195,4 @@ if __name__ == "__main__":
                                 zip( np.random.uniform(size=3), model.dimensions )] )
 
     model.simulate( output_name = 'many-strands', output_period=1e4, num_steps=1e6 )
+    """

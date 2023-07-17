@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-## Test with `python -m arbdmodel.hps_polymer_model`
+## Test with `python -m arbdmodel.fjc_polymer_model`
 
 import numpy as np
 import sys
 
 ## Local imports
-from . import logger, ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
-from .polymer import PolymerSection, PolymerGroup, PolymerBeads, PolymerModel
+from . import logger, ParticleType, PointParticle
+from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-from .coords import quaternion_to_matrix
 
 
 """Define particle types"""
@@ -49,7 +48,7 @@ class FjcBeadsFromPolymer(PolymerBeads):
                                 range_ = (0,500),
                                 resolution = 0.01,
                                 max_force = 50)
-            logger.info(f'Adding bond to {b1} {b2} with k={self.spring_constant} and r0={self.rest_length}')
+            # logger.info(f'Adding bond to {b1} {b2} with k={self.spring_constant} and r0={self.rest_length}')
             self.add_bond( i=b1, j=b2, bond = bond, exclude=True )
         else:
             pass

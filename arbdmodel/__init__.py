@@ -60,6 +60,12 @@ class Transformable():
             orientation = np.array(orientation)
         self.orientation = orientation
 
+    def translate(self, offset = (0,0,0)):
+        self.transform( offset = offset )
+
+    def rotate(self, R, about = (0,0,0)):
+        self.transform( R = R, center = about )
+
     def transform(self, R = ((1,0,0),(0,1,0),(0,0,1)),
                   center = (0,0,0), offset = (0,0,0)):
 
@@ -150,6 +156,9 @@ class Parent():
         self.dihedrals = []
         self.impropers = []
         self.exclusions = []
+        self.bond_angles = []
+        self.product_potentials = []
+        self.group_sites = []
 
     def remove(self,x):
         if x in self.children:
@@ -458,13 +467,16 @@ class ParticleType():
         else:
             return False
 
+    def add_grid_potential(self, gridfile, scale=1):
+        self.grid_potentials = getattr(self, 'grid_potentials', []) + [(gridfile,scale)]
+        
     def __getattr__(self, name):
         """
         Try to get attribute from the parent
 
         """
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
-            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+           raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
 
         excluded_attributes = ParticleType.excludedAttributes
         if name in excluded_attributes:
@@ -495,8 +507,8 @@ class ParticleType():
             if a.__hash_key() != b.__hash_key():
                 raise Exception("Two different ParticleTypes have same 'name' attribute")
 
-    def __eq__(a,b):
-        a._equal_check(b)
+    def __eq__(a,b, check_equal = True):
+        if check_equal: a._equal_check(b)
         return a.name == b.name
     def __lt__(a,b):
         a._equal_check(b)
@@ -537,6 +549,14 @@ class PointParticle(Transformable, Child):
         ## TODO: how to handle duplicating and cloning bonds
         self.restraints.append( restraint )
 
+    def add_grid_potential(self, gridfile, scale=1):
+        t0 = self.type_
+        if t0.parent is not None:
+            raise NotImplementedError('Flat heirarchy only')
+        t = ParticleType(f'{t0.name}_G_{gridfile}', parent=t0)
+        t.add_grid_potential(gridfile, scale=scale)
+        self.type_ = t
+        
     def get_restraints(self):
         return [(self,r) for r in self.restraints]
 
@@ -605,6 +625,10 @@ class PointParticle(Transformable, Child):
                     beta = beta
                 )
         return data
+
+    def __repr__(self):
+        return f'<{__name__}.{self.__class__.__name__} {self.name}>'
+
 
 class RigidBody(PointParticle):
 
@@ -940,6 +964,46 @@ class ArbdModel(PdbModel):
         self.group_sites = []
         self._nonbonded_interaction_files = []
 
+    def extend(self, other_model, copy=False):
+        assert( isinstance(other_model, ArbdModel) )
+        if copy == True:
+            logger.warning(f'Forcing {self.__class__}.extend(other_model,copy=False)')
+            copy = False
+
+        ## Combine particle types, taking care to handle name clashes
+        self._countParticleTypes()
+        other_model._countParticleTypes()
+
+        names = set([t.name for t in self.type_counts.keys()])
+
+        for t1 in self.type_counts.keys():
+            for t2 in other_model.type_counts.keys():
+                if t1.name == t2.name and not t1.__eq__(t2, check_equal=False):
+                    i = 1
+                    new_name = f'{t2.name}{i}'
+                    while new_name in names:
+                        i += 1
+                        new_name = f'{t2.name}{i}'
+                    t2.name = new_name
+                    names.add(new_name)
+            
+        # for g in other_model.children:
+        #     self.update(g, copy=copy)
+        g = Group()
+        for attr in 'children position orientation bonds angles dihedrals impropers exclusions bond_angles product_potentials group_sites'.split():
+            g.__setattr__(attr, other_model.__getattribute__(attr))
+        self.update(g, copy=copy)
+
+        ## Combine configurations
+        self.configuration = other_model.configuration.combine(self.configuration, policy='best', warn=True)
+        
+    def update(self, group , copy=False):
+        assert( isinstance(group, Group) )
+        if copy:
+            group = deepcopy(group)
+        group.parent = self
+        self.add(group)
+        
     def _get_nonbonded_interaction(self, typeA, typeB):
         scheme = None
         for s,A,B in self.nonbonded_interactions:
@@ -1053,7 +1117,7 @@ class SimConf():
             raise ValueError("Temperature must be positive")
         self.__temperature = value
 
-    def combine(self, other):
+    def combine(self, other, policy = 'override', warn=False):
         """ 
         Creates a new SimConf object whose properties are
         initialized to be from "self", but are overridden with
@@ -1062,9 +1126,36 @@ class SimConf():
 
         new_conf = copy(self)
         for attr in _get_properties_and_dict_keys(other):
+            oldval = None
             val = other.__getattribute__(attr)
             if val is not None:
-                new_conf.__setattr__(attr, val)
+                try:
+                    oldval = self.__getattribute__(attr)
+                except:
+                    pass
+                if oldval != val and (oldval is not None) and \
+                   (val is not None) and policy != 'override':
+                    if policy == 'best':
+                        if attr in ('timestep','output_period','decomp_period'):
+                            if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using {min([oldval,val])}')
+                            new_conf.__setattr__(attr, min([oldval,val]))
+                        elif attr in ('num_steps','cutoff','pairlist_distance'):
+                            if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using {max([oldval,val])}')
+                            new_conf.__setattr__(attr, max([oldval,val]))
+                        elif attr == 'integrator':
+                            if 'MD' in (oldval,val) and 'BD' in (oldval,val):
+                                if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using "MD"')
+                                new_conf.__setattr__(attr,'MD')
+                            else:
+                                logger.warning(f'Unsure how to combine {oldval} and {val} for {attr} under policy {policy}; using {val}')
+                                new_conf.__setattr__(attr, val)
+                        else:
+                            logger.warning(f'Unsure how to combine {oldval} and {val} for {attr} under policy {policy}; using {val}')
+                            new_conf.__setattr__(attr, val)                            
+                    else:
+                        raise ValueError(f'Unrecognized policy "{policy}" for combining SimConfs')
+                else:
+                    new_conf.__setattr__(attr, val)
         return new_conf
 
     def items(self):

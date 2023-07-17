@@ -121,6 +121,9 @@ class TabulatedNonbonded(AbstractPotential):
         AbstractPotential.__init__(self,*args,**kwargs)
 
         ## TODO: check that tableFile exists and is regular file
+
+    def potential(self, r, types):
+        raise NotImplementedError('This should probably not be implemented')
         
     def write_file(self, filename, types):
         if filename != self.tableFile:

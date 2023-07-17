@@ -6,10 +6,9 @@ import sys
 
 
 ## Local imports
-from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
-from .polymer import PolymerSection, PolymerGroup
-from .interactions import NonbondedScheme, HarmonicBond, HarmonicAngle, HarmonicDihedral
-from .coords import quaternion_to_matrix
+from . import logger, ParticleType, PointParticle, get_resource_path
+from .polymer import PolymerBeads, PolymerModel
+from .interactions import AbstractPotential, HarmonicBond
 
 """Define particle types"""
 _types = dict(
@@ -120,17 +119,15 @@ _types = dict(
 for k,t in _types.items():
     t.resname = t.name
 
-class OnckNonbonded(NonbondedScheme):
-    def __init__(self, debye_length=10, resolution=0.1, rMin=0):
-        NonbondedScheme.__init__(self, typesA=None, typesB=None,
-                                 resolution=resolution, rMin=rMin)
+class OnckNonbonded(AbstractPotential):
+    def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
+        AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
-        self.maxForce = 50
-        # self.maxForce = 100
-        # self.maxForce = None
+        self.max_force = 50
 
-    def potential(self, r, typeA, typeB):
+    def potential(self, r, types):
         """ Electrostatics """
+        typeA, typeB = types
         ld = self.debye_length
         q1 = typeA.charge
         q2 = typeB.charge
@@ -155,33 +152,22 @@ class OnckNonbonded(NonbondedScheme):
         s = r<=sigma
         u_lj[s] = epsilon_rep*r8[s] - epsilon*(4*r6[s]-1)/3
         u_lj[r>25] = 0
-
-
+        
         u = u_elec + u_lj
-        u[0] = u[1]             # Remove NaN
-
-        maxForce = self.maxForce
-        if maxForce is not None:
-            assert(maxForce > 0)
-            f = np.diff(u)/np.diff(r)
-            f[f>maxForce] = maxForce
-            f[f<-maxForce] = -maxForce
-            u[0] = 0
-            u[1:] = np.cumsum(f*np.diff(r))
-
-        u = u-u[-1]
-
         return u
 
-class OnckBeadsFromPolymer(Group):
-    """ units "8038 kJ / (N_A nm**2)" "0.5 * kcal_mol/AA**2" """
-    peptide_bond = HarmonicBond(k = 38.422562,
-                        r0 = 3.8,
-                        rRange = (0,500),
-                        resolution = 0.01,
-                        maxForce = 10)
+class OnckBeads(PolymerBeads):
+    
+ 
+    def __init__(self, polymer, sequence=None,
+                 spring_constant = 38.422562, # units "8038 kJ / (N_A nm**2)" "0.5 * kcal_mol/AA**2"
+                 rest_length=3.8, **kwargs):
 
-    def __init__(self, polymer, sequence=None, **kwargs):
+        self.peptide_bond = HarmonicBond(k = spring_constant,
+                                         r0 = rest_length,
+                                         range_ = (0,100),
+                                         resolution = 0.01,
+                                         max_force = 10)
 
         if sequence is None:
             raise NotImplementedError
@@ -190,38 +176,22 @@ class OnckBeadsFromPolymer(Group):
         self.polymer = polymer
         self.sequence = sequence
 
-        for prop in ('segname','chain'):
-            if prop not in kwargs:
-                # import pdb
-                # pdb.set_trace()
-                try:
-                    self.__dict__[prop] = polymer.__dict__[prop]
-                except:
-                    pass
+        self.spring_constant = spring_constant
+        PolymerBeads.__init__(self, polymer, sequence, rest_length=rest_length, **kwargs)
+
+        assert(self.monomers_per_bead_group == 1)
 
         if len(sequence) != polymer.num_monomers:
             raise ValueError("Length of sequence does not match length of polymer")
-        Group.__init__(self, **kwargs)
-        
-    def _clear_beads(self):
-        ...
-        
-    def _generate_beads(self):
-        for i in range(self.polymer.num_monomers):
-            c = self.polymer.monomer_index_to_contour(i)
-            r = self.polymer.contour_to_position(c)
-            s = self.sequence[i]
 
-            bead = PointParticle(_types[s], r,
-                                 name = s,
-                                 resid = i+1)
-            self.add(bead)
+        
+    def _generate_ith_bead_group(self, i, r, o):
+        s = self.sequence[i]
+        return PointParticle(_types[s], r,
+                             name = s,
+                             resid = i+1)
 
-        ## Two consecutive monomers 
-        for i in range(len(self.children)-1):
-            b1,b2 = [self.children[i+j] for j in range(2)]
-            bond = OnckBeadsFromPolymer.peptide_bond
-            self.add_bond( i=b1, j=b2, bond = bond, exclude=True )
+    def _join_adjacent_bead_groups(self, ids):
 
         def bead_to_type(bead):
             if bead.type_.name == 'PRO':
@@ -231,28 +201,34 @@ class OnckBeadsFromPolymer(Group):
             else:
                 return 'X'
 
-        ## Three consecutive monomers 
-        for i in range(len(self.children)-2):
-            b1,b2,b3 = [self.children[i+j] for j in range(3)]
-            t1,t2,t3 = ([bead_to_type(b) for b in (b1,b2,b3)])
+        ## Two consecutive groups 
+        if len(ids) == 2:
+            b1,b2 = [self.children[i] for i in ids]
+            """ units "10 kJ/N_A" kcal_mol """
+            bond = self.peptide_bond
+            self.add_bond( i=b1, j=b2, bond = bond, exclude=True )
+        elif len(ids) == 3:
+            b1,b2,b3 = [self.children[i] for i in ids]
+            t1,t2,t3 = [bead_to_type(b) for b in (b1,b2,b3)]
 
             filename = 'onck_model_potentials/bend_O{}{}.txt'.format(
-                t2,'P' if t3 == 'P' else 'Y' )
+                t2, 'P' if t3 == 'P' else 'Y' )
             self.add_angle( i=b1, j=b2, k=b3, 
                           angle = get_resource_path(filename) )
             self.add_exclusion( i=b1, j=b3 )
-
-        ## Four consecutive monomers 
-        for i in range(len(self.children)-3):
-            b1,b2,b3,b4 = [self.children[i+j] for j in range(4)]
-            t1,t2,t3,t4 = ([bead_to_type(b) for b in (b1,b2,b3,b4)])
+        elif len(ids) == 4:
+            ## Four consecutive monomers
+            b1,b2,b3,b4 = [self.children[i] for i in ids]
+            t1,t2,t3,t4 = [bead_to_type(b) for b in (b1,b2,b3,b4)]
 
             filename = 'onck_model_potentials/dih_{}{}.txt'.format(t2,t3)
             self.add_dihedral( i=b1, j=b2, k=b3, l=b4,
                                dihedral = get_resource_path(filename) )
             self.add_exclusion( i=b1, j=b4 )
+        else:
+            raise Exception('Programming error!')
 
-class OnckModel(ArbdModel):
+class OnckModel(PolymerModel):
     def __init__(self, polymers,
                  sequences = None,
                  debye_length = 10,
@@ -265,10 +241,11 @@ class OnckModel(ArbdModel):
         [damping_coefficient]: ns
         """
         if debye_length != 10:
-            print("""WARNING: you are deviated from the model published by Onck by choosing a debye length != 1 nm.
+            logger.warning("""Deviating from the model published by Onck by choosing a debye length != 1 nm.
     Be advised that the non-bonded cutoff is simply set to 5 * debye_length, but this is not necessarily prescribed by the model.""")
-        kwargs['timestep'] = 20e-6
-        kwargs['cutoff'] = max(5*debye_length,25)
+
+        if 'timestep' not in kwargs: kwargs['timestep'] = 20e-6
+        if 'cutoff' not in kwargs: kwargs['cutoff'] = max(5*debye_length,25)
 
         if 'decomp_period' not in kwargs:
             kwargs['decomp_period'] = 1000
@@ -277,9 +254,7 @@ class OnckModel(ArbdModel):
         if sequences is None:
             raise NotImplementedError("OnckModel must be provided a sequences argument")
 
-        self.polymer_group = PolymerGroup(polymers)
-        self.sequences = sequences
-        ArbdModel.__init__(self, [], **kwargs)
+        PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group=1, **kwargs)
 
         """ Update type diffusion coefficients """
         self.types = all_types = [t for key,t in _types.items()]
@@ -287,33 +262,18 @@ class OnckModel(ArbdModel):
 
         """ Set up nonbonded interactions """
         nonbonded = OnckNonbonded(debye_length)
-        for i in range(len(all_types)):
-            t1 = all_types[i]
-            for j in range(i,len(all_types)):
-                t2 = all_types[j]
-                self.useNonbondedScheme( nonbonded, typeA=t1, typeB=t2 )
+        for t in all_types:
+            self._add_nonbonded_interaction(nonbonded, t)
                 
-        """ Generate beads """
-        self.generate_beads()
+    def _add_nonbonded_interaction(self, interaction, type_):
+        i = self.types.index(type_) if type_ in self.types else 0
+        for t in self.types[i:]:
+            self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
-    def update_splines(self, coords):
-        i = 0
-        for p in self.polymer_group.polymers:
-            n = p.num_monomers
-            p.set_splines(np.linspace(0,1,n), coords[i:i+n])
-            i += n
-
-        self.clear_all()
-        self.generate_beads()
-        ## TODO Apply restraints, etc
-
-    def generate_beads(self):
-        self.peptides = [OnckBeadsFromPolymer(p,s)
-                         for p,s in zip(self.polymer_group.polymers,self.sequences)]
-
-        for s in self.peptides:
-            self.add(s)
-            s._generate_beads()
+    def _generate_polymer_beads(self, polymer, sequence):
+        return OnckBeads(polymer, sequence,
+                       monomers_per_bead_group = self.monomers_per_bead_group,
+                       )
 
     def set_damping_coefficient(self, damping_coefficient):
         for t in self.types:
