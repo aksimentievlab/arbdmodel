@@ -232,7 +232,8 @@ class OnckModel(PolymerModel):
     def __init__(self, polymers,
                  sequences = None,
                  debye_length = 10,
-                 damping_coefficient = 50e3,
+                 # damping_coefficient = 50e3,
+                 damping_coefficient = 100,
                  DEBUG=False,
                  **kwargs):
 

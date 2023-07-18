@@ -78,15 +78,15 @@ class Transformable():
             self.orientation = self.orientation.dot(R)
         ...        
 
-    def collapsedPosition(self):
-        # print("collapsedPosition called", type(self), self.name)
+    def get_collapsed_position(self):
+        # print("get_collapsed_position called", type(self), self.name)
         if isinstance(self, Child):
             # print(self.parent, isinstance(self.parent,Transformable))
             if isinstance(self.parent, Transformable):
-                return self.applyOrientation(self.position) + self.parent.collapsedPosition()
+                return self.applyOrientation(self.position) + self.parent.get_collapsed_position()
             
                 # if self.parent.orientation is not None:
-                #     return self.parent.collapsedOrientation().dot(self.position) + self.parent.collapsedPosition()
+                #     return self.parent.collapsedOrientation().dot(self.position) + self.parent.get_collapsed_position()
         return np.array(self.position) # return a copy
                 
     def applyOrientation(self,obj):
@@ -165,6 +165,13 @@ class Parent():
             self.children.remove(x)
             if x.parent is self:
                 x.parent = None
+
+    def get_center(self, weight=None):
+        if weight is None:
+            center = np.mean([p.get_collapsed_position() for p in self], axis=0)
+        elif weight == 'mass':
+            raise NotImplementedError('')
+        return center
 
     def add_bond(self, i,j, bond, exclude=False):
         assert( i is not j )
@@ -376,6 +383,9 @@ class Child():
             raise AttributeError("'{}' object has no method '{}'".format(type(self).__name__, name))
         return ret 
 
+    def _clear_types(self):
+        if self.parent is not None:
+            self.parent._clear_types()
             
     # def __getstate__(self):
     #     print("Child getstate called", self)
@@ -435,6 +445,7 @@ class ParticleType():
                           "position",
                           "orientation",
                           "children",
+                          "name",
                           "parent", "excludedAttributes",
     )
 
@@ -551,11 +562,15 @@ class PointParticle(Transformable, Child):
 
     def add_grid_potential(self, gridfile, scale=1):
         t0 = self.type_
+        name = f'{t0.name}_g_{gridfile.replace(".dx","")}_s_{scale}'
         if t0.parent is not None:
-            raise NotImplementedError('Flat heirarchy only')
-        t = ParticleType(f'{t0.name}_G_{gridfile}', parent=t0)
+            t = copy(t0)
+            t.name = name
+        else:
+            t = ParticleType(name, parent=t0)
         t.add_grid_potential(gridfile, scale=scale)
         self.type_ = t
+        self._clear_types()
         
     def get_restraints(self):
         return [(self,r) for r in self.restraints]
@@ -627,7 +642,7 @@ class PointParticle(Transformable, Child):
         return data
 
     def __repr__(self):
-        return f'<{__name__}.{self.__class__.__name__} {self.name}>'
+        return f'<{__name__}.{self.__class__.__name__} "{self.name}" of {self.type_}>'
 
 
 class RigidBody(PointParticle):
@@ -769,7 +784,7 @@ class PdbModel(Transformable, Parent):
                 if beta_from_fixed:
                     data['beta'] = 1 if 'fixed' in p.__dict__ else 0
 
-                pos = p.collapsedPosition()
+                pos = p.get_collapsed_position()
                 dig = [max(int(np.log10(np.abs(x)+1e-6)//1),0)+1 for x in pos]
                 for d in dig: assert( d <= 7 )
                 # assert( np.all(dig <= 7) )
@@ -804,7 +819,7 @@ class PdbModel(Transformable, Parent):
                     idx = "{:>6d}".format(idx)
                 data['idx'] = idx
 
-                x,y,z = p.collapsedPosition()
+                x,y,z = p.get_collapsed_position()
                 data['x'] = x
                 data['y'] = y
                 data['z'] = z
@@ -917,7 +932,7 @@ class ArbdModel(PdbModel):
         def get_center(self):
             c = np.array((0,0,0))
             for p in self.particles:
-                c = c + p.collapsedPosition()
+                c = c + p.get_collapsed_position()
             c = c / len(self.particles)
             return c
 
@@ -956,11 +971,16 @@ class ArbdModel(PdbModel):
         self.group_sites.append(g)
         return g
 
+    def _clear_types(self):
+        devlogger.debug(f'{self}: Clearing types') 
+        self.type_counts = None
+        
+    
     def clear_all(self, keep_children=False):
         Parent.clear_all(self, keep_children=keep_children)
         self.particles = []
         self.num_particles = 0
-        self.type_counts = None
+        self._clear_types()
         self.group_sites = []
         self._nonbonded_interaction_files = []
 
@@ -974,26 +994,39 @@ class ArbdModel(PdbModel):
         self._countParticleTypes()
         other_model._countParticleTypes()
 
+        self.getParticleTypesAndCounts()
+        other_model.getParticleTypesAndCounts()
+
         names = set([t.name for t in self.type_counts.keys()])
 
+        devlogger.debug(f'Combining types {self.type_counts.keys()} and {other_model.type_counts.keys()}')
         for t1 in self.type_counts.keys():
             for t2 in other_model.type_counts.keys():
-                if t1.name == t2.name and not t1.__eq__(t2, check_equal=False):
+                if t1.name == t2.name and t1.__eq__(t2, check_equal=False):
                     i = 1
                     new_name = f'{t2.name}{i}'
                     while new_name in names:
                         i += 1
                         new_name = f'{t2.name}{i}'
+                    devlogger.debug(f'Updating {t2.name} to {new_name}')
                     t2.name = new_name
                     names.add(new_name)
-            
+                    
+        ## Combine interactions
+        for i, tA, tB in other_model.nonbonded_interactions:
+            devlogger.debug(f'Combining model interactions {i} {tA} {tB}')
+            self.add_nonbonded_interaction(i,tA,tB)
+                    
         # for g in other_model.children:
         #     self.update(g, copy=copy)
         g = Group()
         for attr in 'children position orientation bonds angles dihedrals impropers exclusions bond_angles product_potentials group_sites'.split():
             g.__setattr__(attr, other_model.__getattribute__(attr))
+        devlogger.debug(f'Updating {self} with {g.children[0].children[0]}')
         self.update(g, copy=copy)
 
+        self._clear_types()
+        
         ## Combine configurations
         self.configuration = other_model.configuration.combine(self.configuration, policy='best', warn=True)
         
@@ -1032,7 +1065,15 @@ class ArbdModel(PdbModel):
         for t in self.dummy_types:
             if t not in type_counts:
                 type_counts[t] = 0
+
+        for i,tA,tB in self.nonbonded_interactions:
+            if tA is not None and tA not in type_counts:
+                type_counts[tA] = 0
+            if tB is not None and tB not in type_counts:
+                type_counts[tB] = 0
+            
         self.type_counts = type_counts
+        devlogger.debug(f'{self}: Counting types: {type_counts}')
         
     def _updateParticleOrder(self):
         ## Create ordered list
@@ -1051,6 +1092,7 @@ class ArbdModel(PdbModel):
 
     def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
         """ deprecated """
+        logger.warning('useNonbondedScheme is deprecated! Please update your code to use `add_nonbonded_interaction`')
         self.add_nonbonded_interaction(nbScheme, typeA, typeB)
 
     def add_nonbonded_interaction(self, nonbonded_potential, typeA=None, typeB=None):
@@ -1072,9 +1114,11 @@ class ArbdModel(PdbModel):
     def _particleTypePairIter(self):
         typesAndCounts = self.getParticleTypesAndCounts()
         for i in range(len(typesAndCounts)):
-            t1 = typesAndCounts[i][0]
+            t1,n1 = typesAndCounts[i]
+            if n1 == 0: continue
             for j in range(i,len(typesAndCounts)):
-                t2 = typesAndCounts[j][0]
+                t2,n2 = typesAndCounts[j]
+                if n2 == 0: continue
                 yield( (i,j,t1,t2) )
 
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
@@ -1229,6 +1273,7 @@ class SimEngine(metaclass=ABCMeta):
         
         d_orig = os.getcwd()
         try:
+            model._d_orig = d_orig
             if not os.path.exists(directory):
                 os.makedirs(directory)
             os.chdir(directory)
@@ -1258,13 +1303,15 @@ class SimEngine(metaclass=ABCMeta):
                 logger.info(f'Running {self.default_binary} with: {" ".join(cmd)}')
                 if log_file is None or (hasattr(log_file,'write') and callable(log_file.write)):
                     fd = sys.stdout if log_file is None else log_file
-                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-                    for line in process.stdout:
-                        try:
-                            fd.write(line)
-                        except:
-                            print("WARNING: could not encode line; your locale might not be set correctly")
-                        fd.flush()
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False) # , universal_newlines=True)
+                    ## re-open to get \r recognized as new line
+                    with open(os.dup(process.stdout.fileno()), newline='') as nice_stdout:
+                        for line in nice_stdout:
+                            try:
+                                fd.write(line)
+                            except:
+                                print("WARNING: could not encode line; your locale might not be set correctly")
+                            fd.flush()
                 else:
                     with open(log_file,'w') as fd:
                         process = subprocess.Popen(cmd, stdout=log_file, universal_newlines=True)
@@ -1273,6 +1320,7 @@ class SimEngine(metaclass=ABCMeta):
         except:
             raise
         finally:
+            del model._d_orig
             os.chdir(d_orig)
 
     def _get_binary(self, binary=None):
@@ -1378,7 +1426,7 @@ class ArbdEngine(SimEngine):
         self._write_group_sites_file( model, f"{d}/{output_name}.group_sites.txt" )
 
         self._write_potential_files( model, output_name, directory = d, configuration = configuration )
-        self._write_conf( model, output_name, configuration )
+        self._write_conf( model, output_name, configuration, directory = d )
         ## , numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
 
     def _write_particle_file(self, model, filename, configuration=None, **conf_params):
@@ -1388,11 +1436,11 @@ class ArbdEngine(SimEngine):
         with open(filename,'w') as fh:
             if configuration.integrator == "BD":
                 for p in model.particles:
-                    data = tuple([p.idx,p.type_.name] + [x for x in p.collapsedPosition()])
+                    data = tuple([p.idx,p.type_.name] + [x for x in p.get_collapsed_position()])
                     fh.write("ATOM %d %s %f %f %f\n" % data)
             else:
                 for p in model.particles:
-                    data = [p.idx,p.type_.name] + [x for x in p.collapsedPosition()]
+                    data = [p.idx,p.type_.name] + [x for x in p.get_collapsed_position()]
                     try:
                         data = data + p.momentum
                     except:
@@ -1429,7 +1477,7 @@ class ArbdEngine(SimEngine):
 
 
     def getParticleTypesAndCounts(self):
-        ## TODO: remove(?)
+        ## TODO: remove()?
         return sorted( model.type_counts.items(), key=lambda x: x[0] )
 
     def _particleTypePairIter(self):
@@ -1457,11 +1505,16 @@ class ArbdEngine(SimEngine):
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
 
+        model._nonbonded_interaction_files = [] # clear old nb files
+
         x = np.arange(0, configuration.cutoff)
         for i,j,t1,t2 in model._particleTypePairIter():
             f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
             interaction = model._get_nonbonded_interaction(t1,t2)
-            if interaction is None: continue
+            devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
+            if interaction is None:
+                model._nonbonded_interaction_files.append(None)
+                continue
             old_range = interaction.range_
 
             interaction.range_ = [0, configuration.cutoff]
@@ -1469,6 +1522,7 @@ class ArbdEngine(SimEngine):
             interaction.range_ = old_range 
 
             model._nonbonded_interaction_files.append(f)
+        devlogger.debug(f'model._nonbonded_interaction_files: {model._nonbonded_interaction_files}')
 
     def _write_restraint_file( self, model, filename ):
         self._restraint_filename = filename
@@ -1644,7 +1698,6 @@ class ArbdEngine(SimEngine):
         get_rigid_groups(model)
 
         if len(rigid_groups) > 0:
-            configuration.integrator = 'FusDynamic'
             rb_group_filename = "{}.rb-group.txt".format(prefix)
             params['integrator'] = """FusDynamics
 groupFileName {}
@@ -1684,6 +1737,8 @@ systemSize {dimX} {dimY} {dimZ}
             
             ## Write entries for each type of particle
             for pt,num in model.getParticleTypesAndCounts():
+                if num == 0: continue
+                devlogger.debug(f'Writing configuraion for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
                 particleParams['num'] = num
@@ -1715,15 +1770,17 @@ num {num}
 {dynamics}
 {rigid_potential}
 """.format(**particleParams))
-                if 'grid' in particleParams:
+                if 'grid_potentials' in particleParams:
                     grids = []
                     scales = []
-                    for g,s in pt.grid:
-                        ## TODO, use Path.relative_to?
+                    for g,s in pt.grid_potentials:
+                        tmp_g = str(g) if str(g)[0] == '/' else Path(model._d_orig) / g
                         try:
-                            grids.append(str( g.relative_to(os.getcwd()) ))
+                            grids.append( os.path.relpath(str(tmp_g)) )
                         except:
-                            grids.append(str(g))
+                            devlogger.info(f'Relative path for {pt} grid not found... using {tmp_g}')
+                            grids.append(str(tmp_g))
+                            
                         scales.append(str(s))
 
                     fh.write("gridFile {}\n".format(" ".join(grids)))
@@ -1818,6 +1875,7 @@ tabulatedPotential  1
      
         write_null_dx = False
         for pt,num in model.getParticleTypesAndCounts():
+            if num == 0: continue
             if "grid" not in pt.__dict__: 
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:

@@ -154,9 +154,8 @@ class KhNonbonded(AbstractPotential):
         alpha = 0.159 + _idp_scale * (0.228 - 0.159)
         epsilon0 = -1.0 + _idp_scale * (-1.36 + 1.0)
 
-        e_mj = epsilon_mj[(typeA.name,typeB.name)]        
+        e_mj = epsilon_mj[(typeA.resname,typeB.resname)]        
         epsilon = alpha * np.abs( e_mj - epsilon0 )
-        # epsilon = epsilon_mj[(typeA.name,typeB.name)] 
         lambda_ = -1 if epsilon0 > e_mj else 1
 
         sigma = 0.5 * (typeA.sigma + typeB.sigma)

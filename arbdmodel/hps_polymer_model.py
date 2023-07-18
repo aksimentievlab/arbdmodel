@@ -222,7 +222,7 @@ class HpsModel(PolymerModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: ns
+        [damping_coefficient]: 1/ns
         """
         if 'timestep' not in kwargs: kwargs['timestep'] = 10e-6
         if 'cutoff' not in kwargs: kwargs['cutoff'] = max(4*debye_length,20)
@@ -245,7 +245,7 @@ class HpsModel(PolymerModel):
 
         """ Set up nonbonded interactions """
         nonbonded = HpsNonbonded(debye_length)
-        self.types 
+        self.types
         for i in range(len(all_types)):
             t1 = all_types[i]
             for j in range(i,len(all_types)):
