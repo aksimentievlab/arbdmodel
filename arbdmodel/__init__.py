@@ -325,6 +325,7 @@ class Parent():
     def __iter__(self):
         ## TODO: decide if this is the nicest way to do it!
         """Depth-first iteration through tree"""
+        # devlogger.info(f'{self}.__iter__(): 0th child {None if len(self.children) == 0 else self.children[0]}')
         for x in self.children:
             if isinstance(x,Parent):
                 if isinstance(x,Clone) and not isinstance(x.get_original_recursively(),Parent):
@@ -462,6 +463,7 @@ class ParticleType():
         self.parent = parent
         self.rigid = rigid            
         self.rigid_body_potential = rigid_body_potential
+        devlogger.info(f'Created ParticleType {name} @ {hex(id(self))}')
         
         for key in ParticleType.excludedAttributes:
             assert( key not in kwargs )
@@ -502,6 +504,11 @@ class ParticleType():
             raise AttributeError("'{}' object has no method '{}'".format(type(self).__name__, name))
         return ret 
 
+    def __copy__(self):
+        return self
+
+    def __deepcopy__(self, memo):
+        return self
         
     def __hash_key(self):
         l = [self.name,self.charge]
@@ -586,11 +593,17 @@ class PointParticle(Transformable, Child):
         Note that this data structure seems to be fragile, can result in stack overflow
         
         """
+        if name in ('__copy__','__deepcopy__'):
+            ## Avoid using type_ and parent __copy__/__deepcopy__ functions!
+            return None
+
         # return Child.__getattr__(self,name)
         try:
             return Child.__getattr__(self,name)
         except Exception as e:
             if 'type_' in self.__dict__:
+                if name == 'parent':
+                    raise Exception('Programming error')
                 return getattr(self.type_, name)
             else:
                 raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
@@ -640,6 +653,9 @@ class PointParticle(Transformable, Child):
                     beta = beta
                 )
         return data
+
+    def __copy__(self):
+        Object.__copy__(self)
 
     def __repr__(self):
         return f'<{__name__}.{self.__class__.__name__} "{self.name}" of {self.type_}>'
@@ -1096,9 +1112,9 @@ class ArbdModel(PdbModel):
         self.add_nonbonded_interaction(nbScheme, typeA, typeB)
 
     def add_nonbonded_interaction(self, nonbonded_potential, typeA=None, typeB=None):
-        self.nonbonded_interactions.append( (nonbonded_potential, typeA, typeB) )
+        self.nonbonded_interactions.append( [nonbonded_potential, typeA, typeB] )
         if typeA != typeB:
-            self.nonbonded_interactions.append( (nonbonded_potential, typeB, typeA) )
+            self.nonbonded_interactions.append( [nonbonded_potential, typeB, typeA] )
 
     def prepare_for_simulation(self):
         ...
@@ -1119,7 +1135,7 @@ class ArbdModel(PdbModel):
             for j in range(i,len(typesAndCounts)):
                 t2,n2 = typesAndCounts[j]
                 if n2 == 0: continue
-                yield( (i,j,t1,t2) )
+                yield( [i,j,t1,t2] )
 
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
         raise(NotImplementedError)
@@ -1130,7 +1146,7 @@ class SimConf():
     def __init__(self, num_steps=None, output_period=None,
                  integrator=None, timestep=None, thermostat=None, barostat=None,
                  temperature=None, pressure=None,
-                 cutoff=None, pairlist_distance=None, decomp_period=None,
+                 cutoff=None, pairlist_distance=None, decomp_period=None, gpu=None,
                  seed=None, restart_file=None):
 
         self.num_steps = num_steps
@@ -1148,6 +1164,8 @@ class SimConf():
         self.decomp_period = decomp_period
         self.seed = seed
         self.restart_file = restart_file
+
+        self.gpu = gpu
         
         # num_steps=100000000, timestep=None, output_period=1e4
         ...
@@ -1214,12 +1232,12 @@ class DefaultSimConf(SimConf):
                  integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
                  temperature=295, pressure=1,
                  cutoff=50, pairlist_distance=None, decomp_period=40,
-                 seed=None, restart_file=None):
+                 seed=None, restart_file=None, gpu=0):
         SimConf.__init__(self, num_steps=num_steps, output_period=output_period,
                          integrator=integrator, timestep=timestep, thermostat=thermostat, barostat=barostat,
                          temperature=temperature, pressure=pressure,
                          cutoff=cutoff, pairlist_distance=pairlist_distance, decomp_period=decomp_period,
-                         seed=seed, restart_file=restart_file)
+                         seed=seed, restart_file=restart_file, gpu=gpu)
         
         self.num_steps = num_steps
         self.output_period = output_period
@@ -1263,14 +1281,16 @@ class SimEngine(metaclass=ABCMeta):
         
     def simulate(self, model, output_name, output_directory='output',
                  directory='.', log_file=None,
-                 binary=None, num_procs=None, gpu=0, dry_run = False, configuration = None, replicas = 1, **conf_params):
+                 binary=None, num_procs=None, dry_run = False, configuration = None, replicas = 1, **conf_params):
+
+        ## TODO: Allow _get_combined_conf to take certain parameters as arguments, or otherwise refactor to make this more elegant
+        gpu = self._get_combined_conf(model, **conf_params).gpu
         assert(type(gpu) is int)
-    
+
         if num_procs is None:
             import multiprocessing
             num_procs = max(1,multiprocessing.cpu_count()-1)
 
-        
         d_orig = os.getcwd()
         try:
             model._d_orig = d_orig
@@ -1393,7 +1413,7 @@ class ArbdEngine(SimEngine):
         conf = SimConf(num_steps=1e5, output_period=1e3,
                  integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
                  temperature=295, pressure=1,
-                 cutoff=50, pairlist_distance=None, decomp_period=40,
+                 cutoff=50, pairlist_distance=None, decomp_period=40, gpu = 0,
                  seed=None, restart_file=None)
         return conf
     
@@ -1801,7 +1821,7 @@ num {num}
                             grids.append(str( g.relative_to(os.getcwd()) ))
                         except:
                             grids.append(str(g))
-                        scales.append(str(s))
+                        scales.append(s)
                     fh.write("rigidBodyPotential {}\n".format(" ".join(grids)))
                     if any([s!=1 for s in scales]):
                         raise NotImplementedError
