@@ -1128,13 +1128,20 @@ class ArbdModel(PdbModel):
 
     def _particleTypePairIter(self):
         typesAndCounts = self.getParticleTypesAndCounts()
+        i_skipped = 0
         for i in range(len(typesAndCounts)):
             t1,n1 = typesAndCounts[i]
-            if n1 == 0: continue
+            if n1 == 0:
+                i_skipped += 1
+                continue
+            j_skipped = 0
             for j in range(i,len(typesAndCounts)):
                 t2,n2 = typesAndCounts[j]
+                if n2 == 0:
+                    j_skipped += 1
+                    continue
                 if n2 == 0: continue
-                yield( [i,j,t1,t2] )
+                yield( [i-i_skipped,j-i_skipped-j_skipped,t1,t2] )
 
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
         raise(NotImplementedError)
@@ -1494,19 +1501,6 @@ class ArbdEngine(SimEngine):
                 for c in chunks(particles,8):
                     fh.write(" ".join(str(p.idx) for p in c) + "\n")
 
-
-    def getParticleTypesAndCounts(self):
-        ## TODO: remove()?
-        return sorted( model.type_counts.items(), key=lambda x: x[0] )
-
-    def _particleTypePairIter(self):
-        typesAndCounts = self.getParticleTypesAndCounts()
-        for i in range(len(typesAndCounts)):
-            t1 = typesAndCounts[i][0]
-            for j in range(i,len(typesAndCounts)):
-                t2 = typesAndCounts[j][0]
-                yield( (i,j,t1,t2) )
-    
     def _write_potential_files(self, model, prefix, directory = "potentials", configuration=None, **conf_params):
         try: 
             os.makedirs(directory)
