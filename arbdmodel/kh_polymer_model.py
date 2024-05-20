@@ -120,7 +120,7 @@ for k,t in list(_types.items()):
     
     ## Add types for IDPs
     _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
-    
+
     
 class KhNonbonded(AbstractPotential):
     def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
@@ -142,17 +142,20 @@ class KhNonbonded(AbstractPotential):
         """ KH scale model """
         A_is_idp = B_is_idp = False
         try:
-            A_is_idp = A.is_idp
+            A_is_idp = typeA.is_idp
         except:
             pass
         try:
-            B_is_idp = B.is_idp
+            B_is_idp = typeB.is_idp
         except:
             pass
 
-        _idp_scale = (int(A_is_idp)+int(A_is_idp)) * 0.5
+        _idp_scale = (int(A_is_idp)+int(B_is_idp)) * 0.5
+        if _idp_scale != 0:
+            raise NotImplentedError('SASA version incompatible with IDP')
+
         alpha = 0.159 + _idp_scale * (0.228 - 0.159)
-        epsilon0 = -1.0 + _idp_scale * (-1.36 + 1.0)
+        epsilon0 = -1.36 + _idp_scale * (1.36 - 1.0)
 
         e_mj = epsilon_mj[(typeA.resname,typeB.resname)]        
         epsilon = alpha * np.abs( e_mj - epsilon0 )
@@ -176,6 +179,15 @@ class KhBeads(PolymerBeads):
                  spring_constant = 2.3900574,
                  rest_length = 3.8, **kwargs):
 
+        logger.info("""You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:
+Dignon GL, Zheng W, Kim YC, Best RB, Mittal J (2018) Sequence determinants of protein phase behavior from a coarse-grained model. PLOS Computational Biology 14(1) e1005941. https://doi.org/10.1371/journal.pcbi.1005941
+and
+Young C. Kim, Gerhard Hummer (2008) Coarse-grained Models for Simulations of Multiprotein Complexes: Application to Ubiquitin Binding.
+Journal of Molecular Biology 375(5) 1416-1433. https://doi.org/10.1016/j.jmb.2007.11.063.
+
+        Please cite all appropriate articles!""")
+
+
         if sequence is None:
             raise NotImplementedError
             # ... set random sequence
@@ -193,7 +205,7 @@ class KhBeads(PolymerBeads):
             self.idp_array = polymer.idp_array
         except:
             logger.warning("KhBeads processing a polymer without 'idp_array' attribute set (boolean numpy array with one True/False value per amino acid with True corresponding to IDP... Assuming all amino acids are IDP.")
-            self.idp_array = np.ones(polymer.num_monomers, dtype=np.bool)
+            self.idp_array = np.ones(polymer.num_monomers, dtype=bool)
 
         if len(self.idp_array) != polymer.num_monomers:
             raise ValueError(f'polymer {polymer} idp_array has incorrect size != {polymer.num_monomers}')
@@ -273,7 +285,7 @@ class KhModel(PolymerModel):
             t = self.types[j]
             self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
-    def _generate_polymer_beads(self, polymer, sequence):
+    def _generate_polymer_beads(self, polymer, sequence)
         return KhBeads(polymer, sequence,
                        rest_length = self.rest_length,
                        spring_constant = self.spring_constant,

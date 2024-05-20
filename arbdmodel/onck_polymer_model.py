@@ -120,7 +120,7 @@ for k,t in _types.items():
     t.resname = t.name
 
 class OnckNonbonded(AbstractPotential):
-    def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
+    def __init__(self, debye_length=12.7, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
         self.max_force = 50
@@ -241,8 +241,14 @@ class OnckModel(PolymerModel):
         [debye_length]: angstroms
         [damping_coefficient]: ns
         """
-        if debye_length != 10:
-            logger.warning("""Deviating from the model published by Onck by choosing a debye length != 1 nm.
+
+        logger.info("""You are using an implementation of the Onck model for disordered FG-Nup peptides based on:
+Fragasso, A., de Vries, H.W., Andersson, J. et al. A designer FG-Nup that reconstitutes the selective transport barrier of the nuclear pore complex. Nat Commun 12, 2010 (2021). https://doi.org/10.1038/s41467-021-22293-y
+
+        Please cite all appropriate articles!""")
+
+        if debye_length != 12.7:
+            logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1.27 nm.
     Be advised that the non-bonded cutoff is simply set to 5 * debye_length, but this is not necessarily prescribed by the model.""")
 
         if 'timestep' not in kwargs: kwargs['timestep'] = 20e-6
