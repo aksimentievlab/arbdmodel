@@ -1528,8 +1528,13 @@ class ArbdEngine(SimEngine):
 
         x = np.arange(0, configuration.cutoff)
         for i,j,t1,t2 in model._particleTypePairIter():
-            f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
             interaction = model._get_nonbonded_interaction(t1,t2)
+            try:
+                f = interaction.filename(types=(t1,t2))
+            except:
+                f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
+                logger.warn(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
+
             devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
             if interaction is None:
                 model._nonbonded_interaction_files.append(None)
