@@ -43,14 +43,8 @@ class AbstractPotential(metaclass=ABCMeta):
 
     def filename(self, types=None):
         raise NotImplementedError('Inherited potential objects should overload this function')
-        
-    def write_file(self, filename=None, types=None):
-        if filename is None:
-            filename = self.filename(types)
-        rmin,rmax = self.range_
-        r = np.arange(rmin, rmax+self.resolution, self.resolution)
-        with np.errstate(divide='ignore',invalid='ignore'):
-            u = self.potential(r, types)
+
+    def _cap_potential(self, r, u):
         self.__remove_nans(u)
 
         if self.zero == 'min':
@@ -91,6 +85,17 @@ class AbstractPotential(metaclass=ABCMeta):
             u = u - u[-1]
         else:
             raise ValueError('Unrecognized option for "zero" argument')
+        return u
+
+    def write_file(self, filename=None, types=None):
+        if filename is None:
+            filename = self.filename(types)
+        rmin,rmax = self.range_
+        r = np.arange(rmin, rmax+self.resolution, self.resolution)
+        with np.errstate(divide='ignore',invalid='ignore'):
+            u = self.potential(r, types)
+
+        u = self._cap_potential(r,u)
 
         np.savetxt(filename, np.array([r,u]).T)
     
