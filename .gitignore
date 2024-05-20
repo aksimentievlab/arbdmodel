@@ -1,5 +1,6 @@
 __pycache__
 .backup
+*.bak
 
 /build
 *.egg-info
