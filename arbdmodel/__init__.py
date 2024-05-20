@@ -1054,7 +1054,6 @@ class ArbdModel(PdbModel):
         self.add(group)
         
     def _get_nonbonded_interaction(self, typeA, typeB):
-        scheme = None
         for s,A,B in self.nonbonded_interactions:
             if A is None or B is None:
                 if A is None and B is None:
@@ -1454,7 +1453,7 @@ class ArbdEngine(SimEngine):
             configuration = self._get_combined_conf(model, **conf_params)
 
         with open(filename,'w') as fh:
-            if configuration.integrator == "BD":
+            if configuration.integrator in ('Brown', 'Brownian', 'BD'):
                 for p in model.particles:
                     data = tuple([p.idx,p.type_.name] + [x for x in p.get_collapsed_position()])
                     fh.write("ATOM %d %s %f %f %f\n" % data)
@@ -1758,11 +1757,11 @@ systemSize {dimX} {dimY} {dimZ}
             ## Write entries for each type of particle
             for pt,num in model.getParticleTypesAndCounts():
                 if num == 0: continue
-                devlogger.debug(f'Writing configuraion for particle type {pt}')
+                devlogger.debug(f'Writing configuration for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
                 particleParams['num'] = num
-                if configuration.integrator in ('Brown','Brownian'):
+                if configuration.integrator in ('Brown', 'Brownian', 'BD'):
                     try:
                         D = pt.diffusivity
                     except:
@@ -1896,7 +1895,7 @@ tabulatedPotential  1
         write_null_dx = False
         for pt,num in model.getParticleTypesAndCounts():
             if num == 0: continue
-            if "grid" not in pt.__dict__: 
+            if "grid_potentials" not in pt.__dict__:
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:
                     fh.write("""object 1 class gridpositions counts  2 2 2
