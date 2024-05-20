@@ -285,11 +285,12 @@ class KhModel(PolymerModel):
             t = self.types[j]
             self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
-    def _generate_polymer_beads(self, polymer, sequence)
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index = None)
         return KhBeads(polymer, sequence,
                        rest_length = self.rest_length,
                        spring_constant = self.spring_constant,
                        monomers_per_bead_group = self.monomers_per_bead_group,
+                       polymer_index = polymer_index
                        )
 
     def set_damping_coefficient(self, damping_coefficient):

@@ -277,10 +277,11 @@ Fragasso, A., de Vries, H.W., Andersson, J. et al. A designer FG-Nup that recons
         for t in self.types[i:]:
             self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
-    def _generate_polymer_beads(self, polymer, sequence):
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index=None):
         return OnckBeads(polymer, sequence,
-                       monomers_per_bead_group = self.monomers_per_bead_group,
-                       )
+                         monomers_per_bead_group = self.monomers_per_bead_group,
+                         poymer_index = polymer_index
+                         )
 
     def set_damping_coefficient(self, damping_coefficient):
         for t in self.types:

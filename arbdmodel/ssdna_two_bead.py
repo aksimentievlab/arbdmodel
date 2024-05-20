@@ -169,8 +169,8 @@ class DnaModel(PolymerModel):
 
         self.generate_beads()
                 
-    def _generate_polymer_beads(self, polymer, sequence):
-        return DnaStrandBeads( polymer, sequence )
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index=None):
+        return DnaStrandBeads( polymer, sequence, polymer_index = polymer_index )
         
 if __name__ == "__main__":
     """ ## old code 

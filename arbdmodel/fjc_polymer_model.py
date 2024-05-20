@@ -84,11 +84,12 @@ class FjcModel(PolymerModel):
         # nonbonded = FjcNonbonded()
         #  self.add_nonbonded_interaction( nonbonded, typeA=type_, typeB=type_ )
 
-    def _generate_polymer_beads(self, polymer, sequence):
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index=None):
         return FjcBeadsFromPolymer(polymer, sequence,
                                    rest_length = self.rest_length,
                                    spring_constant = self.spring_constant,
                                    monomers_per_bead_group = self.monomers_per_bead_group,
+                                   polymer_index = polymer_index
                                    )
 
     def set_damping_coefficient(self, damping_coefficient):

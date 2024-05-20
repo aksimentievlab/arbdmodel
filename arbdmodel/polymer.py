@@ -657,15 +657,14 @@ class PolymerModel(ArbdModel, metaclass=ABCMeta):
             i += n
 
     @abstractmethod
-    def _generate_polymer_beads(self, polymer, sequence):
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index = None):
         pass
             
     def generate_beads(self):
         self.clear_all()
-        self.peptides = [self._generate_polymer_beads(p,s)
-                         for p,s in zip(self.polymer_group.polymers,self.sequences)]
+        self.peptides = [self._generate_polymer_beads(p,s,i)
+                         for i,(p,s) in enumerate(zip(self.polymer_group.polymers,self.sequences))]
 
         for s in self.peptides:
             self.add(s)
             s._generate_beads()
-
