@@ -98,6 +98,15 @@ class AbstractPotential(metaclass=ABCMeta):
         u = self._cap_potential(r,u)
 
         np.savetxt(filename, np.array([r,u]).T)
+
+    def __hash__(self):
+        return hash((self.range_, self.resolution, self.max_force, self.max_potential, self.zero))
+
+    def __eq__(self, other):
+        for a in ("range_", "resolution", "max_force", "max_potential", "zero"):
+            if getattr(self,a) != getattr(other,a):
+                return False
+        return type(self).__name__ == type(other).__name__
     
 ## Concrete nonbonded pontentials
 class LennardJones(AbstractPotential):
@@ -155,9 +164,8 @@ class HarmonicBondedPotential(AbstractPotential):
    
     def filename(self, types=None):
         assert(types is None)
-        return "%s%s-%.3f-%.3f.dat" % (self.filename_prefix, self.type_,
-                                       self.k*self.kscale, self.r0)
-
+        return f"{self.filename_prefix}{self.type_}-{self.k*self.kscale:.3f}-{self.r0:.3f}.dat"
+    
     def potential(self, r, types=None):
         dr = r-self.r0
         if self.periodic == True:
@@ -168,13 +176,13 @@ class HarmonicBondedPotential(AbstractPotential):
 
     def __hash__(self):
         assert(self.type_ != "None")
-        return hash((self.type_, self.k, self.r0, self.range_, self.resolution, self.max_force, self.max_potential, self.zero, self.filename_prefix, self.periodic)) # 
+        return hash((self.type_, self.k, self.r0, self.filename_prefix, self.periodic, AbstractPotential.__hash__(self))) # 
 
     def __eq__(self, other):
-        for a in ("type_", "k", "r0", "range_", "resolution", "max_force", "max_potential", "filename_prefix", "periodic"):
+        for a in ("type_", "k", "r0", "filename_prefix", "periodic"):
             if getattr(self,a) != getattr(other,a):
                 return False
-        return True
+        return AbstractPotential.__eq__(self,other)
     
 class HarmonicBond(HarmonicBondedPotential):
     def __init__(self, k, r0, correct_geometry=False, temperature=295, *args, **kwargs):
