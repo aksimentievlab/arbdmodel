@@ -177,15 +177,6 @@ class KhBeads(PolymerBeads):
                  spring_constant = 2.3900574,
                  rest_length = 3.8, **kwargs):
 
-        logger.info("""You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:
-Dignon GL, Zheng W, Kim YC, Best RB, Mittal J (2018) Sequence determinants of protein phase behavior from a coarse-grained model. PLOS Computational Biology 14(1) e1005941. https://doi.org/10.1371/journal.pcbi.1005941
-and
-Young C. Kim, Gerhard Hummer (2008) Coarse-grained Models for Simulations of Multiprotein Complexes: Application to Ubiquitin Binding.
-Journal of Molecular Biology 375(5) 1416-1433. https://doi.org/10.1016/j.jmb.2007.11.063.
-
-        Please cite all appropriate articles!""")
-
-
         if sequence is None:
             raise NotImplementedError
             # ... set random sequence
@@ -252,6 +243,18 @@ class KhModel(PolymerModel):
         [debye_length]: angstroms
         [damping_coefficient]: ns
         """
+
+        logger.info("""You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:
+
+Dignon GL, Zheng W, Kim YC, Best RB, Mittal J (2018) Sequence determinants of protein phase behavior from a coarse-grained model. PLOS Computational Biology 14(1) e1005941. https://doi.org/10.1371/journal.pcbi.1005941
+
+based upon:
+
+Young C. Kim, Gerhard Hummer (2008) Coarse-grained Models for Simulations of Multiprotein Complexes: Application to Ubiquitin Binding. Journal of Molecular Biology 375(5) 1416-1433. https://doi.org/10.1016/j.jmb.2007.11.063.
+
+Please cite all appropriate articles!""")
+
+
         if 'timestep' not in kwargs: kwargs['timestep'] = 10e-6
         if 'cutoff' not in kwargs: kwargs['cutoff'] = max(4*debye_length,20)
 
