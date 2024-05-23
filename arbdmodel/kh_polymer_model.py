@@ -150,9 +150,7 @@ class KhNonbonded(AbstractPotential):
         except:
             pass
 
-        _idp_scale = (int(A_is_idp)+int(B_is_idp)) * 0.5
-        if _idp_scale != 0:
-            raise NotImplentedError('SASA version incompatible with IDP')
+        _idp_scale = (int(A_is_idp)*int(B_is_idp))
 
         alpha = 0.159 + _idp_scale * (0.228 - 0.159)
         epsilon0 = -1.36 + _idp_scale * (1.36 - 1.0)
