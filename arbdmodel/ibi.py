@@ -8,20 +8,6 @@ from .interactions import AbstractPotential
 """ This file includes various routines to simplify running
 simulations with Iterative Boltmann Inversion. """
 
-def add_dofs(model):
-
-    dofs = dict()
-    for p1,p2,pot,_exclusion_flag in model.get_bonds():
-        try:
-            pot.degrees_of_freedom
-        except:
-            continue
-        if pot not in dofs:
-            dofs[pot] = []
-            ## New bond
-
-
-
 class DegreeOfFreedom():
     """ Base class for representing a degree of freedom in the system.
 
@@ -277,10 +263,10 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         ## self.filename_prefix="IBIpotentials/"
 
-    def filename(self, types=None, iteration=None):
+    def filename(self, types=None, iteration=None, smoothed=True):
         if iteration is None:
             iteration = self.iteration
-        return "{}-{:03d}.dat".format(self.filename_prefix, iteration)
+        return f"{self.filename_prefix}-{iteration:03d}{'' if smoothed else '-raw'}.dat"
 
     def __str__(self):
         return self.filename()
@@ -339,18 +325,20 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             if (not Path(f).exists()) or recalculate:
                 if universe is None: raise Exception
                 bins, vals = self._extract_distribution( universe )
+                Path(f).parent.mkdir(parents=True, exist_ok=True)
                 np.savetxt(f,np.array((bins[:-1],vals/np.sum(vals),vals)).T)
             bins, vals, counts = np.loadtxt(f).T
             self.__target = (bins,vals)
         return self.__target
 
     def get_cg_distribution(self, universe, box=None, recalculate=False):
-        f = self.filename().replace('.dat','.cg.dat')
+        f = self.filename(smoothed=False).replace('.dat','.cg.dat')
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"{self}.get_cg_distribution(): writing to '{f}'")
             bins, vals = self._extract_distribution( universe, box=box )
             bins = bins[:len(vals)]
+            Path(f).parent.mkdir(parents=True, exist_ok=True)
             np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
         else:
             logger.info(f"{self}.get_cg_distribution(): reading from '{f}'")
@@ -366,8 +354,12 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             bins = self.bins[:-1]
             pot = np.zeros(bins.shape)
         else:
-            f = self.filename(iteration=iteration)
-            bins, pot = np.loadtxt(f).T
+            try:
+                f = self.filename(iteration=iteration, smoothed=True)
+                bins, pot = np.loadtxt(f).T
+            except:
+                f = self.filename(iteration=iteration, smoothed=False)
+                bins, pot = np.loadtxt(f).T
         return bins,pot
 
 
@@ -402,8 +394,15 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         rho[:first_i] = 0
         rho[last_i:] = 0
 
-    def write_cg_potential(self, universe=None, scaling_factor = 1, temperature = 295, tol = 1e-6, clean_edges=True):
-        f = self.filename()
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = 1e-5, clean_edges=True):
+        if scaling_factor is None:
+            scaling_factor = self.learning_rate
+
+        savgol_opts = dict(
+            window_length=1+(self.smooth//2)*2, polyorder=3,
+            mode = 'wrap' if self.periodic else 'nearest'
+        )
+
         if universe is None:
             bins = self.bins[:-1]
             bins_aa, rho_aa = self.get_target_distribution()
@@ -412,22 +411,13 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             if clean_edges:
                self._clean_edges(bins_aa, rho_aa, tol)
 
-            savgol_opts = dict(
-                window_length=1+(self.smooth//2)*2, polyorder=3,
-                mode = 'wrap' if self.periodic else 'nearest'
-            )
             rho_aa = savgol( rho_aa, **savgol_opts )
             rho_aa[rho_aa < tol] = tol
 
             ## units "295 k K" kcal_mol
             u = - scaling_factor * 0.58622592 * (temperature/295) * np.log(rho_aa)
-            u = self._apply_max_force(bins, u, rho_aa, tol)
-            u = self._cap_potential(bins, u)
-
+            rho_cg = rho_aa     # allows a common smoothing command below
         else:
-            smoothing = self.smooth
-            alpha = self.learning_rate
-
             bins, rho_cg = self._extract_distribution( universe )
             assert( np.abs(len(rho_cg) - len(bins)) < 2 )
             bins = bins[:len(rho_cg)]
@@ -441,10 +431,6 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
 
             r0,u0 = self.read_cg_potential() # iteration-2?
-            savgol_opts = dict(
-                            window_length=1+(self.smooth//2)*2, polyorder=3,
-                            mode = 'wrap' if self.periodic else 'nearest'
-                           )
             rho_cg,rho_aa = [savgol( rho, **savgol_opts ) for rho in [rho_cg,rho_aa]]
             rho_aa[rho_aa < tol] = tol
             rho_cg[rho_cg < tol] = tol
@@ -454,12 +440,16 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             du = 0.58622592 * (temperature/295) * np.log( ratio )
             # sl = rho_aa >= 1e-5
 
-            du = savgol( du, **savgol_opts )
-            u = u0 + alpha * du
+            u = u0 + self.learning_rate * du
 
-            u = self._apply_max_force(bins, u, np.minimum(rho_aa,rho_cg), tol)
-            u = self._cap_potential(bins, u)
+        f = self.filename(smoothed=False)
+        Path(f).parent.mkdir(parents=True, exist_ok=True)
+        np.savetxt(f,np.array((bins,u)).T)
 
+        f = self.filename(smoothed=True)
+        u = savgol( u, **savgol_opts )
+        u = self._apply_max_force(bins, u, np.minimum(rho_aa,rho_cg), tol)
+        u = self._cap_potential(bins, u)
         np.savetxt(f,np.array((bins,u)).T)
         return bins,u
 
@@ -488,7 +478,7 @@ class IBIDihedral(AbstractIBIpotential):
 
 ## Specialize with sensible defaults for r_range
 class IBINonbonded(AbstractIBIpotential):
-    def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, zero='last', smooth=None, learning_rate=0.35, iteration=1, filename_prefix="IBIPotentials/"):
+    def __init__(self, name, degrees_of_freedom=[], range_=(0,50), resolution=0.1, max_force=None, max_potential=None, zero='last', smooth=None, learning_rate=0.35, iteration=1, filename_prefix="IBIPotentials/"):
         AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, zero, smooth, learning_rate, iteration, filename_prefix)
         self.type_ = 'IBInonbonded'
 

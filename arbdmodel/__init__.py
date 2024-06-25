@@ -24,6 +24,8 @@ if _get_username() not in ('cmaffeo2',):
 
 ## Import resources
 from pathlib import Path
+from glob import glob
+import MDAnalysis as mda
 from abc import abstractmethod, ABCMeta
 
 from .version import get_version
@@ -1073,46 +1075,55 @@ class ArbdModel(PdbModel):
 
         logger.info(f'Gathering nonbonded IBI degrees of freedom')
         all_exclusions = self.get_exclusions()
-        if len(self.type_counts) == 0:
-            self._countParticleTypes()
+        try:
+            raise               # particle.idx wasn't set without this
+            if len(self.type_counts) == 0: raise
+        except:
+            self.getParticleTypesAndCounts()
 
-        """ This needs to be rewritten significantly
-instead of looping over types, we should loop over potentials """
-        types = list(self.type_counts.keys())
-        for i,t1 in enumerate(types):
-            p1 = [p for p in self if not p.rigid and p.type_ == t1]
-            for t2 in types[i:]:
-                p2 = [p for p in self if not p.rigid and p.type_ == t2]
-                def _cond(pair):
-                    b1 = (pair[0].type_ == t1 and pair[1].type_ == t2)
-                    b2 = (pair[0].type_ == t2 and pair[1].type_ == t1)
-                    return (b1 or b2)
-                ex = list(filter(_cond, all_exclusions))
-                logger.info(f'{len(ex)} exclusions for {t1}({len(p1)}) and {t2}({len(p2)})')
-                dof = PairDistributionDof( p1, p2, exclusions=ex )
-                pot = IBINonbonded(f'nb-{t1.name}_{t2.name}', degrees_of_freedom=[dof], learning_rate=1.0/len(self.children[0])**2)
-                # pot.get_target_distribution(u)
+        type_to_particles = dict()
+        for p in self:
+            t = p.type_
+            if t not in type_to_particles: type_to_particles[t] = []
+            type_to_particles[t].append(p)
+        type_to_particles[None] = [p for p in self]
 
-                pot.type1 = t1          # we'll use these later
-                pot.type2 = t2
-                self.nonbonded_ibi_potentials.add( pot )
-        for p1,p2,pot,_exclusion_flag in self.get_bonds():
+        already_handled = set()
+        for pot, tA, tB in self.nonbonded_interactions:
+            ## Avoid including particle type pairs that don't apply
+            if (tA,tB) in already_handled: continue
+            already_handled.add((tA,tB))
+            already_handled.add((tB,tA))
+
             try:
                 pot.degrees_of_freedom
             except:
                 continue
-            pot.degrees_of_freedom.add( BondDof(p1,p2) )
+
+            def _cond(pair):
+                b1 = (tA is None or pair[0].type_ == tA) and (tB is None or pair[1].type_ == tB)
+                b2 = (tB is None or pair[0].type_ == tB) and (tA is None or pair[1].type_ == tA)
+                return (b1 or b2)
+
+            ex = list(filter(_cond, all_exclusions))
+            dof = PairDistributionDof( type_to_particles[tA], type_to_particles[tB], exclusions=ex,
+                                       range_=pot.range_, resolution=pot.resolution)
+
+            pot.degrees_of_freedom.append( dof )
+
+            if pot not in self.nonbonded_ibi_potentials:
+                self.nonbonded_ibi_potentials.add( pot )
 
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def run_IBI(self, iterations, directory = 'ibi-runs', engine = None, replicas = 1, run_minimization = True):
+    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1):
 
         try:
             assert( len(self.bonded_ibi_potentials) > 0 )
             assert( len(self.nonbonded_ibi_potentials) > 0 )
         except:
-            raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run model.assign_IBI_degrees_of_freedom()')
+            raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
 
         if engine is None:
             engine = ArbdEngine(
@@ -1120,18 +1131,19 @@ instead of looping over types, we should loop over potentials """
                 output_period = 1e4,
             )
 
-        if model.dimensions.size > 3:
+        if np.array(self.dimensions).size > 3:
             raise NotImplementedError('IBI only implemented for systems with orthorhombic unit cells')
         else:
-            box = tuple(list(model.dimensions[:3]) + ([90]*3))
+            box = tuple(list(self.dimensions[:3]) + ([90]*3))
 
         cg_u = None
         restart_file = None
         for i in range(first_iteration, iterations+1):
             logger.info(f'Working on IBI iteration {i}/{iterations}')
             logger.info(f'Writing IBI potentials')
-            for pot in self.bonded_ibi_potentials + self.nonbonded_ibi_potentials:
-                pot.write_cg_potential(cg_u)
+            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
+                for pot in pots:
+                    pot.write_cg_potential(cg_u)
 
             if i == 1 and run_minimization:
                 logger.info(f'Running brief simulation with small timestep')
@@ -1141,8 +1153,9 @@ instead of looping over types, we should loop over potentials """
                                  timestep = ts0/100,
                                  num_steps = 10000, output_period=1000 )
 
-            for pot in self.bonded_ibi_potentials + self.nonbonded_ibi_potentials:
-                pot.write_cg_potential(cg_u)
+            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
+                for pot in pots:
+                    pot.write_cg_potential(cg_u)
 
                 restart_file = f'{directory}/output/ibi-min.restart'
 
@@ -1156,10 +1169,12 @@ instead of looping over types, we should loop over potentials """
             psf = '{}/{}.psf'.format(directory,name)
             dcds = [f for f in glob(f'{directory}/output/{name}.*dcd') if 'momentum' not in f]
             cg_u = mda.Universe(psf,*dcds)
-            for pot in IBI_potentials:
-                # if pot in nonbonded_ibi_pots: continue
-                pot.get_cg_distribution(cg_u, box=box, recalculate=False)
-                pot.iteration += 1
+
+            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
+                for pot in pots:
+                    # if pot in nonbonded_ibi_pots: continue
+                    pot.get_cg_distribution(cg_u, box=box, recalculate=False)
+                    pot.iteration += 1
 
         
     def update(self, group , copy=False):
