@@ -396,7 +396,8 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
     def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = 1e-5, clean_edges=True):
         if scaling_factor is None:
-            scaling_factor = self.learning_rate
+            try:    scaling_factor = self.learning_rate(self.iteration)
+            except: scaling_factor = self.learning_rate
 
         savgol_opts = dict(
             window_length=1+(self.smooth//2)*2, polyorder=3,
@@ -440,7 +441,9 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             du = 0.58622592 * (temperature/295) * np.log( ratio )
             # sl = rho_aa >= 1e-5
 
-            u = u0 + self.learning_rate * du
+            try:    alpha = self.learning_rate(self.iteration)
+            except: alpha = self.learning_rate
+            u = u0 + alpha * du
 
         f = self.filename(smoothed=False)
         Path(f).parent.mkdir(parents=True, exist_ok=True)

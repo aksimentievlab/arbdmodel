@@ -1143,7 +1143,8 @@ class ArbdModel(PdbModel):
             logger.info(f'Writing IBI potentials')
             for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
                 for pot in pots:
-                    pot.write_cg_potential(cg_u)
+                    try:    pot.write_cg_potential(cg_u, tol=pot.tol)
+                    except: pot.write_cg_potential(cg_u)
 
             if i == 1 and run_minimization:
                 logger.info(f'Running brief simulation with small timestep')
@@ -1155,7 +1156,8 @@ class ArbdModel(PdbModel):
 
             for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
                 for pot in pots:
-                    pot.write_cg_potential(cg_u)
+                    try:    pot.write_cg_potential(cg_u, tol=pot.tol)
+                    except: pot.write_cg_potential(cg_u)
 
                 restart_file = f'{directory}/output/ibi-min.restart'
 
