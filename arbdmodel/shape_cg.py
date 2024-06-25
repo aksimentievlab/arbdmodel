@@ -18,7 +18,7 @@ def find_shape_based_sites(fine_positions, N_cg,
     weights = weights / np.sum(weights)    
 
     if num_steps is None:
-        num_steps = 200*N_cg
+        num_steps = 400*N_cg
 
     # p.collapsedPosition()
     # r_fg = [p.position for p in fine]
