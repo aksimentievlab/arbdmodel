@@ -597,10 +597,10 @@ class PolymerBeads(Group, metaclass=ABCMeta):
         self.clear_all()
 
     @abstractmethod
-    def _generate_ith_bead_group(self, i, r, o):
+    def _generate_ith_bead_group(self, index, position, orientation):
         """ Normally a bead, but sometimes a group of beads """
-        bead = PointParticle(type_, r,
-                             resid = i+1)
+        bead = PointParticle(type_, position,
+                             resid = index+1)
         pass
 
     @abstractmethod
@@ -619,7 +619,7 @@ class PolymerBeads(Group, metaclass=ABCMeta):
         
     def _generate_beads(self):
         for i in range(self.num_bead_groups):
-            c = self.polymer.monomer_index_to_contour(i * self.monomers_per_bead_group)
+            c = self.polymer.monomer_index_to_contour(i * self.monomers_per_bead_group + (self.monomers_per_bead_group-1)/2)
             r = self.polymer.contour_to_position(c)
             o = self.polymer.contour_to_orientation(c)
             
