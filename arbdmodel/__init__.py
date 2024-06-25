@@ -1825,7 +1825,7 @@ class ArbdEngine(SimEngine):
         if configuration.restart_file is None:
             params['restart_coordinates'] = ""
         else:
-            params['restart_coordinates'] = "restart_coordinates %s" % configuration.restart_file
+            params['restart_coordinates'] = "restartCoordinates %s" % configuration.restart_file
 
         for k,v in zip('XYZ', model.dimensions):
             params['dim'+k] = v
