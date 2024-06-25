@@ -1277,6 +1277,14 @@ class ArbdModel(PdbModel):
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
         raise(NotImplementedError)
 
+    def simulate(self, output_name, **kwargs):
+        ## split kwargs
+        sim_kws = ['output_directory', 'directory', 'log_file', 'binary', 'num_procs', 'dry_run', 'configuration', 'replicas']
+        sim_kwargs = {kw:kwargs[kw] for kw in sim_kws if kw in kwargs}
+        engine_kwargs = {k:v for k,v in kwargs.items() if k not in sim_kws}
+        engine = ArbdEngine(**engine_kwargs)
+        return engine.simulate(self, output_name, **sim_kwargs)
+
 class SimConf():
     """ Class describing properties for a (ARBD or NAMD) simulation """
 
