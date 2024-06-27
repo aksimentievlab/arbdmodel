@@ -1693,7 +1693,7 @@ class ArbdEngine(SimEngine):
         self._write_bond_angle_file( model, f"{d}/{output_name}.bond-angle.txt" )
         self._write_product_potential_file( model, f"{d}/{output_name}.product_potential.txt" )
         self._write_group_sites_file( model, f"{d}/{output_name}.group_sites.txt" )
-        self._write_rb_coordinate_file( model, configuration, f"{d}.rbcoords.txt" )
+        self._write_rb_coordinate_file( model, configuration, f'{output_name}.rbcoords.txt' )
         
         self._write_potential_files( model, output_name, directory = d, configuration = configuration )
         self._write_conf( model, output_name, configuration )
@@ -1913,7 +1913,7 @@ class ArbdEngine(SimEngine):
             if rb_integrator is None: rb_integrator = configuration.integrator
             with open(self._rb_coordinate_filename,'w') as fh:
                 for rb in model.rigid_bodies:
-                    fh.write(' '.join(map(str,list(rb.get_collapsed_position()) + list(rb.applyOrientation(np.eye(3)).flatten()))))
+                    fh.write(' '.join(map(str,list(rb.get_collapsed_position()) + list(rb.applyOrientation(rb.orientation).flatten()))))
                     if rb_integrator in ('MD','Langevin'):
                         try: fh.write( ' ' + ' '.join([str(x) for x in rb.momentum]) )
                         except:  fh.write( ' 0'*3 )
