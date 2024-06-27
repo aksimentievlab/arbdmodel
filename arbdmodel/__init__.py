@@ -122,7 +122,6 @@ class Parent():
         self.product_potentials = []
         self.group_sites = []
         
-        self.rigid = False
         ## TODO: self.cacheInvalid = True # What will be in the cache?
 
     def add(self,x):
@@ -372,8 +371,8 @@ class Child():
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
             raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
 
-
-        excluded_attributes = ['parent','rigid']
+        ## Skip certain attributes from search
+        excluded_attributes = ['parent']
         if name in excluded_attributes:
             raise AttributeError("'{}' object has no attribute '{}' and cannot look it up from the parent".format(type(self).__name__, name))
 
@@ -452,20 +451,31 @@ class ParticleType():
                           "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, parent=None, rigid=False, rigid_body_potential=None, **kwargs):
-        """ Parent type is used to fall back on for nonbonded interactions if this type is not specifically referenced """
+    def __init__(self, name, charge=0, mass=None, diffusivity=None,
+                 damping_coefficient=None, parent=None,
+                 rigid_body_potentials=None, **kwargs):
+
+        """ Parent type is used to fall back on for nonbonded
+        interactions if this type is not specifically referenced """
 
         if parent is not None:
             for k,v in parent.__dict__.items():
                 if k not in ParticleType.excludedAttributes:
                     self.__dict__[k] = v
+            assert( type(parent) == type(self) )
 
+        if diffusivity is None:
+            assert( (damping_coefficient is not None) and (mass is not None) )
+
+        ## TODO: make most attributes @property
         self.name   = name
         self.charge = charge
+        self.mass = mass
+        self.damping_coefficient = damping_coefficient
+        self.diffusivity = diffusivity
         self.parent = parent
-        self.rigid = rigid            
-        self.rigid_body_potential = rigid_body_potential
-        devlogger.info(f'Created ParticleType {name} @ {hex(id(self))}')
+        self.rigid_body_potentials = rigid_body_potentials
+        devlogger.info(f'Created {type(self)} {name} @ {hex(id(self))}')
         
         for key in ParticleType.excludedAttributes:
             assert( key not in kwargs )
@@ -474,7 +484,7 @@ class ParticleType():
             self.__dict__[key] = val
 
     def is_same_type(self, other):
-        assert(isinstance(other,ParticleType))
+        assert( type(other) == type(self) )
         if self == other:
             return True
         elif self.parent is not None and self.parent == other:
@@ -512,19 +522,19 @@ class ParticleType():
     def __deepcopy__(self, memo):
         return self
         
-    def __hash_key(self):
-        l = [self.name,self.charge]
+    def _hash_key(self):
+        l = [str(type(self)), self.name, self.charge]
         for keyval in sorted(self.__dict__.items()):
             if isinstance(keyval[1], list): keyval = (keyval[0],tuple(keyval[1]))
             l.extend(keyval)
         return tuple(l)
 
     def __hash__(self):
-        return hash(self.__hash_key())
+        return hash(self._hash_key())
     
     def _equal_check(a,b):
         if a.name == b.name:
-            if a.__hash_key() != b.__hash_key():
+            if a._hash_key() != b._hash_key():
                 raise Exception("Two different ParticleTypes have same 'name' attribute")
 
     def __eq__(a,b, check_equal = True):
@@ -546,6 +556,50 @@ class ParticleType():
     def __repr__(self):
         return '<{} {}{}>'.format( type(self), self.name, '[{}]'.format(self.parent) if self.parent is not None else '' )
 
+class RigidBodyType(ParticleType):
+
+    """Class that holds common attributes for RigidBody objects"""
+
+    def __init__(self, name, parent=None, moment_of_inertia = None,
+                 rotational_diffusivity = None,
+                 rotational_damping_coefficient = None,
+                 attached_particles=tuple(), potential_grids=tuple(),
+                 charge_grids=tuple(), pmf_grids=tuple(), **kwargs):
+
+        """ Parent type is used to fall back on for nonbonded
+        interactions if this type is not specifically referenced """
+
+        if rotational_diffusivity is None:
+            assert( (rotational_damping_coefficient is not None) and (moment_of_inertia is not None) )
+
+        for _grids in (potential_grids,charge_grids,pmf_grids):
+            for val in _grids:
+                assert( len(val) in (2,3) ) #                 
+                
+        ParticleType.__init__(self, name, parent=parent,
+                              moment_of_inertia = moment_of_inertia,
+                              rotational_diffusivity=rotational_diffusivity,
+                              rotational_damping_coefficient = rotational_damping_coefficient,
+                              potential_grids = potential_grids,
+                              charge_grids = charge_grids,
+                              pmf_grids = pmf_grids,
+                              **kwargs)
+
+        self.attached_particles = []
+        for p in attached_particles:
+            self.attach_particle(p)
+
+    def attach_particle(self, particle):
+        """ The particle argument must be a PointParticle. The position/orientation of the attached particle/group is in the RigidBody frame. """
+        
+        if particle.parent is not None:
+            raise ValueError('RigidBody-attached particles are not allowed to have a parent')
+        self.attached_particles.append( particle )
+        
+    def _equal_check(a,b):
+        if a.name == b.name:
+            if a._hash_key() != b._hash_key():
+                raise Exception("Two different RigidBodyTypes have same 'name' attribute")    
 
 class PointParticle(Transformable, Child):
     def __init__(self, type_, position, name="A", **kwargs):
@@ -561,7 +615,7 @@ class PointParticle(Transformable, Child):
         self.counter = 0
         self.restraints = []
         self.rigid = False
-
+        
         for key,val in kwargs.items():
             self.__dict__[key] = val
         
@@ -576,7 +630,8 @@ class PointParticle(Transformable, Child):
             t = copy(t0)
             t.name = name
         else:
-            t = ParticleType(name, parent=t0)
+            # TODO: REMOVE LINE: t = ParticleType(name, parent=t0)
+             t = type(t0)(name, parent=t0)
         t.add_grid_potential(gridfile, scale=scale)
         self.type_ = t
         self._clear_types()
@@ -672,20 +727,24 @@ class RigidBody(PointParticle):
         Child.__init__(self, parent=parent)
         Transformable.__init__(self,position, orientation)
 
+        if type(type_) != RigidBodyType:
+            raise ValueError(f'Attempted to create a RigidBody object from an invalid type {type_}')
+
         self.type_    = type_                
         self.idx     = None
         self.name = name
         self.counter = 0
         self.restraints = []
-        self.attached_particles = []
-        for p in attached_particles:
-            self.attach_particle(p)
+        self.rigid = True
+
+        ## TODO: it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
+        self.attached_particles = [p.copy() for p in type_.attached_particles]
         
         for key,val in kwargs.items():
             self.__dict__[key] = val
         
     def add_restraint(self, restraint):
-        raise NotImplementedError('Harmonic restraints are not yet supported for rigid bodies')
+        raise NotImplementedError('Harmonic restraints are not yet supported for rigid bodies; consider implementing this by attaching a dummy particle')
         ## TODO: how to handle duplicating and cloning bonds
         self.restraints.append( restraint )
 
@@ -695,12 +754,6 @@ class RigidBody(PointParticle):
     def duplicate(self):
         new = deepcopy(self)
         return new
-
-    def attach_particle(self, particle):
-        """ The particle argument can be a PointParticle or Group (RigidBody children will be ignored). The position/orientation of the attached particle/group is in the RigidBody frame. """
-        if particle.parent is not None:
-            raise ValueError('RigidBody-attached particles are not allowed to have a parent')
-        self.attached_particles.append( particle )
 
     def __getattr__(self, name):
         """
@@ -976,6 +1029,8 @@ class ArbdModel(PdbModel):
         self.type_counts = None
 
         self.dummy_types = dummy_types # TODO, determine whether these are really needed
+        if len(self.dummy_types) != 0:
+            raise("Dummy types have been deprecated")
         
         self.nonbonded_interactions = []
         self._nonbonded_interaction_files = [] # This could be made more robust
@@ -1003,6 +1058,10 @@ class ArbdModel(PdbModel):
         self._nonbonded_interaction_files = []
 
     def extend(self, other_model, copy=False):
+
+        if any( [p.rigid for p in self] + [p.rigid for p in other_model] ):
+            raise NotImplementedError('Models containing rigid bodies cannot yet be extended')
+        
         assert( isinstance(other_model, ArbdModel) )
         if copy == True:
             logger.warning(f'Forcing {self.__class__}.extend(other_model,copy=False)')
@@ -1203,38 +1262,72 @@ class ArbdModel(PdbModel):
     def _countParticleTypes(self):
         ## TODO: check for modifications to particle that require
         ## automatic generation of new particle type
-        type_counts = dict()
-        for p in self:
+
+        type_counts = dict()    # type is key, value is 2-element list of regular particle counts and attached particles
+        
+        parts = [p for p in self if not p.rigid]
+
+        for p in parts:
             t = p.type_
             if t in type_counts:
-                type_counts[t] += 1
+                type_counts[t][0] += 1
             else:
-                type_counts[t] = 1
-        for t in self.dummy_types:
-            if t not in type_counts:
-                type_counts[t] = 0
+                type_counts[t] = [1,0]
+
+        parts = [p for rb in self if rb.rigid for p in rb.attached_particles]
+        for p in parts:
+            t = p.type_
+            if t in type_counts:
+                type_counts[t][1] += 1
+            else:
+                type_counts[t] = [0,1]
+        
+        if len(self.dummy_types) != 0:
+            raise("Dummy types have been deprecated")
+        # for t in self.dummy_types:
+        #     if t not in type_counts:
+        #         type_counts[t] = 0
 
         for i,tA,tB in self.nonbonded_interactions:
             if tA is not None and tA not in type_counts:
-                type_counts[tA] = 0
+                type_counts[tA] = [0,0]
             if tB is not None and tB not in type_counts:
-                type_counts[tB] = 0
-            
+                type_counts[tB] = [0,0]
+
+
         self.type_counts = type_counts
+        rbtc = dict()
+        for rb in self.rigid_bodies:
+            t = rb.type_
+            if t in rbtc: rbtc[t] += 1
+            else:         rbtc[t] = 1
+        self.rigid_body_type_counts = [(k,rbtc[k]) for k in sorted(rbtc.keys())]
         devlogger.debug(f'{self}: Counting types: {type_counts}')
+        devlogger.debug(f'{self}: Counting rb types: {rbtc}')
         
     def _updateParticleOrder(self):
         ## Create ordered list
         self.particles = [p for p in self if not p.rigid]
+        self.rigid_bodies = list(sorted([p for p in self if p.rigid], key=lambda x: x.type_))
         # self.particles = sorted(particles, key=lambda p: (p.type_, p.idx))
         
         ## Update particle indices
-        for i,p in enumerate(self.particles):
-            p.idx = i
+        idx = 0
+        for p in self.particles:
+            p.idx = idx
+            idx = idx+1
 
+        ## Add attached particle indices
+        # attach particles
+        for j,rb in enumerate(self.rigid_bodies):
+            for p in rb.attached_particles:
+                p.idx = idx
+                idx = idx+1
+        
         ## TODO recurse through childrens' group_sites
-        for i,g in enumerate(self.group_sites):
-            g.idx = len(self.particles)+i
+        for g in self.group_sites:
+            g.idx = idx
+            idx = idx + 1
             
         # self.initialCoords = np.array([p.initialPosition for p in self.particles])
 
@@ -1252,6 +1345,7 @@ class ArbdModel(PdbModel):
         ...
     
     def getParticleTypesAndCounts(self):
+        """ Includes rigid body-attached particles """
         ## TODO: remove(?)
         if self.type_counts is None:
             self._countParticleTypes()
@@ -1263,14 +1357,14 @@ class ArbdModel(PdbModel):
         typesAndCounts = self.getParticleTypesAndCounts()
         i_skipped = 0
         for i in range(len(typesAndCounts)):
-            t1,n1 = typesAndCounts[i]
-            if n1 == 0:
+            t1,(n1,rb1) = typesAndCounts[i]
+            if n1+rb1 == 0:
                 i_skipped += 1
                 continue
             j_skipped = 0
             for j in range(i,len(typesAndCounts)):
-                t2,n2 = typesAndCounts[j]
-                if n2 == 0:
+                t2,(n2,rb2) = typesAndCounts[j]
+                if n2+rb2 == 0:
                     j_skipped += 1
                     continue
                 if n2 == 0: continue
@@ -1294,7 +1388,12 @@ class SimConf():
                  integrator=None, timestep=None, thermostat=None, barostat=None,
                  temperature=None, pressure=None,
                  cutoff=None, pairlist_distance=None, decomp_period=None, gpu=None,
-                 seed=None, restart_file=None):
+                 seed=None, restart_file=None,
+                 ## ARBD-specific
+                 rigid_body_integrator=None,
+                 rigid_body_grid_grid_period=None,
+                 ):
+
 
         self.num_steps = num_steps
         self.output_period = output_period
@@ -1313,6 +1412,9 @@ class SimConf():
         self.restart_file = restart_file
 
         self.gpu = gpu
+
+        self.rigid_body_integrator = rigid_body_integrator
+        self.rigid_body_grid_grid_period = rigid_body_grid_grid_period
         
         # num_steps=100000000, timestep=None, output_period=1e4
         ...
@@ -1591,9 +1693,10 @@ class ArbdEngine(SimEngine):
         self._write_bond_angle_file( model, f"{d}/{output_name}.bond-angle.txt" )
         self._write_product_potential_file( model, f"{d}/{output_name}.product_potential.txt" )
         self._write_group_sites_file( model, f"{d}/{output_name}.group_sites.txt" )
-
+        self._write_rb_coordinate_file( model, configuration, f"{d}.rbcoords.txt" )
+        
         self._write_potential_files( model, output_name, directory = d, configuration = configuration )
-        self._write_conf( model, output_name, configuration, directory = d )
+        self._write_conf( model, output_name, configuration )
         ## , numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
 
     def _write_particle_file(self, model, filename, configuration=None, **conf_params):
@@ -1803,15 +1906,38 @@ class ArbdEngine(SimEngine):
                     ids = " ".join([str(int(p.idx)) for p in g.particles])
                     fh.write("GROUP %s\n" % ids)
 
-    def _write_conf(self, model, prefix, configuration=None, **conf_params):
+    def _write_rb_coordinate_file( self, model, configuration, filename ):
+        self._rb_coordinate_filename = filename
+        if len(model.rigid_bodies) > 0:
+            rb_integrator = configuration.rigid_body_integrator
+            if rb_integrator is None: rb_integrator = configuration.integrator
+            with open(self._rb_coordinate_filename,'w') as fh:
+                for rb in model.rigid_bodies:
+                    fh.write(' '.join(map(str,list(rb.get_collapsed_position()) + list(rb.applyOrientation(np.eye(3)).flatten()))))
+                    if rb_integrator in ('MD','Langevin'):
+                        try: fh.write( ' ' + ' '.join([str(x) for x in rb.momentum]) )
+                        except:  fh.write( ' 0'*3 )
+                        try: fh.write( ' ' + ' '.join([str(x) for x in rb.rotational_momentum]) )
+                        except:  fh.write( ' 0'*3 )
+                        fh.write('\n')
+
+
+    def _write_conf(self, model, prefix, configuration):
         # num_steps=100000000, output_period=10000, restart_file=None,
-        ## TODO: raise exception if _writeArbdPotentialFiles has not been called
+        ## TODO: raise exception if _write_potential_files has not yet been called
         filename = f'{prefix}.bd'
 
-        ## Prepare a dictionary to fill in placeholders in the configuration file
-        if configuration is None:
-            configuration = self._get_combined_conf(model, **conf_params)
+        ## Create helper function
+        def _fix_path(filename):
+            abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
+            ret = None
+            try: ret = os.path.relpath(str(abspath))
+            except:
+                devlogger.info(f'Relative path for {filename} not found... using {abspath}')
+                ret = abspath
+            return str(ret)
 
+        ## Build dictionary of parameters
         params = dict()
         for k,v in configuration.items():
             params[k] = v
@@ -1844,28 +1970,19 @@ class ArbdEngine(SimEngine):
         else:
             params['pairlist_distance'] -= params['cutoff'] 
 
-        """ Find rigid groups """
-        rigid_groups = []
-        def get_rigid_groups(parent):
-            ret_list = []
-            for c in parent.children:
-                is_rigid = c.rigid if 'rigid' in c.__dict__ else False
-                if is_rigid:
-                    rigid_groups.append(c)
-                elif isinstance(c,Group):
-                    get_rigid_groups(c)
-        get_rigid_groups(model)
-
-        if len(rigid_groups) > 0:
-            rb_group_filename = "{}.rb-group.txt".format(prefix)
-            params['integrator'] = """FusDynamics
-groupFileName {}
-scaleFactor 0.05""".format(rb_group_filename)
-            self._write_rigid_group_file(rb_group_filename, rigid_groups)
-
         if params['integrator'] == 'MD':
             params['integrator'] = 'Langevin'
 
+        if len(model.rigid_bodies) > 0:
+            rb_integrator = params['rigid_body_integrator'] 
+            if rb_integrator is None: rb_integrator = params["integrator"]
+            params['rigid_body_integrator'] = f'\nRigidBodyDynamicType {rb_integrator}'
+            _rbggp = params["rigid_body_grid_grid_period"]
+            if _rbggp is not None and _rbggp > 1:
+                params['rigid_body_integrator'] += f'\nrigidBodyGridGridPeriod {_rbggp}'
+        else:
+            params['rigid_body_integrator'] = ''
+            
         ## Actually write the file
         with open(filename,'w') as fh:
             fh.write("""{seed}
@@ -1876,7 +1993,7 @@ numberFluct 0                   # deprecated
 interparticleForce 1            # other values deprecated
 fullLongRange 0                 # deprecated
 temperature {temperature}
-ParticleDynamicType {integrator}
+ParticleDynamicType {integrator}{rigid_body_integrator}
 
 outputPeriod {output_period}
 ## Energy doesn't actually get printed!
@@ -1895,8 +2012,8 @@ systemSize {dimX} {dimY} {dimZ}
 \n""".format(extra_bd_file_lines=self.extra_bd_file_lines, **params))
             
             ## Write entries for each type of particle
-            for pt,num in model.getParticleTypesAndCounts():
-                if num == 0: continue
+            for pt,(num,num_rigid) in model.getParticleTypesAndCounts():
+                if num+num_rigid == 0: continue
                 devlogger.debug(f'Writing configuration for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
@@ -1919,51 +2036,30 @@ transDamping {g} {g} {g}
 """.format(mass=pt.mass, g=gamma)
                 else:
                     raise ValueError("Unrecognized particle integrator '{}'".format(configuration.particle_integrator))
-                if pt.rigid_body_potential is not None:
-                    particleParams['rigid_potential'] = "rigidBodyPotential {}".format(pt.rigid_body_potential)
-                else:
-                    particleParams['rigid_potential'] = ''
                 fh.write("""
 particle {name}
 num {num}
 {dynamics}
-{rigid_potential}
 """.format(**particleParams))
                 if 'grid_potentials' in particleParams:
                     grids = []
                     scales = []
                     for g,s in pt.grid_potentials:
-                        tmp_g = str(g) if str(g)[0] == '/' else Path(model._d_orig) / g
-                        try:
-                            grids.append( os.path.relpath(str(tmp_g)) )
-                        except:
-                            devlogger.info(f'Relative path for {pt} grid not found... using {tmp_g}')
-                            grids.append(str(tmp_g))
-                            
+                        grids.append( _fix_path(g) )
                         scales.append(str(s))
 
                     fh.write("gridFile {}\n".format(" ".join(grids)))
                     fh.write("gridFileScale {}\n".format(" ".join(scales)))
                 else:
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
-                if 'rb_grid' in particleParams:
+                if 'rigid_body_potentials' in particleParams:
                     grids = []
                     scales = []
-                    for entry in pt.rb_grid:
-                        try:
-                            g, s = entry
-                        except:
-                            g = entry
-                            s = 1
-                        ## TODO, use Path.relative_to?
-                        try:
-                            grids.append(str( g.relative_to(os.getcwd()) ))
-                        except:
-                            grids.append(str(g))
-                        scales.append(s)
-                    fh.write("rigidBodyPotential {}\n".format(" ".join(grids)))
-                    if any([s!=1 for s in scales]):
-                        raise NotImplementedError
+                    for item in pt.rigid_body_potentials:
+                        try:    keyword,s = item
+                        except: keyword,s = (item,1)
+                        fh.write("rigidBodyPotential {keyword}\n")
+                        if s != 1: raise NotImplementedError('Instead scale rigid body potential')
 
             ## Write coordinates and interactions
             fh.write("""
@@ -2031,10 +2127,67 @@ tabulatedPotential  1
                 fh.write("inputProductPotentials %s\n" % self._product_potential_filename)
             if len(group_sites) > 0:
                 fh.write("inputGroups %s\n" % self._group_sites_filename)
-     
+
+            if len(model.rigid_bodies) > 0:
+                for rbt,num in model.rigid_body_type_counts:
+                    devlogger.debug(f'Writing configuration for rigid body type {rbt}')
+                    ## For now, we always convert rigid body diffusivity into mass+damping
+                    try:
+                        gamma = rbt.damping_coefficient
+                    except:
+                        """ units "k K/(AA**2/ns)" "dalton/ns" """
+                        gamma = 831447.2 * configuration.temperature / (rbt.mass*np.array(rbt.diffusivity))
+                    if len(gamma) == 1:
+                        logger.warn(f'Using single diffusion coefficient for all motions along all rigid body principal axes for {rbt}')
+                        gamma = 3*[gamma]
+
+                    try:
+                        gamma_rot = rbt.rotational_damping_coefficient
+                    except:
+                        """ units "k K/(1/ns)" "AA**2 dalton/ns" """
+                        gamma_rot = 831447.2 * configuration.temperature / (np.array(rbt.moment_of_inertia)*np.array(rbt.diffusivity))
+                    if len(gamma_rot) == 1:
+                        logger.warn(f'Using single rotational diffusion coefficient for all motions along all rigid body principal axes for {pt}')
+                        gamma_rot = 3*[gamma_rot]
+                    if len(gamma_rot) != 3: raise ValueError('Expected a three-element rotational diffusion coefficient for rigid bodies')
+                    fh.write(f"""
+rigidBody {rbt.name}
+num {num}
+mass {rbt.mass}
+inertia {' '.join(map(str,rbt.moment_of_inertia))}
+transDamping {' '.join(map(str,gamma))}
+rotDamping {' '.join(map(str,gamma_rot))}
+""")
+
+                    for item in rbt.potential_grids:
+                        try:    keyword,g,s = item
+                        except: (keyword,g),s = (item,1)
+                        g = _fix_path(g)
+                        fh.write(f"potentialGrid {keyword} {g}\n")
+                        if s != 1: fh.write(f"potentialGridScale {keyword} {s}\n")
+                    for item in rbt.charge_grids:
+                        try:    keyword,g,s = item
+                        except: (keyword,g),s = (item,1)
+                        g = _fix_path(g)
+                        fh.write(f"densityGrid {keyword} {g}\n")
+                        if s != 1: fh.write(f"densityGridScale {keyword} {s}\n")
+                    for item in rbt.pmf_grids:
+                        try:    keyword,g,s = item
+                        except: (keyword,g),s = (item,1)
+                        g = _fix_path(g)
+                        fh.write(f"gridFile {keyword} {g}\n")
+                        if s != 1: fh.write(f"pmfScale {keyword} {s}\n")
+
+                    ## AttachedParticles
+                    if len(rbt.attached_particles) > 0:
+                        fh.write(f'attachedParticles {rbt._attached_particles_filename}\n')
+
+                fh.write(f'\ninputRBCoordinates {self._rb_coordinate_filename}\n')
+                ...
+                
         write_null_dx = False
-        for pt,num in model.getParticleTypesAndCounts():
-            if num == 0: continue
+        for pt,(num,num_rb) in model.getParticleTypesAndCounts():
+            if num+num_rb == 0: continue
             if "grid_potentials" not in pt.__dict__:
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:
@@ -2096,18 +2249,18 @@ class NamdEngine(SimEngine):
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
 
-            model.write_psf( output_name+'.psf' )
-            model.write_pdb( output_name+'.pdb' )
-            model.write_pdb( output_name + ".fixed.pdb", beta_from_fixed=True )
-            if write_pqr: model.write_pqr( output_name + ".pqr" )        
+        model.write_psf( output_name+'.psf' )
+        model.write_pdb( output_name+'.pdb' )
+        model.write_pdb( output_name + ".fixed.pdb", beta_from_fixed=True )
+        if write_pqr: model.write_pqr( output_name + ".pqr" )        
 
-            if copy_ff_from is not None and copy_ff_from != '':
-                try:
-                    shutil.copytree( copy_ff_from, Path(copy_ff_from).stem )
-                except FileExistsError:
-                    pass
+        if copy_ff_from is not None and copy_ff_from != '':
+            try:
+                shutil.copytree( copy_ff_from, Path(copy_ff_from).stem )
+            except FileExistsError:
+                pass
 
-            self._write_conf( model, output_name, configuration )
+        self._write_conf( model, output_name, configuration )
 
     def write_conf( self, output_name, minimization_steps=4800, num_steps = 1e6,
                     output_directory = 'output',
