@@ -453,7 +453,7 @@ class ParticleType():
 
     def __init__(self, name, charge=0, mass=None, diffusivity=None,
                  damping_coefficient=None, parent=None,
-                 rigid_body_potentials=None, **kwargs):
+                 rigid_body_potentials=tuple(), **kwargs):
 
         """ Parent type is used to fall back on for nonbonded
         interactions if this type is not specifically referenced """
@@ -2028,6 +2028,7 @@ systemSize {dimX} {dimY} {dimZ}
                 elif configuration.integrator in ('MD','Langevin','FusDynamic'):
                     try:
                         gamma = pt.damping_coefficient
+                        if gamma is None: raise
                     except:
                         """ units "k K/(AA**2/ns)" "amu/ns" """
                         gamma = 831447.2 * configuration.temperature / (pt.mass*pt.diffusivity)
