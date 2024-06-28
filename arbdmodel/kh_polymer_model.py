@@ -286,7 +286,7 @@ Please cite all appropriate articles!""")
             t = self.types[j]
             self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
-    def _generate_polymer_beads(self, polymer, sequence, polymer_index = None)
+    def _generate_polymer_beads(self, polymer, sequence, polymer_index = None):
         return KhBeads(polymer, sequence,
                        rest_length = self.rest_length,
                        spring_constant = self.spring_constant,
