@@ -464,15 +464,15 @@ class ParticleType():
                     self.__dict__[k] = v
             assert( type(parent) == type(self) )
 
-        if diffusivity is None:
-            assert( (damping_coefficient is not None) and (mass is not None) )
+        # if diffusivity is None:
+        #     assert( (damping_coefficient is not None) and (mass is not None) )
 
         ## TODO: make most attributes @property
         self.name   = name
         self.charge = charge
-        self.mass = mass
-        self.damping_coefficient = damping_coefficient
-        self.diffusivity = diffusivity
+        if mass is not None: self.mass = mass
+        if damping_coefficient is not None: self.damping_coefficient = damping_coefficient
+        if diffusivity is not None: self.diffusivity = diffusivity
         self.parent = parent
         self.rigid_body_potentials = rigid_body_potentials
         devlogger.info(f'Created {type(self)} {name} @ {hex(id(self))}')
@@ -685,6 +685,7 @@ class PointParticle(Transformable, Child):
             resid = p.idx+1
         try:
             mass = p.mass
+            if mass is None: raise
         except:
             mass = 1
 
@@ -738,7 +739,7 @@ class RigidBody(PointParticle):
         self.rigid = True
 
         ## TODO: it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
-        self.attached_particles = [p.copy() for p in type_.attached_particles]
+        self.attached_particles = [copy(p) for p in type_.attached_particles]
         
         for key,val in kwargs.items():
             self.__dict__[key] = val
@@ -826,7 +827,8 @@ class PdbModel(Transformable, Parent):
         Transformable.__init__(self,(0,0,0))
         Parent.__init__(self, children, remove_duplicate_bonded_terms)
         self.dimensions = dimensions
-        self.particles = [p for p in self]
+        self.particles = [p for p in self if not p.rigid]
+        self.rigid_bodies = [p for p in self if p.rigid]
         self.cacheInvalid = True
 
     def _updateParticleOrder(self):
