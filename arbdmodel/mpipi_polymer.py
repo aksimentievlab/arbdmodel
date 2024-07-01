@@ -157,8 +157,20 @@ class MpipiNonbonded(AbstractPotential):
         ## units "e**2 / (4 * pi * epsilon0 AA)" kcal_mol
         A =  332.06371
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
-        
+
+        """Mpipi Wang-Frenkel Potential"""
+        vij=1
+        sigma_ij=
+        muij=
+
+        Rij=3*sigma_ij
+
+        alpha=2*(3**(2*muij))*((2*vij+1/(2*vij*(3**(2*muij)-1))))**(2*vij+1)
+
+        u_wang=eps_ij*alpha*((sigma_ij/r)**(2muij)-1)*((Rij/r)**2muij-1)**(2vij)
+
         """ Mpipi scale model """
+        """
         A_is_idp = B_is_idp = False
         try:
             A_is_idp = typeA.is_idp
@@ -188,6 +200,8 @@ class MpipiNonbonded(AbstractPotential):
         u_hps[s] = u_lj[s] + (1-lambda_) * epsilon
 
         u = u_elec + u_hps
+        """
+
         return u
 
 class MpipiBeads(PolymerBeads):
@@ -252,7 +266,7 @@ class MpipiModel(PolymerModel):
                  sequences = None,
                  rest_length = 3.8,
                  spring_constant = 2.3900574,
-                 debye_length = 10,
+                 debye_length = 7.95,
                  damping_coefficient = 10,
                  idp_array = None,
                  DEBUG=False,
