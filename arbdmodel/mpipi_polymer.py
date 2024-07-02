@@ -138,7 +138,6 @@ for k,t in list(_types.items()):
     t.is_idp = False
     
     ## Add types for IDPs
-    _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
 
     
 class MpipiNonbonded(AbstractPotential):
@@ -151,8 +150,8 @@ class MpipiNonbonded(AbstractPotential):
         """ Electrostatics """
         typeA, typeB = types
         ld = self.debye_length 
-        q1 = typeA.charge
-        q2 = typeB.charge
+        q1 = typeA.charge*0.75
+        q2 = typeB.charge*0.75
         D = 80                  # dielectric of water
         ## units "e**2 / (4 * pi * epsilon0 AA)" kcal_mol
         A =  332.06371
@@ -162,11 +161,11 @@ class MpipiNonbonded(AbstractPotential):
         WF=pd.read_csv("mpipi_protein_resname.csv",index_col=0)
         indices=list(df.columns)
         if indices.index(typeA.resname)<indices.index(typeB.resname):
-            sigma_ij=WF[typeB.resname][typeA.resname+"_sigma"]
-            eps_ij=WF[typeB.resname][typeA.resname+"_eps"]
+            sigma_ij=WF[typeB.resname][typeA.resname+"_sigma"]*10
+            eps_ij=WF[typeB.resname][typeA.resname+"_eps"]*0.23900574
         else:
-            sigma_ij=WF[typeA.resname][typeB.resname+"_sigma"]
-            eps_ij=WF[typeA.resname][typeB.resname+"_eps"]
+            sigma_ij=WF[typeA.resname][typeB.resname+"_sigma"]*10
+            eps_ij=WF[typeA.resname][typeB.resname+"_eps"]*0.23900574
         
         vij=1
         muij=2
