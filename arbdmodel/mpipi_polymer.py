@@ -221,7 +221,7 @@ class MpipiNonbonded(AbstractPotential):
 class MpipiBeads(PolymerBeads):
 
     def __init__(self, polymer, sequence=None,
-                 spring_constant = 2.3900574,
+                 spring_constant = 19.19,
                  rest_length = 3.8, **kwargs):
 
         if sequence is None:
@@ -266,7 +266,7 @@ class MpipiModel(PolymerModel):
     def __init__(self, polymers,
                  sequences = None,
                  rest_length = 3.8,
-                 spring_constant = 2.3900574,
+                 spring_constant = 19.19,
                  debye_length = 7.95,
                  damping_coefficient = 10,
                  DEBUG=False,
