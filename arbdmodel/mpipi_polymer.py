@@ -269,7 +269,6 @@ class MpipiModel(PolymerModel):
                  spring_constant = 2.3900574,
                  debye_length = 7.95,
                  damping_coefficient = 10,
-                 idp_array = None,
                  DEBUG=False,
                  **kwargs):
 
