@@ -3,7 +3,7 @@
 
 import numpy as np
 import sys
-
+import pandas as pd
 ## Local imports
 from . import logger, ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
@@ -159,10 +159,25 @@ class MpipiNonbonded(AbstractPotential):
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
 
         """Mpipi Wang-Frenkel Potential"""
+        WF=pd.read_csv("mpipi_protein_resname.csv",index_col=0)
+        indices=list(df.columns)
+        if indices.index(typeA.resname)<indices.index(typeB.resname):
+            sigma_ij=WF[typeB.resname][typeA.resname+"_sigma"]
+            eps_ij=WF[typeB.resname][typeA.resname+"_eps"]
+        else:
+            sigma_ij=WF[typeA.resname][typeB.resname+"_sigma"]
+            eps_ij=WF[typeA.resname][typeB.resname+"_eps"]
+        
         vij=1
-        sigma_ij=
-        muij=
+        muij=2
 
+        if typeA.resname=="ILE":
+            if typeB.resname=="ILE":
+                muij=11
+            elif typeB.resname=="VAL"
+                muij=4
+        if typeB.resname=="ILE" and typeA.resname=="VAL": muij=4
+            
         Rij=3*sigma_ij
 
         alpha=2*(3**(2*muij))*((2*vij+1/(2*vij*(3**(2*muij)-1))))**(2*vij+1)
@@ -201,7 +216,7 @@ class MpipiNonbonded(AbstractPotential):
 
         u = u_elec + u_hps
         """
-
+        u = u_elec + u_wang
         return u
 
 class MpipiBeads(PolymerBeads):
@@ -220,24 +235,11 @@ class MpipiBeads(PolymerBeads):
         assert(self.monomers_per_bead_group == 1)
         
         if len(sequence) != polymer.num_monomers:
-            raise ValueError("Length of sequence does not match length of polymer")                
-
-        try:
-            polymer.idp_array
-            self.idp_array = polymer.idp_array
-        except:
-            logger.warning("MpipiBeads processing a polymer without 'idp_array' attribute set (boolean numpy array with one True/False value per amino acid with True corresponding to IDP... Assuming all amino acids are IDP.")
-            self.idp_array = np.ones(polymer.num_monomers, dtype=bool)
-
-        if len(self.idp_array) != polymer.num_monomers:
-            raise ValueError(f'polymer {polymer} idp_array has incorrect size != {polymer.num_monomers}')
-
+            raise ValueError("Length of sequence does not match length of polymer")               
        
 
     def _generate_ith_bead_group(self, i, r, o):
         s = self.sequence[i]
-        if self.idp_array[i]:
-            s = s + 'IDP'
         return PointParticle(_types[s], r,
                              name = s,
                              resid = i+1)
@@ -277,13 +279,9 @@ class MpipiModel(PolymerModel):
         [damping_coefficient]: ns
         """
 
-        logger.info("""You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:
-
-Dignon GL, Zheng W, Kim YC, Best RB, Mittal J (2018) Sequence determinants of protein phase behavior from a coarse-grained model. PLOS Computational Biology 14(1) e1005941. https://doi.org/10.1371/journal.pcbi.1005941
-
-based upon:
-
-Young C. Kim, Gerhard Hummer (2008) Coarse-grained Models for Simulations of Multiprotein Complexes: Application to Ubiquitin Binding. Journal of Molecular Biology 375(5) 1416-1433. https://doi.org/10.1016/j.jmb.2007.11.063.
+        logger.info("""You are using an implementation of the Mpipi Polymer model as described for proteins and RNA based on:
+        Physics-driven coarse-grained model for biomolecular phase separation with near-quantitative accuracy. Published in final edited form as:
+Nat Comput Sci. 2021 Nov; 1(11): 732–743. Published online 2021 Nov 22. doi: 10.1038/s43588-021-00155-3
 
 Please cite all appropriate articles!""")
 
@@ -333,7 +331,8 @@ Please cite all appropriate articles!""")
             # t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)
 
 if __name__ == "__main__":
-
+    pass
+"""
     from matplotlib import pyplot as plt
     nt = len(_types)
     # print("TYPES")
@@ -351,3 +350,4 @@ if __name__ == "__main__":
 
     plt.imshow(d.T)
     plt.show()
+"""
