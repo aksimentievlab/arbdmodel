@@ -149,6 +149,38 @@ def quaternion_from_matrix( R ):
                           d * (R[1,2]+R[2,1]),
                           1.0/(4*d) ))
 
+def quaternion_product(a, b):
+    assert(len(a) == 4)
+    assert(len(b) == 4)
+    ab = np.empty(4)
+    ab[0] = a[0]*b[0]-a[1:].dot(b[1:])
+    ab[1:] = a[0]*b[1:] + b[0]*a[1:] + np.cross(a[1:],b[1:])
+    return ab
+
+def quaternion_inverse(q):
+    assert(len(q) == 4)
+    qinv = np.array(q)
+    qinv[1:] = -qinv[1:]
+    qinv = qinv / (q[0]**2 + q[1:].dot(q[1:]))
+    return qinv
+
+def quaternion_exp(q,t):
+    assert(len(q) == 4)
+    omega = np.arccos(q[0])
+    v = q[1:]
+    v = v/np.linalg.norm(v)
+    qexp = np.empty(4)
+    qexp[0] = np.cos(omega*t)
+    qexp[1:] = np.sin(omega*t)*v
+    return qexp
+
+def quaternion_slerp(q1,q2,t):
+    assert(len(q1) == 4)
+    assert(len(q2) == 4)
+    assert(t >= 0 and t <= 1)
+    q1_inv = quaternion_inverse(q1)
+    return quaternion_product( q1, quaternion_exp( quaternion_product( q1_inv, q2 ), t ) )
+
 def rotationAboutAxis(axis,angle, normalizeAxis=True):
     if normalizeAxis: axis = axis / np.linalg.norm(axis)
     angle = angle * 0.5 * np.pi/180
