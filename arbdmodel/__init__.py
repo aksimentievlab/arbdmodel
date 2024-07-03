@@ -31,6 +31,8 @@ from abc import abstractmethod, ABCMeta
 from .version import get_version
 __version__ = get_version() 
 
+from .interactions import NullPotential
+
 import numpy as np
 from copy import copy, deepcopy
 from inspect import ismethod
@@ -1255,6 +1257,7 @@ class ArbdModel(PdbModel):
                     return s
             elif typeA.is_same_type(A) and typeB.is_same_type(B):
                 return s
+        
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
         # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
 
@@ -1787,7 +1790,7 @@ class ArbdEngine(SimEngine):
         x = np.arange(0, configuration.cutoff)
         for i,j,t1,t2 in model._particleTypePairIter():
             interaction = model._get_nonbonded_interaction(t1,t2)
-            if interaction is None: continue # skip null interaction
+            if interaction is None: interaction = NullPotential()
             try:
                 f = interaction.filename(types=(t1,t2))
             except:
@@ -1795,12 +1798,9 @@ class ArbdEngine(SimEngine):
                 logger.warn(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
 
             devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
-            if interaction is None:
-                model._nonbonded_interaction_files.append(None)
-                continue
             old_range = interaction.range_
-
-            interaction.range_ = [0, configuration.cutoff]
+            if not isinstance(interaction,NullPotential):
+                interaction.range_ = [0, configuration.cutoff]
             interaction.write_file(f, (t1, t2))
             interaction.range_ = old_range 
 

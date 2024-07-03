@@ -303,3 +303,14 @@ class WLCSKAngle(WLCSKPotential):
         C = (1 + p1*(2*nk) + p2*(2*nk)**2) / (2*nk+p3*(2*nk)**2+p4*(2*nk)**3)
         u = self.kT * C * (1-np.cos(dr * np.pi / 180))
         return u
+
+class NullPotential(AbstractPotential):
+    def __init__(self, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
+
+    def potential(self, r, types):
+        return np.zeros(r.shape)
+
+    def filename(self, types=None):
+        return f"{self.filename_prefix}nullpot.dat"
