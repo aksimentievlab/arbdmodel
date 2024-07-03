@@ -712,9 +712,6 @@ class PointParticle(Transformable, Child):
                 )
         return data
 
-    def __copy__(self):
-        Object.__copy__(self)
-
     def __repr__(self):
         return f'<{__name__}.{self.__class__.__name__} "{self.name}" of {self.type_}>'
 
@@ -1264,10 +1261,14 @@ class ArbdModel(PdbModel):
     def _countParticleTypes(self):
         ## TODO: check for modifications to particle that require
         ## automatic generation of new particle type
-
         type_counts = dict()    # type is key, value is 2-element list of regular particle counts and attached particles
-        
-        parts = [p for p in self if not p.rigid]
+
+        parts, self.rigid_bodies = [],[]
+        for p in self:
+            if p.rigid:
+                self.rigid_bodies.append(p)
+            else:
+                parts.append(p)
 
         for p in parts:
             t = p.type_
@@ -1298,6 +1299,7 @@ class ArbdModel(PdbModel):
 
 
         self.type_counts = type_counts
+
         rbtc = dict()
         for rb in self.rigid_bodies:
             t = rb.type_
@@ -1673,7 +1675,6 @@ class ArbdEngine(SimEngine):
     # -------------------------- #
 
     def write_simulation_files(self, model, output_name, configuration=None, **conf_params):
-        
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
         
@@ -1698,6 +1699,9 @@ class ArbdEngine(SimEngine):
         self._write_rb_coordinate_file( model, configuration, f'{output_name}.rbcoords.txt' )
         
         self._write_potential_files( model, output_name, directory = d, configuration = configuration )
+
+        self._write_rb_attached_particles_files( model, f'{d}/{output_name}', configuration )
+
         self._write_conf( model, output_name, configuration )
         ## , numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
 
@@ -1721,8 +1725,22 @@ class ArbdEngine(SimEngine):
                         except:
                             data = data + [0,0,0]
                     fh.write("ATOM %d %s %f %f %f %f %f %f\n" % tuple(data))
-                
+
+    def _write_rb_attached_particles_files(self, model, output_name, configuration=None, **conf_params):
+        if configuration is None:
+            configuration = self._get_combined_conf(model, **conf_params)
+        if len(model.rigid_bodies) > 0:
+            for rbt,num in model.rigid_body_type_counts:
+                devlogger.debug(f'Writing attached particles file for rigid body type {rbt}')
+                if num > 0 and len(rbt.attached_particles) > 0:
+                    f = rbt._attached_particles_filename = f'{output_name}.attached_particles.{rbt.name}.txt'
+                    with open(f,'w') as fh:
+                        for p in rbt.attached_particles:
+                            x,y,z = p.position
+                            fh.write(f'{p.type_.name} {x} {y} {z}\n')
+
     def _write_rigid_group_file(self, model, filename, groups):
+        raise Exception('Deprecated')
         with open(filename,'w') as fh:
             for g in groups:
                 fh.write("#Group\n")
@@ -1769,6 +1787,7 @@ class ArbdEngine(SimEngine):
         x = np.arange(0, configuration.cutoff)
         for i,j,t1,t2 in model._particleTypePairIter():
             interaction = model._get_nonbonded_interaction(t1,t2)
+            if interaction is None: continue # skip null interaction
             try:
                 f = interaction.filename(types=(t1,t2))
             except:
@@ -2035,8 +2054,7 @@ systemSize {dimX} {dimY} {dimZ}
                         """ units "k K/(AA**2/ns)" "amu/ns" """
                         gamma = 831447.2 * configuration.temperature / (pt.mass*pt.diffusivity)
                     particleParams['dynamics'] = """mass {mass}
-transDamping {g} {g} {g}
-""".format(mass=pt.mass, g=gamma)
+transDamping {g} {g} {g}""".format(mass=pt.mass, g=gamma)
                 else:
                     raise ValueError("Unrecognized particle integrator '{}'".format(configuration.particle_integrator))
                 fh.write("""
@@ -2133,6 +2151,7 @@ tabulatedPotential  1
 
             if len(model.rigid_bodies) > 0:
                 for rbt,num in model.rigid_body_type_counts:
+                    if num == 0: continue
                     devlogger.debug(f'Writing configuration for rigid body type {rbt}')
                     ## For now, we always convert rigid body diffusivity into mass+damping
                     try:
