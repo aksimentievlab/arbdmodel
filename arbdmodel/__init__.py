@@ -1934,7 +1934,9 @@ class ArbdEngine(SimEngine):
             if rb_integrator is None: rb_integrator = configuration.integrator
             with open(self._rb_coordinate_filename,'w') as fh:
                 for rb in model.rigid_bodies:
-                    fh.write(' '.join(map(str,list(rb.get_collapsed_position()) + list(rb.applyOrientation(rb.orientation).flatten()))))
+                    o = list(rb.applyOrientation(rb.orientation).flatten())
+                    if len(o) != 9: raise ValueError('Rigid body orientation should be a 3x3 matrix')
+                    fh.write(' '.join(map(str,list(rb.get_collapsed_position()) + o)))
                     if rb_integrator in ('MD','Langevin'):
                         try: fh.write( ' ' + ' '.join([str(x) for x in rb.momentum]) )
                         except:  fh.write( ' 0'*3 )
