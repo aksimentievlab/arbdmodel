@@ -111,6 +111,52 @@ def quaternion_to_matrix(q):
     return np.array(R)
 
 def quaternion_from_matrix( R ):
+    q = np.empty(4)
+    if R[2,2] < 0:
+        if R[0,0] > R[1,1]:
+            trace = 1.0 + R[0,0] - R[1,1] - R[2,2]
+            s = 2.0 * np.sqrt(trace)
+            if R[1,2] < R[2,1]: s = -s
+            q[0] = (R[1,2] - R[2,1]) / s
+            q[1] = 0.25 * s
+            q[2] = (R[0,1] + R[1,0]) / s
+            q[3] = (R[2,0] + R[0,2]) / s
+            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 1],0)):
+                q[1] = 1
+        else:
+            trace = 1.0 - R[0,0] + R[1,1] - R[2,2]
+            s = 2.0 * np.sqrt(trace)
+            if R[2,0] < R[0,2]: s = -s
+            q[0] = (R[2,0] - R[0,2]) / s
+            q[1] = (R[0,1] + R[1,0]) / s
+            q[2] = 0.25 * s
+            q[3] = (R[1,2] + R[2,1]) / s
+            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 2],0)):
+                q[2] = 1
+    else:
+        if R[0,0] < -R[1,1]:
+            trace = 1.0 - R[0,0] - R[1,1] + R[2,2]
+            s = 2.0 * np.sqrt(trace)
+            if R[0,1] < R[1,0]: s = -s
+            q[0] = (R[0,1] - R[1,0]) / s
+            q[1] = (R[2,0] + R[0,2]) / s
+            q[2] = (R[1,2] + R[2,1]) / s
+            q[3] = 0.25 * s
+            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 3],0)):
+                q[3] = 1
+        else:
+            trace = 1.0 + R[0,0] + R[1,1] + R[2,2]
+            s = 2.0 * np.sqrt(trace)
+            q[0] = 0.25 * s
+            q[1] = (R[1,2] - R[2,1]) / s
+            q[2] = (R[2,0] - R[0,2]) / s
+            q[3] = (R[0,1] - R[1,0]) / s
+            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 0],0)):
+                q[0] = 1
+    assert( q[0] >= 0 )
+    return q
+
+def __quaternion_from_matrix__deprecated( R ):
     e1 = R[0]
     e2 = R[1]
     e3 = R[2]
