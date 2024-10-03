@@ -280,7 +280,7 @@ class WLCSKBond(WLCSKPotential):
         return "wlcbond"
 
     def potential(self, r, types=None):
-        dr = r - self.d
+        dr = r
         nk = self.d / (2*self.lp)
         q2 = (dr / self.d)**2
         a1,a2 = 1, -7.0/(2*nk)
@@ -303,7 +303,7 @@ class WLCSKAngle(WLCSKPotential):
         return "wlcangle"
 
     def potential(self, r, types=None):
-        dr = r - self.d
+        dr = r - 180
         nk = self.d / (2*self.lp)
         p1,p2,p3,p4 = -1.237, 0.8105, -1.0243, 0.4595
         C = (1 + p1*(2*nk) + p2*(2*nk)**2) / (2*nk+p3*(2*nk)**2+p4*(2*nk)**3)
