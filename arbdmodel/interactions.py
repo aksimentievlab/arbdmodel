@@ -33,8 +33,10 @@ class AbstractPotential(metaclass=ABCMeta):
     @abstractmethod
     def potential(self, r, types=None):
         raise NotImplementedError
-    
     def __remove_nans(self, u):
+        u=u[np.isnan(u)==False]
+
+    def __remove_nans_bak(self, u):
         left = np.isnan(u[:-1])
         right = np.where(left)[0]+1
         while np.any(np.isnan(u[right])):
@@ -148,7 +150,6 @@ class HarmonicBondedPotential(AbstractPotential):
     def __init__(self, k, r0, filename_prefix='./potentials/', *args, **kwargs):
         self.k = k
         self.r0 = r0
-        self.kscale_ = None
         self.filename_prefix = filename_prefix
         if 'zero' not in kwargs: kwargs['zero'] = 'min'
         AbstractPotential.__init__(self, *args, **kwargs)
@@ -214,7 +215,7 @@ class HarmonicAngle(HarmonicBondedPotential):
         HarmonicBondedPotential.__init__(self, *args, **kwargs)
 
     @property
-    def kscale_(self):
+    def kscale(self):
         return (180.0/np.pi)**2
 
     @property
@@ -227,7 +228,7 @@ class HarmonicDihedral(HarmonicBondedPotential):
         HarmonicBondedPotential.__init__(self, *args, **kwargs)
 
     @property
-    def kscale_(self):
+    def kscale(self):
         return (180.0/np.pi)**2
 
     @property
