@@ -107,6 +107,12 @@ class AbstractPotential(metaclass=ABCMeta):
             if getattr(self,a) != getattr(other,a):
                 return False
         return type(self).__name__ == type(other).__name__
+
+    ## Want the same objects after copy operations
+    def __copy__(self):
+        return self
+    def __deepcopy__(self, memo):
+        return self
     
 ## Concrete nonbonded pontentials
 class LennardJones(AbstractPotential):
