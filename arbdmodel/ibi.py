@@ -5,8 +5,13 @@ from pathlib import Path
 from . import ArbdModel, logger
 from .interactions import AbstractPotential
 
+from tqdm import tqdm,trange
+from tqdm.contrib.logging import logging_redirect_tqdm
+
+
 """ This file includes various routines to simplify running
 simulations with Iterative Boltmann Inversion. """
+
 
 class DegreeOfFreedom():
     """ Base class for representing a degree of freedom in the system.
@@ -36,18 +41,16 @@ class DegreeOfFreedom():
         else:
             return universe.select_atoms( "index {}".format(particle.idx) )
 
-    def _sel_list_to_positions(sel_list, average=False):
+    def _sel_list_to_positions(sel_list):
 
         """ Recursive function to convert list of selctions into positions """
 
         positions = []
         for sel in sel_list:
             if isinstance(sel, list):
-                positions.append( DegreeOfFreedom._sel_list_to_positions(sel, average=True) )
+                positions.append( DegreeOfFreedom._sel_list_to_positions(sel).mean(axis=0) )
             else:
-                positions.append( np.mean(sel.positions, axis=0) )
-        if average:
-            positions = np.mean(positions,axis=0)
+                positions.append( sel.positions.mean(axis=0) )
         return positions
 
     def wrap_vector(self, v):
@@ -237,7 +240,7 @@ class PairDistributionDof():
         return (4.0/3)*np.pi*(bins[1:]**3-bins[:-1]**3)
 
 class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
-    def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
+    def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
         self.name = name
         self.degrees_of_freedom = degrees_of_freedom
         self.smooth = smooth
@@ -247,8 +250,9 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         self.filename_prefix = filename_prefix + self.name
         self.max_potential = max_potential
+        self.out_of_bounds_force = out_of_bounds_force
         self.iteration = iteration
-        self.smooth = 15 if smooth is None else smooth
+        # self.smooth = 15 if smooth is None else smooth
         self.learning_rate = learning_rate
 
         self.__target = None
@@ -276,7 +280,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
     def __hash__(self):
         assert(self.type_ != "None")
-        return hash((self.name, self.range_, self.resolution, self.max_force, self.max_potential, self.filename_prefix, self.periodic))
+        return hash((self.name, self.range_, self.resolution, self.max_force, self.max_potential, self.out_of_bounds_force, self.filename_prefix, self.periodic))
 
     def __eq__(self, other):
         # def _get_attr_mangle(obj,a):
@@ -297,21 +301,22 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         if key in self.__dists:
             logger.info(f"{self}._extract_distribution( u.{key} ): using cache")
             return self.__dists[key]
-        logger.info(f"{self}._extract_distribution( u.{key} ): calculating")
+        # devlogger.info(f"{self}._extract_distribution( u.{key} ): calculating")
         bins = self.bins
         counts = np.zeros( [len(bins)-1] )
         nframes = 0
-        for t in universe.trajectory:
-            if (t.frame % 100) == 0: logger.info(f'Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}')
-            if box is not None:
-                universe.dimensions = box
-            vals = np.stack([dof.get_values(universe) for dof in self.degrees_of_freedom])
-            inds = np.digitize(vals, bins) - 1
-            # if (inds < 0).sum() > 0: (inds >= len(counts)).sum() > 0:
-            #     logger.warn(f'inds contains {(inds < 0).sum()} elements < 0 and {(inds >= len(counts)).sum()} elements >= len(counts) ({len(counts)}) of {inds.size} total elements')
-            inds = inds[(inds<len(counts)) & (inds>=0)]
-            counts = counts + np.bincount(inds, minlength=len(counts))
-            nframes += 1
+        with logging_redirect_tqdm(loggers=[logger]):
+            for t in tqdm(universe.trajectory, desc=f"Extracting distribution {self}"):
+                # if (t.frame % 100) == 0: logger.info(f'Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}')
+                if box is not None:
+                    universe.dimensions = box
+                vals = np.stack([dof.get_values(universe) for dof in self.degrees_of_freedom])
+                inds = np.digitize(vals, bins) - 1
+                # if (inds < 0).sum() > 0: (inds >= len(counts)).sum() > 0:
+                #     logger.warn(f'inds contains {(inds < 0).sum()} elements < 0 and {(inds >= len(counts)).sum()} elements >= len(counts) ({len(counts)}) of {inds.size} total elements')
+                inds = inds[(inds<len(counts)) & (inds>=0)]
+                counts = counts + np.bincount(inds, minlength=len(counts))
+                nframes += 1
         vol = self.degrees_of_freedom[0].compute_volume(bins)
         likelihood = counts / (nframes*vol)
         ## don't normalize over num values in dofs just yet
@@ -329,19 +334,31 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 np.savetxt(f,np.array((bins[:-1],vals/np.sum(vals),vals)).T)
             bins, vals, counts = np.loadtxt(f).T
             self.__target = (bins,vals)
+        if self.smooth is None:
+            ## Set smooth to ~1/2 stddev
+            _mean = np.average( bins, weights=vals )
+            _var = np.average( (bins-_mean)**2 , weights=vals )
+            _dr = (bins[1]-bins[0])
+            self.smooth = (int(np.round(np.sqrt(_var)/(2*_dr))+1)//2)*2+1
+            if self.smooth < 5:
+                logger.warning(f'{f}: Smoothing ({self.smooth} points) suggested by 1/2 of stddev ({np.sqrt(_var):02f}) is too low: setting smooth to 5')
+                self.smooth = 5
+            else:
+                logger.info(f'{f}: Smoothing {self.smooth} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
+
         return self.__target
 
     def get_cg_distribution(self, universe, box=None, recalculate=False):
         f = self.filename(smoothed=False).replace('.dat','.cg.dat')
 
         if (not Path(f).exists()) or recalculate:
-            logger.info(f"{self}.get_cg_distribution(): writing to '{f}'")
+            logger.info(f"get_cg_distribution(): writing to '{f}'")
             bins, vals = self._extract_distribution( universe, box=box )
             bins = bins[:len(vals)]
             Path(f).parent.mkdir(parents=True, exist_ok=True)
             np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
         else:
-            logger.info(f"{self}.get_cg_distribution(): reading from '{f}'")
+            logger.info(f"get_cg_distribution(): reading from '{f}'")
             bins, vals, counts = np.loadtxt(f).T
             key = universe.__hash__()
             if key not in self.__dists:
@@ -363,7 +380,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         return bins,pot
 
 
-    def _apply_max_force(self, bins, u, rho, tol):
+    def _apply_max_force(self, bins, u, rho, tol, savgol_opts):
         if self.max_force is not None:
             valid = np.where(rho > tol)[0]
             first = valid[0]
@@ -394,7 +411,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         rho[:first_i] = 0
         rho[last_i:] = 0
 
-    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = 1e-5, clean_edges=True):
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None):
         if scaling_factor is None:
             try:    scaling_factor = self.learning_rate(self.iteration)
             except: scaling_factor = self.learning_rate
@@ -404,9 +421,14 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             mode = 'wrap' if self.periodic else 'nearest'
         )
 
+        bins_aa, rho_aa = self.get_target_distribution()
+        rho_aa = rho_aa / np.sum(rho_aa)
+
+        if tol is None:
+            tol = max(1e-5, 1e-3 * np.max(rho_aa)) # likely there is room for improvement here
+
         if universe is None:
             bins = self.bins[:-1]
-            bins_aa, rho_aa = self.get_target_distribution()
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
 
             if clean_edges:
@@ -419,16 +441,15 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             u = - scaling_factor * 0.58622592 * (temperature/295) * np.log(rho_aa)
             rho_cg = rho_aa     # allows a common smoothing command below
         else:
-            bins, rho_cg = self._extract_distribution( universe )
+            bins, rho_cg = self._extract_distribution( universe, box=box )
             assert( np.abs(len(rho_cg) - len(bins)) < 2 )
             bins = bins[:len(rho_cg)]
-            bins_aa, rho_aa = self.get_target_distribution()
-            rho_cg,rho_aa = [rho/np.sum(rho) for rho in [rho_cg,rho_aa]]
+            rho_cg = rho_cg/np.sum(rho_cg)
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
 
             if clean_edges:
                 self._clean_edges(bins_aa, rho_aa, tol)
-                self._clean_edges(bins_aa, rho_cg, tol)
+                # self._clean_edges(bins_aa, rho_cg, tol)
 
 
             r0,u0 = self.read_cg_potential() # iteration-2?
@@ -438,8 +459,9 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
             ratio = rho_cg/rho_aa
             ## units "295 k K" "kcal_mol"
-            du = 0.58622592 * (temperature/295) * np.log( ratio )
-            # sl = rho_aa >= 1e-5
+            du = np.log( ratio )
+            du = du * 0.58622592 * (temperature/295)
+            du = du * (rho_aa/rho_aa.max())**0.25 # penalize learning for values where target density is very low
 
             try:    alpha = self.learning_rate(self.iteration)
             except: alpha = self.learning_rate
@@ -450,29 +472,41 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         np.savetxt(f,np.array((bins,u)).T)
 
         f = self.filename(smoothed=True)
-        u = savgol( u, **savgol_opts )
-        u = self._apply_max_force(bins, u, np.minimum(rho_aa,rho_cg), tol)
+
+        ## Only apply savgol filter in region where target density is well-defined
+        valid = np.where(rho_aa > tol)[0]
+        first = valid[0]
+        last = valid[-1]
+        u[first:last+1] = savgol( u[first:last+1], **savgol_opts )
+
+        ## Apply boundary force outside where target density is well-defined
+        oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
+        if first > 0:
+            u[:first] = u[first] + np.abs(bins[:first]-bins[first])*oobf
+        if last < len(u)-2:
+            u[last+1:] = u[last] + np.abs(bins[last+1:]-bins[last])*oobf
+
         u = self._cap_potential(bins, u)
         np.savetxt(f,np.array((bins,u)).T)
         return bins,u
 
 ## Specialize with sensible defaults for r_range
 class IBIBond(AbstractIBIpotential):
-    def __init__(self, name, degrees_of_freedom=[], range_=(0,20), resolution=0.02, max_force=None, max_potential=None, zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
+    def __init__(self, name, degrees_of_freedom=[], range_=(0,20), resolution=0.02, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
         # AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential)
-        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, zero, smooth, learning_rate, iteration, filename_prefix)
+        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, out_of_bounds_force, zero, smooth, learning_rate, iteration, filename_prefix)
         self.type_ = 'IBIbond'
 
 class IBIAngle(AbstractIBIpotential):
-    def __init__(self, name, degrees_of_freedom, range_=(0,180), resolution=2.0, max_force=None, max_potential=None, zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
+    def __init__(self, name, degrees_of_freedom, range_=(0,180), resolution=2.0, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
         #rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, iteration, filename_prefix)
-        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, zero, smooth, learning_rate, iteration, filename_prefix)
+        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, out_of_bounds_force, zero, smooth, learning_rate, iteration, filename_prefix)
         self.type_ = 'IBIangle'
 
 class IBIDihedral(AbstractIBIpotential):
-    def __init__(self, name, degrees_of_freedom=[], range_=(-180,180), resolution=4.0, max_force=None, max_potential=None, zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
+    def __init__(self, name, degrees_of_freedom=[], range_=(-180,180), resolution=4.0, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='min', smooth=None, learning_rate=0.9, iteration=1, filename_prefix="IBIPotentials/"):
         #rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, filename_prefix)
-        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, zero, smooth, learning_rate, iteration, filename_prefix)
+        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, out_of_bounds_force, zero, smooth, learning_rate, iteration, filename_prefix)
         self.type_ = 'IBIdihed'
 
     @property
@@ -481,8 +515,8 @@ class IBIDihedral(AbstractIBIpotential):
 
 ## Specialize with sensible defaults for r_range
 class IBINonbonded(AbstractIBIpotential):
-    def __init__(self, name, degrees_of_freedom=[], range_=(0,50), resolution=0.1, max_force=None, max_potential=None, zero='last', smooth=None, learning_rate=0.35, iteration=1, filename_prefix="IBIPotentials/"):
-        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, zero, smooth, learning_rate, iteration, filename_prefix)
+    def __init__(self, name, degrees_of_freedom=[], range_=(0,50), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.35, iteration=1, filename_prefix="IBIPotentials/"):
+        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, out_of_bounds_force, zero, smooth, learning_rate, iteration, filename_prefix)
         self.type_ = 'IBInonbonded'
 
     def write_file(self, filename=None, types=None):

@@ -39,6 +39,8 @@ from inspect import ismethod
 import os, sys, subprocess
 import shutil
 
+from tqdm import tqdm, trange
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 _RESOURCE_DIR = Path(__file__).parent / 'resources'
 def get_resource_path(relative_path):
@@ -1118,8 +1120,6 @@ class ArbdModel(PdbModel):
         self.bonded_ibi_potentials = set()
         self.nonbonded_ibi_potentials = set()
 
-        logger.info(f'Gathering bonded IBI degrees of freedom')
-
         for get_fn, parts_pot_fn, cls in (
                 (self.get_bonds,     lambda x: (x[:2],x[2]), BondDof),
                 (self.get_angles,    lambda x: (x[:3],x[3]), AngleDof),
@@ -1177,13 +1177,12 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1):
-
+    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None):
         try:
-            assert( len(self.bonded_ibi_potentials) > 0 )
-            assert( len(self.nonbonded_ibi_potentials) > 0 )
+            assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
         except:
             raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
+        logger.info(f'Running {iterations} IBI iterations with {len(self.bonded_ibi_potentials)} bonded and {len(self.nonbonded_ibi_potentials)} nonbonded IBI potentials')
 
         if engine is None:
             engine = ArbdEngine(
@@ -1196,15 +1195,41 @@ class ArbdModel(PdbModel):
         else:
             box = tuple(list(self.dimensions[:3]) + ([90]*3))
 
-        cg_u = None
         restart_file = None
+
+        if target_universe is not None:
+            _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
+            with logging_redirect_tqdm(loggers=[logger,devlogger]):
+                for potential in tqdm(_potentials, desc='Calculating target distributions'):
+                    potential.get_target_distribution(target_universe)
+
+        def _load_cg_u(iteration):
+            name = f'ibi-{iteration:03d}'
+            psf = '{}/{}.psf'.format(directory,name)
+            globstring=f'{directory}/output/{name}.*dcd'
+            dcds = [f for f in glob(globstring) if 'momentum' not in f]
+            if len(dcds) == 0: raise ValueError(f'Expected to find dcds at {globstring}')
+            cg_u = mda.Universe(psf,*dcds)
+            return cg_u
+
+        cg_u = None
+        if first_iteration > 1:
+            cg_u = _load_cg_u(first_iteration-1)
+            with logging_redirect_tqdm(loggers=[logger,devlogger]):
+                for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
+
+        for p in _potentials:
+            p.iteration = first_iteration
+
         for i in range(first_iteration, iterations+1):
             logger.info(f'Working on IBI iteration {i}/{iterations}')
-            logger.info(f'Writing IBI potentials')
-            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
-                for pot in pots:
-                    try:    pot.write_cg_potential(cg_u, tol=pot.tol)
-                    except: pot.write_cg_potential(cg_u)
+
+            with logging_redirect_tqdm(loggers=[logger,devlogger]):
+                for p in tqdm(_potentials, desc='Writing CG potentials'):
+                    # if 'IBIPotentials/intrabond-1' in p.filename(): import ipdb; ipdb.set_trace()
+                    try:    p.write_cg_potential(cg_u, tol=p.tol, box=box)
+                    except: p.write_cg_potential(cg_u, box=box)
 
             if i == 1 and run_minimization:
                 logger.info(f'Running brief simulation with small timestep')
@@ -1214,30 +1239,21 @@ class ArbdModel(PdbModel):
                                  timestep = ts0/100,
                                  num_steps = 10000, output_period=1000 )
 
-            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
-                for pot in pots:
-                    try:    pot.write_cg_potential(cg_u, tol=pot.tol)
-                    except: pot.write_cg_potential(cg_u)
-
                 restart_file = f'{directory}/output/ibi-min.restart'
 
             name = f'ibi-{i:03d}'
             engine.simulate( self,
                              output_name = name, directory = directory,
-                             restart_file = restart_file )
+                             restart_file = restart_file,
+                             replicas = replicas )
 
             restart_file = f'{directory}/output/{name}{".0" if replicas > 1 else ""}.restart'
-            logger.info(f'Extracting CG distributions')
-            psf = '{}/{}.psf'.format(directory,name)
-            dcds = [f for f in glob(f'{directory}/output/{name}.*dcd') if 'momentum' not in f]
-            cg_u = mda.Universe(psf,*dcds)
+            cg_u = _load_cg_u(i)
 
-            for pots in (self.bonded_ibi_potentials, self.nonbonded_ibi_potentials):
-                for pot in pots:
-                    # if pot in nonbonded_ibi_pots: continue
-                    pot.get_cg_distribution(cg_u, box=box, recalculate=False)
-                    pot.iteration += 1
-
+            with logging_redirect_tqdm(loggers=[logger,devlogger]):
+                for p in tqdm(_potentials, desc='Extracting CG distributions'):
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
+                    p.iteration += 1
         
     def update(self, group , copy=False):
         assert( isinstance(group, Group) )
