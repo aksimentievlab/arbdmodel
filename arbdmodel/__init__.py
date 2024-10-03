@@ -22,7 +22,7 @@ devlogger = logging.getLogger(__name__+'.dev')
 if _get_username() not in ('cmaffeo2',):
     devlogger.addHandler(logging.NullHandler())
 
-## Import resources
+## Import packages
 from pathlib import Path
 from glob import glob
 import MDAnalysis as mda
@@ -54,7 +54,7 @@ def _get_properties_and_dict_keys(obj):
     properties = [name for name,type_ in filter(filter_props, inspect.getmembers(obj.__class__))]
     return properties + list(obj.__dict__.keys())
 
-__active_model = None           # variable to be set temporarily by models as they are doing something, used by AbstractPotential classes
+__active_model = None           # variable to be set temporarily by models as they are doing something, used by AbstractPotential classes (unused)
 
 ## Abstract classes
 class Transformable():
@@ -234,7 +234,7 @@ class Parent():
         return ret
 
     def get_bonds(self):
-        ret = self.bonds
+        ret = copy(self.bonds)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_bonds() )
         if self.remove_duplicate_bonded_terms:
@@ -244,7 +244,7 @@ class Parent():
 
 
     def get_angles(self):
-        ret = self.angles
+        ret = copy(self.angles)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_angles() )
         if self.remove_duplicate_bonded_terms:
@@ -253,7 +253,7 @@ class Parent():
             return ret
 
     def get_dihedrals(self):
-        ret = self.dihedrals
+        ret = copy(self.dihedrals)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_dihedrals() )
         if self.remove_duplicate_bonded_terms:
@@ -262,7 +262,7 @@ class Parent():
             return ret
 
     def get_impropers(self):
-        ret = self.impropers
+        ret = copy(self.impropers)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_impropers() )
         if self.remove_duplicate_bonded_terms:
@@ -271,7 +271,7 @@ class Parent():
             return ret
 
     def get_exclusions(self):
-        ret = self.exclusions
+        ret = copy(self.exclusions)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_exclusions() )
         if self.remove_duplicate_bonded_terms:
@@ -280,7 +280,7 @@ class Parent():
             return ret
 
     def get_bond_angles(self):
-        ret = self.bond_angles
+        ret = copy(self.bond_angles)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_bond_angles() )
         if self.remove_duplicate_bonded_terms:
@@ -289,7 +289,7 @@ class Parent():
             return ret
 
     def get_product_potentials(self):
-        ret = self.product_potentials
+        ret = copy(self.product_potentials)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_product_potentials() )
         if self.remove_duplicate_bonded_terms:
