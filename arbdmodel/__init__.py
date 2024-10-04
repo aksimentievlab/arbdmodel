@@ -2097,7 +2097,7 @@ num {num}
                     for item in pt.rigid_body_potentials:
                         try:    keyword,s = item
                         except: keyword,s = (item,1)
-                        fh.write("rigidBodyPotential {keyword}\n")
+                        fh.write(f"rigidBodyPotential {keyword}\n")
                         if s != 1: raise NotImplementedError('Instead scale rigid body potential')
 
             ## Write coordinates and interactions
