@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABCMeta
 import os, sys
+import scipy
 import numpy as np
 from shutil import copyfile
 
@@ -33,8 +34,11 @@ class AbstractPotential(metaclass=ABCMeta):
     @abstractmethod
     def potential(self, r, types=None):
         raise NotImplementedError
+
     def __remove_nans(self, u):
-        u=u[np.isnan(u)==False]
+        z = lambda x: np.argwhere(x).flatten()
+        nans=np.isnan(u)
+        u[nans] = scipy.interpolate.interp1d(z(~nans), u[~nans], fill_value='extrapolate')(z(nans))
 
     def __remove_nans_bak(self, u):
         left = np.isnan(u[:-1])
