@@ -1654,7 +1654,6 @@ class SimEngine(metaclass=ABCMeta):
 class ArbdEngine(SimEngine):
     """ Interface to ARBD simulation engine """
     def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
-        
         self.extra_bd_file_lines = extra_bd_file_lines
         
         if configuration is None: 
@@ -1958,7 +1957,7 @@ class ArbdEngine(SimEngine):
                         except:  fh.write( ' 0'*3 )
                         try: fh.write( ' ' + ' '.join([str(x) for x in rb.rotational_momentum]) )
                         except:  fh.write( ' 0'*3 )
-                        fh.write('\n')
+                    fh.write('\n')
 
 
     def _write_conf(self, model, prefix, configuration):
