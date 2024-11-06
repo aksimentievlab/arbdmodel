@@ -1177,7 +1177,7 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None):
+    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
         try:
             assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
         except:
@@ -1201,7 +1201,7 @@ class ArbdModel(PdbModel):
             _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
-                    potential.get_target_distribution(target_universe)
+                    potential.get_target_distribution(target_universe, trajectory=target_trajectory)
 
         def _load_cg_u(iteration):
             name = f'ibi-{iteration:03d}'
