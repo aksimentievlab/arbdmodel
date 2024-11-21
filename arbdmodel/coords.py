@@ -111,6 +111,7 @@ def quaternion_to_matrix(q):
     return np.array(R)
 
 def quaternion_from_matrix( R ):
+    R=R.T
     q = np.empty(4)
     if R[2,2] < 0:
         if R[0,0] > R[1,1]:
