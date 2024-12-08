@@ -527,6 +527,7 @@ class ParticleType():
         return self
         
     def _hash_key(self):
+
         l = [str(type(self)), self.name, self.charge]
         for keyval in sorted(self.__dict__.items()):
             if isinstance(keyval[1], list): keyval = (keyval[0],tuple(keyval[1]))
@@ -1320,11 +1321,15 @@ class ArbdModel(PdbModel):
         self.type_counts = type_counts
 
         rbtc = dict()
+        rbti={}
         for rb in self.rigid_bodies:
-            t = rb.type_
+            t = rb.type_.name
             if t in rbtc: rbtc[t] += 1
-            else:         rbtc[t] = 1
+            else:
+                rbti[t]=rb.type_  
+                rbtc[t] = 1
         self.rigid_body_type_counts = [(k,rbtc[k]) for k in sorted(rbtc.keys())]
+        self.rigid_body_index=rbti
         devlogger.debug(f'{self}: Counting types: {type_counts}')
         devlogger.debug(f'{self}: Counting rb types: {rbtc}')
         
@@ -1748,10 +1753,11 @@ class ArbdEngine(SimEngine):
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
         if len(model.rigid_bodies) > 0:
-            for rbt,num in model.rigid_body_type_counts:
+            for rbk,num in model.rigid_body_type_counts:
+                rbt=model.rigid_body_index[rbk]
                 devlogger.debug(f'Writing attached particles file for rigid body type {rbt}')
                 if num > 0 and len(rbt.attached_particles) > 0:
-                    f = rbt._attached_particles_filename = f'{output_name}.attached_particles.{rbt.name}.txt'
+                    f = rbt._attached_particles_filename = f'{output_name}.attached_particles.{rbt}.txt'
                     with open(f,'w') as fh:
                         for p in rbt.attached_particles:
                             x,y,z = p.position
@@ -1810,7 +1816,7 @@ class ArbdEngine(SimEngine):
                 f = interaction.filename(types=(t1,t2))
             except:
                 f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
-                logger.warn(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
+                logger.debug(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
 
             devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
             old_range = interaction.range_
@@ -2167,7 +2173,8 @@ tabulatedPotential  1
                 fh.write("inputGroups %s\n" % self._group_sites_filename)
 
             if len(model.rigid_bodies) > 0:
-                for rbt,num in model.rigid_body_type_counts:
+                for rbi,num in model.rigid_body_type_counts:
+                    rbt=model.rigid_body_index[rbi]
                     if num == 0: continue
                     devlogger.debug(f'Writing configuration for rigid body type {rbt}')
                     ## For now, we always convert rigid body diffusivity into mass+damping
