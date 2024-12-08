@@ -4,18 +4,18 @@
 import numpy as np
 import sys
 
-
 ## Local imports
-from . import logger, ParticleType, PointParticle, get_resource_path
+from . import devlogger, logger, ParticleType, PointParticle, get_resource_path
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
+from .version import Citation
 
 """Define particle types"""
 _types = dict(
     A = ParticleType("ALA",
                      mass = 120,
                      charge = 0,
-                     epsilon = 0.7,
+                     epsilon = 0.7, # dimensionless
                      lambda_ = 0.72973,
                  ),
     R = ParticleType("ARG",
@@ -118,8 +118,98 @@ _types = dict(
 )
 for k,t in _types.items():
     t.resname = t.name
+    t.version = 1.0
+
+_types_versions = {1.0: _types}
+
+## https://link.springer.com/article/10.1007/s12274-022-4647-1
+_types_versions['1.0cp'] = {k:ParticleType(t.name,
+                                           mass = t.mass,
+                                           charge = t.charge,
+                                           epsilon = t.epsilon) for k,t in _types.items()}
+for k in 'R D E K'.split(): _types_versions['1.0cp'][k].epsilon = 0.005
+
+_types_versions[1.1] = dict()   # https://www.pnas.org/doi/10.1073/pnas.2221804120
+__si_data = """A 71.07 0.7 0
+L 113.16 1 0
+R 156.19 0.005 +1
+K 128.17 0.005 +1
+N 114.10 0.41 0
+M 131.20 0.78 0
+D 115.09 0.005 -1
+F 147.18 1 0
+C 103.14 0.68 0
+P 97.12 0.65 0
+Q 128.13 0.33 0
+S 87.08 0.45 0
+E 129.11 0.005 -1
+T 101.11 0.51 0
+G 57.05 0.48 0
+W 186.22 0.96 0
+H 137.14 0.53 0
+Y 163.18 0.82 0
+I 113.16 0.98 0
+V 99.13 0.94 0"""
+for k, m, e, q in [l.split() for l in __si_data.split('\n')]:
+    t0 = _types_versions[1.0][k]
+    t  = _types_versions[1.1][k] = ParticleType(t0.name+'v1.1', mass=float(m),
+                                                epsilon = float(e), charge = float(q), version=1.1)
+    assert(t.charge == t0.charge)
+    if t0.epsilon != t.epsilon:
+        devlogger.info(f'Updating epsilon for 1BPA-1.1 {k}: {t0.epsilon} -> {t.epsilon}')
+
+devlogger.info(f'Onck model version 1BPA-1.1 has {np.sum([t0.epsilon != _types_versions[1.1][k].epsilon for k,t0 in _types_versions[1.0].items()])} different epsilon parameters compared to 1BPA')
+
+""" Cation-Pi interactions """
+eps_cp_dict = {('ARG','PHE'): 4.3,
+               ('ARG','TYR'): 5.0,
+               ('ARG','TRP'): 6.7,
+               ('LYS','PHE'): 1.79,
+               ('LYS','TYR'): 3.13,
+               ('LYS','TRP'): 4.26} # Table S2; kJ/mol
+eps_cp_dict = {k:v*0.23900574 for k,v in eps_cp_dict.items()} # convert to kcal/mol
+for k,v in list(eps_cp_dict.items()): eps_cp_dict[(k[1],k[0])] = v # add reversed keys to dictionary
+
+version_name = {1.0:'1BPA', '1.0cp':'1BPA-CP', 1.1:'1BPA-1.1'}
+
+__base_ref = Citation(
+    author  = 'A. Fragasso, H.W. de Vries, J. Andersson, et al',
+    title   = 'A designer FG-Nup that reconstitutes the selective transport barrier of the nuclear pore complex',
+    journal = 'Nat Commun',
+    volume  = 12,
+    year    = 2021,
+    doi     = '10.1038/s41467-021-22293-y'
+)
+__ref1 = Citation(
+    author  = 'A. Fragasso, H.W. de Vries, J. Andersson, et al',
+    title = 'Transport receptor occupancy in nuclear pore complex mimics',
+    journal = 'Nano Res',
+    volume = 15,
+    pages = '9689–9703',
+    year = 2022,
+    doi = '10.1007/s12274-022-4647-1'
+)
+__ref2 = Citation(
+    author="M. Dekker, E. Van der Giessen, and P.R. Onck",
+    title="Phase separation of intrinsically disordered FG-Nups is driven by highly dynamic FG motifs",
+    journal='PNAS',
+    volume=120,
+    number = 25,
+    pages = 'e2221804120',
+    year=2023,
+    doi = '10.1073/pnas.2221804120'
+)
+
+version_refs = {1.0: (__base_ref,),
+                '1.0cp': (__base_ref, __ref1),
+                1.1: (__base_ref, __ref2),
+                }
+
+## Default to the latest
+_types = _types_versions[1.1]
 
 class OnckNonbonded(AbstractPotential):
+    """ Nonbonded interaction for 1BPA and 1BPA-1.1 """
     def __init__(self, debye_length=12.7, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
@@ -139,29 +229,52 @@ class OnckNonbonded(AbstractPotential):
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r
 
         """ LJ-type term """
-        alpha = 0.27
-        epsilon_hp = 3.1070746 # units "13 kJ/N_A" kcal_mol
-        epsilon_rep = 2.3900574 # units "10 kJ/N_A" kcal_mol
 
-        sigma = 6.0
-        epsilon = epsilon_hp*np.sqrt( (typeA.epsilon*typeB.epsilon)**alpha )
+        try:
+            """ Rather than interacting through the hydrophobic
+            potential phi_hp, cationic residues interact with aromatic
+            residues through an 8–6 Lennard Jones potential """
+            assert( all( t.version in ('1.0cp',1.1) for t in types ) )
+            key = tuple((typeA.name[:3],typeB.name[:3]))
+            eps = eps_cp_dict[key]
 
-        r6 = (sigma/r)**6
-        r8 = (sigma/r)**8
-        u_lj = (epsilon_rep-epsilon) * r8
-        s = r<=sigma
-        u_lj[s] = epsilon_rep*r8[s] - epsilon*(4*r6[s]-1)/3
-        u_lj[r>25] = 0
-        
+            _r_m = 4.5
+            r6 = (_r_m/r)**6
+            r8 = (_r_m/r)**8
+
+            u_lj = eps * (3*r8 - 4*r6)
+        except:
+            r6 = (sigma/r)**6
+            r8 = (sigma/r)**8
+
+            alpha = 0.27
+            epsilon_hp = 3.1070746 # units "13 kJ/N_A" kcal_mol
+            epsilon_rep = 2.3900574 # units "10 kJ/N_A" kcal_mol
+
+            sigma = 6.0
+            epsilon = epsilon_hp*np.sqrt( (typeA.epsilon*typeB.epsilon)**alpha )
+
+            u_lj = (epsilon_rep-epsilon) * r8
+            s = r<=sigma
+            u_lj[s] = epsilon_rep*r8[s] - epsilon*(4*r6[s]-1)/3
+            u_lj[r>25] = 0
+
         u = u_elec + u_lj
         return u
 
 class OnckBeads(PolymerBeads):
-    
- 
     def __init__(self, polymer, sequence=None,
                  spring_constant = 38.422562, # units "8038 kJ / (N_A nm**2)" "0.5 * kcal_mol/AA**2"
-                 rest_length=3.8, **kwargs):
+                 rest_length=3.8, version=None, **kwargs):
+
+        if version == None:
+            logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')
+            version = 1.1
+        if version not in _types_versions:
+            raise ValueError(f'Unkown Onck model version "{version}"')
+        self.version = version
+        self.types_dict = _types_versions[version]
+        _types = _types_versions[version] # Update global _types convenience variable
 
         self.peptide_bond = HarmonicBond(k = spring_constant,
                                          r0 = rest_length,
@@ -184,10 +297,10 @@ class OnckBeads(PolymerBeads):
         if len(sequence) != polymer.num_monomers:
             raise ValueError("Length of sequence does not match length of polymer")
 
-        
+
     def _generate_ith_bead_group(self, i, r, o):
         s = self.sequence[i]
-        return PointParticle(_types[s], r,
+        return PointParticle(self.types_dict[s], r,
                              name = s,
                              resid = i+1)
 
@@ -201,7 +314,7 @@ class OnckBeads(PolymerBeads):
             else:
                 return 'X'
 
-        ## Two consecutive groups 
+        ## Two consecutive groups
         if len(ids) == 2:
             b1,b2 = [self.children[i] for i in ids]
             """ units "10 kJ/N_A" kcal_mol """
@@ -213,7 +326,7 @@ class OnckBeads(PolymerBeads):
 
             filename = 'onck_model_potentials/bend_O{}{}.txt'.format(
                 t2, 'P' if t3 == 'P' else 'Y' )
-            self.add_angle( i=b1, j=b2, k=b3, 
+            self.add_angle( i=b1, j=b2, k=b3,
                           angle = get_resource_path(filename) )
             self.add_exclusion( i=b1, j=b3 )
         elif len(ids) == 4:
@@ -234,18 +347,27 @@ class OnckModel(PolymerModel):
                  debye_length = 10,
                  # damping_coefficient = 50e3,
                  damping_coefficient = 100,
+                 version = None,
                  DEBUG=False,
                  **kwargs):
 
-        """ 
+        """
         [debye_length]: angstroms
         [damping_coefficient]: ns
+
         """
 
-        logger.info("""You are using an implementation of the Onck model for disordered FG-Nup peptides based on:
-Fragasso, A., de Vries, H.W., Andersson, J. et al. A designer FG-Nup that reconstitutes the selective transport barrier of the nuclear pore complex. Nat Commun 12, 2010 (2021). https://doi.org/10.1038/s41467-021-22293-y
+        if version == None:
+            logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')
+            version = 1.1
+        if version not in _types_versions:
+            raise ValueError(f'Unkown Onck model version "{version}"')
+        self.version = version
 
-        Please cite all appropriate articles!""")
+        logger.info(f'Using an implementation of the Onck model {version_name[self.version]} for disordered FG-Nup peptides.')
+        _msg = 'Please cite all appropriate articles, including:\n'
+        _msg = _msg + "\n  and\n".join(ref.display() for ref in version_refs[self.version])
+        print(_msg)
 
         if debye_length != 12.7:
             logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1.27 nm.
@@ -264,23 +386,25 @@ Fragasso, A., de Vries, H.W., Andersson, J. et al. A designer FG-Nup that recons
         PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group=1, **kwargs)
 
         """ Update type diffusion coefficients """
-        self.types = all_types = [t for key,t in _types.items()]
+        self.types = all_types = [t for key,t in self.types_dict.items()]
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """
         nonbonded = OnckNonbonded(debye_length)
         for t in all_types:
             self._add_nonbonded_interaction(nonbonded, t)
-                
+
     def _add_nonbonded_interaction(self, interaction, type_):
         i = self.types.index(type_) if type_ in self.types else 0
         for t in self.types[i:]:
-            self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
+            # self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
+            self.useNonbondedScheme( interaction, typeA=type_, typeB=t )
 
     def _generate_polymer_beads(self, polymer, sequence, polymer_index=None):
         return OnckBeads(polymer, sequence,
                          monomers_per_bead_group = self.monomers_per_bead_group,
-                         poymer_index = polymer_index
+                         poymer_index = polymer_index,
+                         version = self.version
                          )
 
     def set_damping_coefficient(self, damping_coefficient):
@@ -289,7 +413,6 @@ Fragasso, A., de Vries, H.W., Andersson, J. et al. A designer FG-Nup that recons
             # t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)
 
 if __name__ == "__main__":
-
-    print("TYPES")
+    logger.info("TYPES")
     for n,t in _types.items():
-        print("{}\t{}\t{}\t{}\t{}".format(n, t.name, t.mass, t.charge, t.epsilon))
+        logger.info("{}\t{}\t{}\t{}\t{}".format(n, t.name, t.mass, t.charge, t.epsilon))
