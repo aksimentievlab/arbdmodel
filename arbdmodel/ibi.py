@@ -73,6 +73,8 @@ class DegreeOfFreedom():
         positions = DegreeOfFreedom._sel_list_to_positions( self.sels[key] )
         self.current_key = key
         result = [self._get_value(positions)]
+        assert( np.all( ~np.isnan(result) ) )
+        assert( len(result) > 0 )
         self.current_key = None
         return result
 
@@ -296,8 +298,13 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 return False
         return True
 
-    def _extract_distribution(self, universe, box = None):
-        key = universe.__hash__()
+    def _extract_distribution(self, universe, trajectory = None, box = None):
+        if trajectory is not None:
+            key = (universe, trajectory).__hash__()
+        else:
+            key = universe.__hash__()
+            trajectory = universe.trajectory
+
         if key in self.__dists:
             logger.info(f"{self}._extract_distribution( u.{key} ): using cache")
             return self.__dists[key]
@@ -306,7 +313,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         counts = np.zeros( [len(bins)-1] )
         nframes = 0
         with logging_redirect_tqdm(loggers=[logger]):
-            for t in tqdm(universe.trajectory, desc=f"Extracting distribution {self}"):
+            for t in tqdm(trajectory, desc=f"Extracting distribution {self}"):
                 # if (t.frame % 100) == 0: logger.info(f'Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}')
                 if box is not None:
                     universe.dimensions = box
@@ -317,24 +324,34 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 inds = inds[(inds<len(counts)) & (inds>=0)]
                 counts = counts + np.bincount(inds, minlength=len(counts))
                 nframes += 1
+        if np.sum(counts) == 0:
+            raise ValueError(f'Extracting distribution for "{self.filename()}" failed because no values were found in the range {self.range_}; consider specifying a larger range_ parameter when creating the {self.__class__.__name__}')
+        assert(nframes > 0)
+
         vol = self.degrees_of_freedom[0].compute_volume(bins)
+        assert(vol.sum() > 0)
         likelihood = counts / (nframes*vol)
         ## don't normalize over num values in dofs just yet
 
         self.__dists[key] = (bins,likelihood) # record for later
         return bins, likelihood
 
-    def get_target_distribution(self, universe=None, recalculate=False):
+    def get_target_distribution(self, universe=None, trajectory=None, recalculate=False):
         if self.__target is None:
             f = self.filename_prefix + '.target.dat'
             if (not Path(f).exists()) or recalculate:
                 if universe is None: raise Exception
-                bins, vals = self._extract_distribution( universe )
+                bins, vals = self._extract_distribution( universe, trajectory=trajectory )
+                if np.sum(vals) == 0:
+                    raise Exception
                 Path(f).parent.mkdir(parents=True, exist_ok=True)
                 np.savetxt(f,np.array((bins[:-1],vals/np.sum(vals),vals)).T)
             bins, vals, counts = np.loadtxt(f).T
+            if np.sum(counts) == 0:
+                raise Exception
             self.__target = (bins,vals)
         if self.smooth is None:
+            bins,vals = self.__target
             ## Set smooth to ~1/2 stddev
             _mean = np.average( bins, weights=vals )
             _var = np.average( (bins-_mean)**2 , weights=vals )
@@ -348,12 +365,12 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         return self.__target
 
-    def get_cg_distribution(self, universe, box=None, recalculate=False):
+    def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False):
         f = self.filename(smoothed=False).replace('.dat','.cg.dat')
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
-            bins, vals = self._extract_distribution( universe, box=box )
+            bins, vals = self._extract_distribution( universe, trajectory=trajectory, box=box )
             bins = bins[:len(vals)]
             Path(f).parent.mkdir(parents=True, exist_ok=True)
             np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
@@ -396,6 +413,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         """ Removes values to the left of the rightmost spot left of
         the peak where rho dips below tol, and vice versa """
 
+        total_before = np.sum(rho)
         peak_i = np.where(np.abs(rho) == np.max(np.abs(rho)))[0][0]
         is_left  = (bins < bins[peak_i])
         is_small = (rho <= tol)
@@ -410,6 +428,10 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         rho[:first_i] = 0
         rho[last_i:] = 0
+
+        total_after = np.sum(rho)
+        if total_after < 0.9 * total_before:
+            raise ValueError('Removed too much density from the distribution ({100*total_after/total_before:%02d})')
 
     def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None):
         if scaling_factor is None:
