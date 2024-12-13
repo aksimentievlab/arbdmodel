@@ -399,7 +399,7 @@ class OnckModel(PolymerModel):
         i = self.types.index(type_) if type_ in self.types else 0
         for t in self.types[i:]:
             # self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
-            self.useNonbondedScheme( interaction, typeA=type_, typeB=t )
+            self.add_nonbonded_interaction( interaction, typeA=type_, typeB=t )
 
     def _generate_polymer_beads(self, polymer, sequence, polymer_index=None):
         return OnckBeads(polymer, sequence,
