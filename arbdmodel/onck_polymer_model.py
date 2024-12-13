@@ -244,6 +244,7 @@ class OnckNonbonded(AbstractPotential):
 
             u_lj = eps * (3*r8 - 4*r6)
         except:
+            sigma = 6.0
             r6 = (sigma/r)**6
             r8 = (sigma/r)**8
 
@@ -251,7 +252,6 @@ class OnckNonbonded(AbstractPotential):
             epsilon_hp = 3.1070746 # units "13 kJ/N_A" kcal_mol
             epsilon_rep = 2.3900574 # units "10 kJ/N_A" kcal_mol
 
-            sigma = 6.0
             epsilon = epsilon_hp*np.sqrt( (typeA.epsilon*typeB.epsilon)**alpha )
 
             u_lj = (epsilon_rep-epsilon) * r8
