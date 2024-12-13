@@ -363,6 +363,7 @@ class OnckModel(PolymerModel):
         if version not in _types_versions:
             raise ValueError(f'Unkown Onck model version "{version}"')
         self.version = version
+        self.types_dict = _types_versions[version]
 
         logger.info(f'Using an implementation of the Onck model {version_name[self.version]} for disordered FG-Nup peptides.')
         _msg = 'Please cite all appropriate articles, including:\n'
