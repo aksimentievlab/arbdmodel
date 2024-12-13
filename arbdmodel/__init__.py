@@ -479,7 +479,7 @@ class ParticleType():
         if diffusivity is not None: self.diffusivity = diffusivity
         self.parent = parent
         self.rigid_body_potentials = rigid_body_potentials
-        devlogger.info(f'Created {type(self)} {name} @ {hex(id(self))}')
+        devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
         
         for key in ParticleType.excludedAttributes:
             assert( key not in kwargs )
@@ -1042,6 +1042,10 @@ class ArbdModel(PdbModel):
         self.cacheUpToDate = False
 
         self.group_sites = []
+
+    def add(self, obj):
+        self._clear_types()     # TODO: call upon (potentially nested) `child.add(add)`
+        return Parent.add(self, obj)
 
     def add_group_site(self, particles, weights=None):
         g = ArbdModel._GroupSite(particles, weights)
