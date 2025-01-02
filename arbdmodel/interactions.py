@@ -78,7 +78,7 @@ class AbstractPotential(metaclass=ABCMeta):
             # w = np.sqrt(2*self.max_potential/self.k)
             # drAvg = 0.5*(np.abs(dr[ids]) + np.abs(dr[ids+1]))
             # f[ids] = f[ids] * np.exp(-(drAvg-w)/(w))
-            f[ids] = self.max_potential
+            f[ids] = 0
             
             u[0] = 0
             u[1:] = np.cumsum(f*np.diff(r))

@@ -122,6 +122,7 @@ class Parent():
         self.dihedrals = []
         self.impropers = []
         self.exclusions = []
+        self.vector_angles = []
         self.bond_angles = []
         self.product_potentials = []
         self.group_sites = []
@@ -210,6 +211,10 @@ class Parent():
         # for b in (i,j): assert(b in beads)
         self.exclusions.append( (i,j) )
 
+    def add_vector_angle(self, i,j,k,l, potential):
+        assert( len(set((i,j,k,l))) >= 3 )
+        self.vector_angles.append( (i,j,k,l, potential) )
+
     def add_bond_angle(self, i,j,k,l, bond_angle, exclude=False):
         assert( len(set((i,j,k,l))) == 4 )
         ## TODO: how to handle duplicating and cloning bonds
@@ -276,6 +281,15 @@ class Parent():
         ret = copy(self.exclusions)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_exclusions() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(ret))
+        else:
+            return ret
+
+    def get_vector_angles(self):
+        ret = copy(self.vector_angles)
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.get_vector_angles() )
         if self.remove_duplicate_bonded_terms:
             return list(set(ret))
         else:
@@ -1105,7 +1119,7 @@ class ArbdModel(PdbModel):
         # for g in other_model.children:
         #     self.update(g, copy=copy)
         g = Group()
-        for attr in 'children position orientation bonds angles dihedrals impropers exclusions bond_angles product_potentials group_sites'.split():
+        for attr in 'children position orientation bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
             g.__setattr__(attr, other_model.__getattribute__(attr))
         devlogger.debug(f'Updating {self} with {g.children[0].children[0]}')
         self.update(g, copy=copy)
@@ -1839,7 +1853,10 @@ class ArbdEngine(SimEngine):
                 item = [i.idx]
                 if len(restraint) == 1:
                     item.append(restraint[0])
-                    item.extend(i.get_collapsed_position())
+                    if isinstance(i, ArbdModel._GroupSite):
+                        item.extend(i.get_center())
+                    else:
+                        item.extend(i.get_collapsed_position())
                 elif len(restraint) == 2:
                     item.append(restraint[0])
                     item.extend(restraint[1])
@@ -1901,6 +1918,19 @@ class ArbdEngine(SimEngine):
             for ex in model.get_exclusions():
                 item = tuple(int(p.idx) for p in ex)
                 fh.write("EXCLUDE %d %d\n" % item)
+
+    def _write_vector_angle_file( self, model, filename ):
+        self._vector_angle_filename = filename
+        if len(model.vector_angles) > 0:
+            with open(self._vector_angle_filename,'w') as fh:
+                for b in model.get_vector_angles():
+                    p = b[-1]
+                    try:
+                        bfile = p.filename()
+                    except:
+                        bfile = str(p)
+                    item = tuple([p.idx for p in b[:-1]] + [bfile])
+                    fh.write("VECANGLE %d %d %d %d %s\n" % item)
 
     def _write_bond_angle_file( self, model, filename ):
         self._bond_angle_filename = filename
@@ -2130,6 +2160,7 @@ tabulatedPotential  1
             angles = model.get_angles()
             dihedrals = model.get_dihedrals()
             exclusions = model.get_exclusions()
+            vector_angles = model.get_vector_angles()
             bond_angles = model.get_bond_angles()
             prod_pots = model.get_product_potentials()
             # group_sites = model.get_group_sites()
@@ -2169,6 +2200,9 @@ tabulatedPotential  1
                 fh.write("inputDihedrals %s\n" % self._dihedral_filename)
             if len(exclusions) > 0:
                 fh.write("inputExcludes %s\n" % self._exclusion_filename)
+            if len(vector_angles) > 0:
+                raise NotImplementedError
+                fh.write("inputVecAngles %s\n" % self._vector_angle_filename)
             if len(bond_angles) > 0:
                 fh.write("inputBondAngles %s\n" % self._bond_angle_filename)
             if len(prod_pots) > 0:
