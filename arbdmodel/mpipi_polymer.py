@@ -158,8 +158,11 @@ class MpipiNonbonded(AbstractPotential):
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
 
         """Mpipi Wang-Frenkel Potential"""
-        WF=pd.read_csv("mpipi_protein_resname.csv",index_col=0)
-        indices=list(df.columns)
+        import os
+        project_root = os.path.dirname(os.path.abspath(__file__))
+
+        WF=pd.read_csv(project_root+"/resources/mpipi_params/mpipi_protein_resname.csv",index_col=0)
+        indices=list(WF.columns)
         if indices.index(typeA.resname)<indices.index(typeB.resname):
             sigma_ij=WF[typeB.resname][typeA.resname+"_sigma"]*10
             eps_ij=WF[typeB.resname][typeA.resname+"_eps"]*0.23900574
@@ -173,15 +176,15 @@ class MpipiNonbonded(AbstractPotential):
         if typeA.resname=="ILE":
             if typeB.resname=="ILE":
                 muij=11
-            elif typeB.resname=="VAL"
+            elif typeB.resname=="VAL":
                 muij=4
         if typeB.resname=="ILE" and typeA.resname=="VAL": muij=4
             
         Rij=3*sigma_ij
 
-        alpha=2*(3**(2*muij))*((2*vij+1/(2*vij*(3**(2*muij)-1))))**(2*vij+1)
-
-        u_wang=eps_ij*alpha*((sigma_ij/r)**(2muij)-1)*((Rij/r)**2muij-1)**(2vij)
+        #alpha=2*(3**(2*muij))*((2*vij+1/(2*vij*(3**(2*muij)-1))))**(2*vij+1)
+        alpha=2*vij*(Rij/sigma_ij)**(2*muij)*((2*vij+1)/(2*vij*((Rij/sigma_ij)**(2*muij)-1)))**(2*vij+1)
+        u_wang=eps_ij*alpha*((sigma_ij/r)**(2*muij)-1)*((Rij/r)**(2*muij)-1)**(2*vij)
 
         """ Mpipi scale model """
         """
