@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import pandas as pd
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from . import logger, ParticleType, PointParticle, get_resource_path
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 
@@ -158,10 +158,7 @@ class MpipiNonbonded(AbstractPotential):
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
 
         """Mpipi Wang-Frenkel Potential"""
-        import os
-        project_root = os.path.dirname(os.path.abspath(__file__))
-
-        WF=pd.read_csv(project_root+"/resources/mpipi_params/mpipi_protein_resname.csv",index_col=0)
+        WF=pd.read_csv(get_resource_path('mpipi_params/mpipi_protein_resname.csv'),index_col=0)
         indices=list(WF.columns)
         if indices.index(typeA.resname)<indices.index(typeB.resname):
             sigma_ij=WF[typeB.resname][typeA.resname+"_sigma"]*10
