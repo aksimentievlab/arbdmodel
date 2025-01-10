@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ## Test with `python -m arbdmodel.mpipi_polymer_model`
 
 import numpy as np
