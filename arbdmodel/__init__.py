@@ -510,8 +510,10 @@ class ParticleType():
         else:
             return False
 
-    def add_grid_potential(self, gridfile, scale=1):
-        self.grid_potentials = getattr(self, 'grid_potentials', []) + [(gridfile,scale)]
+    def add_grid_potential(self, gridfile, scale=1, boundary_condition='dirichlet'):
+        if boundary_condition not in ('dirichlet','neumann','periodic'):
+            raise ValueError(f'Unrecognized grid boundary condition "{boundary_condition}"; should be one of "dirichlet", "neumann" or "periodic".')
+        self.grid_potentials = getattr(self, 'grid_potentials', []) + [(gridfile,scale,boundary_condition)]
         
     def __getattr__(self, name):
         """
@@ -642,7 +644,7 @@ class PointParticle(Transformable, Child):
         ## TODO: how to handle duplicating and cloning bonds
         self.restraints.append( restraint )
 
-    def add_grid_potential(self, gridfile, scale=1):
+    def add_grid_potential(self, gridfile, scale=1, boundary_condition='dirichlet'):
         t0 = self.type_
         name = f'{t0.name}_g_{gridfile.replace(".dx","")}_s_{scale}'
         if t0.parent is not None:
@@ -651,7 +653,7 @@ class PointParticle(Transformable, Child):
         else:
             # TODO: REMOVE LINE: t = ParticleType(name, parent=t0)
              t = type(t0)(name, parent=t0)
-        t.add_grid_potential(gridfile, scale=scale)
+        t.add_grid_potential(gridfile, scale=scale, boundary_condition=boundary_condition)
         self.type_ = t
         self._clear_types()
         
@@ -2122,12 +2124,22 @@ num {num}
                 if 'grid_potentials' in particleParams:
                     grids = []
                     scales = []
-                    for g,s in pt.grid_potentials:
+                    boundary_conditions = []
+                    for vals in pt.grid_potentials:
+                        try: g,s,bc = vals
+                        except:
+                            logger.warning(f'Failed to unpack {pt}.grid_potentials, presumably due to lack of specified boundary condition... using "dirichlet"')
+                            g,s = vals
+                            bc = 'dirichlet'
                         grids.append( _fix_path(g) )
                         scales.append(str(s))
-
+                        boundary_conditions.append(bc)
+                        
                     fh.write("gridFile {}\n".format(" ".join(grids)))
                     fh.write("gridFileScale {}\n".format(" ".join(scales)))
+                    if any([bc != 'dirichlet' for bc in boundary_conditions]):
+                        fh.write(f'gridFileBoundaryConditions {" ".join(boundary_conditions)}'+'\n')
+                    
                 else:
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
                 if 'rigid_body_potentials' in particleParams:
