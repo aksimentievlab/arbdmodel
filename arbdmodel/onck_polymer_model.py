@@ -126,7 +126,8 @@ _types_versions = {1.0: _types}
 _types_versions['1.0cp'] = {k:ParticleType(t.name,
                                            mass = t.mass,
                                            charge = t.charge,
-                                           epsilon = t.epsilon) for k,t in _types.items()}
+                                           epsilon = t.epsilon,
+                                           version = '1.0cp') for k,t in _types.items()}
 for k in 'R D E K'.split(): _types_versions['1.0cp'][k].epsilon = 0.005
 
 _types_versions[1.1] = dict()   # https://www.pnas.org/doi/10.1073/pnas.2221804120
@@ -357,7 +358,7 @@ class OnckModel(PolymerModel):
 
         """
 
-        if version == None:
+        if version is None:
             logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')
             version = 1.1
         if version not in _types_versions:
