@@ -2173,11 +2173,11 @@ num {num}
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
 
                 if 'forceXGrid' in particleParams:
-                    fh.write(f"forceXGrid {_fix_path(pt.forceXGrid)}\n")
+                    fh.write(f"forceXGridFile {_fix_path(pt.forceXGrid)}\n")
                 if 'forceYGrid' in particleParams:
-                    fh.write(f"forceYGrid {_fix_path(pt.forceYGrid)}\n")
+                    fh.write(f"forceYGridFile {_fix_path(pt.forceYGrid)}\n")
                 if 'forceZGrid' in particleParams:
-                    fh.write(f"forceZGrid {_fix_path(pt.forceZGrid)}\n")
+                    fh.write(f"forceZGridFile {_fix_path(pt.forceZGrid)}\n")
 
                 if 'rigid_body_potentials' in particleParams:
                     grids = []
