@@ -2169,7 +2169,6 @@ num {num}
                     fh.write("gridFileScale {}\n".format(" ".join(scales)))
                     if any([bc != 'dirichlet' for bc in boundary_conditions]):
                         fh.write(f'gridFileBoundaryConditions {" ".join(boundary_conditions)}'+'\n')
-
                 else:
                     fh.write("gridFile {}/null.dx\n".format(self.potential_directory))
 
