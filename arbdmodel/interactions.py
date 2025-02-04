@@ -249,6 +249,21 @@ class HarmonicDihedral(HarmonicBondedPotential):
     def periodic(self):
         return True
 
+
+class HarmonicVectorAngle(HarmonicBondedPotential):
+    def __init__(self, *args, **kwargs):
+        if 'range_' not in kwargs: kwargs['range_'] = (0,180)
+        HarmonicBondedPotential.__init__(self, *args, **kwargs)
+
+    @property
+    def kscale(self):
+        return (180.0/np.pi)**2
+
+    @property
+    def type_(self):
+        return 'vecangle'
+
+
 class WLCSKPotential(HarmonicBondedPotential, metaclass=ABCMeta):
     """ ## https://aip.scitation.org/doi/full/10.1063/1.4968020 """
     def __init__(self, d, lp, kT, **kwargs):

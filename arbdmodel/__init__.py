@@ -120,6 +120,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.vector_angles = []
         self.impropers = []
         self.exclusions = []
         self.vector_angles = []
@@ -160,6 +161,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.vector_angles = []
         self.impropers = []
         self.exclusions = []
         self.bond_angles = []
@@ -198,6 +200,13 @@ class Parent():
         # beads = [b for b in self]
         # for b in (i,j,k,l): assert(b in beads)
         self.dihedrals.append( (i,j,k,l, dihedral) )
+
+    def add_vector_angle(self, i,j,k,l, potential):
+        assert( len(set((i,j,k,l))) == 4 )
+
+        # beads = [b for b in self]
+        # for b in (i,j,k,l): assert(b in beads)
+        self.vector_angles.append( (i,j,k,l, potential) )
 
     def add_improper(self, i,j,k,l, dihedral):
         # beads = [b for b in self]
@@ -245,7 +254,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_bonds() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -255,7 +264,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_angles() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -264,7 +273,16 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_dihedrals() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
+        else:
+            return ret
+
+    def get_vector_angles(self):
+        ret = self.vector_angles
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.vector_angles() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -273,7 +291,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_impropers() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -282,7 +300,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_exclusions() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -291,7 +309,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_vector_angles() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -300,7 +318,7 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_bond_angles() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
@@ -309,20 +327,20 @@ class Parent():
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_product_potentials() )
         if self.remove_duplicate_bonded_terms:
-            return list(set(ret))
+            return list(set(tuple(ret)))
         else:
             return ret
 
     def _get_bond_potentials(self):
         bonds =  [b for i,j,b,ex in self.get_bonds()]
         bondangles1 = [b[1] for i,j,k,l,b in self.get_bond_angles()]
-        return list(set( bonds+bondangles1 ))
+        return list(set( tuple(bonds+bondangles1) ))
 
     def _get_angle_potentials(self):
         angles =  [b for i,j,k,b in self.get_angles()]
         bondangles1 = [b[0] for i,j,k,l,b in self.get_bond_angles()]
         bondangles2 = [b[2] for i,j,k,l,b in self.get_bond_angles()]
-        return list(set( angles+bondangles1+bondangles2 ))
+        return list(set( tuple(angles+bondangles1+bondangles2) ))
 
 
     ## Removed because prohibitively slow
@@ -1741,6 +1759,7 @@ class ArbdEngine(SimEngine):
         self._write_bond_file( model, "{}/{}.bond.txt".format(d, output_name) )
         self._write_angle_file( model, "{}/{}.angle.txt".format(d, output_name) )
         self._write_dihedral_file( model, "{}/{}.dihedral.txt".format(d, output_name) )
+        self._write_vector_angle_file( model, "{}/{}.vecangle.txt".format(d, output_name) )
         self._write_exclusion_file( model, "{}/{}.exclusion.txt".format(d, output_name) )
         self._write_bond_angle_file( model, f"{d}/{output_name}.bond-angle.txt" )
         self._write_product_potential_file( model, f"{d}/{output_name}.product_potential.txt" )
@@ -1920,15 +1939,13 @@ class ArbdEngine(SimEngine):
                 item = tuple([p.idx for p in b[:-1]] + [bfile])
                 fh.write("DIHEDRAL %d %d %d %d %s\n" % item)
 
-    def _write_exclusion_file( self, model, filename ):
-        self._exclusion_filename = filename
-        with open(self._exclusion_filename,'w') as fh:
-            for ex in model.get_exclusions():
-                item = tuple(int(p.idx) for p in ex)
-                fh.write("EXCLUDE %d %d\n" % item)
-
     def _write_vector_angle_file( self, model, filename ):
         self._vector_angle_filename = filename
+
+        for b in list( set( [b for i,j,k,l,b in model.get_vector_angles()] ) ):
+            if type(b) is not str and not isinstance(b, Path):
+                b.write_file()
+
         if len(model.vector_angles) > 0:
             with open(self._vector_angle_filename,'w') as fh:
                 for b in model.get_vector_angles():
@@ -1939,6 +1956,13 @@ class ArbdEngine(SimEngine):
                         bfile = str(p)
                     item = tuple([p.idx for p in b[:-1]] + [bfile])
                     fh.write("VECANGLE %d %d %d %d %s\n" % item)
+
+    def _write_exclusion_file( self, model, filename ):
+        self._exclusion_filename = filename
+        with open(self._exclusion_filename,'w') as fh:
+            for ex in model.get_exclusions():
+                item = tuple(int(p.idx) for p in ex)
+                fh.write("EXCLUDE %d %d\n" % item)
 
     def _write_bond_angle_file( self, model, filename ):
         self._bond_angle_filename = filename
@@ -2185,8 +2209,8 @@ tabulatedPotential  1
             bonds = model.get_bonds()
             angles = model.get_angles()
             dihedrals = model.get_dihedrals()
-            exclusions = model.get_exclusions()
             vector_angles = model.get_vector_angles()
+            exclusions = model.get_exclusions()
             bond_angles = model.get_bond_angles()
             prod_pots = model.get_product_potentials()
             # group_sites = model.get_group_sites()
@@ -2208,6 +2232,14 @@ tabulatedPotential  1
                         bfile = str(b)
                     fh.write("tabulatedAngleFile %s\n" % bfile)
 
+            if len(vector_angles) > 0:
+                for b in list(set([b for i,j,k,l,b in vector_angles])):
+                    try:
+                        bfile = b.filename()
+                    except:
+                        bfile = str(b)
+                    fh.write("tabulatedVecangleFile %s\n" % bfile)
+
             if len(dihedrals) > 0:
                 for b in list(set([b for i,j,k,l,b in dihedrals])):
                     try:
@@ -2215,6 +2247,14 @@ tabulatedPotential  1
                     except:
                         bfile = str(b)
                     fh.write("tabulatedDihedralFile %s\n" % bfile)
+
+            if len(vector_angles) > 0:
+                for b in list(set([b for i,j,k,l,b in vector_angles])):
+                    try:
+                        bfile = b.filename()
+                    except:
+                        bfile = str(b)
+                    fh.write("tabulatedVecangleFile %s\n" % bfile)
 
             if len(restraints) > 0:
                 fh.write("inputRestraints %s\n" % self._restraint_filename)
@@ -2224,11 +2264,12 @@ tabulatedPotential  1
                 fh.write("inputAngles %s\n" % self._angle_filename)
             if len(dihedrals) > 0:
                 fh.write("inputDihedrals %s\n" % self._dihedral_filename)
+            if len(vector_angles) > 0:
+                fh.write("inputVecangles %s\n" % self._vector_angle_filename)
             if len(exclusions) > 0:
                 fh.write("inputExcludes %s\n" % self._exclusion_filename)
             if len(vector_angles) > 0:
-                raise NotImplementedError
-                fh.write("inputVecAngles %s\n" % self._vector_angle_filename)
+                fh.write("inputVecangles %s\n" % self._vector_angle_filename)
             if len(bond_angles) > 0:
                 fh.write("inputBondAngles %s\n" % self._bond_angle_filename)
             if len(prod_pots) > 0:
