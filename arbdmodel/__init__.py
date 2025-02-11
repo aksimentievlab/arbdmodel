@@ -2179,6 +2179,18 @@ num {num}
                 if 'forceZGrid' in particleParams:
                     fh.write(f"forceZGridFile {_fix_path(pt.forceZGrid)}\n")
 
+                if any(f'force{x}Grid' in particleParams for x in ('X','Y','Z')) and \
+                   'forceGridScale' in particleParams:
+                    _scale = None
+                    if isinstance( pt.forceGridScale, float ):
+                        _scale = 3*[pt.forceGridScale]
+                    elif len( pt.forceGridScale ) == 1:
+                        _scale = 3*[pt.forceGridScale[0]]
+                    elif len( pt.forceGridScale ) == 3:
+                        _scale = 3*[pt.forceGridScale[0]]
+                    else:
+                        raise ValueError(f'Unrecognized format for ParticleType.forceGridScale: "{pt.forceGridScale}"')
+
                 if 'rigid_body_potentials' in particleParams:
                     grids = []
                     scales = []
