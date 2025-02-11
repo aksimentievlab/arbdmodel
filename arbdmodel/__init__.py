@@ -2190,7 +2190,7 @@ num {num}
                         _scale = pt.forceGridScale
                     else:
                         raise ValueError(f'Unrecognized format for ParticleType.forceGridScale: "{pt.forceGridScale}"')
-                    fh.write(f"forceGridScale {' '.join(map(str,pt.forceGridScale))}\n")
+                    fh.write(f"forceGridScale {' '.join(map(str,_scale))}")
                     
                 if 'rigid_body_potentials' in particleParams:
                     grids = []
