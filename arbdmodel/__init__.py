@@ -2122,6 +2122,7 @@ systemSize {dimX} {dimY} {dimZ}
 \n""".format(extra_bd_file_lines=self.extra_bd_file_lines, **params))
             
             ## Write entries for each type of particle
+            import ipdb; ipdb.set_trace()
             for pt,(num,num_rigid) in model.getParticleTypesAndCounts():
                 if num+num_rigid == 0: continue
                 devlogger.debug(f'Writing configuration for particle type {pt}')
@@ -2187,10 +2188,11 @@ num {num}
                     elif len( pt.forceGridScale ) == 1:
                         _scale = 3*[pt.forceGridScale[0]]
                     elif len( pt.forceGridScale ) == 3:
-                        _scale = 3*[pt.forceGridScale[0]]
+                        _scale = pt.forceGridScale
                     else:
                         raise ValueError(f'Unrecognized format for ParticleType.forceGridScale: "{pt.forceGridScale}"')
-
+                    fh.write(f"forceGridScale {' '.join(map(str,pt.forceGridScale))}\n")
+                    
                 if 'rigid_body_potentials' in particleParams:
                     grids = []
                     scales = []
