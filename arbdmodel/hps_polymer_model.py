@@ -6,7 +6,8 @@ import sys
 
 
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from . import logger
+from .arbd_objects import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 

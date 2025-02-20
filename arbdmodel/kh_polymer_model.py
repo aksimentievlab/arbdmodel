@@ -2,13 +2,11 @@
 ## Test with `python -m arbdmodel.kh_polymer_model`
 
 import numpy as np
-import sys
 
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from .arbd_objects import logger, ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-from .kh_polymer_model_pair_epsilon import epsilon_mj
 
 """Define particle types"""
 _types = dict(
@@ -120,6 +118,20 @@ for k,t in list(_types.items()):
     
     ## Add types for IDPs
     _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
+
+data= np.loadtxt("resources/kh_pairwise_epsilon.csv", dtype=str)
+epsilon_mj = dict()
+for n1,n2,v in data:
+    v = float(v)
+    epsilon_mj[(n1,n2)] = v
+    epsilon_mj[(n2,n1)] = v
+    epsilon_mj[(n1+'IDP',n2)]=v
+    epsilon_mj[(n2,n1+'IDP')]=v
+    epsilon_mj[(n2+'IDP',n1)]=v
+    epsilon_mj[(n1,n2+'IDP')]=v
+    epsilon_mj[(n2+'IDP',n1+'IDP')]=v
+    epsilon_mj[(n1+'IDP',n2+'IDP')]=v
+
 
     
 class KhNonbonded(AbstractPotential):
