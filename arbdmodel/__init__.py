@@ -37,6 +37,26 @@ def _get_properties_and_dict_keys(obj):
     return properties + list(obj.__dict__.keys())
 
 __active_model = None           # variable to be set temporarily by models as they are doing something, used by AbstractPotential classes (unused)
+import logging
+def _get_username():
+    import sys
+    try:
+        return sys.environ['USER']
+    except:
+        return None
+
+logging.basicConfig(format='%(name)s: %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+_ch = logging.StreamHandler()
+_ch.setFormatter(logging.Formatter('%(name)s: %(levelname)s: %(message)s'))
+logger.addHandler(_ch)
+logger.propagate = False
+
+devlogger = logging.getLogger(__name__+'.dev')
+# devlogger.setLevel(logging.DEBUG)
+if _get_username() not in ('cmaffeo2',):
+    devlogger.addHandler(logging.NullHandler())
 
         
 class PdbModel(Transformable, Parent):

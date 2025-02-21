@@ -1,9 +1,10 @@
 import numpy as np
 from copy import copy, deepcopy
 from inspect import ismethod
-from .version import devlogger
+from . import devlogger
 from copy import copy, deepcopy
 from inspect import ismethod
+from . import logger
 
 ## Abstract classes
 class Transformable():

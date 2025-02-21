@@ -3,13 +3,14 @@ from abc import abstractmethod, ABCMeta
 from . import logger
 
 from pathlib import Path
-from copy import copy, deepcopy
+from copy import deepcopy
 
 import numpy as np
 from scipy import interpolate
 
-from . import ArbdModel, Group
+from . import ArbdModel
 from .coords import rotationAboutAxis, quaternion_from_matrix, quaternion_to_matrix
+from .arbd_objects import Group, PointParticle
 
 """
 TODO:

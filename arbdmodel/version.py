@@ -40,7 +40,6 @@ from subprocess import Popen, PIPE
 
 _version_file = Path(__file__).parent / "RELEASE-VERSION"
 
-
 def check_git_repository():
     try:
         remotes = subprocess.check_output(['git', 'remote', '-v'], stderr=subprocess.STDOUT)

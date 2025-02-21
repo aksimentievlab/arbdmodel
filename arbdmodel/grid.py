@@ -45,6 +45,41 @@ def average_grids(grids, mask='nan'):
     average[counts == 0] = np.nan
     return average
 
+def loadGrid(file, **kwargs):
+    """Load grid data from DX file"""
+    # Read DX file header to get dimensions and metadata
+    with open(file, 'r') as f:
+        lines = f.readlines()
+    
+    # Parse header
+    for line in lines:
+        if 'counts' in line:
+            dims = [int(x) for x in line.split()[-3:]]
+            break
+            
+    for line in lines:
+        if 'origin' in line:
+            origin = [float(x) for x in line.split()[-3:]]
+            break
+            
+    for line in lines:
+        if 'delta' in line:
+            delta = float(line.split()[1])
+            break
+            
+    # Read data values
+    data = []
+    for line in lines:
+        try:
+            values = [float(x) for x in line.split()]
+            data.extend(values)
+        except ValueError:
+            continue
+            
+    # Reshape into 3D array
+    grid = np.array(data).reshape(dims)
+    return grid, origin, delta
+
 class TestAverageGrids(unittest.TestCase):
     def test_average_grids(self):
         grid1 = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])

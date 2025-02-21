@@ -4,7 +4,9 @@ import numpy as np
 import sys
 import pandas as pd
 ## Local imports
-from . import logger, ParticleType, PointParticle, get_resource_path
+from . import logger, get_resource_path
+from arbd_objects import ParticleType, PointParticle
+
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 

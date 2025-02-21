@@ -2,12 +2,12 @@
 ## Test with `python -m arbdmodel.fjc_polymer_model`
 
 import numpy as np
-import sys
 
 ## Local imports
-from .arbd_objects import logger, ParticleType, PointParticle
+from .arbd_objects import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
+from . import logger
 
 
 """Define particle types"""
