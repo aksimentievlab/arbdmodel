@@ -1,0 +1,67 @@
+ Generic file name: hydropro.dat                  
+ Case: 2.9-lysozyme                  
+ Input file: hydropro.dat                  
+ Main results file: lysozyme29-1-res.txt          
+ Open SolPro file: lysozyme29-1-sol.txt          
+ Open Summary file: hydropro-sum.txt              
+ Open HydroFit file: hydropro-fit.txt              
+ Type of hydropro calculation : 1
+ Atomic-level primary model; non-overlapping shell model
+ Radius of elements in primary model : 2.90 Angs.
+  
+ Reading atomic coordinates from file : 6lyz.pdb                      
+ Taking all non-H atoms
+  
+  Radius of elements in primary model : 2.90 Angs.
+         Type of hydropro calculation : 1
+                           Temperature:  20.0 centigrade
+                     Solvent viscosity:  0.01000 poise
+                      Molecular weight:    14320. Da
+        Solute partial specific volume: 0.702 cm^3/g
+                      Solution density: 1.000 g/cm^3
+                      Solution density: 1.000 g(cm^3
+  
+ Scattering calculation. Automatic data
+ Distribution of distances. Automatic data
+ Prints full 6x6 diffusion tensor
+  
+ Number of elements in primary model :         1001
+
+
+ Building shell models for  6 values of minibead radius
+    between  1.00 and  2.00 Angs, increment  0.20
+ Building shell for minibead radius :   2.00
+ Building shell for minibead radius :   1.80
+ Building shell for minibead radius :   1.60
+ Building shell for minibead radius :   1.40
+ Building shell for minibead radius :   1.20
+ Building shell for minibead radius :   1.00
+  
+ Write graphics files for primary model
+  First and last beads; coord. and radius
+           1   3.287001       10.09200       10.32900       2.900000    
+        1001  -17.84000       19.89100       8.550999       2.900000    
+  Generated coords file for graphics: coorcon.txt
+  Generating pseudo-PDB file for lysozyme29-1-pri              
+  * Type of graphics file: Pseudo-PDB
+   * Output file will be :lysozyme29-1-pri.bea          
+     by Fortran unit :17
+ Visualization file has been generated:lysozyme29-1-pri.bea          
+  Generating static VRML  file for lysozyme29-1-pri              
+  * Type of graphics file: Full POV
+   * Output file will be :lysozyme29-1-pri.vrml         
+     by Fortran unit :14
+ Visualization file has been generated:lysozyme29-1-pri.vrml         
+  
+ Calculate non-hydrodynamic properties
+   -- Calculate longest distance
+   -- Calculate scattering factor
+   -- Calculate distribution of distances
+
+ Number of values of minibead radii:   6
+    Calculation for minibead radius :   2.00     Number of minibeads :    337
+    Calculation for minibead radius :   1.80     Number of minibeads :    460
+    Calculation for minibead radius :   1.60     Number of minibeads :    617
+    Calculation for minibead radius :   1.40     Number of minibeads :    816
+    Calculation for minibead radius :   1.20     Number of minibeads :   1175
+    Calculation for minibead radius :   1.00     Number of minibeads :   1759
