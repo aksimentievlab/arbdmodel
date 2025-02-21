@@ -7,25 +7,41 @@ This module provides interfaces to external tools used in shape rigid body model
 """
 
 import os
+import sys
+import platform
 import subprocess
 from pathlib import Path
-
+from . import logger, get_resource_path
 
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
     
-    def __init__(self, binary_path, temperature=295, viscosity=0.01, solvent_density=1.0):
+    def __init__(self, binary_path=None, temperature=295, viscosity=0.01, solvent_density=1.0):
         """Initialize HydroPro interface.
         
         Args:
-            binary_path: Path to HydroPro executable
+            binary_path: Path to HydroPro executable. If None, uses bundled binary
             temperature: Temperature in Kelvin (default: 295K)
             viscosity: Solvent viscosity in poise (default: 0.01)
             solvent_density: Solvent density in g/cm3 (default: 1.0)
         """
-        self.binary = Path(binary_path)
+        if binary_path is None:
+            # Determine correct binary based on platform
+            if platform.system() == 'Windows':
+                binary_name = 'hydropro10-msd.exe'
+            else:  # Unix-like systems
+                binary_name = 'hydropro10-lnx.exe'
+            
+            self.binary = get_resource_path('hydropro10') / binary_name
+        else:
+            self.binary = Path(binary_path)
+            
         if not self.binary.exists():
-            raise FileNotFoundError(f"HydroPro binary not found at {binary_path}")
+            raise FileNotFoundError(f"HydroPro binary not found at {self.binary}")
+            
+        # Make binary executable if needed (Unix only)
+        if platform.system() != 'Windows' and not os.access(self.binary, os.X_OK):
+            os.chmod(self.binary, 0o755)
             
         self.temperature = temperature
         self.viscosity = viscosity
