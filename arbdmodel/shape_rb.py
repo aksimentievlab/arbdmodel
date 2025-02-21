@@ -18,6 +18,10 @@ from .shape_rb_cal import Get_damping_coefficients, Fix_charge, Bound_grid
 
 This module provides classes for rigid body shape modeling in the arbdmodel package,
 adapting the original SimpleARBD functionality to use RigidBody and RigidBodyType.
+SimpleARBD uses a different clustering scheme as Chris original script
+that helps resolved the sickness issue between proteins
+maybe we should have an option for users, depending if they want proteins to stick or not.
+Generating BD boundary using input formats from MD
 """
 
 class ShapeRBType(RigidBodyType):
@@ -316,6 +320,7 @@ class ShapeRbModel(ArbdModel):
                     raise TypeError("Static objects must be ShapeRBObject instances")
                 self.static_objects.append(obj)  
                 self.add(obj)
+
 
 class ShapeRbModel2(ArbdModel):
     """Model class for shape-based rigid body simulations"""

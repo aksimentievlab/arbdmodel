@@ -1,4 +1,5 @@
 """Integration with external tools for shape rigid body calculations.
+Original script by Chun Kit Chan, 2024
 
 This module provides interfaces to external tools used in shape rigid body modeling:
 - HydroPro for hydrodynamic calculations
@@ -8,7 +9,6 @@ This module provides interfaces to external tools used in shape rigid body model
 import os
 import subprocess
 from pathlib import Path
-from . import logger
 
 
 class HydroProRunner:
@@ -42,23 +42,23 @@ class HydroProRunner:
         temperature_c = self.temperature - 273.15  # Convert K to C
         
         config = f"""hydro
-{structure_name}.hydro
-hydro.pdb
-1
-2.9,
-6,
-1.2,
-3.0,
-{temperature_c},
-{self.viscosity},
-{mass},
-1.0,
-{self.solvent_density}
--1,
--1,
-0,
-1
-*"""
+        {structure_name}.hydro
+        hydro.pdb
+        1
+        2.9,
+        6,
+        1.2,
+        3.0,
+        {temperature_c},
+        {self.viscosity},
+        {mass},
+        1.0,
+        {self.solvent_density}
+        -1,
+        -1,
+        0,
+        1
+        *"""
         
         with open(output_path, 'w') as f:
             f.write(config)
@@ -187,34 +187,34 @@ class APBSRunner:
             center = 'mol 1'
             
         config = f"""read
-mol pqr {structure_name}.pqr
-end
-elec
-mg-auto
-dime {' '.join(xyz_dime)}
-cglen {' '.join(xyz_cg)}
-cgcent {center}
-fglen {' '.join(xyz_cg)}
-fgcent {center}
-mol 1
-npbe
-bcfl sdh
-srfm smol
-chgm spl2
-ion 1 {salt_conc} 2.0
-ion -1 {salt_conc} 2.0
-pdie 12.0
-sdie 78.54
-sdens 10.0
-srad 1.4
-swin 0.3
-temp {temperature}
-gamma 0.105
-calcenergy no
-calcforce no
-write pot dx {structure_name}.elec.tmp
-end
-quit"""
+        mol pqr {structure_name}.pqr
+        end
+        elec
+        mg-auto
+        dime {' '.join(xyz_dime)}
+        cglen {' '.join(xyz_cg)}
+        cgcent {center}
+        fglen {' '.join(xyz_cg)}
+        fgcent {center}
+        mol 1
+        npbe
+        bcfl sdh
+        srfm smol
+        chgm spl2
+        ion 1 {salt_conc} 2.0
+        ion -1 {salt_conc} 2.0
+        pdie 12.0
+        sdie 78.54
+        sdens 10.0
+        srad 1.4
+        swin 0.3
+        temp {temperature}
+        gamma 0.105
+        calcenergy no
+        calcforce no
+        write pot dx {structure_name}.elec.tmp
+        end
+        quit"""
 
         with open(f"{structure_name}.apbs", 'w') as f:
             f.write(config)
@@ -254,27 +254,3 @@ quit"""
             
         finally:
             os.chdir(original_dir)
-
-    def bound_grid(self, input_file, output_file, lower_bound=-20, upper_bound=20):
-        """Apply upper and lower bounds to APBS grid.
-        
-        Args:
-            input_file: Input DX file path
-            output_file: Output DX file path
-            lower_bound: Minimum allowed value
-            upper_bound: Maximum allowed value
-        """
-        # Note: This is a simple implementation - in practice you'd want to use
-        # a library like gridData to handle DX files properly
-        import numpy as np
-        from gridData import Grid
-        
-        # Load grid
-        g = Grid(input_file)
-        
-        # Apply bounds
-        g.grid[g.grid > upper_bound] = upper_bound
-        g.grid[g.grid < lower_bound] = lower_bound
-        
-        # Write output
-        g.export(output_file)

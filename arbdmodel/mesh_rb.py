@@ -16,9 +16,9 @@ from .shape_rb_cal import Get_damping_coefficients, Fix_charge, Bound_grid
 
 """Rigid body shape modeling module for arbdmodel package.
 
-This module provides classes for rigid body shape modeling in the arbdmodel package,
-adapting the original SimpleARBD functionality to use RigidBody and RigidBodyType.
+This module provides classes for simple rigid body shape mesh objects into ARBD model.
 """
+
 
 class MeshRBType(RigidBodyType):
     """RigidBodyType subclass for shape rigid body objects"""
@@ -41,8 +41,7 @@ class MeshRBType(RigidBodyType):
             viscosity: Solvent viscosity in poise (default: 0.01)
             solvent_density: Solvent density in g/cm3 (default: 1.0)
             vmd_path: Path to VMD executable
-            hydro_path: Path to HydroPro executable
-            apbs_path: Path to APBS executable
+
         """
         super().__init__(
             name=name,
@@ -55,22 +54,12 @@ class MeshRBType(RigidBodyType):
         self.structure_path = Path(structure_path)
         self.temperature = temperature
         self.viscosity = viscosity
-        self.solvent_density = solvent_density
         
         # Store paths to required executables
         self.vmd_path = vmd_path or 'vmd'
-        self.hydro_path = hydro_path or 'hydropro'
-        self.apbs_path = apbs_path or 'apbs'
         
         # Initialize runners
-        self.hydro_runner = HydroProRunner(
-            self.hydro_path,
-            temperature=temperature,
-            viscosity=viscosity,
-            solvent_density=solvent_density
-        )
-        self.apbs_runner = APBSRunner(self.apbs_path)
-        
+
     def prepare_structure(self, align=True, skip_parametrizing=False):
         """Prepare structure files by aligning and parametrizing.
         
@@ -246,19 +235,11 @@ class MeshRbModel(ArbdModel):
         super().__init__(children=[], dimensions=dimensions, **kwargs)
         
         self.diffusible_objects = []
-        self.static_objects = []
         
         # Add diffusible objects
         for obj in objects:
-            if not isinstance(obj, ShapeRBObject):
+            if not isinstance(obj, MeshRBObject):
                 raise TypeError("Objects must be ShapeRBObject instances")
             self.diffusible_objects.append(obj)
             self.add(obj)
             
-        # Add static objects if provided
-        if static_objects:
-            for obj in static_objects:
-                if not isinstance(obj, ShapeRBObject):
-                    raise TypeError("Static objects must be ShapeRBObject instances")
-                self.static_objects.append(obj)  
-                self.add(obj)
