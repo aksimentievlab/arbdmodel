@@ -11,28 +11,24 @@ from .arbd_objects import RigidBody, RigidBodyType
 from . import ArbdModel
 from .interactions import AbstractPotential
 
-from .shape_rb_cal import Get_damping_coefficients, Fix_charge, Bound_grid
-
-
 """Rigid body shape modeling module for arbdmodel package.
 
 This module provides classes for simple rigid body shape mesh objects into ARBD model.
+
+Input: .msh file
 """
 
 
 class MeshRBType(RigidBodyType):
     """RigidBodyType subclass for shape rigid body objects"""
     
-    def __init__(self, name, structure_path, mass=None, moment_of_inertia=None,
-                 diffusivity=None, damping_coefficient=None, 
-                 temperature=300, viscosity=0.01, solvent_density=1.0,
-                 vmd_path=None, hydro_path=None, apbs_path=None,
-                 **kwargs):
+    def __init__(self, name, msh_file, mass=None, moment_of_inertia=None,
+                 diffusivity=None, damping_coefficient=None, vmd_path=None, **kwargs):
         """Initialize shape type.
         
         Args:
             name: Name identifier for this type
-            structure_path: Path to structure file (.psf/.pdb)
+            msh_file: Path to structure file (.psf/.pdb)
             mass: Mass in AMU
             moment_of_inertia: 3-element list of principal moments of inertia
             diffusivity: Optional diffusion coefficient
@@ -51,9 +47,7 @@ class MeshRBType(RigidBodyType):
             damping_coefficient=damping_coefficient,
             **kwargs
         )
-        self.structure_path = Path(structure_path)
-        self.temperature = temperature
-        self.viscosity = viscosity
+        self.msh_file = Path(msh_file)
         
         # Store paths to required executables
         self.vmd_path = vmd_path or 'vmd'
@@ -71,7 +65,7 @@ class MeshRBType(RigidBodyType):
             logger.info(f"Skipping parametrization for {self.name}")
             return
             
-        base_name = self.structure_path.stem
+        base_name = self.msh_file.stem
         work_dir = Path.cwd()
         
         if align:
