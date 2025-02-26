@@ -4,7 +4,7 @@
 import numpy as np
 
 ## Local imports
-from .arbd_objects import ParticleType, PointParticle
+from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 from . import logger
@@ -16,15 +16,6 @@ type_ = ParticleType("X",
                      mass=120
 )
 
-# ## Bonded potentials
-# class FjcNonbonded(AbstractPotential):
-#     """ This potential should apply zero force; however, it is required for the arbd engine """
-#     def __init__(self, resolution=0.1, range_=(0,1)):
-#         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
-
-#     def potential(self, r, types):
-#         u = np.zeros(r.shape)
-#         return u
 
 class FjcBeadsFromPolymer(PolymerBeads):
 

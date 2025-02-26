@@ -4,7 +4,7 @@ import sys
 
 ## Local imports
 from . import logger,  get_resource_path
-from .arbd_objects import ParticleType, PointParticle, Group
+from . import ParticleType, PointParticle, Group
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import TabulatedNonbonded, HarmonicBond, HarmonicAngle, HarmonicDihedral
 

@@ -7,8 +7,8 @@ import numpy as np
 from pathlib import Path
 from . import logger
 
-from .arbd_objects import RigidBody, RigidBodyType
-from . import ArbdModel
+from . import RigidBody, RigidBodyType
+from .engine import ArbdModel
 from .interactions import AbstractPotential
 
 """Rigid body shape modeling module for arbdmodel package.

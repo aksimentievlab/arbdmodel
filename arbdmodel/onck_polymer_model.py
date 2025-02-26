@@ -5,8 +5,7 @@ import numpy as np
 import sys
 
 ## Local imports
-from . import devlogger, logger, get_resource_path
-from .arbd_objects import ParticleType, PointParticle
+from . import devlogger, logger, get_resource_path, ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 from .version import Citation

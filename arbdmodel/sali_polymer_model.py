@@ -6,7 +6,8 @@ import sys
 
 
 ## Local imports
-from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
+from . import ParticleType, PointParticle, Group, get_resource_path    
+from engine import ArbdModel
 from .polymer import PolymerSection, PolymerGroup
 from .interactions import NonbondedScheme, HarmonicBond, HarmonicPotential
 from .coords import quaternion_to_matrix

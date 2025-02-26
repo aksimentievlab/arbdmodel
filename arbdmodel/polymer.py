@@ -8,9 +8,9 @@ from copy import deepcopy
 import numpy as np
 from scipy import interpolate
 
-from . import ArbdModel
+from .engine import ArbdModel
 from .coords import rotationAboutAxis, quaternion_from_matrix, quaternion_to_matrix
-from .arbd_objects import Group, PointParticle
+from . import Group, PointParticle
 
 """
 TODO:

@@ -2,12 +2,9 @@
 ## Test with `python -m arbdmodel.hps_polymer_model`
 
 import numpy as np
-import sys
-
 
 ## Local imports
-from . import logger
-from .arbd_objects import ParticleType, PointParticle
+from . import logger, ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 
