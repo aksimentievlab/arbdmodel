@@ -12,7 +12,6 @@ from .version import get_version
 __version__ = get_version() 
 
 from .interactions import NullPotential
-from . import Transformable, Parent, Group
 import numpy as np
 from copy import copy, deepcopy
 from inspect import ismethod
