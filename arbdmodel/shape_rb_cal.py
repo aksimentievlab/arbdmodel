@@ -1,4 +1,5 @@
 # SimpleARBD/Accessory_routines_for_ARBD.py by Chun Kit Chan, using grid.py 
+# SimpleARBD/Accessory_routines_for_ARBD.py by Chun Kit Chan, using grid.py 
 
 from __future__ import absolute_import, print_function
 import numpy as np 
@@ -6,9 +7,8 @@ from scipy import signal
 import math
 import os,sys
 from .grid import writeDx, gaussian_kernel, loadGrid
+from . import logger
 
-def info(*obj):
-    print('INFO: ',obj , file=sys.stderr)
 
 def Get_damping_coefficients(hydroproFile, massFile, inertiaFile, outFile):
     """Calculate damping coefficients"""
@@ -70,14 +70,14 @@ def Fix_charge(inFile, outFile, netChargeFile):
     ids = np.where(np.abs(grid[:]) > 0.01)
 
     numPoints = np.size(ids)
-    info(np.sum(grid), numPoints, np.sum(grid)/numPoints)
+    #logger.info(f"{np.sum(grid)}, {numPoints}, {np.sum(grid)/numPoints}")
 
     # Remove excess charge (in loop due to machine error)
     while np.abs(np.sum(grid) - netCharge) > 0.0001:
         grid[ids] = grid[ids] + (netCharge-np.sum(grid))/numPoints
-        #info(np.sum(grid), numPoints, np.sum(grid)/numPoints)
+        #logger.info(f"{np.sum(grid)}, {numPoints}, {np.sum(grid)/numPoints}")
 
-    info("Final charge", np.sum(grid))
+    logger.info(f"Final charge {np.sum(grid)}")
 
     # Write output using writeDx
     writeDx(outFile, grid, origin, [delta, delta, delta])
@@ -139,8 +139,8 @@ def Find_boundary_end_points(cellBasisVector1=[10,0,0],
     xyz_max = [cellOrigin[ind] + xyz_travel[ind] * 0.5 for ind in range(3)]
 
     return (xyz_min[0], xyz_min[1], xyz_min[2], xyz_max[0], xyz_max[1], xyz_max[2])
+    
 def Create_a_rectangular_mesh(wallRangeX, wallRangeY, wallRangeZ, blur, dd):
-
     x = np.linspace(wallRangeX[0], wallRangeX[1], int((wallRangeX[1]-wallRangeX[0])/dd) + 1)
     y = np.linspace(wallRangeY[0], wallRangeY[1], int((wallRangeY[1]-wallRangeY[0])/dd) + 1)
     z = np.linspace(wallRangeZ[0], wallRangeZ[1], int((wallRangeZ[1]-wallRangeZ[0])/dd) + 1)
@@ -198,23 +198,19 @@ def Create_null(grid_path='null.dx'):
     writeDx(grid_path, zeros, origin, delta)
 
 def Generate_spanning_vectors(bv1, bv2, bv3, dimensions, buff=5):
-
     dd = max(dimensions) + 2 * buff
 
     n1 = round(np.linalg.norm(bv1)/dd) + 1
     n2 = round(np.linalg.norm(bv2)/dd) + 1
     n3 = round(np.linalg.norm(bv3)/dd) + 1
 
-
     v1 = np.array(bv1) /n1
     v2 = np.array(bv2) /n2
     v3 = np.array(bv3) /n3
 
-
     return v1, v2, v3, n1, n2, n3
 
 def Generate_coordinates(bv1, bv2, bv3, n1, n2, n3, num_copy, origin, replica_index):
-
     ori_vec = np.array(origin)
 
     if n1 * n2 * n3 > num_copy:

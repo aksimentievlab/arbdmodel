@@ -7,13 +7,13 @@ import numpy as np
 from pathlib import Path
 from . import logger
 
-from . import RigidBody, RigidBodyType
-from .engine import ArbdModel
+from .arbd_objects import RigidBody, RigidBodyType
+from . import ArbdModel
 from .interactions import AbstractPotential
 
 """Rigid body shape modeling module for arbdmodel package.
 
-This module provides classes for simple rigid body shape mesh objects into ARBD model.
+This module provides classes for simple metal rigid body shape mesh objects into ARBD model.
 
 Input: .msh file
 """
@@ -52,9 +52,7 @@ class MeshRBType(RigidBodyType):
         # Store paths to required executables
         self.vmd_path = vmd_path or 'vmd'
         
-        # Initialize runners
-
- 
+        
 class MeshRBObject(RigidBody):
     """RigidBody subclass representing a shape object"""
     
@@ -78,6 +76,10 @@ class MeshRBObject(RigidBody):
             **kwargs
         )
         
+        # Add electrostatics potential to potential grids
+        if hasattr(type_, 'charge_dx'):
+            self.add_potential_grid('elec', type_.charge_dx, scale=0.59616195)
+            self.add_charge_grid('elec', type_.charge_density_dx)
 
 class MeshRbModel(ArbdModel):
     """Model class for shape-based rigid body simulations"""

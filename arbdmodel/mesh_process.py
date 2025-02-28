@@ -3,7 +3,7 @@ import gmsh
 from scipy.spatial import KDTree
 from pathlib import Path
 import subprocess
-#from .grid import writeDx
+from .grid import writeDx
 
 """input: 3d mesh in .msh, density of object. Output: no-entering potential, transdamp, rotdamping."""
 
