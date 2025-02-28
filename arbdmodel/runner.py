@@ -11,7 +11,7 @@ import sys
 import platform
 import subprocess
 from pathlib import Path
-from __init__ import logger, get_resource_path
+from . import logger, get_resource_path
 
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
