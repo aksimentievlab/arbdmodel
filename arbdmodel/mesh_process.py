@@ -4,6 +4,11 @@ from scipy.spatial import KDTree
 from pathlib import Path
 import subprocess
 from .grid import writeDx
+from runner import HydroProRunner
+from . import get_resource_path
+import platform
+import os
+
 
 """input: 3d mesh in .msh, density of object. Output: no-entering potential, transdamp, rotdamping."""
 
@@ -15,13 +20,13 @@ class MeshProcessor:
     
     def __init__(self, mesh_file, density=1.0, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 hydropro_path=None, extract_surface=False):
+                 binary_path=None, extract_surface=False):
         """
         Initialize processor with mesh file
         
         Args:
             mesh_file: Path to .msh file
-            density: Material density in mass units per volume unit
+            density: Material density in mass units per volume unit in g/cm^3
             temperature: Temperature in Kelvin
             viscosity: Solvent viscosity in poise
             solvent_density: Solvent density in g/cm3
@@ -35,7 +40,24 @@ class MeshProcessor:
         self.temperature = temperature
         self.viscosity = viscosity
         self.solvent_density = solvent_density
-        self.hydropro_path = hydropro_path or "hydropro"
+        if binary_path is None:
+            # Determine correct binary based on platform
+            if platform.system() == 'Windows':
+                binary_name = 'hydropro10-msd.exe'
+            else:  # Unix-like systems
+                binary_name = 'hydropro10-lnx.exe'
+            
+            self.binary = get_resource_path('hydropro10') / binary_name
+        else:
+            self.binary = Path(binary_path)
+            
+        if not self.binary.exists():
+            raise FileNotFoundError(f"HydroPro binary not found at {self.binary}")
+            
+        # Make binary executable if needed (Unix only)
+        if platform.system() != 'Windows' and not os.access(self.binary, os.X_OK):
+            os.chmod(self.binary, 0o755)
+            
         
         # Initialize gmsh and read mesh
         gmsh.initialize()
@@ -255,24 +277,24 @@ class MeshProcessor:
         config_path = work_dir / "hydropro.dat"
         with open(config_path, 'w') as f:
             f.write(f"""hydro                          ! Project title
-hydro-res.txt                   ! Output file
-hydro.pdb                      ! Input PDB file
-1                             ! NMC (calculation mode)- shell model
-{atomic_radius:.1f}            ! AER (atomic element radius in nm)
-6                             ! NSIG (number of values for interpolation)
-1.2                           ! SIGMIN (minimum radius of for shell calculation in nm)
-3.0                           ! SIGMAX (maximum radius for shell calculation in nm)
-{temperature_c}                ! TEMP (temperature in Celsius)
-{self.viscosity}              ! ETA (viscosity in poise)
-{self.mass}                   ! RHOPR (protein density in g/cm^3)
-1.0                           ! RHOSO (solvent density in g/cm^3)
-{self.solvent_density}        ! ETASO (solvent viscosity in poise)
--1                           ! IUSEP (use P or not)
--1                           ! IUSM (use M or not)
-0                            ! IBEG
-1                            ! IEND
-*""")
-        
+        hydro-res.txt                   ! Output file
+        hydro.pdb                      ! Input PDB file
+        1                             ! NMC (calculation mode)- shell model
+        {atomic_radius:.1f}            ! AER (atomic element radius in nm)
+        6                             ! NSIG (number of values for interpolation)
+        1.2                           ! SIGMIN (minimum radius of for shell calculation in nm)
+        3.0                           ! SIGMAX (maximum radius for shell calculation in nm)
+        {temperature_c}                ! TEMP (temperature in Celsius)
+        {self.viscosity}              ! ETA (viscosity in poise)
+        {self.mass}                   ! RHOPR (protein density in g/cm^3)
+        1.0                           ! RHOSO (solvent density in g/cm^3)
+        {self.solvent_density}        ! ETASO (solvent viscosity in poise)
+        -1                           ! IUSEP (use P or not)
+        -1                           ! IUSM (use M or not)
+        0                            ! IBEG
+        1                            ! IEND
+        *""")
+                
         return pdb_path, config_path
 
     def _calculate_hydro_properties(self):
