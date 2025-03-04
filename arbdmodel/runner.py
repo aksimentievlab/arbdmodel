@@ -16,7 +16,7 @@ from . import logger, get_resource_path
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
     
-    def __init__(self, binary_path=None, temperature=295, viscosity=0.01, solvent_density=1.0):
+    def __init__(self, mass,binary_path=None, temperature=295, viscosity=0.01, solvent_density=1.0,structure_name="hydrocal"):
         """Initialize HydroPro interface.
         
         Args:
@@ -24,6 +24,7 @@ class HydroProRunner:
             temperature: Temperature in Kelvin (default: 295K)
             viscosity: Solvent viscosity in poise (default: 0.01)
             solvent_density: Solvent density in g/cm3 (default: 1.0)
+            mass: mass in amu
         """
         if binary_path is None:
             # Determine correct binary based on platform
@@ -46,8 +47,12 @@ class HydroProRunner:
         self.temperature = temperature
         self.viscosity = viscosity
         self.solvent_density = solvent_density
+        self.structure_name=structure_name
+        self.mass=mass
         
-    def write_config(self, structure_name, mass, output_path="hydropro.dat"):
+    def write_config(self,output_path="hydropro.dat"):
+        mass=self.mass
+        structure_name=self.structure_name
         """Write HydroPro configuration file.
         
         Args:
@@ -78,53 +83,9 @@ class HydroProRunner:
         
         with open(output_path, 'w') as f:
             f.write(config)
-            
-    def run_calculation(self, structure_name, mass, work_dir="."):
-        """Run HydroPro calculation.
-        
-        Args:
-            structure_name: Base name of structure files
-            mass: Mass in AMU
-            work_dir: Working directory for calculation
-        
-        Returns:
-            Dictionary containing:
-            - translation_damping: [Dx, Dy, Dz]
-            - rotation_damping: [Rx, Ry, Rz]
-        """
-        original_dir = os.getcwd()
-        try:
-            os.chdir(work_dir)
-            
-            # Write config
-            self.write_config(structure_name, mass)
-            
-            # Link structure file
-            pdb_path = Path(f"{structure_name}.pdb")
-            if not pdb_path.exists():
-                raise FileNotFoundError(f"Structure file not found: {pdb_path}")
-            os.symlink(pdb_path, "hydro.pdb")
-            
-            # Run HydroPro
-            result = subprocess.run([str(self.binary)], 
-                                 capture_output=True, 
-                                 text=True,
-                                 check=True)
-            
-            # Parse results
-            trans_damp, rot_damp = self._parse_output(f"{structure_name}.hydro-res.txt", mass)
-            
-            return {
-                "translation_damping": trans_damp,
-                "rotation_damping": rot_damp
-            }
-            
-        finally:
-            if os.path.exists("hydro.pdb"):
-                os.unlink("hydro.pdb")
-            os.chdir(original_dir)
-            
-    def _parse_output(self, output_file, mass):
+
+    def parse_output(self, output_file):
+        mass=self.mass
         """Parse HydroPro output file to get damping coefficients.
         
         Args:
@@ -136,6 +97,7 @@ class HydroProRunner:
         """
         with open(output_file) as f:
             lines = f.readlines()
+        mass=self.mass
             
         # Skip header
         line_num = 48
@@ -161,6 +123,52 @@ class HydroProRunner:
         rot_damp = [2.4527692e+17 / (x*mass) for x in [Rx, Ry, Rz]]
         
         return trans_damp, rot_damp
+                
+    def run_calculation(self,work_dir="."):
+        """Run HydroPro calculation.
+        
+        Args:
+            structure_name: Base name of structure files
+            mass: Mass in AMU
+            work_dir: Working directory for calculation
+        
+        Returns:
+            Dictionary containing:
+            - translation_damping: [Dx, Dy, Dz]
+            - rotation_damping: [Rx, Ry, Rz]
+        """
+        structure_name, mass=self.structure_name, self.mass
+        original_dir = os.getcwd()
+        try:
+            os.chdir(work_dir)
+            
+            # Write config
+            self.write_config()
+            
+            # Link structure file
+            pdb_path = Path(f"{structure_name}.pdb")
+            if not pdb_path.exists():
+                raise FileNotFoundError(f"Structure file not found: {pdb_path}")
+            os.symlink(pdb_path, "hydro.pdb")
+            
+            # Run HydroPro
+            result = subprocess.run([str(self.binary)], 
+                                 capture_output=True, 
+                                 text=True,
+                                 check=True)
+            
+            # Parse results
+            trans_damp, rot_damp = self._parse_output(f"{structure_name}.hydro-res.txt", mass)
+            
+            return {
+                "translation_damping": trans_damp,
+                "rotation_damping": rot_damp
+            }
+            
+        finally:
+            if os.path.exists("hydro.pdb"):
+                os.unlink("hydro.pdb")
+            os.chdir(original_dir)
 
 class APBSRunner:
     """Interface to APBS for electrostatics calculations"""

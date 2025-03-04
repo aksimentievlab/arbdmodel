@@ -194,9 +194,9 @@ class ShapeRBType(RigidBodyType):
             self.mass = float(f.readline().strip())
             
         # Run HydroPro to get hydrodynamic properties
-        results = self.hydro_runner.run_calculation(
-            base_name,
-            self.mass,
+        results = self.hydro_runner.run_calculation(pdb=f"{base_name}.aligned.pdb",
+            structure_name=base_name,
+            mass=self.mass,
             work_dir=str(work_dir)
         )
         

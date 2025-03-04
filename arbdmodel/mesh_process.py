@@ -4,7 +4,7 @@ from scipy.spatial import KDTree
 from pathlib import Path
 import subprocess
 from .grid import writeDx
-from runner import HydroProRunner
+from .runner import HydroProRunner
 from . import get_resource_path
 import platform
 import os
@@ -18,7 +18,7 @@ class MeshProcessor:
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
     
-    def __init__(self, mesh_file, density=1.0, temperature=295, viscosity=0.01, 
+    def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
                  binary_path=None, extract_surface=False):
         """
@@ -40,25 +40,9 @@ class MeshProcessor:
         self.temperature = temperature
         self.viscosity = viscosity
         self.solvent_density = solvent_density
-        if binary_path is None:
-            # Determine correct binary based on platform
-            if platform.system() == 'Windows':
-                binary_name = 'hydropro10-msd.exe'
-            else:  # Unix-like systems
-                binary_name = 'hydropro10-lnx.exe'
-            
-            self.binary = get_resource_path('hydropro10') / binary_name
-        else:
-            self.binary = Path(binary_path)
-            
-        if not self.binary.exists():
-            raise FileNotFoundError(f"HydroPro binary not found at {self.binary}")
-            
-        # Make binary executable if needed (Unix only)
-        if platform.system() != 'Windows' and not os.access(self.binary, os.X_OK):
-            os.chmod(self.binary, 0o755)
-            
-        
+        self.binary_path=binary_path
+
+
         # Initialize gmsh and read mesh
         gmsh.initialize()
         gmsh.open(str(self.mesh_file))
@@ -72,7 +56,7 @@ class MeshProcessor:
         
         # Calculate basic properties before alignment
         self.volume = self._calculate_volume()
-        self.mass = self.volume * self.density
+        self.mass = self.volume * self.density*0.6022 #g/cm^3 to amu/AA^3
         
         # Align mesh to center of mass and principal axes
         self._align_mesh()
@@ -82,8 +66,9 @@ class MeshProcessor:
         self.principal_moments = np.diag(self.inertia_tensor)
         
         # Calculate hydrodynamic properties
-        self._calculate_hydro_properties()
-        
+        self.runner=HydroProRunner(self.mass,temperature=temperature,viscosity=viscosity, binary_path=binary_path)
+        self._get_damping()
+        print(self.transdamp,self.rotational_damping_coefficient)
         gmsh.finalize()
 
     def _get_nodes(self):
@@ -252,16 +237,22 @@ class MeshProcessor:
         self.rotation_matrix = eigenvectors
         self.translation = com
 
-    def _write_hydropro_input(self, work_dir):
+    def _get_damping(self, work_dir="hydrocalc"):
         """Write input files for HYDROPRO"""
         # First calculate bounding box to estimate atomic element radius
         bounds_min = np.min(self.nodes, axis=0)
         bounds_max = np.max(self.nodes, axis=0)
         max_dim = np.max(bounds_max - bounds_min)
         atomic_radius = max_dim / 50  # Rule of thumb for initial radius
-        
         # Write PDB file with surface nodes as pseudo-atoms
-        pdb_path = work_dir / "hydro.pdb"
+
+        try:
+            os.listdir(work_dir)
+        except:
+            os.mkdir(work_dir)
+
+        work_dir=Path(work_dir)
+        pdb_path = work_dir / "hydrocal.pdb"
         with open(pdb_path, 'w') as f:
             for i, node in enumerate(self.nodes):
                 x, y, z = node / 10  # Convert to nm for HYDROPRO
@@ -273,81 +264,17 @@ class MeshProcessor:
         
         # Write HYDROPRO config
         # Using HYDROPRO's shell model mode (NMC=1) with automated radius calculation
-        temperature_c = self.temperature - 273.15  # Convert K to C
-        config_path = work_dir / "hydropro.dat"
-        with open(config_path, 'w') as f:
-            f.write(f"""hydro                          ! Project title
-        hydro-res.txt                   ! Output file
-        hydro.pdb                      ! Input PDB file
-        1                             ! NMC (calculation mode)- shell model
-        {atomic_radius:.1f}            ! AER (atomic element radius in nm)
-        6                             ! NSIG (number of values for interpolation)
-        1.2                           ! SIGMIN (minimum radius of for shell calculation in nm)
-        3.0                           ! SIGMAX (maximum radius for shell calculation in nm)
-        {temperature_c}                ! TEMP (temperature in Celsius)
-        {self.viscosity}              ! ETA (viscosity in poise)
-        {self.mass}                   ! RHOPR (protein density in g/cm^3)
-        1.0                           ! RHOSO (solvent density in g/cm^3)
-        {self.solvent_density}        ! ETASO (solvent viscosity in poise)
-        -1                           ! IUSEP (use P or not)
-        -1                           ! IUSM (use M or not)
-        0                            ! IBEG
-        1                            ! IEND
-        *""")
-                
-        return pdb_path, config_path
-
-    def _calculate_hydro_properties(self):
-        """Calculate hydrodynamic properties using HYDROPRO"""
-        # Create working directory
-        work_dir = Path.cwd() / "hydro_calc"
-        work_dir.mkdir(exist_ok=True)
+            
+        # Run HydroPro to get hydrodynamic properties
+        results = self.runner.run_calculation(
+            work_dir=work_dir
+        )
         
-        try:
-            # Write input files
-            pdb_path, config_path = self._write_hydropro_input(work_dir)
-            
-            # Run HYDROPRO
-            subprocess.run([self.hydropro_path], 
-                         cwd=work_dir,
-                         check=True,
-                         capture_output=True)
-            
-            # Parse results file
-            results_file = work_dir / "hydro-res.txt"
-            lineNum = 1
-            with open(results_file) as f:
-                # Skip header
-                while lineNum <= 48:
-                    f.readline()
-                    lineNum += 1
-                
-                # Read translational coefficients
-                Dx = float(f.readline().split()[0])
-                Dy = float(f.readline().split()[1])
-                Dz = float(f.readline().split()[2])
-                
-                # Skip two lines
-                f.readline()
-                f.readline()
-                
-                # Read rotational coefficients
-                Rx = float(f.readline().split()[3])
-                Ry = float(f.readline().split()[4])
-                Rz = float(f.readline().split()[5])
-            
-            # Convert units
-            # Translation: "(295 k K) / (( cm^2/s) *  amu)" "1/ns"
-            self.translation_damping = [24.527692/(x*self.mass) for x in [Dx,Dy,Dz]]
-            
-            # Rotation: "(295 k K) / ((1 /s) *  amu AA^2)" "1/ns"
-            self.rotation_damping = [2.4527692e+17 / (x*self.mass) for x in [Rx,Ry,Rz]]
-            
-        finally:
-            # Cleanup
-            if work_dir.exists():
-                import shutil
-                shutil.rmtree(work_dir)
+        self.damping_coefficient = results['translation_damping']
+        self.rotational_damping_coefficient = results['rotation_damping']
+        
+        return pdb_path
+
 
     def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
         """Generate potential grid for ARBD"""
@@ -411,8 +338,8 @@ class MeshProcessor:
         gmsh.write(str(output_file))
         gmsh.finalize()
 
-def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx=None, 
-                     output_mesh=None, hydropro_path=None, **kwargs):
+def process_mesh_file(mesh_file, temperature=295, output_dx="pod.dx", 
+                     output_mesh="rod.msh",  **kwargs):
     """
     Process mesh file and calculate all properties
     
@@ -425,8 +352,7 @@ def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx=None,
         hydropro_path: Path to HYDROPRO executable
         **kwargs: Additional arguments for potential generation
     """
-    processor = MeshProcessor(mesh_file, density, temperature=temperature,
-                            hydropro_path=hydropro_path)
+    processor = MeshProcessor(mesh_file, temperature=temperature,)
     
     print(f"Mass: {processor.mass:.3f}")
     print(f"Volume: {processor.volume:.3f}")
@@ -444,3 +370,5 @@ def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx=None,
         processor.save_aligned_mesh(output_mesh)
         
     return processor
+if __name__=="__main__":
+    process_mesh_file("3drod.msh")
