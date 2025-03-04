@@ -1,5 +1,5 @@
-DefineConstant[ R = 0.018 ];
-DefineConstant[ H = 0.144 ];
+DefineConstant[ R = 0.011 ];
+DefineConstant[ H = 0.076 ];
 DefineConstant[ N = 3     ];
 DefineConstant[ Smooth=1  ];
 
