@@ -18,7 +18,7 @@ class MeshProcessor:
     
     def __init__(self, mesh_file, density=1.0, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 extract_surface=True):
+                 extract_surface=False):
         """
         Initialize processor with mesh file
         
@@ -43,9 +43,11 @@ class MeshProcessor:
         gmsh.open(str(self.mesh_file))
         
         # Get nodes and elements
-        
-        self.nodes = self._get_nodes()
-        self.elements = self._get_elements()
+        if extract_surface:
+            self.nodes, self.elements = self._extract_surface_mesh()
+        else:
+            self.nodes = self._get_nodes()
+            self.elements = self._get_elements()
         
         # Calculate basic properties before alignment
         self.volume = self._calculate_volume()
@@ -57,9 +59,7 @@ class MeshProcessor:
         # Calculate final properties after alignment
         self.inertia_tensor = self._calculate_inertia_tensor()
         self.principal_moments = np.diag(self.inertia_tensor)
-        if extract_surface:
-            self.nodes, self.elements = self._extract_surface_mesh()
-
+        
         # Calculate diffusion coefficients 
         self._calculate_diffusion()
         
@@ -97,7 +97,7 @@ class MeshProcessor:
         gmsh.model.mesh.createTopology()
         
         # Get surface elements
-        surface_dimtags = gmsh.model.getBoundary([tag for tag in gmsh.model.getEntities(3)], 
+        surface_dimtags = gmsh.model.getBoundary([(3, tag) for tag in gmsh.model.getEntities(3)], 
                                                 combined=False, oriented=False)
         
         # Create a new physical group for the surface
@@ -127,7 +127,7 @@ class MeshProcessor:
         node_index_map = {}  # Map old indices to new ones
         
         for i, old_idx in enumerate(sorted(all_surface_nodes)):
-            coords = gmsh.model.mesh.getNode(int(old_idx + 1))[0]  # +1 because gmsh uses 1-based indexing
+            coords = gmsh.model.mesh.getNode(old_idx + 1)[0]  # +1 because gmsh uses 1-based indexing
             surface_nodes.append(coords)
             node_index_map[old_idx] = i
             
@@ -232,169 +232,72 @@ class MeshProcessor:
         self.translation = com
 
     def _calculate_diffusion(self):
-        """
-        Calculate diffusion and damping coefficients using ellipsoidal model
-        with anisotropic translational and rotational coefficients.
-        
-        The damping coefficient is defined as γ = kB·T/(D·m) with units [1/ns]
-        """
-        # Physical constants
-        kB = 1.380649e-23  # J/K
-        kB_T = kB * self.temperature  # J
-        
-        # Calculate principal axes of the ellipsoid using the gyration tensor
+        """Calculate diffusion and damping coefficients based on mesh geometry"""
+        # Calculate hydrodynamic radius from gyration tensor
         gyration_tensor = np.zeros((3, 3))
-        for v in self.nodes:
+        for v in self.nodes:  # Nodes are already centered at CoM during alignment
             gyration_tensor += np.outer(v, v)
         gyration_tensor /= len(self.nodes)
         
-        # Diagonalize the gyration tensor to get principal radii
-        gyr_eigenvals, gyr_eigenvecs = np.linalg.eigh(gyration_tensor)
+        # Get radius of gyration from the trace of gyration tensor
+        Rg_squared = np.trace(gyration_tensor)
+        Rg = np.sqrt(Rg_squared)
         
-        # Scaling factor to convert from gyration to semi-axes
-        scale_factor = 5.0
+        # Approximation for hydrodynamic radius
+        Rh = Rg * (5/3)**0.5  # in Angstroms
         
-        # Semi-axes in descending order
-        semi_axes = np.sqrt(scale_factor * gyr_eigenvals)
-        a, b, c = semi_axes[::-1]  # Largest to smallest
+        # Convert to meters for damping calculation
+        Rh_m = Rh * 1e-10  # Å to m
         
-        # Convert to meters for hydrodynamic calculations
-        a_m, b_m, c_m = a * 1e-10, b * 1e-10, c * 1e-10  # Å to m
+        # Calculate translational damping using Stokes' law
+        # gamma = 6 * pi * eta * Rh
+        gamma_trans = 6 * np.pi * self.viscosity * Rh_m  # kg/s
         
-        # Calculate translational friction coefficients for ellipsoid
-        # Using Perrin's formulas for ellipsoids
+        # Convert to ARBD units (1/ns)
+        # 1/ns = 1e9/s
+        # kg/s * (1/amu) * (1e9/s) = 1e9/(amu*s) = 1/(amu*ns)
+        amu = 1.66054e-27  # kg
+        gamma_trans_arbd = gamma_trans / (self.mass * amu) * 1e9
         
-        # Calculate shape factors
-        if np.isclose(b, c, rtol=0.05):  # Prolate ellipsoid (a > b ≈ c)
-            e = np.sqrt(1 - (b_m/a_m)**2)  # Eccentricity
-            
-            # Shape factor S for prolate ellipsoid
-            if e > 0.99:  # Avoid numerical issues for very elongated shapes
-                S = 2 * np.log(2*a_m/b_m) - 0.5
-            else:
-                S = 2 * np.log((1 + e)/(1 - e)) / e - 2*e/(1 - e**2)
-                
-            # Translational friction coefficients
-            gamma_a = 6 * np.pi * self.viscosity * b_m / S  # Along major axis
-            gamma_bc = 6 * np.pi * self.viscosity * b_m / (0.5 * S + 1)  # Perpendicular to major axis
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_a, gamma_bc, gamma_bc])
-            
-            # Rotational friction coefficients
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            gamma_rot_a = 6 * self.viscosity * V * (1 - e**2) / (e**2) * (-2*e/(1-e**2) + np.log((1+e)/(1-e)))  # Around minor axes
-            gamma_rot_bc = 6 * self.viscosity * V * (1 + e**2) / (e**2) * (2*e/(1-e**2) - (1-e**2)/(2*e) * np.log((1+e)/(1-e)))  # Around major axis
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_bc, gamma_rot_a, gamma_rot_a])
-            
-        elif np.isclose(a, b, rtol=0.05):  # Oblate ellipsoid (a ≈ b > c)
-            e = np.sqrt(1 - (c_m/a_m)**2)  # Eccentricity
-            
-            # Shape factor S for oblate ellipsoid
-            if e > 0.99:  # Avoid numerical issues for very flat shapes
-                S = np.pi * a_m / (2 * c_m)
-            else:
-                S = 2 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2))
-                
-            # Translational friction coefficients
-            gamma_ab = 6 * np.pi * self.viscosity * a_m / (1 + 0.5*S*(1-e**2)/e)  # Perpendicular to minor axis
-            gamma_c = 6 * np.pi * self.viscosity * a_m / (S*(1-e**2)/e)  # Along minor axis
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_ab, gamma_ab, gamma_c])
-            
-            # Rotational friction coefficients
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            gamma_rot_c = 6 * self.viscosity * V * (2 - e**2) / (e**2) * (e/(1-e**2) - 0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)))  # Around minor axis
-            gamma_rot_ab = 6 * self.viscosity * V * (2 + e**2) / (e**2) * (0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)) - e/(1-e**2))  # Around major axes
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_ab, gamma_rot_ab, gamma_rot_c])
-            
-        else:  # General triaxial ellipsoid
-            # Use approximation for triaxial ellipsoid
-            # This is more complex and requires numerical integration in general
-            # We'll use an approximation based on the geometric mean of prolate and oblate solutions
-            
-            # Equivalent radius for translational friction
-            R_eq = (a_m * b_m * c_m)**(1/3)
-            
-            # Correction factors based on aspect ratios
-            alpha_a = 1 - 0.25 * (1 - (a_m/R_eq)**(-2))
-            alpha_b = 1 - 0.25 * (1 - (b_m/R_eq)**(-2))
-            alpha_c = 1 - 0.25 * (1 - (c_m/R_eq)**(-2))
-            
-            # Translational friction coefficients
-            gamma_a = 6 * np.pi * self.viscosity * R_eq / alpha_a
-            gamma_b = 6 * np.pi * self.viscosity * R_eq / alpha_b
-            gamma_c = 6 * np.pi * self.viscosity * R_eq / alpha_c
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_a, gamma_b, gamma_c])
-            
-            # For rotational friction, use the approximation from Perrin's formula
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            
-            # Rotational friction coefficients - more complex approximation
-            # These formulas are approximations for triaxial ellipsoids
-            beta_a = ((b_m**2 - c_m**2)/(b_m**2 + c_m**2))**2
-            beta_b = ((a_m**2 - c_m**2)/(a_m**2 + c_m**2))**2
-            beta_c = ((a_m**2 - b_m**2)/(a_m**2 + b_m**2))**2
-            
-            gamma_rot_a = 8 * np.pi * self.viscosity * (b_m**2 + c_m**2) / 3 * (1 + beta_a)
-            gamma_rot_b = 8 * np.pi * self.viscosity * (a_m**2 + c_m**2) / 3 * (1 + beta_b)
-            gamma_rot_c = 8 * np.pi * self.viscosity * (a_m**2 + b_m**2) / 3 * (1 + beta_c)
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_a, gamma_rot_b, gamma_rot_c])
+        # Apply to all 3 axes (isotropic translational damping)
+        self.damping_coefficient = np.array([gamma_trans_arbd, gamma_trans_arbd, gamma_trans_arbd])
         
-        # Convert to ARBD units
-        # For translational damping: 1/ns = 1e9/s
-        # kg/s to 1/(amu*ns): divide by mass in kg, multiply by 1e9
-        amu_to_kg = 1.66054e-27  # kg/amu
-        mass_kg = self.mass * amu_to_kg
+        # For rotational damping
+        # Approximation for rotational damping using sphere model first
+        gamma_rot_sphere = 8 * np.pi * self.viscosity * Rh_m**3  # kg·m²/s
         
-        # Convert translational damping to 1/(amu*ns)
-        self.damping_coefficient = gamma_trans / mass_kg * 1e9
+        # Convert principal moments from mesh units to SI
+        principal_moments_si = self.principal_moments * 1.66e-47  # from amu/AA^2 Convert to kg·m²
         
-        # Convert rotational damping coefficients
-        # Need to use the appropriate moment of inertia for each axis
-        principal_moments_kg_m2 = self.principal_moments * self.density * 1e-30 * 0.6022  # Convert to kg·m²
+        # Calculate rotational damping coefficient = gamma_rot / I
+        # Units: kg·m²/s / (kg·m²) * 1e9 = 1e9/s = 1/ns
+        gamma_rot_arbd = gamma_rot_sphere / principal_moments_si * 1e9
         
-        # Convert rotational damping to 1/ns
-        self.rotational_damping_coefficient = gamma_rot / principal_moments_kg_m2 * 1e9
+        # Refine for non-spherical objects using eigenvalues ratio
+        # Sort eigenvalues for consistency
+        evs = np.sort(np.diag(self.inertia_tensor))
         
+        # For a more accurate treatment of non-spherical objects
+        # Approximate correction factors based on axial ratios
+        if evs[2] / evs[0] > 2.0:  # Significantly non-spherical
+            # Adjust based on the axial ratio (simplified approximation)
+            axial_ratio = np.sqrt(evs[2] / evs[0])
+            correction = np.array([
+                1.0,  # Smallest axis (fastest rotation)
+                np.sqrt(axial_ratio),  # Middle axis
+                axial_ratio  # Largest axis (slowest rotation)
+            ])
+            gamma_rot_arbd *= correction
+            
+        self.rotdamp = gamma_rot_arbd
+        self.transdamp=gamma_trans_arbd 
         # Also store diffusion coefficients (not used directly in ARBD)
         # D = kB*T/gamma
         # This is just for reference/output
         kB = 1.380649e-23  # J/K
-        D_trans = kB * self.temperature / gamma_trans  # m²/s
-        D_rot = kB * self.temperature / gamma_rot  # rad²/s
+        self.D_trans = kB * self.temperature / gamma_trans  # m²/s
+        self.D_rot = kB * self.temperature / gamma_rot_sphere  # rad²/s
         
-        # Store in Å²/ns and rad²/ns
-        self.transdamp = D_trans * 1e10  # m²/s to Å²/ns
-        self.rotdamp = D_rot * 1e-9  # rad²/s to rad²/ns
-        
-        # Log results
-        print(f"Semi-axes of equivalent ellipsoid: a={a:.1f} Å, b={b:.1f} Å, c={c:.1f} Å")
-        print(f"Shape classification: {self._classify_shape(a, b, c)}")
-        print(f"Translational damping coefficients [1/ns]: {self.damping_coefficient}")
-        print(f"Rotational damping coefficients [1/ns]: {self.rotational_damping_coefficient}")
-
-    def _classify_shape(self, a, b, c):
-        """Classify the shape based on semi-axes ratios"""
-        tol = 0.05  # Tolerance for considering axes equal
-        
-        if np.isclose(a, b, rtol=tol) and np.isclose(b, c, rtol=tol):
-            return "Sphere"
-        elif np.isclose(a, b, rtol=tol) and a > c:
-            return "Oblate ellipsoid (disk-like)"
-        elif np.isclose(b, c, rtol=tol) and a > b:
-            return "Prolate ellipsoid (rod-like)"
-        else:
-            return "Triaxial ellipsoid"
 
     def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
         """Generate potential grid for ARBD"""
@@ -477,6 +380,11 @@ def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx="pod.dx
     print(f"Volume: {processor.volume:.3f} Å³")
     print("\nPrincipal moments of inertia:")
     print(processor.principal_moments)
+    print("\nTranslational damping coefficients [1/ns]:")
+    print(processor.transdamp)
+    print("\nRotational damping coefficients [1/ns]:")
+    print(processor.rotdamp)
+    print(processor.D_trans, processor.D_rot)
     
     if output_dx:
         processor.write_potential_dx(output_dx, **kwargs)
