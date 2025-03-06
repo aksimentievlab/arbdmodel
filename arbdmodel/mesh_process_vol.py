@@ -10,9 +10,7 @@ from .runner import HydroProRunner
 from . import get_resource_path
 
 """
-Improved mesh processor that combines extraction techniques from mesh_ver3.py
-with volume calculation from mesh_process.py, and uses generated PDB for
-HydroPro calculations.
+Improved mesh processor with corrected inertia calculations based purely on mesh geometry
 """
 
 class MeshProcessor:
@@ -20,6 +18,7 @@ class MeshProcessor:
     
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
+    
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                 solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
                 binary_path=None, expected_mass=None, expected_aspect_ratio=None):
@@ -82,10 +81,11 @@ class MeshProcessor:
             print(f"Calculated mass: {self.mass:.2f} amu")
             
             # Align both meshes to center of mass and principal axes
+            # Important: Center of mass calculation needs to be fixed to use the volumetric mesh
             self._align_mesh()
             
-            # Calculate inertia tensor using volumetric mesh
-            self.inertia_tensor = self._calculate_volume_inertia_tensor()
+            # Calculate inertia tensor using volumetric mesh with corrected method
+            self.inertia_tensor = self._calculate_correct_inertia_tensor()
             
             # If expected aspect ratio provided, adjust inertia tensor
             if self.expected_aspect_ratio:
@@ -185,12 +185,21 @@ class MeshProcessor:
         
         return nodes, elements
 
-
-    def _calculate_volume_inertia_tensor(self):
-        """Calculate inertia tensor using tetrahedral elements from the volume mesh"""
+    def _calculate_correct_inertia_tensor(self):
+        """Calculate inertia tensor correctly using tetrahedral elements from the volume mesh"""
+        # Initialize inertia tensor
         inertia = np.zeros((3, 3))
         
-        # For tetrahedral elements from the original volumetric mesh
+        # Set density (including any correction factors)
+        if hasattr(self, 'density_correction'):
+            effective_density = self.density * self.density_correction
+        else:
+            effective_density = self.density
+            
+        # Conversion factor from g/cm^3 to amu/Å^3
+        density_amu = effective_density * 0.6022
+        
+        # For each tetrahedral element
         for element in self.volume_elements:
             # Get vertices of tetrahedron
             v0, v1, v2, v3 = self.volume_nodes[element]
@@ -203,30 +212,81 @@ class MeshProcessor:
             volume = abs(np.dot(np.cross(v01, v02), v03)) / 6.0
             
             # Mass of tetrahedron
-            tetra_mass = volume * self.density * 0.6022  # Convert to amu
+            tetra_mass = volume * density_amu
             
-            # Calculate centroid
+            # Centroid of tetrahedron
             centroid = (v0 + v1 + v2 + v3) / 4.0
             
-            # Calculate inertia contribution using parallel axis theorem
-            # First, calculate inertia about centroid
-            vertices = np.vstack([v0, v1, v2, v3])
+            # Tetrahedron inertia tensor calculation
+            # For a tetrahedron, we need to integrate over the volume
+            # See: https://en.wikipedia.org/wiki/List_of_moments_of_inertia
             
-            for i in range(3):
-                for j in range(3):
-                    if i == j:
-                        # Diagonal terms - integrate r² over tetrahedron
-                        # I_ii = ∫(y²+z²)dm for x-axis, etc.
-                        r_squared_sum = np.sum((vertices[:, (i+1)%3] - centroid[(i+1)%3])**2 + 
-                                            (vertices[:, (i+2)%3] - centroid[(i+2)%3])**2)
-                        # For a tetrahedron, the factor is 1/10
-                        inertia[i, i] += tetra_mass * r_squared_sum / 10.0
-                    else:
-                        # Off-diagonal terms - integrate -xy over tetrahedron
-                        xy_prod_sum = np.sum((vertices[:, i] - centroid[i]) * 
-                                            (vertices[:, j] - centroid[j]))
-                        inertia[i, j] -= tetra_mass * xy_prod_sum / 10.0
-        
+            # Set up vertices relative to centroid
+            vertices_centered = np.vstack([
+                v0 - centroid,
+                v1 - centroid,
+                v2 - centroid,
+                v3 - centroid
+            ])
+            
+            # Compute the inertia tensor for tetrahedron about its centroid
+            # We'll use the formula for a general tetrahedron
+            local_inertia = np.zeros((3, 3))
+            
+            # Set up a matrix with columns for each coordinate
+            x = vertices_centered[:, 0]
+            y = vertices_centered[:, 1]
+            z = vertices_centered[:, 2]
+            
+            # Calculate second moments
+            xx = np.sum(x * x) / 10.0
+            yy = np.sum(y * y) / 10.0
+            zz = np.sum(z * z) / 10.0
+            
+            xy = np.sum(x * y) / 10.0
+            xz = np.sum(x * z) / 10.0
+            yz = np.sum(y * z) / 10.0
+            
+            # Fill in the local inertia tensor
+            local_inertia[0, 0] = yy + zz
+            local_inertia[1, 1] = xx + zz
+            local_inertia[2, 2] = xx + yy
+            
+            local_inertia[0, 1] = local_inertia[1, 0] = -xy
+            local_inertia[0, 2] = local_inertia[2, 0] = -xz
+            local_inertia[1, 2] = local_inertia[2, 1] = -yz
+            
+            # Scale by mass
+            local_inertia *= tetra_mass
+            
+            # Apply parallel axis theorem to get the inertia tensor about the origin
+            # I = I_cm + m * (d^2 * I_identity - d ⊗ d)
+            # where d is the distance vector from the origin to the centroid
+            
+            # Distance squared from origin to centroid
+            d_squared = np.sum(centroid * centroid)
+            
+            # Dyadic product of centroid vector with itself
+            d_dyadic = np.outer(centroid, centroid)
+            
+            # Parallel axis theorem
+            parallel_axis_correction = tetra_mass * (d_squared * np.eye(3) - d_dyadic)
+            
+            # Add to total inertia
+            inertia += local_inertia + parallel_axis_correction
+            
+        # Scale inertia tensor to match expected mass if provided
+        if self.expected_mass:
+            mass_scale = self.expected_mass / (self.volume * density_amu)
+            inertia *= mass_scale
+            
+        # Verify that the inertia tensor is positive-definite
+        eigenvalues = np.linalg.eigvalsh(inertia)
+        if np.any(eigenvalues <= 0):
+            print("WARNING: Inertia tensor is not positive-definite! Eigenvalues:", eigenvalues)
+            # Fix by making all eigenvalues positive
+            inertia += np.eye(3) * abs(min(0, np.min(eigenvalues))) * 1.01
+            
         return inertia
 
     def _calculate_volume(self):
@@ -276,106 +336,71 @@ class MeshProcessor:
         
         return com / total_mass if total_mass > 0 else np.zeros(3)
 
-    def _calculate_center_of_mass(self):
-        """Calculate center of mass of the surface mesh"""
-        com = np.zeros(3)
-        total_weight = 0
-        
-        # For a surface mesh, weight each triangle by its area
-        for element in self.elements:
-            # Get vertices of triangle
-            v0, v1, v2 = self.nodes[element]
-            
-            # Calculate area using cross product
-            v01 = v1 - v0
-            v02 = v2 - v0
-            area = 0.5 * np.linalg.norm(np.cross(v01, v02))
-            
-            # Centroid of triangle
-            centroid = (v0 + v1 + v2) / 3.0
-            
-            # Add weighted contribution
-            com += centroid * area
-            total_weight += area
-            
-        return com / total_weight if total_weight > 0 else np.zeros(3)
-
-    def _calculate_inertia_tensor(self):
-        """Calculate inertia tensor about center of mass for surface mesh"""
-        inertia = np.zeros((3, 3))
-        
-        # For a surface mesh, approximate inertia using triangles
-        for element in self.elements:
-            # Get vertices of triangle
-            v0, v1, v2 = self.nodes[element]
-            
-            # Calculate area
-            v01 = v1 - v0
-            v02 = v2 - v0
-            area = 0.5 * np.linalg.norm(np.cross(v01, v02))
-            
-            # Vertices contribution to inertia tensor
-            vertices = np.vstack([v0, v1, v2])
-            
-            # Approximate inertia contribution based on area
-            for i in range(3):
-                for j in range(3):
-                    if i == j:
-                        # Diagonal terms
-                        term = np.sum(vertices[:, (i+1)%3]**2 + vertices[:, (i+2)%3]**2) / 3.0
-                    else:
-                        # Off-diagonal terms
-                        term = -np.sum(vertices[:, i] * vertices[:, j]) / 3.0
-                        
-                    inertia[i,j] += self.density * 0.6022 * area * term  # Convert density to amu/Å³
-        
-        return inertia
-
     def _align_mesh(self):
-        """Align mesh to center of mass and principal axes"""
-        # First center the mesh
-        com = self._calculate_center_of_mass()
+        """Align mesh to center of mass and principal axes with rod along Z-axis"""
+        # First center the mesh using volume-based COM calculation
+        com = self._calculate_center_of_mass_volume()
+        self.volume_nodes -= com
         self.nodes -= com
         
-        # Calculate and diagonalize inertia tensor
-        inertia = self._calculate_volume_inertia_tensor()
+        # Calculate inertia tensor for initial alignment
+        inertia = self._calculate_correct_inertia_tensor()
+        
+        # Diagonalize to find principal axes
         eigenvalues, eigenvectors = np.linalg.eigh(inertia)
         
-        # Sort by eigenvalues to get consistent orientation
-        print(eigenvalues,eigenvectors)
+        # Sort by eigenvalues
         sort_idx = np.argsort(eigenvalues)
         eigenvalues = eigenvalues[sort_idx]
-        eigenvectors = eigenvectors[:, sort_idx]
-        # Now just use simple indices since eigenvectors is already sorted
-        z_vec = eigenvectors[:, 0]  # Vector of smallest moment (rod axis)
-        x_vec = eigenvectors[:, 1]
-        y_vec = eigenvectors[:, 2]
-        # For a rod, smallest moment of inertia is along the rod axis
-        # Create new eigenvector matrix with Z as the rod axis
-        reordered_eigenvectors = np.column_stack([x_vec, y_vec, z_vec])
+        
+        # For a rod-like object:
+        # The smallest moment of inertia is along the rod axis
+        # We want this to be aligned with the Z-axis (index 2)
+        
+        # Reordering eigenvectors: 
+        # - smallest moment (rod axis) should be last (Z-axis)
+        z_vec = eigenvectors[:, sort_idx[0]]  # Vector with smallest moment -> Z axis
+        x_vec = eigenvectors[:, sort_idx[1]]
+        y_vec = eigenvectors[:, sort_idx[2]]  # Vector with largest moment -> Y axis
+        
+        # Create new rotation matrix with correctly ordered eigenvectors
+        rotation_matrix = np.column_stack([x_vec, y_vec, z_vec])
         
         # Ensure right-handed coordinate system
-        if np.linalg.det(reordered_eigenvectors) < 0:
-            reordered_eigenvectors[:, 0] *= -1
+        if np.linalg.det(rotation_matrix) < 0:
+            rotation_matrix[:, 0] *= -1  # Flip X-axis
             
-        # Rotate mesh to align with principal axes with rod along Z
-        self.nodes = self.nodes @ reordered_eigenvectors
+        # Apply rotation to both meshes
+        self.volume_nodes = self.volume_nodes @ rotation_matrix
+        self.nodes = self.nodes @ rotation_matrix
         
         # Store transformation
-        self.rotation_matrix = eigenvectors
+        self.rotation_matrix = rotation_matrix
         self.translation = com
+        
+        # Verify dimensions after alignment
+        bounds_min = np.min(self.volume_nodes, axis=0)
+        bounds_max = np.max(self.volume_nodes, axis=0)
+        dimensions = bounds_max - bounds_min
+        
         print(f"Aligned mesh to principal axes, COM: {com}")
+        print(f"Dimensions after alignment (X,Y,Z): {dimensions}")
+        
+        # Calculate aspect ratio after alignment
+        length = dimensions[2]  # Z dimension (rod axis)
+        width = max(dimensions[0], dimensions[1])  # Larger of X,Y (transverse)
+        aspect_ratio = length / width if width > 0 else 1.0
+        print(f"Calculated aspect ratio after alignment: {aspect_ratio:.2f}")
 
     def calculate_damping(self, work_dir="hydrocalc"):
         """Calculate hydrodynamic properties using HydroPro"""
         # Create work directory if it doesn't exist
-        work_dir =Path(self.name)
+        work_dir = Path(self.name)
         try:
             os.listdir(work_dir)
         except:
             os.mkdir(work_dir)
 
-        #work_dir = Path(work_dir)
         base_path = work_dir / "hydrocal"
         
         # Save the mesh in PDB format for HydroPro
@@ -432,7 +457,7 @@ class MeshProcessor:
         
     def write_potential_dx(self, output_file, **kwargs):
         """Generate and write potential field to DX file"""
-        potential, origin, delta = self.generate_potential_grid()
+        potential, origin, delta = self.generate_potential_grid(**kwargs)
         writeDx(output_file, potential, origin, delta)
 
     def save_aligned_mesh(self, output_file):
@@ -540,6 +565,7 @@ class MeshProcessor:
         pdb_filename = f"{base_filename}.pdb"
         self.save_as_pdb(pdb_filename)
         print(f"Saved aligned mesh as PDB: {pdb_filename}")
+    
     def _adjust_inertia_for_aspect_ratio(self, expected_ar):
         """Adjust inertia tensor to match expected aspect ratio for rod-like objects
         with rod aligned along Z-axis"""
@@ -551,6 +577,9 @@ class MeshProcessor:
         # After alignment, Z should be the major axis (rod length)
         length = dimensions[2]  # Z-axis length
         width = max(dimensions[0], dimensions[1])  # Larger of X or Y dimensions
+        
+        # Current aspect ratio
+        current_ar = length / width if width > 0 else 1.0
         
         # For a rod with mass M, length L, and radius R:
         # I_axial = (1/2)MR²
