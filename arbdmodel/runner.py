@@ -63,23 +63,23 @@ class HydroProRunner:
         temperature_c = self.temperature - 273.15  # Convert K to C
         
         config = f"""hydro
-        {structure_name}.hydro
-        hydro.pdb
-        1
-        2.9,
-        6,
-        1.2,
-        3.0,
-        {temperature_c},
-        {self.viscosity},
-        {mass},
-        1.0,
-        {self.solvent_density}
-        -1,
-        -1,
-        0,
-        1
-        *"""
+{structure_name}.hydro
+hydro.pdb
+1
+2.9,
+6,
+1.2,
+3.0,
+{temperature_c},
+{self.viscosity},
+{mass},
+1.0,
+{self.solvent_density}
+-1,
+-1,
+0,
+1
+*"""
         
         with open(output_path, 'w') as f:
             f.write(config)
