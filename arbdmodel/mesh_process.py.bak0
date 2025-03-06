@@ -1,0 +1,490 @@
+import numpy as np
+import gmsh
+from scipy.spatial import KDTree
+from pathlib import Path
+import os
+from scipy.linalg import eigh
+from .grid import writeDx
+from . import get_resource_path
+
+
+"""Process 3D meshes to calculate inertia, diffusion coefficients and generate potential fields."""
+
+class MeshProcessor:
+    """Process gmsh files to calculate inertia, diffusion coefficients and generate potential fields"""
+    
+    # Conversion factors
+    MICRON_TO_ANGSTROM = 10000
+    
+    def __init__(self, mesh_file, density=1.0, temperature=295, viscosity=0.01, 
+                 solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
+                 extract_surface=True):
+        """
+        Initialize processor with mesh file
+        
+        Args:
+            mesh_file: Path to .msh file
+            density: Material density in mass units per volume unit in g/cm^3
+            temperature: Temperature in Kelvin
+            viscosity: Solvent viscosity in poise (convert to Pa·s for calculations)
+            solvent_density: Solvent density in g/cm3
+            unit_scale: Conversion factor from input units to angstroms
+            extract_surface: If True, extract surface mesh from 3D volumetric mesh
+        """
+        self.mesh_file = Path(mesh_file)
+        self.density = density* 0.6022  # g/cm^3 to amu/AA^3
+        self.unit_scale = unit_scale
+        self.temperature = temperature
+        self.viscosity = viscosity * 0.1  # Convert poise to Pa·s
+        self.solvent_density = solvent_density
+
+        # Initialize gmsh and read mesh
+        gmsh.initialize()
+        gmsh.open(str(self.mesh_file))
+        
+        # Get nodes and elements
+        
+        self.nodes = self._get_nodes()
+        self.elements = self._get_elements()
+        
+        # Calculate basic properties before alignment
+        self.volume = self._calculate_volume()
+        self.mass = self.volume * self.density 
+        
+        # Align mesh to center of mass and principal axes
+        self._align_mesh()
+        
+        # Calculate final properties after alignment
+        self.inertia_tensor = self._calculate_inertia_tensor()
+        self.principal_moments = np.diag(self.inertia_tensor)
+        if extract_surface:
+            self.nodes, self.elements = self._extract_surface_mesh()
+
+        # Calculate diffusion coefficients 
+        self._calculate_diffusion()
+        
+        gmsh.finalize()
+
+    def _get_nodes(self):
+        """Get mesh nodes with unit conversion"""
+        node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
+        coords = np.array(node_coords).reshape(-1, 3)
+        return coords * self.unit_scale  # Convert to angstroms
+        
+    def _get_elements(self):
+        """Get tetrahedral elements from the volume mesh"""
+        element_types, element_tags, node_tags = gmsh.model.mesh.getElements(dim=3)
+        if not element_types:  # No volume elements found
+            raise ValueError("No tetrahedral elements found in mesh")
+            
+        # Find tetrahedral elements (type 4 in gmsh)
+        tet_idx = None
+        for i, type_num in enumerate(element_types):
+            if type_num == 4:  # Tetrahedral elements
+                tet_idx = i
+                break
+                
+        if tet_idx is None:
+            raise ValueError("No tetrahedral elements found in mesh")
+            
+        # Convert to 0-based indexing and reshape to Nx4 array
+        elements = np.array(node_tags[tet_idx]).reshape(-1, 4) - 1
+        return elements
+        
+    def _extract_surface_mesh(self):
+        """Extract surface mesh from a 3D volumetric mesh"""
+        # Get all surface elements
+        gmsh.model.mesh.createTopology()
+        
+        # Get surface elements
+        surface_dimtags = gmsh.model.getBoundary([tag for tag in gmsh.model.getEntities(3)], 
+                                                combined=False, oriented=False)
+        
+        # Create a new physical group for the surface
+        surface_tag = gmsh.model.addPhysicalGroup(2, [tag for dim, tag in surface_dimtags])
+        
+        # Get nodes associated with surface elements
+        all_surface_nodes = set()
+        surface_elements = []
+        
+        for dim, tag in surface_dimtags:
+            element_types, element_tags, node_tags = gmsh.model.mesh.getElements(dim, tag)
+            
+            # We only want triangular elements (type 2)
+            tri_idx = None
+            for i, type_num in enumerate(element_types):
+                if type_num == 2:  # Triangle elements
+                    tri_idx = i
+                    break
+                    
+            if tri_idx is not None:
+                node_tags_array = np.array(node_tags[tri_idx]).reshape(-1, 3) - 1  # Convert to 0-based
+                surface_elements.extend(node_tags_array)
+                all_surface_nodes.update(node_tags_array.flatten())
+        
+        # Get coordinates of surface nodes
+        surface_nodes = []
+        node_index_map = {}  # Map old indices to new ones
+        
+        for i, old_idx in enumerate(sorted(all_surface_nodes)):
+            coords = gmsh.model.mesh.getNode(int(old_idx + 1))[0]  # +1 because gmsh uses 1-based indexing
+            surface_nodes.append(coords)
+            node_index_map[old_idx] = i
+            
+        # Remap element indices
+        remapped_elements = []
+        for element in surface_elements:
+            remapped_elements.append([node_index_map[idx] for idx in element])
+            
+        # Convert to numpy arrays and apply unit conversion
+        nodes = np.array(surface_nodes) * self.unit_scale
+        elements = np.array(remapped_elements)
+        
+        return nodes, elements
+
+    def _calculate_volume(self):
+        """Calculate volume of the tetrahedral mesh"""
+        volume = 0
+        for element in self.elements:
+            # Get vertices of tetrahedron
+            v0, v1, v2, v3 = self.nodes[element]
+            # Calculate volume using determinant method
+            v01 = v1 - v0
+            v02 = v2 - v0
+            v03 = v3 - v0
+            volume += abs(np.dot(v01, np.cross(v02, v03))) / 6.0
+        return volume
+
+    def _calculate_center_of_mass(self):
+        """Calculate center of mass of the tetrahedral mesh"""
+        com = np.zeros(3)
+        total_volume = 0
+        
+        for element in self.elements:
+            # Get vertices of tetrahedron
+            v0, v1, v2, v3 = self.nodes[element]
+            # Calculate volume
+            v01 = v1 - v0
+            v02 = v2 - v0
+            v03 = v3 - v0
+            tet_volume = abs(np.dot(v01, np.cross(v02, v03))) / 6.0
+            # Tetrahedron centroid is average of vertices
+            centroid = (v0 + v1 + v2 + v3) / 4.0
+            com += centroid * tet_volume
+            total_volume += tet_volume
+            
+        return com / total_volume
+
+    def _calculate_inertia_tensor(self):
+        """Calculate inertia tensor about center of mass for tetrahedral mesh"""
+        inertia = np.zeros((3, 3))
+        
+        for element in self.elements:
+            # Get vertices of tetrahedron
+            v0, v1, v2, v3 = self.nodes[element]
+            
+            # Calculate volume
+            v01 = v1 - v0
+            v02 = v2 - v0
+            v03 = v3 - v0
+            tet_volume = abs(np.dot(v01, np.cross(v02, v03))) / 6.0
+            
+            # Vertices contribution to inertia tensor
+            vertices = np.vstack([v0, v1, v2, v3])
+            
+            for i in range(3):
+                for j in range(3):
+                    if i == j:
+                        # Diagonal terms
+                        term = np.sum(vertices[:, (i+1)%3]**2 + vertices[:, (i+2)%3]**2) / 10.0
+                    else:
+                        # Off-diagonal terms
+                        term = -np.sum(vertices[:, i] * vertices[:, j]) / 10.0
+                        
+                    inertia[i,j] += self.density * tet_volume * term
+        
+        return inertia
+
+    def _align_mesh(self):
+        """Align mesh to center of mass and principal axes"""
+        # First center the mesh
+        com = self._calculate_center_of_mass()
+        self.nodes -= com
+        
+        # Calculate and diagonalize inertia tensor
+        inertia = self._calculate_inertia_tensor()
+        eigenvalues, eigenvectors = np.linalg.eigh(inertia)
+        
+        # Sort by eigenvalues to get consistent orientation
+        sort_idx = np.argsort(eigenvalues)
+        eigenvalues = eigenvalues[sort_idx]
+        eigenvectors = eigenvectors[:, sort_idx]
+        
+        # Ensure right-handed coordinate system
+        if np.linalg.det(eigenvectors) < 0:
+            eigenvectors[:, 0] *= -1
+            
+        # Rotate mesh to align with principal axes
+        self.nodes = self.nodes @ eigenvectors
+        
+        # Store transformation
+        self.rotation_matrix = eigenvectors
+        self.translation = com
+
+    def _calculate_diffusion(self):
+        """
+        Calculate diffusion and damping coefficients using ellipsoidal model
+        with anisotropic translational and rotational coefficients.
+        
+        The damping coefficient is defined as γ = kB·T/(D·m) with units [1/ns]
+        """
+        # Physical constants
+        kB = 1.380649e-23  # J/K
+        kB_T = kB * self.temperature  # J
+        
+        # Calculate principal axes of the ellipsoid using the gyration tensor
+        gyration_tensor = np.zeros((3, 3))
+        for v in self.nodes:
+            gyration_tensor += np.outer(v, v)
+        gyration_tensor /= len(self.nodes)
+        
+        # Diagonalize the gyration tensor to get principal radii
+        gyr_eigenvals, gyr_eigenvecs = np.linalg.eigh(gyration_tensor)
+        
+        # Scaling factor to convert from gyration to semi-axes
+        scale_factor = 5.0
+        
+        # Semi-axes in descending order
+        semi_axes = np.sqrt(scale_factor * gyr_eigenvals)
+        a, b, c = semi_axes[::-1]  # Largest to smallest
+        
+        # Convert to meters for hydrodynamic calculations
+        a_m, b_m, c_m = a * 1e-10, b * 1e-10, c * 1e-10  # Å to m
+        
+        # Calculate translational friction coefficients for ellipsoid
+        # Using Perrin's formulas for ellipsoids
+        
+        # Calculate shape factors
+        if np.isclose(b, c, rtol=0.05):  # Prolate ellipsoid (a > b ≈ c)
+            e = np.sqrt(1 - (b_m/a_m)**2)  # Eccentricity
+            
+            # Shape factor S for prolate ellipsoid
+            if e > 0.99:  # Avoid numerical issues for very elongated shapes
+                S = 2 * np.log(2*a_m/b_m) - 0.5
+            else:
+                S = 2 * np.log((1 + e)/(1 - e)) / e - 2*e/(1 - e**2)
+                
+            # Translational friction coefficients
+            gamma_a = 6 * np.pi * self.viscosity * b_m / S  # Along major axis
+            gamma_bc = 6 * np.pi * self.viscosity * b_m / (0.5 * S + 1)  # Perpendicular to major axis
+            
+            # Assign to the three axes
+            gamma_trans = np.array([gamma_a, gamma_bc, gamma_bc])
+            
+            # Rotational friction coefficients
+            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
+            gamma_rot_a = 6 * self.viscosity * V * (1 - e**2) / (e**2) * (-2*e/(1-e**2) + np.log((1+e)/(1-e)))  # Around minor axes
+            gamma_rot_bc = 6 * self.viscosity * V * (1 + e**2) / (e**2) * (2*e/(1-e**2) - (1-e**2)/(2*e) * np.log((1+e)/(1-e)))  # Around major axis
+            
+            # Assign to the three axes
+            gamma_rot = np.array([gamma_rot_bc, gamma_rot_a, gamma_rot_a])
+            
+        elif np.isclose(a, b, rtol=0.05):  # Oblate ellipsoid (a ≈ b > c)
+            e = np.sqrt(1 - (c_m/a_m)**2)  # Eccentricity
+            
+            # Shape factor S for oblate ellipsoid
+            if e > 0.99:  # Avoid numerical issues for very flat shapes
+                S = np.pi * a_m / (2 * c_m)
+            else:
+                S = 2 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2))
+                
+            # Translational friction coefficients
+            gamma_ab = 6 * np.pi * self.viscosity * a_m / (1 + 0.5*S*(1-e**2)/e)  # Perpendicular to minor axis
+            gamma_c = 6 * np.pi * self.viscosity * a_m / (S*(1-e**2)/e)  # Along minor axis
+            
+            # Assign to the three axes
+            gamma_trans = np.array([gamma_ab, gamma_ab, gamma_c])
+            
+            # Rotational friction coefficients
+            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
+            gamma_rot_c = 6 * self.viscosity * V * (2 - e**2) / (e**2) * (e/(1-e**2) - 0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)))  # Around minor axis
+            gamma_rot_ab = 6 * self.viscosity * V * (2 + e**2) / (e**2) * (0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)) - e/(1-e**2))  # Around major axes
+            
+            # Assign to the three axes
+            gamma_rot = np.array([gamma_rot_ab, gamma_rot_ab, gamma_rot_c])
+            
+        else:  # General triaxial ellipsoid
+            # Use approximation for triaxial ellipsoid
+            # This is more complex and requires numerical integration in general
+            # We'll use an approximation based on the geometric mean of prolate and oblate solutions
+            
+            # Equivalent radius for translational friction
+            R_eq = (a_m * b_m * c_m)**(1/3)
+            
+            # Correction factors based on aspect ratios
+            alpha_a = 1 - 0.25 * (1 - (a_m/R_eq)**(-2))
+            alpha_b = 1 - 0.25 * (1 - (b_m/R_eq)**(-2))
+            alpha_c = 1 - 0.25 * (1 - (c_m/R_eq)**(-2))
+            
+            # Translational friction coefficients
+            gamma_a = 6 * np.pi * self.viscosity * R_eq / alpha_a
+            gamma_b = 6 * np.pi * self.viscosity * R_eq / alpha_b
+            gamma_c = 6 * np.pi * self.viscosity * R_eq / alpha_c
+            
+            # Assign to the three axes
+            gamma_trans = np.array([gamma_a, gamma_b, gamma_c])
+            
+            # For rotational friction, use the approximation from Perrin's formula
+            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
+            
+            # Rotational friction coefficients - more complex approximation
+            # These formulas are approximations for triaxial ellipsoids
+            beta_a = ((b_m**2 - c_m**2)/(b_m**2 + c_m**2))**2
+            beta_b = ((a_m**2 - c_m**2)/(a_m**2 + c_m**2))**2
+            beta_c = ((a_m**2 - b_m**2)/(a_m**2 + b_m**2))**2
+            
+            gamma_rot_a = 8 * np.pi * self.viscosity * (b_m**2 + c_m**2) / 3 * (1 + beta_a)
+            gamma_rot_b = 8 * np.pi * self.viscosity * (a_m**2 + c_m**2) / 3 * (1 + beta_b)
+            gamma_rot_c = 8 * np.pi * self.viscosity * (a_m**2 + b_m**2) / 3 * (1 + beta_c)
+            
+            # Assign to the three axes
+            gamma_rot = np.array([gamma_rot_a, gamma_rot_b, gamma_rot_c])
+        
+        # Convert to ARBD units
+        # For translational damping: 1/ns = 1e9/s
+        # kg/s to 1/(amu*ns): divide by mass in kg, multiply by 1e9
+        amu_to_kg = 1.66054e-27  # kg/amu
+        mass_kg = self.mass * amu_to_kg
+        
+        # Convert translational damping to 1/(amu*ns)
+        self.damping_coefficient = gamma_trans / mass_kg * 1e9
+        
+        # Convert rotational damping coefficients
+        # Need to use the appropriate moment of inertia for each axis
+        principal_moments_kg_m2 = self.principal_moments * self.density * 1e-30 * 0.6022  # Convert to kg·m²
+        
+        # Convert rotational damping to 1/ns
+        self.rotational_damping_coefficient = gamma_rot / principal_moments_kg_m2 * 1e9
+        
+        # Also store diffusion coefficients (not used directly in ARBD)
+        # D = kB*T/gamma
+        # This is just for reference/output
+        kB = 1.380649e-23  # J/K
+        D_trans = kB * self.temperature / gamma_trans  # m²/s
+        D_rot = kB * self.temperature / gamma_rot  # rad²/s
+        
+        # Store in Å²/ns and rad²/ns
+        self.transdamp = D_trans * 1e10  # m²/s to Å²/ns
+        self.rotdamp = D_rot * 1e-9  # rad²/s to rad²/ns
+        
+        # Log results
+        print(f"Semi-axes of equivalent ellipsoid: a={a:.1f} Å, b={b:.1f} Å, c={c:.1f} Å")
+        print(f"Shape classification: {self._classify_shape(a, b, c)}")
+        print(f"Translational damping coefficients [1/ns]: {self.damping_coefficient}")
+        print(f"Rotational damping coefficients [1/ns]: {self.rotational_damping_coefficient}")
+
+    def _classify_shape(self, a, b, c):
+        """Classify the shape based on semi-axes ratios"""
+        tol = 0.05  # Tolerance for considering axes equal
+        
+        if np.isclose(a, b, rtol=tol) and np.isclose(b, c, rtol=tol):
+            return "Sphere"
+        elif np.isclose(a, b, rtol=tol) and a > c:
+            return "Oblate ellipsoid (disk-like)"
+        elif np.isclose(b, c, rtol=tol) and a > b:
+            return "Prolate ellipsoid (rod-like)"
+        else:
+            return "Triaxial ellipsoid"
+
+    def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
+        """Generate potential grid for ARBD"""
+        # Calculate grid bounds with buffer
+        bounds_min = np.min(self.nodes, axis=0) - buffer
+        bounds_max = np.max(self.nodes, axis=0) + buffer
+        
+        # Create grid points
+        npts = np.ceil((bounds_max - bounds_min) / spacing).astype(int)
+        x = np.linspace(bounds_min[0], bounds_max[0], npts[0])
+        y = np.linspace(bounds_min[1], bounds_max[1], npts[1])
+        z = np.linspace(bounds_min[2], bounds_max[2], npts[2])
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        
+        # Create KD-tree for fast distance calculations
+        tree = KDTree(self.nodes)
+        
+        # Calculate distances to nearest surface points
+        grid_points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+        distances, _ = tree.query(grid_points)
+        distances = distances.reshape(X.shape)
+        
+        # Generate potential
+        potential = np.zeros_like(distances)
+        mask = distances <= cutoff
+        potential[mask] = max_potential * (1 - 1/(1 + np.exp(-k * distances[mask])))
+        
+        return potential, bounds_min, spacing * np.ones(3)
+        
+    def write_potential_dx(self, output_file, **kwargs):
+        """Generate and write potential field to DX file"""
+        potential, origin, delta = self.generate_potential_grid(**kwargs)
+        writeDx(output_file, potential, origin, delta)
+
+    def save_aligned_mesh(self, output_file):
+        """Save the aligned mesh to a new .msh file"""
+        gmsh.initialize()
+        gmsh.model.add("aligned_mesh")
+        
+        # Add nodes
+        node_tags = []
+        node_coords = []
+        for i, node in enumerate(self.nodes):
+            tag = i + 1
+            node_tags.append(tag)
+            node_coords.extend(node / self.unit_scale)  # Convert back to microns
+            
+        gmsh.model.mesh.addNodes(2, 1, node_tags, node_coords)
+        
+        # Add elements
+        element_tags = []
+        element_nodes = []
+        for i, element in enumerate(self.elements):
+            tag = i + 1
+            element_tags.append(tag)
+            element_nodes.extend([x + 1 for x in element])  # Convert to 1-based indexing
+            
+        gmsh.model.mesh.addElements(2, 1, [2], [element_tags], [element_nodes])
+        
+        # Write mesh
+        gmsh.write(str(output_file))
+        gmsh.finalize()
+
+def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx="pod.dx", 
+                     output_mesh="rod.msh",  **kwargs):
+    """
+    Process mesh file and calculate all properties
+    
+    Args:
+        mesh_file: Path to .msh file
+        density: Material density
+        temperature: Temperature in Kelvin
+        output_dx: Optional path to output potential DX file
+        output_mesh: Optional path to save aligned mesh
+        **kwargs: Additional arguments for potential generation
+    """
+    processor = MeshProcessor(mesh_file, density, temperature=temperature)
+    
+    print(f"Mass: {processor.mass:.3f} amu")
+    print(f"Volume: {processor.volume:.3f} Å³")
+    print("\nPrincipal moments of inertia:")
+    print(processor.principal_moments)
+    
+    if output_dx:
+        processor.write_potential_dx(output_dx, **kwargs)
+        
+    if output_mesh:
+        processor.save_aligned_mesh(output_mesh)
+        
+    return processor
+
+if __name__=="__main__":
+    process_mesh_file("3drod.msh")
