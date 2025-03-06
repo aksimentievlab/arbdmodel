@@ -330,7 +330,7 @@ class MeshProcessor:
         
     def write_potential_dx(self, output_file, **kwargs):
         """Generate and write potential field to DX file"""
-        potential, origin, delta = self.generate_potential_grid(**kwargs)
+        potential, origin, delta = self.generate_potential_grid()
         writeDx(output_file, potential, origin, delta)
 
     def save_aligned_mesh(self, output_file):
