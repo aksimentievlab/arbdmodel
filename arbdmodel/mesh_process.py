@@ -2,23 +2,25 @@ import numpy as np
 import gmsh
 from scipy.spatial import KDTree
 from pathlib import Path
-import os
-from scipy.linalg import eigh
+import subprocess
 from .grid import writeDx
+from .runner import HydroProRunner
 from . import get_resource_path
+import platform
+import os
 
 
-"""Process 3D meshes to calculate inertia, diffusion coefficients and generate potential fields."""
+"""input: 3d mesh in .msh, density of object. Output: no-entering potential, transdamp, rotdamping."""
 
 class MeshProcessor:
-    """Process gmsh files to calculate inertia, diffusion coefficients and generate potential fields"""
+    """Process gmsh files to calculate inertia, hydrodynamics and generate potential fields"""
     
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
     
-    def __init__(self, mesh_file, density=1.0, temperature=295, viscosity=0.01, 
+    def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 extract_surface=True):
+                 binary_path=None, extract_surface=False):
         """
         Initialize processor with mesh file
         
@@ -26,30 +28,35 @@ class MeshProcessor:
             mesh_file: Path to .msh file
             density: Material density in mass units per volume unit in g/cm^3
             temperature: Temperature in Kelvin
-            viscosity: Solvent viscosity in poise (convert to Pa·s for calculations)
+            viscosity: Solvent viscosity in poise
             solvent_density: Solvent density in g/cm3
             unit_scale: Conversion factor from input units to angstroms
+            hydropro_path: Path to HYDROPRO executable
             extract_surface: If True, extract surface mesh from 3D volumetric mesh
         """
         self.mesh_file = Path(mesh_file)
-        self.density = density* 0.6022  # g/cm^3 to amu/AA^3
+        self.density = density
         self.unit_scale = unit_scale
         self.temperature = temperature
-        self.viscosity = viscosity * 0.1  # Convert poise to Pa·s
+        self.viscosity = viscosity
         self.solvent_density = solvent_density
+        self.binary_path=binary_path
+
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
         gmsh.open(str(self.mesh_file))
         
         # Get nodes and elements
-        
-        self.nodes = self._get_nodes()
-        self.elements = self._get_elements()
+        if extract_surface:
+            self.nodes, self.elements = self._extract_surface_mesh()
+        else:
+            self.nodes = self._get_nodes()
+            self.elements = self._get_elements()
         
         # Calculate basic properties before alignment
         self.volume = self._calculate_volume()
-        self.mass = self.volume * self.density 
+        self.mass = self.volume * self.density*0.6022 #g/cm^3 to amu/AA^3
         
         # Align mesh to center of mass and principal axes
         self._align_mesh()
@@ -57,12 +64,11 @@ class MeshProcessor:
         # Calculate final properties after alignment
         self.inertia_tensor = self._calculate_inertia_tensor()
         self.principal_moments = np.diag(self.inertia_tensor)
-        if extract_surface:
-            self.nodes, self.elements = self._extract_surface_mesh()
-
-        # Calculate diffusion coefficients 
-        self._calculate_diffusion()
         
+        # Calculate hydrodynamic properties
+        self.runner=HydroProRunner(self.mass,temperature=temperature,viscosity=viscosity, binary_path=binary_path)
+        self._get_damping()
+        print(self.transdamp,self.rotational_damping_coefficient)
         gmsh.finalize()
 
     def _get_nodes(self):
@@ -97,7 +103,7 @@ class MeshProcessor:
         gmsh.model.mesh.createTopology()
         
         # Get surface elements
-        surface_dimtags = gmsh.model.getBoundary([tag for tag in gmsh.model.getEntities(3)], 
+        surface_dimtags = gmsh.model.getBoundary([(3, tag) for tag in gmsh.model.getEntities(3)], 
                                                 combined=False, oriented=False)
         
         # Create a new physical group for the surface
@@ -127,7 +133,7 @@ class MeshProcessor:
         node_index_map = {}  # Map old indices to new ones
         
         for i, old_idx in enumerate(sorted(all_surface_nodes)):
-            coords = gmsh.model.mesh.getNode(int(old_idx + 1))[0]  # +1 because gmsh uses 1-based indexing
+            coords = gmsh.model.mesh.getNode(old_idx + 1)[0]  # +1 because gmsh uses 1-based indexing
             surface_nodes.append(coords)
             node_index_map[old_idx] = i
             
@@ -231,170 +237,37 @@ class MeshProcessor:
         self.rotation_matrix = eigenvectors
         self.translation = com
 
-    def _calculate_diffusion(self):
-        """
-        Calculate diffusion and damping coefficients using ellipsoidal model
-        with anisotropic translational and rotational coefficients.
-        
-        The damping coefficient is defined as γ = kB·T/(D·m) with units [1/ns]
-        """
-        # Physical constants
-        kB = 1.380649e-23  # J/K
-        kB_T = kB * self.temperature  # J
-        
-        # Calculate principal axes of the ellipsoid using the gyration tensor
-        gyration_tensor = np.zeros((3, 3))
-        for v in self.nodes:
-            gyration_tensor += np.outer(v, v)
-        gyration_tensor /= len(self.nodes)
-        
-        # Diagonalize the gyration tensor to get principal radii
-        gyr_eigenvals, gyr_eigenvecs = np.linalg.eigh(gyration_tensor)
-        
-        # Scaling factor to convert from gyration to semi-axes
-        scale_factor = 5.0
-        
-        # Semi-axes in descending order
-        semi_axes = np.sqrt(scale_factor * gyr_eigenvals)
-        a, b, c = semi_axes[::-1]  # Largest to smallest
-        
-        # Convert to meters for hydrodynamic calculations
-        a_m, b_m, c_m = a * 1e-10, b * 1e-10, c * 1e-10  # Å to m
-        
-        # Calculate translational friction coefficients for ellipsoid
-        # Using Perrin's formulas for ellipsoids
-        
-        # Calculate shape factors
-        if np.isclose(b, c, rtol=0.05):  # Prolate ellipsoid (a > b ≈ c)
-            e = np.sqrt(1 - (b_m/a_m)**2)  # Eccentricity
-            
-            # Shape factor S for prolate ellipsoid
-            if e > 0.99:  # Avoid numerical issues for very elongated shapes
-                S = 2 * np.log(2*a_m/b_m) - 0.5
-            else:
-                S = 2 * np.log((1 + e)/(1 - e)) / e - 2*e/(1 - e**2)
-                
-            # Translational friction coefficients
-            gamma_a = 6 * np.pi * self.viscosity * b_m / S  # Along major axis
-            gamma_bc = 6 * np.pi * self.viscosity * b_m / (0.5 * S + 1)  # Perpendicular to major axis
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_a, gamma_bc, gamma_bc])
-            
-            # Rotational friction coefficients
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            gamma_rot_a = 6 * self.viscosity * V * (1 - e**2) / (e**2) * (-2*e/(1-e**2) + np.log((1+e)/(1-e)))  # Around minor axes
-            gamma_rot_bc = 6 * self.viscosity * V * (1 + e**2) / (e**2) * (2*e/(1-e**2) - (1-e**2)/(2*e) * np.log((1+e)/(1-e)))  # Around major axis
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_bc, gamma_rot_a, gamma_rot_a])
-            
-        elif np.isclose(a, b, rtol=0.05):  # Oblate ellipsoid (a ≈ b > c)
-            e = np.sqrt(1 - (c_m/a_m)**2)  # Eccentricity
-            
-            # Shape factor S for oblate ellipsoid
-            if e > 0.99:  # Avoid numerical issues for very flat shapes
-                S = np.pi * a_m / (2 * c_m)
-            else:
-                S = 2 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2))
-                
-            # Translational friction coefficients
-            gamma_ab = 6 * np.pi * self.viscosity * a_m / (1 + 0.5*S*(1-e**2)/e)  # Perpendicular to minor axis
-            gamma_c = 6 * np.pi * self.viscosity * a_m / (S*(1-e**2)/e)  # Along minor axis
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_ab, gamma_ab, gamma_c])
-            
-            # Rotational friction coefficients
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            gamma_rot_c = 6 * self.viscosity * V * (2 - e**2) / (e**2) * (e/(1-e**2) - 0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)))  # Around minor axis
-            gamma_rot_ab = 6 * self.viscosity * V * (2 + e**2) / (e**2) * (0.5 * np.arctan(e/np.sqrt(1-e**2)) / (e * np.sqrt(1-e**2)) - e/(1-e**2))  # Around major axes
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_ab, gamma_rot_ab, gamma_rot_c])
-            
-        else:  # General triaxial ellipsoid
-            # Use approximation for triaxial ellipsoid
-            # This is more complex and requires numerical integration in general
-            # We'll use an approximation based on the geometric mean of prolate and oblate solutions
-            
-            # Equivalent radius for translational friction
-            R_eq = (a_m * b_m * c_m)**(1/3)
-            
-            # Correction factors based on aspect ratios
-            alpha_a = 1 - 0.25 * (1 - (a_m/R_eq)**(-2))
-            alpha_b = 1 - 0.25 * (1 - (b_m/R_eq)**(-2))
-            alpha_c = 1 - 0.25 * (1 - (c_m/R_eq)**(-2))
-            
-            # Translational friction coefficients
-            gamma_a = 6 * np.pi * self.viscosity * R_eq / alpha_a
-            gamma_b = 6 * np.pi * self.viscosity * R_eq / alpha_b
-            gamma_c = 6 * np.pi * self.viscosity * R_eq / alpha_c
-            
-            # Assign to the three axes
-            gamma_trans = np.array([gamma_a, gamma_b, gamma_c])
-            
-            # For rotational friction, use the approximation from Perrin's formula
-            V = 4/3 * np.pi * a_m * b_m * c_m  # Volume
-            
-            # Rotational friction coefficients - more complex approximation
-            # These formulas are approximations for triaxial ellipsoids
-            beta_a = ((b_m**2 - c_m**2)/(b_m**2 + c_m**2))**2
-            beta_b = ((a_m**2 - c_m**2)/(a_m**2 + c_m**2))**2
-            beta_c = ((a_m**2 - b_m**2)/(a_m**2 + b_m**2))**2
-            
-            gamma_rot_a = 8 * np.pi * self.viscosity * (b_m**2 + c_m**2) / 3 * (1 + beta_a)
-            gamma_rot_b = 8 * np.pi * self.viscosity * (a_m**2 + c_m**2) / 3 * (1 + beta_b)
-            gamma_rot_c = 8 * np.pi * self.viscosity * (a_m**2 + b_m**2) / 3 * (1 + beta_c)
-            
-            # Assign to the three axes
-            gamma_rot = np.array([gamma_rot_a, gamma_rot_b, gamma_rot_c])
-        
-        # Convert to ARBD units
-        # For translational damping: 1/ns = 1e9/s
-        # kg/s to 1/(amu*ns): divide by mass in kg, multiply by 1e9
-        amu_to_kg = 1.66054e-27  # kg/amu
-        mass_kg = self.mass * amu_to_kg
-        
-        # Convert translational damping to 1/(amu*ns)
-        self.damping_coefficient = gamma_trans / mass_kg * 1e9
-        
-        # Convert rotational damping coefficients
-        # Need to use the appropriate moment of inertia for each axis
-        principal_moments_kg_m2 = self.principal_moments * self.density * 1e-30 * 0.6022  # Convert to kg·m²
-        
-        # Convert rotational damping to 1/ns
-        self.rotational_damping_coefficient = gamma_rot / principal_moments_kg_m2 * 1e9
-        
-        # Also store diffusion coefficients (not used directly in ARBD)
-        # D = kB*T/gamma
-        # This is just for reference/output
-        kB = 1.380649e-23  # J/K
-        D_trans = kB * self.temperature / gamma_trans  # m²/s
-        D_rot = kB * self.temperature / gamma_rot  # rad²/s
-        
-        # Store in Å²/ns and rad²/ns
-        self.transdamp = D_trans * 1e10  # m²/s to Å²/ns
-        self.rotdamp = D_rot * 1e-9  # rad²/s to rad²/ns
-        
-        # Log results
-        print(f"Semi-axes of equivalent ellipsoid: a={a:.1f} Å, b={b:.1f} Å, c={c:.1f} Å")
-        print(f"Shape classification: {self._classify_shape(a, b, c)}")
-        print(f"Translational damping coefficients [1/ns]: {self.damping_coefficient}")
-        print(f"Rotational damping coefficients [1/ns]: {self.rotational_damping_coefficient}")
+    def _get_damping(self, work_dir="hydrocalc"):
+        """Write input files for HYDROPRO"""
+        # First calculate bounding box to estimate atomic element radius
+        bounds_min = np.min(self.nodes, axis=0)
+        bounds_max = np.max(self.nodes, axis=0)
+        max_dim = np.max(bounds_max - bounds_min)
+        atomic_radius = max_dim / 50  # Rule of thumb for initial radius
+        # Write PDB file with surface nodes as pseudo-atoms
 
-    def _classify_shape(self, a, b, c):
-        """Classify the shape based on semi-axes ratios"""
-        tol = 0.05  # Tolerance for considering axes equal
+        try:
+            os.listdir(work_dir)
+        except:
+            os.mkdir(work_dir)
+
+        work_dir=Path(work_dir)
+        base_path = work_dir / "hydrocal"
+        self._save_aligned_mesh_both_formats(base_path)
         
-        if np.isclose(a, b, rtol=tol) and np.isclose(b, c, rtol=tol):
-            return "Sphere"
-        elif np.isclose(a, b, rtol=tol) and a > c:
-            return "Oblate ellipsoid (disk-like)"
-        elif np.isclose(b, c, rtol=tol) and a > b:
-            return "Prolate ellipsoid (rod-like)"
-        else:
-            return "Triaxial ellipsoid"
+        # Write HYDROPRO config
+        # Using HYDROPRO's shell model mode (NMC=1) with automated radius calculation
+            
+        # Run HydroPro to get hydrodynamic properties
+        results = self.runner.run_calculation(
+            work_dir=work_dir
+        )
+        
+        self.damping_coefficient = results['translation_damping']
+        self.rotational_damping_coefficient = results['rotation_damping']
+        pdb_path=str(base_path)+".pdb"
+        return pdb_path
+
 
     def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
         """Generate potential grid for ARBD"""
@@ -433,14 +306,14 @@ class MeshProcessor:
         """Save the aligned mesh to a new .msh file"""
         gmsh.initialize()
         gmsh.model.add("aligned_mesh")
-        
+        surface_tag = gmsh.model.addDiscreteEntity(2)
         # Add nodes
         node_tags = []
         node_coords = []
         for i, node in enumerate(self.nodes):
             tag = i + 1
             node_tags.append(tag)
-            node_coords.extend(node / self.unit_scale)  # Convert back to microns
+            node_coords.extend(node / self.unit_scale)  # Convert back to mesh units
             
         gmsh.model.mesh.addNodes(2, 1, node_tags, node_coords)
         
@@ -450,15 +323,92 @@ class MeshProcessor:
         for i, element in enumerate(self.elements):
             tag = i + 1
             element_tags.append(tag)
-            element_nodes.extend([x + 1 for x in element])  # Convert to 1-based indexing
+            element_nodes.extend([int(x + 1) for x in element])  # Convert to 1-based indexing
             
         gmsh.model.mesh.addElements(2, 1, [2], [element_tags], [element_nodes])
         
         # Write mesh
         gmsh.write(str(output_file))
         gmsh.finalize()
+            
+    def save_as_pdb(self, output_file):
+        """Save the aligned mesh as a PDB file (coordinates in Å)"""
+        # PDB format specifications
+        HEADER = "HEADER    ALIGNED MESH                           "
+        ATOM_FORMAT = "ATOM  {:5d} {:4s} {:3s} {:1s}{:4d}    {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
+        
+        with open(output_file, 'w') as f:
+            # Write header
+            from datetime import datetime
+            date_str = datetime.now().strftime("%d-%b-%y")
+            f.write(f"{HEADER}{date_str}   XXXX\n")
+            
+            # Calculate box dimensions for CRYST record
+            bounds_min = np.min(self.nodes, axis=0)
+            bounds_max = np.max(self.nodes, axis=0)
+            box_dimensions = bounds_max - bounds_min
+            
+            # Write crystallographic information
+            f.write(f"CRYST1{box_dimensions[0]:9.3f}{box_dimensions[1]:9.3f}{box_dimensions[2]:9.3f}  90.00  90.00  90.00 P 1           1\n")
+            
+            # Write atoms (nodes from the mesh)
+            for i, node in enumerate(self.nodes):
+                # PDB uses 1-indexed atom numbers
+                atom_num = i + 1
+                # Use CA (alpha carbon) atom type for visibility in viewers
+                atom_name = " CA "
+                # Use residue name MES for mesh
+                res_name = "MES"
+                # Use chain ID A
+                chain_id = "A"
+                # Residue number = atom number for simplicity
+                res_num = atom_num
+                # X, Y, Z coordinates in Ångströms (already in the correct units)
+                x, y, z = node
+                # Use 1.0 for occupancy and 0.0 for temperature factor
+                occupancy = 1.0
+                temp_factor = 0.0
+                
+                f.write(f"{ATOM_FORMAT.format(atom_num, atom_name, res_name, chain_id, res_num, x, y, z, occupancy, temp_factor)}\n")
+            
+            # Write connectivity (the mesh elements) as CONECT records
+            for element in self.elements:
+                # PDB CONECT records use 1-indexed atom numbers
+                atom_indices = [idx + 1 for idx in element]
+                
+                # Create a CONECT record for each edge of the triangle
+                edges = [(atom_indices[0], atom_indices[1]), 
+                         (atom_indices[1], atom_indices[2]), 
+                         (atom_indices[2], atom_indices[0])]
+                
+                for a1, a2 in edges:
+                    f.write(f"CONECT{a1:5d}{a2:5d}\n")
+            
+            # Write end of file
+            f.write("END\n")
+        
+        print(f"Saved aligned mesh as PDB: {output_file}")
+    
+    def _save_aligned_mesh_both_formats(self, base_filename):
+        """Save the aligned mesh in both MSH and PDB formats"""
+        # Save as MSH (in microns)
+        msh_filename = f"{base_filename}.msh"
+        self.save_aligned_mesh(msh_filename)
+        print(f"Saved aligned mesh as MSH: {msh_filename}")
+        
+        # Save as PDB (in Ångströms)
+        pdb_filename = f"{base_filename}.pdb"
+        self.save_as_pdb(pdb_filename)
+        print(f"Saved aligned mesh as PDB: {pdb_filename}")
+        
+        # If we have components, also save those
+        if hasattr(self, 'component_indices'):
+            comp_filename = f"{base_filename}_components.pdb"
+            self.visualize_components(comp_filename)
+            print(f"Saved component visualization: {comp_filename}")
 
-def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx="pod.dx", 
+
+def process_mesh_file(mesh_file, temperature=295, output_dx="pod.dx", 
                      output_mesh="rod.msh",  **kwargs):
     """
     Process mesh file and calculate all properties
@@ -469,14 +419,19 @@ def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx="pod.dx
         temperature: Temperature in Kelvin
         output_dx: Optional path to output potential DX file
         output_mesh: Optional path to save aligned mesh
+        hydropro_path: Path to HYDROPRO executable
         **kwargs: Additional arguments for potential generation
     """
-    processor = MeshProcessor(mesh_file, density, temperature=temperature)
+    processor = MeshProcessor(mesh_file, temperature=temperature,)
     
-    print(f"Mass: {processor.mass:.3f} amu")
-    print(f"Volume: {processor.volume:.3f} Å³")
+    print(f"Mass: {processor.mass:.3f}")
+    print(f"Volume: {processor.volume:.3f}")
     print("\nPrincipal moments of inertia:")
     print(processor.principal_moments)
+    print("\nTranslational damping coefficients [1/ns]:")
+    print(processor.translation_damping)
+    print("\nRotational damping coefficients [1/ns]:")
+    print(processor.rotation_damping)
     
     if output_dx:
         processor.write_potential_dx(output_dx, **kwargs)
@@ -485,6 +440,5 @@ def process_mesh_file(mesh_file, density=1.0, temperature=295, output_dx="pod.dx
         processor.save_aligned_mesh(output_mesh)
         
     return processor
-
 if __name__=="__main__":
     process_mesh_file("3drod.msh")
