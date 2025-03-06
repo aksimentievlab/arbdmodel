@@ -64,12 +64,12 @@ class HydroProRunner:
         
         config = f"""hydro
 {structure_name}.hydro
-hydro.pdb
+hydrocal.pdb
 1
 10,
-3,
+4,
 10,
-30,
+20,
 {temperature_c},
 {self.viscosity},
 {mass},
