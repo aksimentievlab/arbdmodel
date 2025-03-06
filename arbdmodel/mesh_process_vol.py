@@ -253,13 +253,21 @@ class MeshProcessor:
         sort_idx = np.argsort(eigenvalues)
         eigenvalues = eigenvalues[sort_idx]
         eigenvectors = eigenvectors[:, sort_idx]
+        # Reorder to put smallest moment (rod axis) as Z
+        # Z should be axis 2, so we want the smallest moment to be last
+        z_vec = eigenvectors[:, sort_idx[0]]  # Vector of smallest moment (rod axis)
+        x_vec = eigenvectors[:, sort_idx[1]]
+        y_vec = eigenvectors[:, sort_idx[2]]
+        
+        # Create new eigenvector matrix with Z as the rod axis
+        reordered_eigenvectors = np.column_stack([x_vec, y_vec, z_vec])
         
         # Ensure right-handed coordinate system
-        if np.linalg.det(eigenvectors) < 0:
-            eigenvectors[:, 0] *= -1
+        if np.linalg.det(reordered_eigenvectors) < 0:
+            reordered_eigenvectors[:, 0] *= -1
             
-        # Rotate mesh to align with principal axes
-        self.nodes = self.nodes @ eigenvectors
+        # Rotate mesh to align with principal axes with rod along Z
+        self.nodes = self.nodes @ reordered_eigenvectors
         
         # Store transformation
         self.rotation_matrix = eigenvectors
