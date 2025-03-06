@@ -338,19 +338,19 @@ class MeshProcessor:
         self.nodes -= com
         
         # Calculate and diagonalize inertia tensor
-        inertia = self._calculate_inertia_tensor()
+        inertia = self._calculate_volume_inertia_tensor()
         eigenvalues, eigenvectors = np.linalg.eigh(inertia)
         
         # Sort by eigenvalues to get consistent orientation
+        print(eigenvalues,eigenvectors)
         sort_idx = np.argsort(eigenvalues)
         eigenvalues = eigenvalues[sort_idx]
         eigenvectors = eigenvectors[:, sort_idx]
-        # Reorder to put smallest moment (rod axis) as Z
-        # Z should be axis 2, so we want the smallest moment to be last
-        z_vec = eigenvectors[:, sort_idx[0]]  # Vector of smallest moment (rod axis)
-        x_vec = eigenvectors[:, sort_idx[1]]
-        y_vec = eigenvectors[:, sort_idx[2]]
-        
+        # Now just use simple indices since eigenvectors is already sorted
+        z_vec = eigenvectors[:, 0]  # Vector of smallest moment (rod axis)
+        x_vec = eigenvectors[:, 1]
+        y_vec = eigenvectors[:, 2]
+        # For a rod, smallest moment of inertia is along the rod axis
         # Create new eigenvector matrix with Z as the rod axis
         reordered_eigenvectors = np.column_stack([x_vec, y_vec, z_vec])
         

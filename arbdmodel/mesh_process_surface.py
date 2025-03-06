@@ -38,7 +38,7 @@ class SurfaceMeshProcessor:
             expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
         """
         self.mesh_file = Path(mesh_file)
-        self.density = density
+        self.density = density*0.6022
         self.unit_scale = unit_scale
         self.temperature = temperature
         self.viscosity = viscosity
@@ -70,7 +70,7 @@ class SurfaceMeshProcessor:
                 print(f"Using expected mass: {self.mass:.2f} amu (density correction: {self.density_correction:.6f})")
             else:
                 # Convert density from g/cm^3 to amu/Å^3
-                self.mass = self.volume * self.density * 0.6022
+                self.mass = self.volume * self.density
                 self.density_correction = 1.0
                 
             print(f"Calculated volume: {self.volume:.2f} Å³")
