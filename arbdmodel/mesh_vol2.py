@@ -20,9 +20,10 @@ class MeshProcessor:
     
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
+    
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
-                solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                binary_path=None, expected_mass=None, expected_aspect_ratio=None):
+                 solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
+                 binary_path=None, extract_surface=True):
         """
         Initialize processor with mesh file
         
@@ -34,8 +35,7 @@ class MeshProcessor:
             solvent_density: Solvent density in g/cm3
             unit_scale: Conversion factor from input units to angstroms
             binary_path: Path to HydroPro binary
-            expected_mass: Optional expected mass in amu to calibrate calculations
-            expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
+            extract_surface: If True, extract surface mesh from 3D volumetric mesh
         """
         self.mesh_file = Path(mesh_file)
         self.density = density
@@ -44,9 +44,7 @@ class MeshProcessor:
         self.viscosity = viscosity
         self.solvent_density = solvent_density
         self.binary_path = binary_path
-        self.name = str(self.mesh_file.stem)
-        self.expected_mass = expected_mass
-        self.expected_aspect_ratio = expected_aspect_ratio
+        self.name=str(self.mesh_file.stem)
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
@@ -54,44 +52,26 @@ class MeshProcessor:
             gmsh.open(str(self.mesh_file))
             print(f"Successfully opened mesh file: {self.mesh_file}")
             
-            # First, load the full volumetric mesh for physical calculations
-            self.volume_nodes = self._get_nodes()
-            self.volume_elements = self._get_elements()
-            print(f"Loaded {len(self.volume_nodes)} nodes and {len(self.volume_elements)} elements from volume mesh")
-            
-            # Then extract surface mesh for visualization and HydroPro
-            self.nodes, self.elements = self._extract_surface_mesh()
-            print(f"Extracted {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
-            
-            # Calculate volume using volumetric mesh
-            self.volume = self._calculate_volume()
-            
-            # Calculate mass with density correction if needed
-            if self.expected_mass:
-                # Use expected mass if provided
-                self.mass = self.expected_mass
-                # Update density to match expected mass
-                self.density_correction = self.expected_mass / (self.volume * 0.6022)
-                print(f"Using expected mass: {self.mass:.2f} amu (density correction: {self.density_correction:.6f})")
+            # Get nodes and elements
+            if extract_surface:
+                self.nodes, self.elements = self._extract_surface_mesh()
+                print(f"Extracted {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
             else:
-                # Convert density from g/cm^3 to amu/Å^3
-                self.mass = self.volume * self.density * 0.6022
-                self.density_correction = 1.0
-                
+                self.nodes = self._get_nodes()
+                self.elements = self._get_elements()
+            
+            # Calculate basic properties before alignment
+            self.volume = self._calculate_volume()
+            # Convert density from g/cm^3 to amu/Å^3
+            self.mass = self.volume * self.density * 0.6022  # g/cm^3 to amu/AA^3
             print(f"Calculated volume: {self.volume:.2f} Å³")
             print(f"Calculated mass: {self.mass:.2f} amu")
             
-            # Align both meshes to center of mass and principal axes
+            # Align mesh to center of mass and principal axes
             self._align_mesh()
             
-            # Calculate inertia tensor using volumetric mesh
-            self.inertia_tensor = self._calculate_volume_inertia_tensor()
-            
-            # If expected aspect ratio provided, adjust inertia tensor
-            if self.expected_aspect_ratio:
-                print(f"Using expected aspect ratio: {self.expected_aspect_ratio}")
-                self._adjust_inertia_for_aspect_ratio(self.expected_aspect_ratio)
-                
+            # Calculate final properties after alignment
+            self.inertia_tensor = self._calculate_inertia_tensor()
             self.principal_moments = np.diag(self.inertia_tensor)
             print(f"Principal moments of inertia: {self.principal_moments}")
             
@@ -102,7 +82,7 @@ class MeshProcessor:
             gmsh.finalize()
 
     def _get_nodes(self):
-        """Get all mesh nodes with unit conversion"""
+        """Get mesh nodes with unit conversion"""
         node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
         coords = np.array(node_coords).reshape(-1, 3)
         return coords * self.unit_scale  # Convert to angstroms
@@ -126,7 +106,7 @@ class MeshProcessor:
         # Convert to 0-based indexing and reshape to Nx4 array
         elements = np.array(node_tags[tet_idx]).reshape(-1, 4) - 1
         return elements
-    
+        
     def _extract_surface_mesh(self):
         """Extract surface mesh from a 3D volumetric mesh"""
         # Get 3D elements
@@ -185,96 +165,24 @@ class MeshProcessor:
         
         return nodes, elements
 
-
-    def _calculate_volume_inertia_tensor(self):
-        """Calculate inertia tensor using tetrahedral elements from the volume mesh"""
-        inertia = np.zeros((3, 3))
-        
-        # For tetrahedral elements from the original volumetric mesh
-        for element in self.volume_elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.volume_nodes[element]
-            
-            # Calculate volume of tetrahedron
-            # V = (1/6) * |((v1-v0) × (v2-v0)) · (v3-v0)|
-            v01 = v1 - v0
-            v02 = v2 - v0
-            v03 = v3 - v0
-            volume = abs(np.dot(np.cross(v01, v02), v03)) / 6.0
-            
-            # Mass of tetrahedron
-            tetra_mass = volume * self.density * 0.6022  # Convert to amu
-            
-            # Calculate centroid
-            centroid = (v0 + v1 + v2 + v3) / 4.0
-            
-            # Calculate inertia contribution using parallel axis theorem
-            # First, calculate inertia about centroid
-            vertices = np.vstack([v0, v1, v2, v3])
-            
-            for i in range(3):
-                for j in range(3):
-                    if i == j:
-                        # Diagonal terms - integrate r² over tetrahedron
-                        # I_ii = ∫(y²+z²)dm for x-axis, etc.
-                        r_squared_sum = np.sum((vertices[:, (i+1)%3] - centroid[(i+1)%3])**2 + 
-                                            (vertices[:, (i+2)%3] - centroid[(i+2)%3])**2)
-                        # For a tetrahedron, the factor is 1/10
-                        inertia[i, i] += tetra_mass * r_squared_sum / 10.0
-                    else:
-                        # Off-diagonal terms - integrate -xy over tetrahedron
-                        xy_prod_sum = np.sum((vertices[:, i] - centroid[i]) * 
-                                            (vertices[:, j] - centroid[j]))
-                        inertia[i, j] -= tetra_mass * xy_prod_sum / 10.0
-        
-        return inertia
-
     def _calculate_volume(self):
-        """Calculate volume using the tetrahedral elements from volume mesh"""
-        # For tetrahedral mesh, calculate volume by summing volumes of all tetrahedra
+        """Calculate volume of the surface mesh using the divergence theorem"""
+        # For a closed surface mesh, use signed volume calculation
         total_volume = 0
-        
-        for element in self.volume_elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.volume_nodes[element]
+        for element in self.elements:
+            # Get vertices of triangle
+            v0, v1, v2 = self.nodes[element]
             
-            # Calculate volume of tetrahedron
-            # V = (1/6) * |((v1-v0) × (v2-v0)) · (v3-v0)|
+            # Calculate signed volume of tetrahedron formed by triangle and origin
+            # V = (1/6) * |((v1-v0) × (v2-v0)) · v0|
             v01 = v1 - v0
             v02 = v2 - v0
-            v03 = v3 - v0
-            volume = abs(np.dot(np.cross(v01, v02), v03)) / 6.0
+            normal = np.cross(v01, v02)
+            volume = abs(np.dot(normal, v0)) / 6.0
             
             total_volume += volume
-            
+                
         return total_volume
-
-    def _calculate_center_of_mass_volume(self):
-        """Calculate center of mass using tetrahedral elements from volume mesh"""
-        com = np.zeros(3)
-        total_mass = 0
-        
-        for element in self.volume_elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.volume_nodes[element]
-            
-            # Calculate volume
-            v01 = v1 - v0
-            v02 = v2 - v0
-            v03 = v3 - v0
-            volume = abs(np.dot(np.cross(v01, v02), v03)) / 6.0
-            
-            # Mass of tetrahedron
-            tetra_mass = volume * self.density * 0.6022  # Convert to amu
-            
-            # Centroid of tetrahedron
-            centroid = (v0 + v1 + v2 + v3) / 4.0
-            
-            # Add weighted contribution
-            com += centroid * tetra_mass
-            total_mass += tetra_mass
-        
-        return com / total_mass if total_mass > 0 else np.zeros(3)
 
     def _calculate_center_of_mass(self):
         """Calculate center of mass of the surface mesh"""
@@ -540,46 +448,11 @@ class MeshProcessor:
         pdb_filename = f"{base_filename}.pdb"
         self.save_as_pdb(pdb_filename)
         print(f"Saved aligned mesh as PDB: {pdb_filename}")
-    def _adjust_inertia_for_aspect_ratio(self, expected_ar):
-        """Adjust inertia tensor to match expected aspect ratio for rod-like objects
-        with rod aligned along Z-axis"""
-        # Get current dimensions from the volumetric mesh
-        bounds_min = np.min(self.volume_nodes, axis=0)
-        bounds_max = np.max(self.volume_nodes, axis=0)
-        dimensions = bounds_max - bounds_min
-        
-        # After alignment, Z should be the major axis (rod length)
-        length = dimensions[2]  # Z-axis length
-        width = max(dimensions[0], dimensions[1])  # Larger of X or Y dimensions
-        
-        # For a rod with mass M, length L, and radius R:
-        # I_axial = (1/2)MR²
-        # I_transverse = (1/12)ML² + (1/4)MR²
-        
-        # Analytic moments for a rod with the expected aspect ratio
-        radius_adjusted = length / (2 * expected_ar)
-        
-        # Z-axis is axial, X and Y are transverse
-        I_axial = 0.5 * self.mass * radius_adjusted**2
-        I_transverse = (1/12.0) * self.mass * length**2 + (1/4.0) * self.mass * radius_adjusted**2
-        
-        # Create the adjusted inertia tensor with Z-axis as the rod axis
-        adjusted_inertia = np.zeros((3, 3))
-        adjusted_inertia[0, 0] = I_transverse  # X-axis (transverse)
-        adjusted_inertia[1, 1] = I_transverse  # Y-axis (transverse)
-        adjusted_inertia[2, 2] = I_axial       # Z-axis (along rod)
-        
-        print(f"Adjusted inertia tensor for expected aspect ratio {expected_ar}:")
-        print(f"  I_axial (Z-axis): {I_axial:.2e}")
-        print(f"  I_transverse (X/Y-axes): {I_transverse:.2e}")
-        
-        # Update the inertia tensor
-        self.inertia_tensor = adjusted_inertia
+
 
 def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
                      solvent_density=1.0, output_dx="pod.dx", 
-                     output_mesh="rod.msh", binary_path=None,
-                     expected_mass=None, expected_aspect_ratio=None, **kwargs):
+                     output_mesh="rod.msh", binary_path=None, **kwargs):
     """
     Process mesh file and calculate all properties
     
@@ -592,8 +465,6 @@ def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
         output_dx: Optional path to output potential DX file
         output_mesh: Optional path to save aligned mesh
         binary_path: Path to HydroPro executable
-        expected_mass: Optional expected mass in amu to calibrate calculations
-        expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
         **kwargs: Additional arguments for potential generation
     """
     processor = MeshProcessor(
@@ -602,9 +473,7 @@ def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
         temperature=temperature,
         viscosity=viscosity,
         solvent_density=solvent_density,
-        binary_path=binary_path,
-        expected_mass=expected_mass,
-        expected_aspect_ratio=expected_aspect_ratio
+        binary_path=binary_path
     )
     
     # Calculate hydrodynamic properties
@@ -626,3 +495,6 @@ def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
         processor.save_aligned_mesh(output_mesh)
         
     return processor
+
+if __name__ == "__main__":
+    process_mesh_file("3drod.msh")
