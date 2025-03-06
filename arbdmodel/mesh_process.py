@@ -44,6 +44,7 @@ class MeshProcessor:
         self.viscosity = viscosity
         self.solvent_density = solvent_density
         self.binary_path = binary_path
+        self.name=str(self.mesh_file.stem)
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
@@ -268,12 +269,13 @@ class MeshProcessor:
     def calculate_damping(self, work_dir="hydrocalc"):
         """Calculate hydrodynamic properties using HydroPro"""
         # Create work directory if it doesn't exist
+        work_dir =Path(self.name)
         try:
             os.listdir(work_dir)
         except:
             os.mkdir(work_dir)
 
-        work_dir = Path(work_dir)
+        #work_dir = Path(work_dir)
         base_path = work_dir / "hydrocal"
         
         # Save the mesh in PDB format for HydroPro
