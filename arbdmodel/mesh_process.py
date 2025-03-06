@@ -3,14 +3,17 @@ import gmsh
 from scipy.spatial import KDTree
 from pathlib import Path
 import subprocess
+import os
+import platform
 from .grid import writeDx
 from .runner import HydroProRunner
 from . import get_resource_path
-import platform
-import os
 
-
-"""input: 3d mesh in .msh, density of object. Output: no-entering potential, transdamp, rotdamping."""
+"""
+Improved mesh processor that combines extraction techniques from mesh_ver3.py
+with volume calculation from mesh_process.py, and uses generated PDB for
+HydroPro calculations.
+"""
 
 class MeshProcessor:
     """Process gmsh files to calculate inertia, hydrodynamics and generate potential fields"""
@@ -20,18 +23,18 @@ class MeshProcessor:
     
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 binary_path=None, extract_surface=False):
+                 binary_path=None, extract_surface=True):
         """
         Initialize processor with mesh file
         
         Args:
             mesh_file: Path to .msh file
-            density: Material density in mass units per volume unit in g/cm^3
+            density: Material density in g/cm^3
             temperature: Temperature in Kelvin
             viscosity: Solvent viscosity in poise
             solvent_density: Solvent density in g/cm3
             unit_scale: Conversion factor from input units to angstroms
-            hydropro_path: Path to HYDROPRO executable
+            binary_path: Path to HydroPro binary
             extract_surface: If True, extract surface mesh from 3D volumetric mesh
         """
         self.mesh_file = Path(mesh_file)
@@ -40,36 +43,42 @@ class MeshProcessor:
         self.temperature = temperature
         self.viscosity = viscosity
         self.solvent_density = solvent_density
-        self.binary_path=binary_path
-
+        self.binary_path = binary_path
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
-        gmsh.open(str(self.mesh_file))
-        
-        # Get nodes and elements
-        if extract_surface:
-            self.nodes, self.elements = self._extract_surface_mesh()
-        else:
-            self.nodes = self._get_nodes()
-            self.elements = self._get_elements()
-        
-        # Calculate basic properties before alignment
-        self.volume = self._calculate_volume()
-        self.mass = self.volume * self.density*0.6022 #g/cm^3 to amu/AA^3
-        
-        # Align mesh to center of mass and principal axes
-        self._align_mesh()
-        
-        # Calculate final properties after alignment
-        self.inertia_tensor = self._calculate_inertia_tensor()
-        self.principal_moments = np.diag(self.inertia_tensor)
-        
-        # Calculate hydrodynamic properties
-        self.runner=HydroProRunner(self.mass,temperature=temperature,viscosity=viscosity, binary_path=binary_path)
-        self._get_damping()
-        print(self.transdamp,self.rotational_damping_coefficient)
-        gmsh.finalize()
+        try:
+            gmsh.open(str(self.mesh_file))
+            print(f"Successfully opened mesh file: {self.mesh_file}")
+            
+            # Get nodes and elements
+            if extract_surface:
+                self.nodes, self.elements = self._extract_surface_mesh()
+                print(f"Extracted {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
+            else:
+                self.nodes = self._get_nodes()
+                self.elements = self._get_elements()
+            
+            # Calculate basic properties before alignment
+            self.volume = self._calculate_volume()
+            # Convert density from g/cm^3 to amu/Å^3
+            self.mass = self.volume * self.density * 0.6022  # g/cm^3 to amu/AA^3
+            print(f"Calculated volume: {self.volume:.2f} Å³")
+            print(f"Calculated mass: {self.mass:.2f} amu")
+            
+            # Align mesh to center of mass and principal axes
+            self._align_mesh()
+            
+            # Calculate final properties after alignment
+            self.inertia_tensor = self._calculate_inertia_tensor()
+            self.principal_moments = np.diag(self.inertia_tensor)
+            print(f"Principal moments of inertia: {self.principal_moments}")
+            
+        except Exception as e:
+            print(f"Error processing mesh: {e}")
+            raise
+        finally:
+            gmsh.finalize()
 
     def _get_nodes(self):
         """Get mesh nodes with unit conversion"""
@@ -99,11 +108,18 @@ class MeshProcessor:
         
     def _extract_surface_mesh(self):
         """Extract surface mesh from a 3D volumetric mesh"""
-        # Get all surface elements
+        # Get 3D elements
+        dim3_entities = gmsh.model.getEntities(3)
+        if not dim3_entities:
+            raise ValueError("No 3D volume elements found in mesh")
+            
+        print("Found 3D volumetric mesh, extracting surface...")
+        
+        # Create topology for boundary extraction
         gmsh.model.mesh.createTopology()
         
         # Get surface elements
-        surface_dimtags = gmsh.model.getBoundary([(3, tag) for tag in gmsh.model.getEntities(3)], 
+        surface_dimtags = gmsh.model.getBoundary([(3, tag) for dim, tag in dim3_entities], 
                                                 combined=False, oriented=False)
         
         # Create a new physical group for the surface
@@ -133,7 +149,7 @@ class MeshProcessor:
         node_index_map = {}  # Map old indices to new ones
         
         for i, old_idx in enumerate(sorted(all_surface_nodes)):
-            coords = gmsh.model.mesh.getNode(old_idx + 1)[0]  # +1 because gmsh uses 1-based indexing
+            coords = gmsh.model.mesh.getNode(int(old_idx + 1))[0]  # +1 because gmsh uses 1-based indexing
             surface_nodes.append(coords)
             node_index_map[old_idx] = i
             
@@ -149,65 +165,76 @@ class MeshProcessor:
         return nodes, elements
 
     def _calculate_volume(self):
-        """Calculate volume of the tetrahedral mesh"""
-        volume = 0
+        """Calculate volume of the surface mesh using the divergence theorem"""
+        # For a closed surface mesh, use signed volume calculation
+        total_volume = 0
         for element in self.elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.nodes[element]
-            # Calculate volume using determinant method
+            # Get vertices of triangle
+            v0, v1, v2 = self.nodes[element]
+            
+            # Calculate signed volume of tetrahedron formed by triangle and origin
+            # V = (1/6) * |((v1-v0) × (v2-v0)) · v0|
             v01 = v1 - v0
             v02 = v2 - v0
-            v03 = v3 - v0
-            volume += abs(np.dot(v01, np.cross(v02, v03))) / 6.0
-        return volume
+            normal = np.cross(v01, v02)
+            volume = abs(np.dot(normal, v0)) / 6.0
+            
+            total_volume += volume
+                
+        return total_volume
 
     def _calculate_center_of_mass(self):
-        """Calculate center of mass of the tetrahedral mesh"""
+        """Calculate center of mass of the surface mesh"""
         com = np.zeros(3)
-        total_volume = 0
+        total_weight = 0
         
+        # For a surface mesh, weight each triangle by its area
         for element in self.elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.nodes[element]
-            # Calculate volume
+            # Get vertices of triangle
+            v0, v1, v2 = self.nodes[element]
+            
+            # Calculate area using cross product
             v01 = v1 - v0
             v02 = v2 - v0
-            v03 = v3 - v0
-            tet_volume = abs(np.dot(v01, np.cross(v02, v03))) / 6.0
-            # Tetrahedron centroid is average of vertices
-            centroid = (v0 + v1 + v2 + v3) / 4.0
-            com += centroid * tet_volume
-            total_volume += tet_volume
+            area = 0.5 * np.linalg.norm(np.cross(v01, v02))
             
-        return com / total_volume
+            # Centroid of triangle
+            centroid = (v0 + v1 + v2) / 3.0
+            
+            # Add weighted contribution
+            com += centroid * area
+            total_weight += area
+            
+        return com / total_weight if total_weight > 0 else np.zeros(3)
 
     def _calculate_inertia_tensor(self):
-        """Calculate inertia tensor about center of mass for tetrahedral mesh"""
+        """Calculate inertia tensor about center of mass for surface mesh"""
         inertia = np.zeros((3, 3))
         
+        # For a surface mesh, approximate inertia using triangles
         for element in self.elements:
-            # Get vertices of tetrahedron
-            v0, v1, v2, v3 = self.nodes[element]
+            # Get vertices of triangle
+            v0, v1, v2 = self.nodes[element]
             
-            # Calculate volume
+            # Calculate area
             v01 = v1 - v0
             v02 = v2 - v0
-            v03 = v3 - v0
-            tet_volume = abs(np.dot(v01, np.cross(v02, v03))) / 6.0
+            area = 0.5 * np.linalg.norm(np.cross(v01, v02))
             
             # Vertices contribution to inertia tensor
-            vertices = np.vstack([v0, v1, v2, v3])
+            vertices = np.vstack([v0, v1, v2])
             
+            # Approximate inertia contribution based on area
             for i in range(3):
                 for j in range(3):
                     if i == j:
                         # Diagonal terms
-                        term = np.sum(vertices[:, (i+1)%3]**2 + vertices[:, (i+2)%3]**2) / 10.0
+                        term = np.sum(vertices[:, (i+1)%3]**2 + vertices[:, (i+2)%3]**2) / 3.0
                     else:
                         # Off-diagonal terms
-                        term = -np.sum(vertices[:, i] * vertices[:, j]) / 10.0
+                        term = -np.sum(vertices[:, i] * vertices[:, j]) / 3.0
                         
-                    inertia[i,j] += self.density * tet_volume * term
+                    inertia[i,j] += self.density * 0.6022 * area * term  # Convert density to amu/Å³
         
         return inertia
 
@@ -236,38 +263,42 @@ class MeshProcessor:
         # Store transformation
         self.rotation_matrix = eigenvectors
         self.translation = com
+        print(f"Aligned mesh to principal axes, COM: {com}")
 
-    def _get_damping(self, work_dir="hydrocalc"):
-        """Write input files for HYDROPRO"""
-        # First calculate bounding box to estimate atomic element radius
-        bounds_min = np.min(self.nodes, axis=0)
-        bounds_max = np.max(self.nodes, axis=0)
-        max_dim = np.max(bounds_max - bounds_min)
-        atomic_radius = max_dim / 50  # Rule of thumb for initial radius
-        # Write PDB file with surface nodes as pseudo-atoms
-
+    def calculate_damping(self, work_dir="hydrocalc"):
+        """Calculate hydrodynamic properties using HydroPro"""
+        # Create work directory if it doesn't exist
         try:
             os.listdir(work_dir)
         except:
             os.mkdir(work_dir)
 
-        work_dir=Path(work_dir)
+        work_dir = Path(work_dir)
         base_path = work_dir / "hydrocal"
-        self._save_aligned_mesh_both_formats(base_path)
         
-        # Write HYDROPRO config
-        # Using HYDROPRO's shell model mode (NMC=1) with automated radius calculation
-            
+        # Save the mesh in PDB format for HydroPro
+        pdb_path = str(base_path) + ".pdb"
+        self.save_as_pdb(pdb_path)
+        
         # Run HydroPro to get hydrodynamic properties
-        results = self.runner.run_calculation(
-            work_dir=work_dir
+        self.runner = HydroProRunner(
+            self.mass,
+            binary_path=self.binary_path,
+            temperature=self.temperature,
+            viscosity=self.viscosity,
+            solvent_density=self.solvent_density,
+            structure_name="hydrocal"
         )
         
-        self.damping_coefficient = results['translation_damping']
+        results = self.runner.run_calculation(work_dir=work_dir)
+        
+        self.transdamp = results['translation_damping']
         self.rotational_damping_coefficient = results['rotation_damping']
-        pdb_path=str(base_path)+".pdb"
+        
+        print(f"Translational damping: {self.transdamp}")
+        print(f"Rotational damping: {self.rotational_damping_coefficient}")
+        
         return pdb_path
-
 
     def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
         """Generate potential grid for ARBD"""
@@ -306,7 +337,14 @@ class MeshProcessor:
         """Save the aligned mesh to a new .msh file"""
         gmsh.initialize()
         gmsh.model.add("aligned_mesh")
-        surface_tag = gmsh.model.addDiscreteEntity(2)
+        
+        # For surface mesh
+        entity_dim = 2
+        element_type = 2  # Triangle in gmsh
+            
+        # Add a discrete entity
+        entity_tag = gmsh.model.addDiscreteEntity(entity_dim)
+        
         # Add nodes
         node_tags = []
         node_coords = []
@@ -315,7 +353,7 @@ class MeshProcessor:
             node_tags.append(tag)
             node_coords.extend(node / self.unit_scale)  # Convert back to mesh units
             
-        gmsh.model.mesh.addNodes(2, 1, node_tags, node_coords)
+        gmsh.model.mesh.addNodes(entity_dim, entity_tag, node_tags, node_coords)
         
         # Add elements
         element_tags = []
@@ -325,7 +363,7 @@ class MeshProcessor:
             element_tags.append(tag)
             element_nodes.extend([int(x + 1) for x in element])  # Convert to 1-based indexing
             
-        gmsh.model.mesh.addElements(2, 1, [2], [element_tags], [element_nodes])
+        gmsh.model.mesh.addElements(entity_dim, entity_tag, [element_type], [element_tags], [element_nodes])
         
         # Write mesh
         gmsh.write(str(output_file))
@@ -362,7 +400,7 @@ class MeshProcessor:
                 # Use chain ID A
                 chain_id = "A"
                 # Residue number = atom number for simplicity
-                res_num = atom_num
+                res_num = atom_num % 10000  # PDB format limits res numbers to 9999
                 # X, Y, Z coordinates in Ångströms (already in the correct units)
                 x, y, z = node
                 # Use 1.0 for occupancy and 0.0 for temperature factor
@@ -400,38 +438,45 @@ class MeshProcessor:
         pdb_filename = f"{base_filename}.pdb"
         self.save_as_pdb(pdb_filename)
         print(f"Saved aligned mesh as PDB: {pdb_filename}")
-        
-        # If we have components, also save those
-        if hasattr(self, 'component_indices'):
-            comp_filename = f"{base_filename}_components.pdb"
-            self.visualize_components(comp_filename)
-            print(f"Saved component visualization: {comp_filename}")
 
 
-def process_mesh_file(mesh_file, temperature=295, output_dx="pod.dx", 
-                     output_mesh="rod.msh",  **kwargs):
+def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
+                     solvent_density=1.0, output_dx="pod.dx", 
+                     output_mesh="rod.msh", binary_path=None, **kwargs):
     """
     Process mesh file and calculate all properties
     
     Args:
         mesh_file: Path to .msh file
-        density: Material density
+        density: Material density in g/cm³
         temperature: Temperature in Kelvin
+        viscosity: Solvent viscosity in poise
+        solvent_density: Solvent density in g/cm³
         output_dx: Optional path to output potential DX file
         output_mesh: Optional path to save aligned mesh
-        hydropro_path: Path to HYDROPRO executable
+        binary_path: Path to HydroPro executable
         **kwargs: Additional arguments for potential generation
     """
-    processor = MeshProcessor(mesh_file, temperature=temperature,)
+    processor = MeshProcessor(
+        mesh_file,
+        density=density,
+        temperature=temperature,
+        viscosity=viscosity,
+        solvent_density=solvent_density,
+        binary_path=binary_path
+    )
     
-    print(f"Mass: {processor.mass:.3f}")
-    print(f"Volume: {processor.volume:.3f}")
+    # Calculate hydrodynamic properties
+    processor.calculate_damping()
+    
+    print(f"Mass: {processor.mass:.3f} amu")
+    print(f"Volume: {processor.volume:.3f} Å³")
     print("\nPrincipal moments of inertia:")
     print(processor.principal_moments)
     print("\nTranslational damping coefficients [1/ns]:")
-    print(processor.translation_damping)
+    print(processor.transdamp)
     print("\nRotational damping coefficients [1/ns]:")
-    print(processor.rotation_damping)
+    print(processor.rotational_damping_coefficient)
     
     if output_dx:
         processor.write_potential_dx(output_dx, **kwargs)
@@ -440,5 +485,6 @@ def process_mesh_file(mesh_file, temperature=295, output_dx="pod.dx",
         processor.save_aligned_mesh(output_mesh)
         
     return processor
-if __name__=="__main__":
+
+if __name__ == "__main__":
     process_mesh_file("3drod.msh")

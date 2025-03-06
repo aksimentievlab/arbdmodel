@@ -66,10 +66,10 @@ class HydroProRunner:
 {structure_name}.hydro
 hydro.pdb
 1
-2.9,
-6,
-1.2,
-3.0,
+10,
+3,
+10,
+30,
 {temperature_c},
 {self.viscosity},
 {mass},
@@ -108,7 +108,7 @@ hydro.pdb
         Dz = float(lines[line_num+2].strip().split()[2])
         
         # Skip two lines
-        line_num += 4
+        line_num += 5
         
         # Read rotational coefficients
         Rx = float(lines[line_num].strip().split()[3])
@@ -158,7 +158,7 @@ hydro.pdb
                                  check=True)
             
             # Parse results
-            trans_damp, rot_damp = self._parse_output(f"{structure_name}.hydro-res.txt", mass)
+            trans_damp, rot_damp = self.parse_output(f"{structure_name}.hydro-res.txt")
             
             return {
                 "translation_damping": trans_damp,
