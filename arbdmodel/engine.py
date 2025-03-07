@@ -9,7 +9,7 @@ import MDAnalysis as mda
 from abc import abstractmethod, ABCMeta
 
 from .version import get_version
-from . import devlogger,logger
+from . import _get_properties_and_dict_keys, devlogger,logger
 
 from .interactions import NullPotential
 from . import Transformable, Parent, Group

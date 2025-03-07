@@ -6,7 +6,7 @@ from pathlib import Path
 
 from . import logger
 from . import RigidBody, RigidBodyType
-from .engine import ArbdModel
+from .engine import ArbdModel,SimConf
 from .structure_from_pdb import StructureProcessor
 
 """Structure rigid body modeling module for ARBD.
