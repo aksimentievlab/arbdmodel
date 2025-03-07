@@ -1,10 +1,16 @@
-import numpy as np
+from __future__ import absolute_import, print_function
+import numpy as np 
+from scipy import signal
+import os,sys
+from . import logger
 import unittest
+import numpy as np
+
+
 
 def add_smaller_grid( grid, smaller_grid ):
     slices = get_slice_enclosing_smaller_grid( grid, smaller_grid )
     grid.grid[slices] = grid.grid[slices] + smaller_grid.grid
-
 
 def average_grids(grids, mask='nan'):
     """
@@ -79,6 +85,74 @@ def loadGrid(file, **kwargs):
     # Reshape into 3D array
     grid = np.array(data).reshape(dims)
     return grid, origin, delta
+
+def Bound_grid(inFile, outFile, lowerBound, upperBound):
+    """Apply bounds to grid values"""
+    # Fix scientific notation
+    cmd_in = "sed -r 's/^([0-9]+)e/\1.0e/g; s/ ([0-9]+)e/ \1.0e/' " + inFile + " > bound_grid_temp0.dx"
+    os.system(cmd_in)
+    cmd_in = "sed -r 's/^(-[0-9]+)e/\1.0e/g; s/ (-[0-9]+)e/ \1.0e/' bound_grid_temp0.dx > bound_grid_temp1.dx"
+    os.system(cmd_in)
+
+    assert(lowerBound < upperBound)
+
+    # Load data
+    grid, origin, delta = loadGrid('bound_grid_temp1.dx')
+
+    # Apply bounds
+    grid[grid > upperBound] = upperBound
+    grid[grid < lowerBound] = lowerBound
+
+    # Write output
+    writeDx(outFile, grid, origin, [delta, delta, delta])
+
+def blur3Dgrid(g, blur):
+    """Apply 3D Gaussian blur"""
+    kernel = gaussian_kernel(voxels=2*int(blur*3)+1, sig=blur, ndim=3)
+    return signal.fftconvolve(g, kernel, mode='same')
+
+    
+def Create_a_rectangular_mesh(wallRangeX, wallRangeY, wallRangeZ, blur, dd):
+    x = np.linspace(wallRangeX[0], wallRangeX[1], int((wallRangeX[1]-wallRangeX[0])/dd) + 1)
+    y = np.linspace(wallRangeY[0], wallRangeY[1], int((wallRangeY[1]-wallRangeY[0])/dd) + 1)
+    z = np.linspace(wallRangeZ[0], wallRangeZ[1], int((wallRangeZ[1]-wallRangeZ[0])/dd) + 1)
+    dx = np.mean(np.diff(x))
+    dy = np.mean(np.diff(y))
+    dz = np.mean(np.diff(z))
+
+    X,Y,Z = np.meshgrid(x,y,z,indexing='ij')
+
+    return X, Y, Z, dx, dy, dz
+
+
+
+def Convert_math_pt_to_mesh_pt(region_pts, min_wallX, min_wallY, min_wallZ, dx, dy, dz):
+    mesh_pts = []
+    for pt in region_pts:
+        indx = round((pt[0] - min_wallX) / dx)
+        indy = round((pt[1] - min_wallY) / dy)
+        indz = round((pt[2] - min_wallZ) / dz)
+        mesh_pts.append((indx, indy, indz))
+    return mesh_pts
+
+def Create_the_well(X, wellDepth, mesh_pts, blur, dx, dy, dz, wX, wY, wZ, out_path):
+    """Create potential well"""
+    pot = np.zeros(np.shape(X))
+    for pt in mesh_pts:
+        pot[pt[0], pt[1], pt[2]] = wellDepth
+
+    dd = np.mean([dx, dy, dz])
+    pot_blur = blur3Dgrid(pot, blur/dd)
+
+    origin = [wX, wY, wZ]
+    writeDx(out_path, pot_blur, origin, [dd, dd, dd])
+
+def Create_null(grid_path='null.dx'):
+    """Create null potential grid"""
+    zeros = np.zeros([2,2,2])
+    origin = -1500*np.array((1,1,1))
+    delta = [3000, 3000, 3000]
+    writeDx(grid_path, zeros, origin, delta)
 
 class TestAverageGrids(unittest.TestCase):
     def test_average_grids(self):

@@ -20,7 +20,7 @@ class MeshProcessor:
     MICRON_TO_ANGSTROM = 10000
     
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
-                solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
+                solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM, work_dir = None,
                 binary_path=None, expected_mass=None):
         """
         Initialize processor with mesh file
@@ -31,7 +31,7 @@ class MeshProcessor:
             temperature: Temperature in Kelvin
             viscosity: Solvent viscosity in poise
             solvent_density: Solvent density in g/cm3
-            unit_scale: Conversion factor from input units to angstroms
+            unit_scale: Conversion factor from input units to angstroms,default microns
             binary_path: Path to HydroPro binary
             expected_mass: Optional expected mass in amu to calibrate calculations
             expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
@@ -45,7 +45,10 @@ class MeshProcessor:
         self.binary_path = binary_path
         self.name = str(self.mesh_file.stem)
         self.expected_mass = expected_mass
+        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
+        os.makedirs(self.work_dir, exist_ok=True)
 
+        
         # Initialize gmsh and read mesh
         gmsh.initialize()
         try:
@@ -389,7 +392,7 @@ class MeshProcessor:
     def calculate_damping(self):
         """Calculate hydrodynamic properties using HydroPro"""
         # Create work directory if it doesn't exist
-        work_dir = Path(self.name)
+        work_dir = self.work_dir
         try:
             os.listdir(work_dir)
         except:
@@ -414,10 +417,10 @@ class MeshProcessor:
         results = self.runner.run_calculation(work_dir=work_dir)
         
         self.transdamp = results['translation_damping']
-        self.rotational_damping_coefficient = results['rotation_damping']
+        self.rotdamp = results['rotation_damping']
         
         logger.info(f"Translational damping: {self.transdamp}")
-        logger.info(f"Rotational damping: {self.rotational_damping_coefficient}")
+        logger.info(f"Rotational damping: {self.rotdamp}")
         
         return pdb_path
 
@@ -452,13 +455,19 @@ class MeshProcessor:
     def write_no_enter_potential(self, output_file=None, **kwargs):
         """Generate and write potential field to DX file so particles do not fall inside rigidbody."""
         if output_file is None:
-            output_file=self.name+".dx"
+            output_file=self.work_dir/f"{self.name}-no-enter.dx"
+        else:
+            if not os.path.isabs(output_file):
+                output_file = self.work_dir / output_file
 
         potential, origin, delta = self.generate_potential_grid(**kwargs)
         writeDx(output_file, potential, origin, delta)
         return output_file
 
     def save_aligned_mesh(self, output_file):
+        if not os.path.isabs(output_file):
+            output_file = self.work_dir / output_file
+
         """Save the aligned mesh to a new .msh file"""
         gmsh.initialize()
         gmsh.model.add("aligned_mesh")
@@ -496,6 +505,8 @@ class MeshProcessor:
             
     def save_as_pdb(self, output_file):
         """Save the aligned mesh as a PDB file (coordinates in Å)"""
+        if not os.path.isabs(output_file):
+            output_file = self.work_dir / output_file
         # PDB format specifications
         HEADER = "HEADER    ALIGNED MESH                           "
         ATOM_FORMAT = "ATOM  {:5d} {:4s} {:3s} {:1s}{:4d}    {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
@@ -554,6 +565,8 @@ class MeshProcessor:
     
     def _save_aligned_mesh_both_formats(self, base_filename):
         """Save the aligned mesh in both MSH and PDB formats"""
+        if not os.path.isabs(base_filename):
+            base_filename = self.work_dir / base_filename
         # Save as MSH (in microns)
         msh_filename = f"{base_filename}.msh"
         self.save_aligned_mesh(msh_filename)
@@ -564,48 +577,10 @@ class MeshProcessor:
         self.save_as_pdb(pdb_filename)
         logger.info(f"Saved aligned mesh as PDB: {pdb_filename}")
     
-    def _adjust_inertia_for_aspect_ratio(self, expected_ar):
-        """Adjust inertia tensor to match expected aspect ratio for rod-like objects
-        with rod aligned along Z-axis"""
-        # Get current dimensions from the volumetric mesh
-        bounds_min = np.min(self.volume_nodes, axis=0)
-        bounds_max = np.max(self.volume_nodes, axis=0)
-        dimensions = bounds_max - bounds_min
-        
-        # After alignment, Z should be the major axis (rod length)
-        length = dimensions[2]  # Z-axis length
-        width = max(dimensions[0], dimensions[1])  # Larger of X or Y dimensions
-        
-        # Current aspect ratio
-        current_ar = length / width if width > 0 else 1.0
-        
-        # For a rod with mass M, length L, and radius R:
-        # I_axial = (1/2)MR²
-        # I_transverse = (1/12)ML² + (1/4)MR²
-        
-        # Analytic moments for a rod with the expected aspect ratio
-        radius_adjusted = length / (2 * expected_ar)
-        
-        # Z-axis is axial, X and Y are transverse
-        I_axial = 0.5 * self.mass * radius_adjusted**2
-        I_transverse = (1/12.0) * self.mass * length**2 + (1/4.0) * self.mass * radius_adjusted**2
-        
-        # Create the adjusted inertia tensor with Z-axis as the rod axis
-        adjusted_inertia = np.zeros((3, 3))
-        adjusted_inertia[0, 0] = I_transverse  # X-axis (transverse)
-        adjusted_inertia[1, 1] = I_transverse  # Y-axis (transverse)
-        adjusted_inertia[2, 2] = I_axial       # Z-axis (along rod)
-        
-        logger.info(f"Adjusted inertia tensor for expected aspect ratio {expected_ar}:")
-        logger.info(f"  I_axial (Z-axis): {I_axial:.2e}")
-        logger.info(f"  I_transverse (X/Y-axes): {I_transverse:.2e}")
-        
-        # Update the inertia tensor
-        self.inertia_tensor = adjusted_inertia
 
 def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
-                     solvent_density=1.0, output_dx="pod.dx", 
-                     output_mesh="rod.msh", binary_path=None,
+                     solvent_density=1.0, output_dx=None, 
+                     output_mesh=None, binary_path=None,
                      expected_mass=None, **kwargs):
     """
     Process mesh file and calculate all properties
@@ -635,19 +610,9 @@ def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
     # Calculate hydrodynamic properties
     processor.calculate_damping()
     
-    logger.info(f"Mass: {processor.mass:.3f} amu")
-    logger.info(f"Volume: {processor.volume:.3f} Å³")
-    logger.info("\nPrincipal moments of inertia:")
-    logger.info(processor.principal_moments)
     logger.info("\nTranslational damping coefficients [1/ns]:")
     logger.info(processor.transdamp)
     logger.info("\nRotational damping coefficients [1/ns]:")
-    logger.info(processor.rotational_damping_coefficient)
-    
-    if output_dx:
-        processor.write_no_enter_potential(output_dx, **kwargs)
-        
-    if output_mesh:
-        processor.save_aligned_mesh(output_mesh)
+    logger.info(processor.rotdamp)
         
     return processor

@@ -909,28 +909,39 @@ class ArbdEngine(SimEngine):
         d = self.potential_directory = "potentials"
         if not os.path.exists(d):
             os.makedirs(d)
- 
+        rb_type_dirs = {}
+        for rbk, num in model.rigid_body_type_counts:
+            if num > 0:
+                rbt = model.rigid_body_index[rbk]
+                rb_dir = rbt.name  # Create top-level directory named after the RigidBodyType
+                if not os.path.exists(rb_dir):
+                    os.makedirs(rb_dir)
+                rb_type_dirs[rbt.name] = rb_dir
+        
+        main_potentials_dir=self.potential_directory 
+        self.rb_type_dirs = rb_type_dirs
+
         model.write_psf( output_name+'.psf' )
         model.write_pdb( output_name+'.pdb' )
 
-        self._write_particle_file( model, output_name + ".particles.txt", configuration )
-
-        self._write_restraint_file( model, "{}/{}.restraint.txt".format(d, output_name) )
-        self._write_bond_file( model, "{}/{}.bond.txt".format(d, output_name) )
-        self._write_angle_file( model, "{}/{}.angle.txt".format(d, output_name) )
-        self._write_dihedral_file( model, "{}/{}.dihedral.txt".format(d, output_name) )
-        self._write_vector_angle_file( model, "{}/{}.vecangle.txt".format(d, output_name) )
-        self._write_exclusion_file( model, "{}/{}.exclusion.txt".format(d, output_name) )
-        self._write_bond_angle_file( model, f"{d}/{output_name}.bond-angle.txt" )
-        self._write_product_potential_file( model, f"{d}/{output_name}.product_potential.txt" )
-        self._write_group_sites_file( model, f"{d}/{output_name}.group_sites.txt" )
-        self._write_rb_coordinate_file( model, configuration, f'{output_name}.rbcoords.txt' )
+        self._write_particle_file(model, output_name + ".particles.txt", configuration)
         
-        self._write_potential_files( model, output_name, directory = d, configuration = configuration )
-
-        self._write_rb_attached_particles_files( model, f'{d}/{output_name}', configuration )
-
-        self._write_conf( model, output_name, configuration )
+        self._write_restraint_file(model, f"{main_potentials_dir}/{output_name}.restraint.txt")
+        self._write_bond_file(model, f"{main_potentials_dir}/{output_name}.bond.txt")
+        self._write_angle_file(model, f"{main_potentials_dir}/{output_name}.angle.txt")
+        self._write_dihedral_file(model, f"{main_potentials_dir}/{output_name}.dihedral.txt")
+        self._write_vector_angle_file(model, f"{main_potentials_dir}/{output_name}.vecangle.txt")
+        self._write_exclusion_file(model, f"{main_potentials_dir}/{output_name}.exclusion.txt")
+        self._write_bond_angle_file(model, f"{main_potentials_dir}/{output_name}.bond-angle.txt")
+        self._write_product_potential_file(model, f"{main_potentials_dir}/{output_name}.product_potential.txt")
+        self._write_group_sites_file(model, f"{main_potentials_dir}/{output_name}.group_sites.txt")
+        self._write_rb_coordinate_file(model, configuration, f'{output_name}.rbcoords.txt')
+        
+        self._write_potential_files(model, output_name, directory=main_potentials_dir, configuration=configuration)
+        
+        self._write_rb_attached_particles_files(model, output_name, configuration)
+        
+        self._write_conf(model, output_name, configuration)
         ## , numSteps=numSteps, outputPeriod=outputPeriod, restart_file=restart_file )
 
     def _write_particle_file(self, model, filename, configuration=None, **conf_params):
@@ -958,14 +969,22 @@ class ArbdEngine(SimEngine):
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
         if len(model.rigid_bodies) > 0:
-            for rbk,num in model.rigid_body_type_counts:
-                rbt=model.rigid_body_index[rbk]
+            for rbk, num in model.rigid_body_type_counts:
+                rbt = model.rigid_body_index[rbk]
                 devlogger.debug(f'Writing attached particles file for rigid body type {rbt}')
                 if num > 0 and len(rbt.attached_particles) > 0:
-                    f = rbt._attached_particles_filename = f'{output_name}.attached_particles.{rbt}.txt'
-                    with open(f,'w') as fh:
+                    # Use RB-specific directory
+                    rb_dir = self.rb_type_dirs.get(rbt.name)
+                    if not rb_dir:
+                        logger.warning(f"No directory found for RigidBodyType {rbt.name}, using default")
+                        rb_dir = self.potential_directory
+                    
+                    # Create the attached particles file inside the RB directory
+                    f = os.path.join(rb_dir, f"attached_particles.txt")
+                    rbt._attached_particles_filename = f
+                    with open(f, 'w') as fh:
                         for p in rbt.attached_particles:
-                            x,y,z = p.position
+                            x, y, z = p.position
                             fh.write(f'{p.type_.name} {x} {y} {z}\n')
 
     def _write_rigid_group_file(self, model, filename, groups):
@@ -1198,15 +1217,28 @@ class ArbdEngine(SimEngine):
         filename = f'{prefix}.bd'
 
         ## Create helper function
-        def _fix_path(filename):
+        def _fix_path(filename, rb_type=None):
+            if rb_type and rb_type in self.rb_type_dirs:
+                # First, check if this is an existing file within the RB directory
+                rb_dir = self.rb_type_dirs[rb_type]
+                basename = os.path.basename(str(filename))
+                rb_path = os.path.join(rb_dir, basename)
+                if os.path.exists(rb_path):
+                    return rb_path
+                
+                # Check if this might be a resource we want to place in the RB directory
+                if basename.startswith(rb_type) or rb_type in str(filename):
+                    return rb_path
+            
             abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
             ret = None
-            try: ret = os.path.relpath(str(abspath))
+            try: 
+                ret = os.path.relpath(str(abspath))
             except:
                 devlogger.info(f'Relative path for {filename} not found... using {abspath}')
                 ret = abspath
             return str(ret)
-
+        
         ## Build dictionary of parameters
         params = dict()
         for k,v in configuration.items():
@@ -1485,19 +1517,21 @@ rotDamping {' '.join(map(str,gamma_rot))}
                     for item in rbt.potential_grids:
                         try:    keyword,g,s = item
                         except: (keyword,g),s = (item,1)
-                        g = _fix_path(g)
+
+                        g = _fix_path(g,rbt.name)
                         fh.write(f"potentialGrid {keyword} {g}\n")
                         if s != 1: fh.write(f"potentialGridScale {keyword} {s}\n")
+
                     for item in rbt.charge_grids:
                         try:    keyword,g,s = item
                         except: (keyword,g),s = (item,1)
-                        g = _fix_path(g)
+                        g = _fix_path(g,rbt.name)
                         fh.write(f"densityGrid {keyword} {g}\n")
                         if s != 1: fh.write(f"densityGridScale {keyword} {s}\n")
                     for item in rbt.pmf_grids:
                         try:    keyword,g,s = item
                         except: (keyword,g),s = (item,1)
-                        g = _fix_path(g)
+                        g = _fix_path(g,rbt.name)
                         fh.write(f"gridFile {keyword} {g}\n")
                         if s != 1: fh.write(f"pmfScale {keyword} {s}\n")
 

@@ -21,7 +21,7 @@ class SurfaceMeshProcessor:
     
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 binary_path=None):
+                 binary_path=None, work_dir=None):
         """
         Initialize processor with surface mesh file
         
@@ -34,6 +34,7 @@ class SurfaceMeshProcessor:
             unit_scale: Conversion factor from input units to angstroms
             binary_path: Path to HydroPro binary
             expected_mass: Optional expected mass in amu to calibrate calculations
+            work_dir: Directory to store output files (default: current directory)
         """
         self.mesh_file = Path(mesh_file)
         self.density = density*0.6022
@@ -43,7 +44,8 @@ class SurfaceMeshProcessor:
         self.solvent_density = solvent_density
         self.binary_path = binary_path
         self.name = str(self.mesh_file.stem)
-        
+        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
+        os.makedirs(self.work_dir, exist_ok=True)
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
@@ -284,7 +286,7 @@ class SurfaceMeshProcessor:
         """Calculate hydrodynamic properties using HydroPro"""
         # Create work directory if it doesn't exist
         if work_dir is None:
-            work_dir = Path(self.name)
+            work_dir = self.work_dir / self.name
         else:
             work_dir = Path(work_dir)
             
