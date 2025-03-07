@@ -1,6 +1,6 @@
 DefineConstant[ R = 0.011 ];
-DefineConstant[ H = 0.076 ];
-DefineConstant[ N = 3     ];
+DefineConstant[ H = 0.054 ];
+DefineConstant[ N = 5     ];
 DefineConstant[ Smooth=1  ];
 
 L=Pi*R/(2*N);

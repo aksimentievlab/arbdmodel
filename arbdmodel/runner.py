@@ -16,7 +16,7 @@ from . import logger, get_resource_path
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
     
-    def __init__(self, mass,binary_path=None, temperature=295, viscosity=0.01, solvent_density=1.0,structure_name="hydrocal"):
+    def __init__(self, mass,binary_path=None, temperature=295, viscosity=0.01, solvent_density=1.0,structure_name="hydrocal",cal_type="shape"):
         """Initialize HydroPro interface.
         
         Args:
@@ -25,6 +25,7 @@ class HydroProRunner:
             viscosity: Solvent viscosity in poise (default: 0.01)
             solvent_density: Solvent density in g/cm3 (default: 1.0)
             mass: mass in amu
+            cal_type: shape or mesh, determined by program
         """
         if binary_path is None:
             # Determine correct binary based on platform
@@ -49,40 +50,58 @@ class HydroProRunner:
         self.solvent_density = solvent_density
         self.structure_name=structure_name
         self.mass=mass
-        
-    def write_config(self,output_path="hydropro.dat"):
-        mass=self.mass
-        structure_name=self.structure_name
-        """Write HydroPro configuration file.
+        self.cal_type=cal_type
+
+    def write_config(self, output_path="hydropro.dat",
+                     aer=2.9,nsig=6,sig_min=1,sig_max=2,specific_volume=0.702,):
+        """Write HydroPro configuration file with explicit parameters.
         
         Args:
-            structure_name: Base name of structure files
-            mass: Mass in AMU
             output_path: Path to write config file
+            cal_type: shape(0) or mesh(1)
+            structure_name: Name of the molecule/structure
+            mass: Molecular weight in Daltons (amu)
+            aer: Atomic Element Radius in Angstroms
+            nsig: Number of values of the shell thickness
+            sig_min: Minimum radius of beads in the shell (Angstroms)
+            sig_max: Maximum radius of beads in the shell (Angstroms)
+            specific_volume: Partial specific volume in cm³/g
         """
         temperature_c = self.temperature - 273.15  # Convert K to C
-        
-        config = f"""hydro
-{structure_name}.hydro
-hydrocal.pdb
-1
-10,
-4,
-10,
-20,
-{temperature_c},
-{self.viscosity},
-{mass},
-1.0,
-{self.solvent_density}
--1,
--1,
-0,
-1
-*"""
-        
+        if self.cal_type=="mesh" or self.cal_type==1:
+            aer=10
+            nsig=4
+            sig_min=10
+            sig_max=20
+            specific_volume=1
+
         with open(output_path, 'w') as f:
-            f.write(config)
+            # Basic identification
+            f.write(f"{self.structure_name}\n")                  # Name of molecule
+            f.write(f"{self.structure_name}.hydro\n")           # Base name for output files
+            f.write("hydro.pdb\n")                         
+            f.write("1\n")                                  # Calculation type always 1 (bead surface model)
+
+            # Bead model parameters
+            f.write(f"{aer},\n")                            # AER (radius in Angstroms)
+            f.write(f"{nsig},\n")                           # NSIG (values of shell thickness)
+            f.write(f"{sig_min},\n")                        # SIGMIN (min bead radius)
+            f.write(f"{sig_max},\n")                        # SIGMAX (max bead radius)
+            
+            # Physical parameters
+            f.write(f"{temperature_c},\n")                  # Temperature in Celsius
+            f.write(f"{self.viscosity},\n")                      # Solvent viscosity in poise
+            f.write(f"{self.mass},\n")                           # Molecular weight in Daltons
+            f.write(f"{specific_volume},\n")                # Partial specific volume
+            f.write(f"{self.solvent_density}\n")                 # Solvent density
+            
+            # Calculation control parameters
+            f.write("-1\n")                       # Number of Q values
+            f.write("-1\n")                      # Number of intervals
+            f.write("0\n")                      # Monte Carlo trials
+            f.write("1\n")                                  # IDIF=1 (yes) for full diffusion tensors
+            f.write("*")                                    # End marker
+
 
     def parse_output(self, output_file):
         mass=self.mass
@@ -211,34 +230,34 @@ class APBSRunner:
             center = 'mol 1'
             
         config = f"""read
-        mol pqr {structure_name}.pqr
-        end
-        elec
-        mg-auto
-        dime {' '.join(xyz_dime)}
-        cglen {' '.join(xyz_cg)}
-        cgcent {center}
-        fglen {' '.join(xyz_cg)}
-        fgcent {center}
-        mol 1
-        npbe
-        bcfl sdh
-        srfm smol
-        chgm spl2
-        ion 1 {salt_conc} 2.0
-        ion -1 {salt_conc} 2.0
-        pdie 12.0
-        sdie 78.54
-        sdens 10.0
-        srad 1.4
-        swin 0.3
-        temp {temperature}
-        gamma 0.105
-        calcenergy no
-        calcforce no
-        write pot dx {structure_name}.elec.tmp
-        end
-        quit"""
+mol pqr {structure_name}.pqr
+end
+elec
+mg-auto
+dime {' '.join(xyz_dime)}
+cglen {' '.join(xyz_cg)}
+cgcent {center}
+fglen {' '.join(xyz_cg)}
+fgcent {center}
+mol 1
+npbe
+bcfl sdh
+srfm smol
+chgm spl2
+ion 1 {salt_conc} 2.0
+ion -1 {salt_conc} 2.0
+pdie 12.0
+sdie 78.54
+sdens 10.0
+srad 1.4
+swin 0.3
+temp {temperature}
+gamma 0.105
+calcenergy no
+calcforce no
+write pot dx {structure_name}.elec.tmp
+end
+quit"""
 
         with open(f"{structure_name}.apbs", 'w') as f:
             f.write(config)

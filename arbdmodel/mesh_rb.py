@@ -10,7 +10,7 @@ from . import logger
 from . import RigidBody, RigidBodyType
 from .engine import ArbdModel
 from .interactions import AbstractPotential
-
+from mesh_process_volume  import MeshProcessor
 """Rigid body shape modeling module for arbdmodel package.
 
 This module provides classes for simple rigid body shape mesh objects into ARBD model.
@@ -22,8 +22,9 @@ Input: .msh file
 class MeshRBType(RigidBodyType):
     """RigidBodyType subclass for shape rigid body objects"""
     
-    def __init__(self, name, msh_file, mass=None, moment_of_inertia=None,
-                 diffusivity=None, damping_coefficient=None, vmd_path=None, **kwargs):
+    def __init__(self, name, msh_file, density=19.3, temperature=303, viscosity=0.01, 
+                solvent_density=1.0, unit_scale=1e4,use_surface=False,
+                **kwargs):
         """Initialize shape type.
         
         Args:
@@ -39,20 +40,33 @@ class MeshRBType(RigidBodyType):
             vmd_path: Path to VMD executable
 
         """
+        self.msh_file = Path(msh_file)
+        if use_surface:
+            logger.warning(f'Thie moment of inertia using surface mesh is still inaccurate. consider use volume mesh')
+            from mesh_process_surface import SurfaceMeshProcessor
+            rbprocess=SurfaceMeshProcessor(self.msh_file, density=density, temperature=temperature,
+                            viscosity=viscosity, 
+                            solvent_density=solvent_density, unit_scale=unit_scale,
+                            binary_path=None)
+        else:
+            rbprocess=MeshProcessor(self.msh_file, density=density, temperature=temperature,
+                            viscosity=viscosity, 
+                            solvent_density=solvent_density, unit_scale=unit_scale,
+                            binary_path=None)
+        
+        rbprocess.calculate_damping()
+        potential_grids=[]
+        potential_grids.append(rbprocess.write_no_enter_potential())
+
         super().__init__(
             name=name,
-            mass=mass,
-            moment_of_inertia=moment_of_inertia,
-            diffusivity=diffusivity, 
-            damping_coefficient=damping_coefficient,
+            mass=rbprocess.mass,
+            moment_of_inertia=rbprocess.principal_moments,
+            damping_coefficient=rbprocess.transdamp,
+            rotational_damping_coefficient=rbprocess.rotational_damping_coefficient,
+            potential_grids = potential_grids,
             **kwargs
         )
-        self.msh_file = Path(msh_file)
-        
-        # Store paths to required executables
-        self.vmd_path = vmd_path or 'vmd'
-        
-        # Initialize runners
 
  
 class MeshRBObject(RigidBody):

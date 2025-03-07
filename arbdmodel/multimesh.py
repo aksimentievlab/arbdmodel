@@ -3,10 +3,10 @@ import gmsh
 from scipy.spatial import KDTree, distance
 from scipy.cluster.hierarchy import linkage, fcluster
 from pathlib import Path
-import os
-from scipy.linalg import eigh
-from .grid import writeDx
 
+"""
+Potential multimesh generation suggusted by Claude.
+"""
 
 class MultiBodyHydrodynamics:
     """

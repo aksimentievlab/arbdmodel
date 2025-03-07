@@ -7,11 +7,10 @@ import os
 import platform
 from .grid import writeDx
 from .runner import HydroProRunner
-from . import get_resource_path
+from . import logger
 
 """
-Specialized surface mesh processor that handles triangle meshes directly
-rather than extracting surface from volumetric meshes.
+Specialized surface mesh processor that handles triangle surface meshes 
 """
 
 class SurfaceMeshProcessor:
@@ -22,7 +21,7 @@ class SurfaceMeshProcessor:
     
     def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
                  solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 binary_path=None, expected_mass=None, expected_aspect_ratio=None):
+                 binary_path=None):
         """
         Initialize processor with surface mesh file
         
@@ -35,7 +34,6 @@ class SurfaceMeshProcessor:
             unit_scale: Conversion factor from input units to angstroms
             binary_path: Path to HydroPro binary
             expected_mass: Optional expected mass in amu to calibrate calculations
-            expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
         """
         self.mesh_file = Path(mesh_file)
         self.density = density*0.6022
@@ -45,54 +43,36 @@ class SurfaceMeshProcessor:
         self.solvent_density = solvent_density
         self.binary_path = binary_path
         self.name = str(self.mesh_file.stem)
-        self.expected_mass = expected_mass
-        self.expected_aspect_ratio = expected_aspect_ratio
+        
 
         # Initialize gmsh and read mesh
         gmsh.initialize()
         try:
             gmsh.open(str(self.mesh_file))
-            print(f"Successfully opened mesh file: {self.mesh_file}")
-            
-            # Get nodes and triangular elements directly
+            logger.info(f"Successfully opened mesh file: {self.mesh_file}")
+
             self.nodes, self.elements = self._load_surface_mesh()
-            print(f"Loaded {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
+            logger.info(f"Loaded {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
             
             # Calculate basic properties before alignment
             self.volume = self._calculate_volume()
-            
-            # Convert density from g/cm^3 to amu/Å^3
-            if self.expected_mass:
-                # Use expected mass if provided
-                self.mass = self.expected_mass
-                # Update density to match expected mass
-                self.density_correction = self.expected_mass / (self.volume * 0.6022)
-                print(f"Using expected mass: {self.mass:.2f} amu (density correction: {self.density_correction:.6f})")
-            else:
-                # Convert density from g/cm^3 to amu/Å^3
-                self.mass = self.volume * self.density
-                self.density_correction = 1.0
+            self.mass = self.volume * self.density
+            self.density_correction = 1.0
                 
-            print(f"Calculated volume: {self.volume:.2f} Å³")
-            print(f"Calculated mass: {self.mass:.2f} amu")
+            logger.info(f"Calculated volume: {self.volume:.2f} Å³")
+            logger.info(f"Calculated mass: {self.mass:.2f} amu")
             
             # Align mesh to center of mass and principal axes
             self._align_mesh()
             
             # Calculate final properties after alignment
             self.inertia_tensor = self._calculate_inertia_tensor()
-            
-            # If expected aspect ratio provided, adjust inertia tensor
-            if self.expected_aspect_ratio:
-                print(f"Using expected aspect ratio: {self.expected_aspect_ratio}")
-                self._adjust_inertia_for_aspect_ratio(self.expected_aspect_ratio)
-                
+
             self.principal_moments = np.diag(self.inertia_tensor)
-            print(f"Principal moments of inertia: {self.principal_moments}")
+            logger.info(f"Principal moments of inertia: {self.principal_moments}")
             
         except Exception as e:
-            print(f"Error processing mesh: {e}")
-            raise
+            logger.error(f"Error processing mesh: {e}")
         finally:
             gmsh.finalize()
 
@@ -101,7 +81,7 @@ class SurfaceMeshProcessor:
         # Get all 2D entities (surfaces)
         surface_entities = gmsh.model.getEntities(2)
         if not surface_entities:
-            raise ValueError("No surface entities found in mesh")
+            logger.error("No surface entities found in mesh")
             
         # Collect all triangular elements
         all_nodes = set()
@@ -123,7 +103,7 @@ class SurfaceMeshProcessor:
                 all_nodes.update(element_node_tags.flatten())
         
         if not all_elements:
-            raise ValueError("No triangular elements found in mesh")
+            logger.error("No triangular elements found in mesh")
             
         # Get coordinates of all nodes
         node_coords = {}
@@ -194,66 +174,6 @@ class SurfaceMeshProcessor:
         return com / total_weight if total_weight > 0 else np.zeros(3)
 
     def _calculate_inertia_tensor(self):
-        """Calculate inertia tensor for a solid 3D object represented by surface mesh"""
-        # For a solid object enclosed by a surface mesh, we need to use a different approach
-        # We'll treat this as a solid object, not a thin shell
-        
-        inertia = np.zeros((3, 3))
-        volume = self._calculate_volume()
-        
-        # Mass of the entire object
-        mass = volume * self.density * 0.6022  # amu
-        
-        # For each triangular face, calculate contribution to inertia
-        for element in self.elements:
-            # Get vertices of triangle
-            v0, v1, v2 = self.nodes[element]
-            
-            # Calculate normal and area
-            v01 = v1 - v0
-            v02 = v2 - v0
-            normal = np.cross(v01, v02)
-            area = 0.5 * np.linalg.norm(normal)
-            
-            # Make sure normal points outward (assuming consistent winding)
-            if np.dot(normal, v0) < 0:
-                normal = -normal
-                
-            unit_normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) > 0 else np.zeros(3)
-            
-            # Tetrahedron formed by triangle and origin
-            # Calculate contribution to inertia tensor from this tetrahedron
-            vertices = np.vstack([np.zeros(3), v0, v1, v2])
-            
-            # Contribution is proportional to the signed volume
-            signed_volume = np.dot(normal, v0) / 6.0
-            tetra_mass = abs(signed_volume) * self.density * 0.6022
-            
-            # Calculate inertia tensor contribution
-            # For each pair of coordinates, calculate integral over tetrahedron
-            for i in range(3):
-                for j in range(3):
-                    if i == j:
-                        # Diagonal elements - use r² for each axis
-                        r_squared_sum = np.sum(vertices[:, (i+1)%3]**2 + vertices[:, (i+2)%3]**2)
-                        inertia[i, i] += tetra_mass * r_squared_sum / 10.0  # 1/10 factor for tetrahedron
-                    else:
-                        # Off-diagonal elements - use -xy products
-                        xy_sum = np.sum(vertices[:, i] * vertices[:, j])
-                        inertia[i, j] -= tetra_mass * xy_sum / 10.0
-        
-        # Scale inertia tensor to match expected mass
-        # This helps correct for numerical issues in volume calculation
-        scale_factor = mass / np.sum([np.abs(np.dot(np.cross(v1-v0, v2-v0), v0)) / 6.0 
-                                     for element in self.elements 
-                                     for v0, v1, v2 in [self.nodes[element]]])
-        
-        inertia *= scale_factor
-        
-        return inertia
-        
-    def _calculate_inertia_tensor_old(self):
-        """Legacy method for calculating inertia tensor using thin shell approximation"""
         inertia = np.zeros((3, 3))
         
         # Compute total mass based on volume and density
@@ -276,8 +196,8 @@ class SurfaceMeshProcessor:
         else:
             AR = 1.0
             
-        print(f"Detected dimensions: {dimensions}")
-        print(f"Estimated aspect ratio: {AR:.2f}")
+        logger.info(f"Detected dimensions: {dimensions}")
+        logger.info(f"Estimated aspect ratio: {AR:.2f}")
         
         # Calculate moments of inertia for a cylindrical rod
         # For a uniform rod of length L and radius R:
@@ -313,7 +233,7 @@ class SurfaceMeshProcessor:
         bounds_min = np.min(self.nodes, axis=0)
         bounds_max = np.max(self.nodes, axis=0)
         dimensions = bounds_max - bounds_min
-        print(f"Pre-alignment dimensions: {dimensions}")
+        logger.info(f"Pre-alignment dimensions: {dimensions}")
         
         # Calculate and diagonalize inertia tensor
         inertia = self._calculate_inertia_tensor()
@@ -343,22 +263,22 @@ class SurfaceMeshProcessor:
         bounds_min = np.min(self.nodes, axis=0)
         bounds_max = np.max(self.nodes, axis=0)
         dimensions = bounds_max - bounds_min
-        print(f"Post-alignment dimensions: {dimensions}")
+        logger.info(f"Post-alignment dimensions: {dimensions}")
         
         # Verify that Z is now the longest dimension
         if dimensions[2] < max(dimensions[0], dimensions[1]):
-            print("WARNING: Z-axis is not the longest dimension after alignment!")
+            logger.info("WARNING: Z-axis is not the longest dimension after alignment!")
             
         # Calculate aspect ratio (using Z as length)
         length = dimensions[2]  # Z axis should be the rod length
         width = max(dimensions[0], dimensions[1])  # Use max of X or Y for width
         self.aspect_ratio = length / width if width > 0 else 1.0
-        print(f"Calculated aspect ratio: {self.aspect_ratio:.6f}")
+        logger.info(f"Calculated aspect ratio: {self.aspect_ratio:.6f}")
         
         # Store transformation
         self.rotation_matrix = reordered_eigenvectors
         self.translation = com
-        print(f"Aligned mesh to principal axes with rod along Z-axis, COM: {com}")
+        logger.info(f"Aligned mesh to principal axes with rod along Z-axis, COM: {com}")
 
     def calculate_damping(self, work_dir=None):
         """Calculate hydrodynamic properties using HydroPro"""
@@ -386,7 +306,7 @@ class SurfaceMeshProcessor:
             temperature=self.temperature,
             viscosity=self.viscosity,
             solvent_density=self.solvent_density,
-            structure_name="hydrocal"
+            structure_name=self.name
         )
         
         results = self.runner.run_calculation(work_dir=work_dir)
@@ -394,8 +314,8 @@ class SurfaceMeshProcessor:
         self.transdamp = results['translation_damping']
         self.rotational_damping_coefficient = results['rotation_damping']
         
-        print(f"Translational damping: {self.transdamp}")
-        print(f"Rotational damping: {self.rotational_damping_coefficient}")
+        logger.info(f"Translational damping: {self.transdamp}")
+        logger.info(f"Rotational damping: {self.rotational_damping_coefficient}")
         
         return pdb_path
 
@@ -427,7 +347,9 @@ class SurfaceMeshProcessor:
         
         return potential, bounds_min, spacing * np.ones(3)
         
-    def write_potential_dx(self, output_file, **kwargs):
+    def write_no_enter_potential_dx(self, output_file=None, **kwargs):
+        if output_file is None:
+            outfile=self.name+".dx"
         """Generate and write potential field to DX file"""
         potential, origin, delta = self.generate_potential_grid(**kwargs)
         writeDx(output_file, potential, origin, delta)
@@ -469,6 +391,7 @@ class SurfaceMeshProcessor:
         gmsh.finalize()
             
     def save_as_pdb(self, output_file):
+
         """Save the aligned mesh as a PDB file (coordinates in Å)"""
         # PDB format specifications
         HEADER = "HEADER    ALIGNED SURFACE MESH                   "
@@ -524,65 +447,24 @@ class SurfaceMeshProcessor:
             # Write end of file
             f.write("END\n")
         
-        print(f"Saved aligned mesh as PDB: {output_file}")
+        logger.info(f"Saved aligned mesh as PDB: {output_file}")
     
     def save_aligned_mesh_both_formats(self, base_filename):
         """Save the aligned mesh in both MSH and PDB formats"""
         # Save as MSH (in microns)
         msh_filename = f"{base_filename}.msh"
         self.save_aligned_mesh(msh_filename)
-        print(f"Saved aligned mesh as MSH: {msh_filename}")
+        logger.info(f"Saved aligned mesh as MSH: {msh_filename}")
         
         # Save as PDB (in Ångströms)
         pdb_filename = f"{base_filename}.pdb"
         self.save_as_pdb(pdb_filename)
-        print(f"Saved aligned mesh as PDB: {pdb_filename}")
+        logger.info(f"Saved aligned mesh as PDB: {pdb_filename}")
 
 
-    def _adjust_inertia_for_aspect_ratio(self, expected_ar):
-        """Adjust inertia tensor to match expected aspect ratio for rod-like objects
-        with rod aligned along Z-axis"""
-        # Get current dimensions
-        bounds_min = np.min(self.nodes, axis=0)
-        bounds_max = np.max(self.nodes, axis=0)
-        dimensions = bounds_max - bounds_min
-        
-        # After alignment, Z should be the major axis (rod length)
-        length = dimensions[2]  # Z-axis length
-        width = max(dimensions[0], dimensions[1])  # Larger of X or Y dimensions
-        
-        # Current aspect ratio
-        current_ar = length / width if width > 0 else 1.0
-        
-        # For a rod with mass M, length L, and radius R:
-        # I_axial = (1/2)MR²
-        # I_transverse = (1/12)ML² + (1/4)MR²
-        
-        # Analytic moments for a rod with the expected aspect ratio
-        radius_adjusted = length / (2 * expected_ar)
-        
-        # Z-axis is axial, X and Y are transverse
-        I_axial = 0.5 * self.mass * radius_adjusted**2
-        I_transverse = (1/12.0) * self.mass * length**2 + (1/4.0) * self.mass * radius_adjusted**2
-        
-        # Create the adjusted inertia tensor with Z-axis as the rod axis
-        adjusted_inertia = np.zeros((3, 3))
-        adjusted_inertia[0, 0] = I_transverse  # X-axis (transverse)
-        adjusted_inertia[1, 1] = I_transverse  # Y-axis (transverse)
-        adjusted_inertia[2, 2] = I_axial       # Z-axis (along rod)
-        
-        print(f"Adjusted inertia tensor for expected aspect ratio {expected_ar}:")
-        print(f"  I_axial (Z-axis): {I_axial:.2e}")
-        print(f"  I_transverse (X/Y-axes): {I_transverse:.2e}")
-        
-        # Update the inertia tensor
-        self.inertia_tensor = adjusted_inertia
-
-
-def process_surface_mesh(mesh_file, density=19.3, temperature=295, viscosity=0.01,
+def process_surface_mesh(mesh_file, density=19.3, temperature=303, viscosity=0.01,
                         solvent_density=1.0, output_dx="surface_potential.dx", 
-                        output_mesh="aligned_surface.msh", binary_path=None, 
-                        expected_mass=None, expected_aspect_ratio=None, **kwargs):
+                        output_mesh="aligned_surface.msh", binary_path=None, **kwargs):
     """
     Process surface mesh file and calculate all properties
     
@@ -606,24 +488,22 @@ def process_surface_mesh(mesh_file, density=19.3, temperature=295, viscosity=0.0
         viscosity=viscosity,
         solvent_density=solvent_density,
         binary_path=binary_path,
-        expected_mass=expected_mass,
-        expected_aspect_ratio=expected_aspect_ratio
     )
     
     # Calculate hydrodynamic properties
     processor.calculate_damping()
     
-    print(f"Mass: {processor.mass:.3f} amu")
-    print(f"Volume: {processor.volume:.3f} Å³")
-    print("\nPrincipal moments of inertia:")
-    print(processor.principal_moments)
-    print("\nTranslational damping coefficients [1/ns]:")
-    print(processor.transdamp)
-    print("\nRotational damping coefficients [1/ns]:")
-    print(processor.rotational_damping_coefficient)
+    logger.info(f"Mass: {processor.mass:.3f} amu")
+    logger.info(f"Volume: {processor.volume:.3f} Å³")
+    logger.info("\nPrincipal moments of inertia:")
+    logger.info(processor.principal_moments)
+    logger.info("\nTranslational damping coefficients [1/ns]:")
+    logger.info(processor.transdamp)
+    logger.info("\nRotational damping coefficients [1/ns]:")
+    logger.info(processor.rotational_damping_coefficient)
     
     if output_dx:
-        processor.write_potential_dx(output_dx, **kwargs)
+        processor.write_no_enter_potential_dx()
         
     if output_mesh:
         processor.save_aligned_mesh(output_mesh)

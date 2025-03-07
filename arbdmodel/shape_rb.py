@@ -12,7 +12,7 @@ from engine import ArbdModel
 from .interactions import AbstractPotential
 from .runner import HydroProRunner, APBSRunner
 
-from .shape_rb_cal import Get_damping_coefficients, Fix_charge, Bound_grid
+from .shape_rb_cal import Fix_charge
 
 """Rigid body shape modeling module for arbdmodel package.
 
@@ -48,6 +48,7 @@ class ShapeRBType(RigidBodyType):
             hydro_path: Path to HydroPro executable
             apbs_path: Path to APBS executable
         """
+
         super().__init__(
             name=name,
             mass=mass,
@@ -322,7 +323,7 @@ class ShapeRbModel(ArbdModel):
                 self.add(obj)
 
 
-class ShapeRbModel2(ArbdModel):
+class ShapeRbModel_bak(ArbdModel):
     """Model class for shape-based rigid body simulations"""
     
     def __init__(self, config=None, dimensions=(1000, 1000, 1000), **kwargs):
