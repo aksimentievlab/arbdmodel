@@ -1,14 +1,5 @@
 from . import logger
 import numpy as np
-from scipy.optimize import newton
-from scipy import signal
-
-def Find_segments_num(dimensions, threshold=300):
-    """Find number of segments needed"""
-    in_xyz = [float(elm) for elm in dimensions]
-    segments = [np.ceil(elm / threshold) for elm in in_xyz]
-    return segments[0], segments[1], segments[2]
-
 
 def minimizeRmsd(coordsB, coordsA, weights=None, maxIter=100):
     ## Going through many iterations wasn't really needed
@@ -245,51 +236,6 @@ def rotationAboutAxis(axis,angle, normalizeAxis=True):
     return quaternion_to_matrix(q)
 
 # By Chun
-def Find_boundary_resolution(cellBasisVector1=[10,0,0],
-                           cellBasisVector2=[0,10,0],
-                           cellBasisVector3=[0,0,10],
-                           resolution=2):
-    """Find appropriate boundary resolution"""
-    min_PBC_length = min([max(cellBasisVector1), max(cellBasisVector2), max(cellBasisVector3)])
-    if min_PBC_length < resolution:
-        dx = round(min_PBC_length / 2)
-    else:
-        dx = resolution
-
-    n1 = round(np.linalg.norm(cellBasisVector1)/dx)
-    n2 = round(np.linalg.norm(cellBasisVector2)/dx)
-    n3 = round(np.linalg.norm(cellBasisVector3)/dx)
-
-    return dx, n1, n2, n3
-
-def Find_boundary_end_points(cellBasisVector1=[10,0,0],
-                             cellBasisVector2=[0,10,0],
-                             cellBasisVector3=[0,0,10],
-                             cellOrigin=[0,0,0]):
-    xyz_travel = [sum([cellBasisVector1[ind], cellBasisVector2[ind], cellBasisVector3[ind]]) for ind in range(3)]
-    xyz_min = [cellOrigin[ind] - xyz_travel[ind] * 0.5 for ind in range(3)]
-    xyz_max = [cellOrigin[ind] + xyz_travel[ind] * 0.5 for ind in range(3)]
-
-    return (xyz_min[0], xyz_min[1], xyz_min[2], xyz_max[0], xyz_max[1], xyz_max[2])
-
-def Create_boundary_region(mx, my, mz,
-                           n1, n2, n3,
-                           cellBasisVector1=[10,0,0],
-                           cellBasisVector2=[0,10,0],
-                           cellBasisVector3=[0,0,10]):
-    v1 = np.array(cellBasisVector1) / n1
-    v2 = np.array(cellBasisVector2) / n2
-    v3 = np.array(cellBasisVector3) / n3
-    region_pts = []
-    start_pt = np.array([mx, my, mz])
-    for i in range(n1 + 1):
-        for j in range(n2 + 1):
-            for k in range(n3 + 1):
-                region_pts.append(start_pt + i * v1 + j * v2 + k * v3)
-
-    return region_pts
-
-
 def Generate_spanning_vectors(bv1, bv2, bv3, dimensions, buff=5):
     dd = max(dimensions) + 2 * buff
 

@@ -2,11 +2,9 @@ import numpy as np
 import gmsh
 from scipy.spatial import KDTree
 from pathlib import Path
-import subprocess
 import os
-import platform
 from .grid import writeDx
-from .runner import HydroProRunner
+from .engine import HydroProRunner
 from . import logger
 
 """
@@ -14,40 +12,40 @@ Improved mesh processor with corrected inertia calculations based purely on mesh
 """
 
 class MeshProcessor:
-    """Process gmsh files to calculate inertia, hydrodynamics and generate potential fields"""
-    
+    """Process gmsh files to calculate inertia, hydrodynamics and generate potential fields"""    
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
-    
-    def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
-                solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM, work_dir = None,
-                binary_path=None, expected_mass=None):
+
+    def __init__(self, mesh_file, density=19.3, simconf=None, unit_scale=MICRON_TO_ANGSTROM, 
+                 work_dir=None, expected_mass=None):
         """
         Initialize processor with mesh file
         
         Args:
             mesh_file: Path to .msh file
             density: Material density in g/cm^3
-            temperature: Temperature in Kelvin
-            viscosity: Solvent viscosity in poise
-            solvent_density: Solvent density in g/cm3
-            unit_scale: Conversion factor from input units to angstroms,default microns
-            binary_path: Path to HydroPro binary
+            simconf: SimConf object containing configuration parameters
+            unit_scale: Conversion factor from input units to angstroms
+            work_dir: Working directory
             expected_mass: Optional expected mass in amu to calibrate calculations
-            expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia
         """
         self.mesh_file = Path(mesh_file)
         self.density = density
         self.unit_scale = unit_scale
-        self.temperature = temperature
-        self.viscosity = viscosity
-        self.solvent_density = solvent_density
-        self.binary_path = binary_path
-        self.name = str(self.mesh_file.stem)
         self.expected_mass = expected_mass
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         os.makedirs(self.work_dir, exist_ok=True)
-
+        
+        if simconf is None:
+            from . import DefaultSimConf
+            simconf = DefaultSimConf()
+            
+        # Extract parameters from simconf
+        self.temperature = simconf.temperature
+        self.viscosity = simconf.viscosity
+        self.solvent_density = simconf.solvent_density
+        self.binary_path = simconf.get_binary('hydropro')
+        self.name = str(self.mesh_file.stem)
         
         # Initialize gmsh and read mesh
         gmsh.initialize()

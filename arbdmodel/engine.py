@@ -1,743 +1,21 @@
-# -*- coding: utf-8 -*-
-
-## Set up loggers
-
 ## Import packages
 from pathlib import Path
-from glob import glob
-import MDAnalysis as mda
-from abc import abstractmethod, ABCMeta
-
-from .version import get_version
-from . import _get_properties_and_dict_keys, devlogger,logger
-
-from .interactions import NullPotential
-from . import Transformable, Parent, Group
 import numpy as np
-from copy import copy, deepcopy
-from inspect import ismethod
 import os, sys, subprocess
+import platform
+from abc import abstractmethod, ABCMeta
 import shutil
 
-from tqdm import tqdm, trange
-from tqdm.contrib.logging import logging_redirect_tqdm
-        
-class PdbModel(Transformable, Parent):
-
-    def __init__(self, children=None, dimensions=None, remove_duplicate_bonded_terms=False):
-        Transformable.__init__(self,(0,0,0))
-        Parent.__init__(self, children, remove_duplicate_bonded_terms)
-        self.dimensions = dimensions
-        self.particles = [p for p in self if not p.rigid]
-        self.rigid_bodies = [p for p in self if p.rigid]
-        self.cacheInvalid = True
-
-    def _updateParticleOrder(self):
-        pass
-
-    def write_pdb(self, filename, beta_from_fixed=False):
-        if self.cacheInvalid:
-            self._updateParticleOrder()
-        with open(filename,'w') as fh:
-            ## Write header
-            fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
-
-            ## Write coordinates
-            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:>5.5s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2d}{segname:>6s}\n"
-            for p in self.particles:
-                ## http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM
-                data = p._get_psfpdb_dictionary()
-                idx = data['idx']
-
-                if np.log10(idx) >= 5:
-                    idx = " *****"
-                else:
-                    idx = "{:>6d}".format(idx)
-                data['idx'] = idx
-
-                if beta_from_fixed:
-                    data['beta'] = 1 if 'fixed' in p.__dict__ else 0
-
-                pos = p.get_collapsed_position()
-                dig = [max(int(np.log10(np.abs(x)+1e-6)//1),0)+1 for x in pos]
-                for d in dig: assert( d <= 7 )
-                # assert( np.all(dig <= 7) )
-                fs = ["{: %d.%df}" % (8,7-d) for d in dig]
-                x,y,z = [f.format(x) for f,x in zip(fs,pos)] 
-                data['x'] = x
-                data['y'] = y
-                data['z'] = z
-                assert(data['resid'] < 1e5)
-                data['charge'] = int(data['charge'])
-                data['resid'] = "{:<4d}".format(data['resid'])
-                fh.write( formatString.format(**data) )
-
-        return
-
-    def write_pqr(self, filename):
-        if self.cacheInvalid:
-            self._updateParticleOrder()
-        with open(filename,'w') as fh:
-            ## Write header
-            fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
-
-            ## Write coordinates
-            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s} {resid:>5.5s}   {x:.6f} {y:.6f} {z:.6f} {charge} {radius}\n"
-            for p in self.particles:
-                data = p._get_psfpdb_dictionary()
-
-                idx = data['idx']
-                if np.log10(idx) >= 5:
-                    idx = " *****"
-                else:
-                    idx = "{:>6d}".format(idx)
-                data['idx'] = idx
-
-                x,y,z = p.get_collapsed_position()
-                data['x'] = x
-                data['y'] = y
-                data['z'] = z
-                assert(data['resid'] < 1e5)
-                data['resid'] = "{:<4d}".format(data['resid'])
-                if 'radius' not in data:
-                    data['radius'] = 2 * (data['mass']/16)**0.333333
-                fh.write( formatString.format(**data) )
-        return
-        
-    def write_psf(self, filename):
-        if self.cacheUpToDate == False:
-            self._updateParticleOrder()
-        with open(filename,'w') as fh:
-            ## Write header
-            fh.write("PSF NAMD\n\n") # create NAMD formatted psf
-            fh.write("{:>8d} !NTITLE\n\n".format(0))
-            
-            ## ATOMS section
-            fh.write("{:>8d} !NATOM\n".format(len(self.particles)))
-
-            ## From vmd/plugins/molfile_plugin/src/psfplugin.c
-            ## "%d %7s %10s %7s %7s %7s %f %f"
-            formatString = "{idx:>8d} {segname:7.7s} {resid:<10.10s} {resname:7.7s}" + \
-                           " {name:7.7s} {type:7.7s} {charge:f} {mass:f}\n"
-            for p in self.particles:
-                data = p._get_psfpdb_dictionary()
-                data['resid'] = "%d%c%c" % (data['resid']," "," ") # TODO: work with large indices
-                fh.write( formatString.format(**data) )
-            fh.write("\n")
-
-            ## Write out bonds
-            bonds = self.get_bonds()
-            fh.write("{:>8d} !NBOND\n".format(len(bonds)))
-            counter = 0
-            for p1,p2,b,ex in bonds:
-                fh.write( "{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1) )
-                counter += 1
-                if counter == 4:
-                    fh.write("\n")
-                    counter = 0
-                else:
-                    fh.write(" ")
-            fh.write("\n" if counter == 0 else "\n\n")
-
-            ## Write out angles
-            angles = self.get_angles()
-            fh.write("{:>8d} !NTHETA\n".format(len(angles)))
-            counter = 0
-            for p1,p2,p3,a in angles:
-                fh.write( "{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1) )
-                counter += 1
-                if counter == 3:
-                    fh.write("\n")
-                    counter = 0
-                else:
-                    fh.write(" ")
-            fh.write("\n" if counter == 0 else "\n\n")
-
-            ## Write out dihedrals
-            dihedrals = self.get_dihedrals()
-            fh.write("{:>8d} !NPHI\n".format(len(dihedrals)))
-            counter = 0
-            for p1,p2,p3,p4,a in dihedrals:
-                fh.write( "{:>8d}{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1,p4.idx+1) )
-                counter += 1
-                if counter == 2:
-                    fh.write("\n")
-                    counter = 0
-                else:
-                    fh.write(" ") 
-            fh.write("\n" if counter == 0 else "\n\n")
-
-            ## Write out impropers
-            impropers = self.get_impropers()
-            fh.write("{:>8d} !NIMPHI\n".format(len(impropers)))
-            counter = 0
-            for p1,p2,p3,p4,a in impropers:
-                fh.write( "{:>8d}{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1,p4.idx+1) )
-                counter += 1
-                if counter == 2:
-                    fh.write("\n")
-                    counter = 0
-                else:
-                    fh.write(" ")
-            fh.write("\n" if counter == 0 else "\n\n")
-
-            fh.write("\n{:>8d} !NDON: donors\n\n\n".format(0))
-            fh.write("\n{:>8d} !NACC: acceptors\n\n\n".format(0))
-            fh.write("\n       0 !NNB\n\n")
-            natoms = len(self.particles)
-            for i in range(natoms//8):
-                fh.write("      0       0       0       0       0       0       0       0\n")
-            for i in range(natoms-8*(natoms//8)):
-                fh.write("      0")
-            fh.write("\n\n       1       0 !NGRP\n\n")
-
-
-class ArbdModel(PdbModel):
-
-    class _GroupSite():
-        """ Class to represent a collection of particles that can be used by bond potentials """
-        def __init__(self, particles, weights=None):
-            if weights is not None:
-                raise NotImplementedError
-            self.particles = particles
-            self.idx = None
-            self.restraints = []
-            
-        def get_center(self):
-            c = np.array((0,0,0))
-            for p in self.particles:
-                c = c + p.get_collapsed_position()
-            c = c / len(self.particles)
-            return c
-
-        def add_restraint(self, restraint):
-            self.restraints.append( restraint )
-        def get_restraints(self):
-            return [(self,r) for r in self.restraints]
-
-
-    def __init__(self, children, origin=None, dimensions=(1000,1000,1000),
-                 remove_duplicate_bonded_terms=True,
-                 configuration=None, dummy_types=tuple(), **conf_params):
-
-        PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
-        self.origin = origin
-
-        if configuration is None: 
-            configuration = SimConf(**conf_params)
-        self.configuration = configuration
-
-        self.num_particles = 0
-        self.particles = []
-        self.type_counts = None
-
-        self.dummy_types = dummy_types # TODO, determine whether these are really needed
-        if len(self.dummy_types) != 0:
-            raise("Dummy types have been deprecated")
-        
-        self.nonbonded_interactions = []
-        self._nonbonded_interaction_files = [] # This could be made more robust
-
-        self.cacheUpToDate = False
-
-        self.group_sites = []
-
-    def add(self, obj):
-        self._clear_types()     # TODO: call upon (potentially nested) `child.add(add)`
-        return Parent.add(self, obj)
-
-    def add_group_site(self, particles, weights=None):
-        g = ArbdModel._GroupSite(particles, weights)
-        self.group_sites.append(g)
-        return g
-
-    def _clear_types(self):
-        devlogger.debug(f'{self}: Clearing types') 
-        self.type_counts = None
-        
-    
-    def clear_all(self, keep_children=False):
-        Parent.clear_all(self, keep_children=keep_children)
-        self.particles = []
-        self.num_particles = 0
-        self._clear_types()
-        self.group_sites = []
-        self._nonbonded_interaction_files = []
-
-    def extend(self, other_model, copy=False):
-
-        if any( [p.rigid for p in self] + [p.rigid for p in other_model] ):
-            raise NotImplementedError('Models containing rigid bodies cannot yet be extended')
-        
-        assert( isinstance(other_model, ArbdModel) )
-        if copy == True:
-            logger.warning(f'Forcing {self.__class__}.extend(other_model,copy=False)')
-            copy = False
-
-        ## Combine particle types, taking care to handle name clashes
-        self._countParticleTypes()
-        other_model._countParticleTypes()
-
-        self.getParticleTypesAndCounts()
-        other_model.getParticleTypesAndCounts()
-
-        names = set([t.name for t in self.type_counts.keys()])
-
-        devlogger.debug(f'Combining types {self.type_counts.keys()} and {other_model.type_counts.keys()}')
-        for t1 in self.type_counts.keys():
-            for t2 in other_model.type_counts.keys():
-                if t1.name == t2.name and t1.__eq__(t2, check_equal=False):
-                    i = 1
-                    new_name = f'{t2.name}{i}'
-                    while new_name in names:
-                        i += 1
-                        new_name = f'{t2.name}{i}'
-                    devlogger.debug(f'Updating {t2.name} to {new_name}')
-                    t2.name = new_name
-                    names.add(new_name)
-                    
-        ## Combine interactions
-        for i, tA, tB in other_model.nonbonded_interactions:
-            devlogger.debug(f'Combining model interactions {i} {tA} {tB}')
-            self.add_nonbonded_interaction(i,tA,tB)
-                    
-        # for g in other_model.children:
-        #     self.update(g, copy=copy)
-        g = Group()
-        for attr in 'children position orientation bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
-            g.__setattr__(attr, other_model.__getattribute__(attr))
-        devlogger.debug(f'Updating {self} with {g.children[0].children[0]}')
-        self.update(g, copy=copy)
-
-        self._clear_types()
-        
-        ## Combine configurations
-        self.configuration = other_model.configuration.combine(self.configuration, policy='best', warn=True)
-
-    def assign_IBI_degrees_of_freedom(self):
-
-        """ Convenience routine that adds degrees of freedom to
-        corresponding IBI potentials """
-
-        from .ibi import BondDof, AngleDof, DihedralDof, PairDistributionDof
-
-        self.bonded_ibi_potentials = set()
-        self.nonbonded_ibi_potentials = set()
-
-        for get_fn, parts_pot_fn, cls in (
-                (self.get_bonds,     lambda x: (x[:2],x[2]), BondDof),
-                (self.get_angles,    lambda x: (x[:3],x[3]), AngleDof),
-                (self.get_dihedrals, lambda x: (x[:4],x[4]), DihedralDof)
-        ):
-            for x in get_fn():
-                parts, pot = parts_pot_fn(x)
-                try: pot.degrees_of_freedom
-                except: continue
-                pot.degrees_of_freedom.append( cls(*parts) )
-                if pot not in self.bonded_ibi_potentials:
-                    self.bonded_ibi_potentials.add( pot )
-
-        logger.info(f'Gathering nonbonded IBI degrees of freedom')
-        all_exclusions = self.get_exclusions()
-        try:
-            raise               # particle.idx wasn't set without this
-            if len(self.type_counts) == 0: raise
-        except:
-            self.getParticleTypesAndCounts()
-
-        type_to_particles = dict()
-        for p in self:
-            t = p.type_
-            if t not in type_to_particles: type_to_particles[t] = []
-            type_to_particles[t].append(p)
-        type_to_particles[None] = [p for p in self]
-
-        already_handled = set()
-        for pot, tA, tB in self.nonbonded_interactions:
-            ## Avoid including particle type pairs that don't apply
-            if (tA,tB) in already_handled: continue
-            already_handled.add((tA,tB))
-            already_handled.add((tB,tA))
-
-            try:
-                pot.degrees_of_freedom
-            except:
-                continue
-
-            def _cond(pair):
-                b1 = (tA is None or pair[0].type_ == tA) and (tB is None or pair[1].type_ == tB)
-                b2 = (tB is None or pair[0].type_ == tB) and (tA is None or pair[1].type_ == tA)
-                return (b1 or b2)
-
-            ex = list(filter(_cond, all_exclusions))
-            dof = PairDistributionDof( type_to_particles[tA], type_to_particles[tB], exclusions=ex,
-                                       range_=pot.range_, resolution=pot.resolution)
-
-            pot.degrees_of_freedom.append( dof )
-
-            if pot not in self.nonbonded_ibi_potentials:
-                self.nonbonded_ibi_potentials.add( pot )
-
-    def load_target_IBI_distributions(self):
-        raise NotImplementedError
-
-    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
-        try:
-            assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
-        except:
-            raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
-        logger.info(f'Running {iterations} IBI iterations with {len(self.bonded_ibi_potentials)} bonded and {len(self.nonbonded_ibi_potentials)} nonbonded IBI potentials')
-
-        if engine is None:
-            engine = ArbdEngine(
-                num_steps = 5e6,
-                output_period = 1e4,
-            )
-
-        if np.array(self.dimensions).size > 3:
-            raise NotImplementedError('IBI only implemented for systems with orthorhombic unit cells')
-        else:
-            box = tuple(list(self.dimensions[:3]) + ([90]*3))
-
-        restart_file = None
-
-        if target_universe is not None:
-            _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
-            with logging_redirect_tqdm(loggers=[logger,devlogger]):
-                for potential in tqdm(_potentials, desc='Calculating target distributions'):
-                    potential.get_target_distribution(target_universe, trajectory=target_trajectory)
-
-        def _load_cg_u(iteration):
-            name = f'ibi-{iteration:03d}'
-            psf = '{}/{}.psf'.format(directory,name)
-            globstring=f'{directory}/output/{name}.*dcd'
-            dcds = [f for f in glob(globstring) if 'momentum' not in f]
-            if len(dcds) == 0: raise ValueError(f'Expected to find dcds at {globstring}')
-            cg_u = mda.Universe(psf,*dcds)
-            return cg_u
-
-        cg_u = None
-        if first_iteration > 1:
-            cg_u = _load_cg_u(first_iteration-1)
-            with logging_redirect_tqdm(loggers=[logger,devlogger]):
-                for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
-
-        for p in _potentials:
-            p.iteration = first_iteration
-
-        for i in range(first_iteration, iterations+1):
-            logger.info(f'Working on IBI iteration {i}/{iterations}')
-
-            with logging_redirect_tqdm(loggers=[logger,devlogger]):
-                for p in tqdm(_potentials, desc='Writing CG potentials'):
-                    # if 'IBIPotentials/intrabond-1' in p.filename(): import ipdb; ipdb.set_trace()
-                    try:    p.write_cg_potential(cg_u, tol=p.tol, box=box)
-                    except: p.write_cg_potential(cg_u, box=box)
-
-            if i == 1 and run_minimization:
-                logger.info(f'Running brief simulation with small timestep')
-                ts0 = engine._get_combined_conf(self).timestep
-                engine.simulate( self,
-                                 output_name = 'ibi-min', directory = directory,
-                                 timestep = ts0/100,
-                                 num_steps = 10000, output_period=1000 )
-
-                restart_file = f'{directory}/output/ibi-min.restart'
-
-            name = f'ibi-{i:03d}'
-            engine.simulate( self,
-                             output_name = name, directory = directory,
-                             restart_file = restart_file,
-                             replicas = replicas )
-
-            restart_file = f'{directory}/output/{name}{".0" if replicas > 1 else ""}.restart'
-            cg_u = _load_cg_u(i)
-
-            with logging_redirect_tqdm(loggers=[logger,devlogger]):
-                for p in tqdm(_potentials, desc='Extracting CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
-                    p.iteration += 1
-        
-    def update(self, group , copy=False):
-        assert( isinstance(group, Group) )
-        if copy:
-            group = deepcopy(group)
-        group.parent = self
-        self.add(group)
-        
-    def _get_nonbonded_interaction(self, typeA, typeB):
-        for cp in (False,True):
-            for s,A,B in self.nonbonded_interactions:
-                if A is None or B is None:
-                    if A is None and B is None:
-                        return s
-                    elif A is None and typeB.is_same_type(B, consider_parents=cp):
-                        return s
-                    elif B is None and typeA.is_same_type(A, consider_parents=cp):
-                        return s
-                elif typeA.is_same_type(A,consider_parents=False) and typeB.is_same_type(B,consider_parents=cp):
-                    return s
-        
-        # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
-        # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
-
-    def _countParticleTypes(self):
-        ## TODO: check for modifications to particle that require
-        ## automatic generation of new particle type
-        type_counts = dict()    # type is key, value is 2-element list of regular particle counts and attached particles
-
-        parts, self.rigid_bodies = [],[]
-        for p in self:
-            if p.rigid:
-                self.rigid_bodies.append(p)
-            else:
-                parts.append(p)
-
-        for p in parts:
-            t = p.type_
-            if t in type_counts:
-                type_counts[t][0] += 1
-            else:
-                type_counts[t] = [1,0]
-
-        parts = [p for rb in self if rb.rigid for p in rb.attached_particles]
-        for p in parts:
-            t = p.type_
-            if t in type_counts:
-                type_counts[t][1] += 1
-            else:
-                type_counts[t] = [0,1]
-        
-        if len(self.dummy_types) != 0:
-            raise("Dummy types have been deprecated")
-        # for t in self.dummy_types:
-        #     if t not in type_counts:
-        #         type_counts[t] = 0
-
-        for i,tA,tB in self.nonbonded_interactions:
-            if tA is not None and tA not in type_counts:
-                type_counts[tA] = [0,0]
-            if tB is not None and tB not in type_counts:
-                type_counts[tB] = [0,0]
-
-
-        self.type_counts = type_counts
-
-        rbtc = dict()
-        rbti={}
-        for rb in self.rigid_bodies:
-            t = rb.type_.name
-            if t in rbtc: rbtc[t] += 1
-            else:
-                rbti[t]=rb.type_  
-                rbtc[t] = 1
-        self.rigid_body_type_counts = [(k,rbtc[k]) for k in sorted(rbtc.keys())]
-        self.rigid_body_index=rbti
-        devlogger.debug(f'{self}: Counting types: {type_counts}')
-        devlogger.debug(f'{self}: Counting rb types: {rbtc}')
-        
-    def _updateParticleOrder(self):
-        ## Create ordered list
-        self.particles = [p for p in self if not p.rigid]
-        self.rigid_bodies = list(sorted([p for p in self if p.rigid], key=lambda x: x.type_))
-        # self.particles = sorted(particles, key=lambda p: (p.type_, p.idx))
-        
-        ## Update particle indices
-        idx = 0
-        for p in self.particles:
-            p.idx = idx
-            idx = idx+1
-
-        ## Add attached particle indices
-        # attach particles
-        for j,rb in enumerate(self.rigid_bodies):
-            for p in rb.attached_particles:
-                p.idx = idx
-                idx = idx+1
-        
-        ## TODO recurse through childrens' group_sites
-        for g in self.group_sites:
-            g.idx = idx
-            idx = idx + 1
-            
-        # self.initialCoords = np.array([p.initialPosition for p in self.particles])
-
-    def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
-        """ deprecated """
-        logger.warning('useNonbondedScheme is deprecated! Please update your code to use `add_nonbonded_interaction`')
-        self.add_nonbonded_interaction(nbScheme, typeA, typeB)
-
-    def add_nonbonded_interaction(self, nonbonded_potential, typeA=None, typeB=None):
-        self.nonbonded_interactions.append( [nonbonded_potential, typeA, typeB] )
-        if typeA != typeB:
-            self.nonbonded_interactions.append( [nonbonded_potential, typeB, typeA] )
-
-    def prepare_for_simulation(self):
-        ...
-    
-    def getParticleTypesAndCounts(self):
-        """ Includes rigid body-attached particles """
-        ## TODO: remove(?)
-        if self.type_counts is None:
-            self._countParticleTypes()
-            self._updateParticleOrder()
-
-        return sorted( self.type_counts.items(), key=lambda x: x[0] )
-
-    def _particleTypePairIter(self):
-        typesAndCounts = self.getParticleTypesAndCounts()
-        i_skipped = 0
-        for i in range(len(typesAndCounts)):
-            t1,(n1,rb1) = typesAndCounts[i]
-            if n1+rb1 == 0:
-                i_skipped += 1
-                continue
-            j_skipped = 0
-            for j in range(i,len(typesAndCounts)):
-                t2,(n2,rb2) = typesAndCounts[j]
-                if n2+rb2 == 0:
-                    j_skipped += 1
-                    continue
-                if n2 == 0: continue
-                yield( [i-i_skipped,j-i_skipped-j_skipped,t1,t2] )
-
-    def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
-        raise(NotImplementedError)
-
-    def simulate(self, output_name, **kwargs):
-        ## split kwargs
-        sim_kws = ['output_directory', 'directory', 'log_file', 'binary', 'num_procs', 'dry_run', 'configuration', 'replicas']
-        sim_kwargs = {kw:kwargs[kw] for kw in sim_kws if kw in kwargs}
-        engine_kwargs = {k:v for k,v in kwargs.items() if k not in sim_kws}
-        engine = ArbdEngine(**engine_kwargs)
-        return engine.simulate(self, output_name, **sim_kwargs)
-
-class SimConf():
-    """ Class describing properties for a (ARBD or NAMD) simulation """
-
-    def __init__(self, num_steps=None, output_period=None,
-                 integrator=None, timestep=None, thermostat=None, barostat=None,
-                 temperature=None, pressure=None,
-                 cutoff=None, pairlist_distance=None, decomp_period=None, gpu=None,
-                 seed=None, restart_file=None,
-                 ## ARBD-specific
-                 rigid_body_integrator=None,
-                 rigid_body_grid_grid_period=None,
-                 ):
-
-
-        self.num_steps = num_steps
-        self.output_period = output_period
-
-        self.integrator = integrator
-        self.timestep = timestep
-        self.thermostat = thermostat
-        self.barostat = barostat
-
-        self.temperature = temperature
-        self.pressure = pressure
-        self.cutoff = cutoff
-        self.pairlist_distance = pairlist_distance
-        self.decomp_period = decomp_period
-        self.seed = seed
-        self.restart_file = restart_file
-
-        self.gpu = gpu
-
-        self.rigid_body_integrator = rigid_body_integrator
-        self.rigid_body_grid_grid_period = rigid_body_grid_grid_period
-        
-        # num_steps=100000000, timestep=None, output_period=1e4
-        ...
-
-    @property
-    def temperature(self):
-        return self.__temperature
-    @temperature.setter
-    def temperature(self,value):
-        if value is not None and value <= 0:
-            raise ValueError("Temperature must be positive")
-        self.__temperature = value
-
-    def combine(self, other, policy = 'override', warn=False):
-        """ 
-        Creates a new SimConf object whose properties are
-        initialized to be from "self", but are overridden with
-        properties in "other", provided they are not None
-        """
-
-        new_conf = copy(self)
-        for attr in _get_properties_and_dict_keys(other):
-            oldval = None
-            val = other.__getattribute__(attr)
-            if val is not None:
-                try:
-                    oldval = self.__getattribute__(attr)
-                except:
-                    pass
-                if oldval != val and (oldval is not None) and \
-                   (val is not None) and policy != 'override':
-                    if policy == 'best':
-                        if attr in ('timestep','output_period','decomp_period'):
-                            if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using {min([oldval,val])}')
-                            new_conf.__setattr__(attr, min([oldval,val]))
-                        elif attr in ('num_steps','cutoff','pairlist_distance'):
-                            if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using {max([oldval,val])}')
-                            new_conf.__setattr__(attr, max([oldval,val]))
-                        elif attr == 'integrator':
-                            if 'MD' in (oldval,val) and 'BD' in (oldval,val):
-                                if warn: logger.warning(f'Combining attribute {attr}: {oldval} != {val}, using "MD"')
-                                new_conf.__setattr__(attr,'MD')
-                            else:
-                                logger.warning(f'Unsure how to combine {oldval} and {val} for {attr} under policy {policy}; using {val}')
-                                new_conf.__setattr__(attr, val)
-                        else:
-                            logger.warning(f'Unsure how to combine {oldval} and {val} for {attr} under policy {policy}; using {val}')
-                            new_conf.__setattr__(attr, val)                            
-                    else:
-                        raise ValueError(f'Unrecognized policy "{policy}" for combining SimConfs')
-                else:
-                    new_conf.__setattr__(attr, val)
-        return new_conf
-
-    def items(self):
-        for attr in _get_properties_and_dict_keys(self):
-            val = self.__getattribute__(attr)
-            yield attr,val
-
-class DefaultSimConf(SimConf):
-    """ Generic class describing properties for a simulation """
-
-    def __init__(self, num_steps=1e5, output_period=1e3,
-                 integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
-                 temperature=295, pressure=1,
-                 cutoff=50, pairlist_distance=None, decomp_period=40,
-                 seed=None, restart_file=None, gpu=0):
-        SimConf.__init__(self, num_steps=num_steps, output_period=output_period,
-                         integrator=integrator, timestep=timestep, thermostat=thermostat, barostat=barostat,
-                         temperature=temperature, pressure=pressure,
-                         cutoff=cutoff, pairlist_distance=pairlist_distance, decomp_period=decomp_period,
-                         seed=seed, restart_file=restart_file, gpu=gpu)
-        
-        self.num_steps = num_steps
-        self.output_period = output_period
-        self.__temperature = temperature
-        self.pressure = pressure
-        
-        # num_steps=100000000, timestep=None, output_period=1e4
-        ...
-
-    @property
-    def temperature(self):
-        return self.__temperature
-    @temperature.setter
-    def temperature(self,value):
-        if (value <= 0):
-            raise ValueError("Temperature must be positive")
-        self.__temperature = value
-        
-
+from . import devlogger, logger
+from .interactions import NullPotential
+from . import get_resource_path
+from .sim_config import SimConf
+
+
+""" SimEngines
+Abstract classes for running simulations with different engines.
+SimEngine is the base class for all simulation engines.
+"""
 class SimEngine(metaclass=ABCMeta):
     """ Abstract class for running a simulation of a model """
     def __init__(self, configuration=None):
@@ -826,13 +104,17 @@ class SimEngine(metaclass=ABCMeta):
 
     def _get_binary(self, binary=None):
         if binary is None:
+            from .binary_manager import BinaryManager
+            binary_name = self.default_binary
+            binary = BinaryManager.get_binary_path(binary_name)
+
+        if binary is None:
             for path in os.environ["PATH"].split(os.pathsep):
                 path = path.strip('"')
                 fname = os.path.join(path, self.default_binary)
                 if os.path.isfile(fname) and os.access(fname, os.X_OK):
                     binary = fname
                     break
-
         if binary is None: raise Exception("{} was not found".format(self.default_binary))
 
         if not os.path.exists(binary):
@@ -1059,7 +341,7 @@ class ArbdEngine(SimEngine):
                 item = [i.idx]
                 if len(restraint) == 1:
                     item.append(restraint[0])
-                    if isinstance(i, ArbdModel._GroupSite):
+                    if isinstance(i, GroupSite):
                         item.extend(i.get_center())
                     else:
                         item.extend(i.get_collapsed_position())
@@ -1754,3 +1036,307 @@ if {{$nLast == 0}} {{
 
 run {num_steps:d}
 """.format(**format_data))
+
+""" External Runners
+Integration with HydroPro and APBS for shape rigid body calculations.
+Original script by Chun Kit Chan, 2024
+HydroProRunner and APBSRunner module provides interfaces to external tools used in shape rigid body modeling:
+- HydroPro for hydrodynamic calculations
+- APBS for electrostatics calculations
+"""
+
+class HydroProRunner:
+    """Interface to HydroPro for hydrodynamic calculations"""
+    def __init__(self, mass, simconf=None, structure_name="hydrocal", cal_type="shape"):
+        """Initialize HydroPro interface.
+        
+        Args:
+            mass: Mass in AMU
+            simconf: SimConf object with temperature, viscosity and solvent_density (optional)
+            structure_name: Base name of structure files
+            cal_type: shape or mesh, determined by program
+        """
+        if simconf is None:
+            from . import DefaultSimConf
+            simconf = DefaultSimConf()
+            
+        self.temperature = simconf.temperature
+        self.viscosity = simconf.viscosity
+        self.solvent_density = simconf.solvent_density
+        self.binary = simconf.get_binary('hydropro')
+            
+        # Check if binary exists
+        if self.binary is None:
+            raise FileNotFoundError("HydroPro binary not found. Please configure in simconf.")
+        
+        self.binary = Path(self.binary)
+        if not self.binary.exists():
+            raise FileNotFoundError(f"HydroPro binary not found at {self.binary}")
+            
+        # Make binary executable if needed (Unix only)
+        if platform.system() != 'Windows' and not os.access(self.binary, os.X_OK):
+            os.chmod(self.binary, 0o755)
+            
+        self.structure_name = structure_name
+        self.mass = mass
+        self.cal_type = cal_type
+        
+    def write_config(self, output_path="hydropro.dat",
+                     aer=2.9,nsig=6,sig_min=1,sig_max=2,specific_volume=0.702,):
+        """Write HydroPro configuration file with explicit parameters.
+        
+        Args:
+            output_path: Path to write config file
+            cal_type: shape(0) or mesh(1)
+            structure_name: Name of the molecule/structure
+            mass: Molecular weight in Daltons (amu)
+            aer: Atomic Element Radius in Angstroms
+            nsig: Number of values of the shell thickness
+            sig_min: Minimum radius of beads in the shell (Angstroms)
+            sig_max: Maximum radius of beads in the shell (Angstroms)
+            specific_volume: Partial specific volume in cm³/g
+        """
+        temperature_c = self.temperature - 273.15  # Convert K to C
+        if self.cal_type=="mesh" or self.cal_type==1:
+            aer=10
+            nsig=4
+            sig_min=10
+            sig_max=20
+            specific_volume=1
+
+        with open(output_path, 'w') as f:
+            # Basic identification
+            f.write(f"{self.structure_name}\n")                  # Name of molecule
+            f.write(f"{self.structure_name}.hydro\n")           # Base name for output files
+            f.write("hydro.pdb\n")                         
+            f.write("1\n")                                  # Calculation type always 1 (bead surface model)
+
+            # Bead model parameters
+            f.write(f"{aer},\n")                            # AER (radius in Angstroms)
+            f.write(f"{nsig},\n")                           # NSIG (values of shell thickness)
+            f.write(f"{sig_min},\n")                        # SIGMIN (min bead radius)
+            f.write(f"{sig_max},\n")                        # SIGMAX (max bead radius)
+            
+            # Physical parameters
+            f.write(f"{temperature_c},\n")                  # Temperature in Celsius
+            f.write(f"{self.viscosity},\n")                      # Solvent viscosity in poise
+            f.write(f"{self.mass},\n")                           # Molecular weight in Daltons
+            f.write(f"{specific_volume},\n")                # Partial specific volume
+            f.write(f"{self.solvent_density}\n")                 # Solvent density
+            
+            # Calculation control parameters
+            f.write("-1\n")                       # Number of Q values
+            f.write("-1\n")                      # Number of intervals
+            f.write("0\n")                      # Monte Carlo trials
+            f.write("1\n")                                  # IDIF=1 (yes) for full diffusion tensors
+            f.write("*")                                    # End marker
+
+
+    def parse_output(self, output_file):
+        mass=self.mass
+        """Parse HydroPro output file to get damping coefficients.
+        
+        Args:
+            output_file: Path to HydroPro output file
+            mass: Mass in AMU used to normalize coefficients
+            
+        Returns:
+            tuple of (translation_damping, rotation_damping)
+        """
+        with open(output_file) as f:
+            lines = f.readlines()
+        mass=self.mass
+            
+        # Skip header
+        line_num = 48
+        
+        # Read translational coefficients
+        Dx = float(lines[line_num].strip().split()[0])
+        Dy = float(lines[line_num+1].strip().split()[1])
+        Dz = float(lines[line_num+2].strip().split()[2])
+        
+        # Skip two lines
+        line_num += 5
+        
+        # Read rotational coefficients
+        Rx = float(lines[line_num].strip().split()[3])
+        Ry = float(lines[line_num+1].strip().split()[4])
+        Rz = float(lines[line_num+2].strip().split()[5])
+        
+        # Convert units
+        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "1/ns"
+        trans_damp = [24.527692/(x*mass) for x in [Dx, Dy, Dz]]
+        
+        # Rotation: "(295 k K) / ((1 /s) *  amu AA^2)" "1/ns"
+        rot_damp = [2.4527692e+17 / (x*mass) for x in [Rx, Ry, Rz]]
+        
+        return trans_damp, rot_damp
+                
+    def run_calculation(self,work_dir="."):
+        """Run HydroPro calculation.
+        
+        Args:
+            structure_name: Base name of structure files
+            mass: Mass in AMU
+            work_dir: Working directory for calculation
+        
+        Returns:
+            Dictionary containing:
+            - translation_damping: [Dx, Dy, Dz]
+            - rotation_damping: [Rx, Ry, Rz]
+        """
+        structure_name, mass=self.structure_name, self.mass
+        original_dir = os.getcwd()
+        try:
+            os.chdir(work_dir)
+            
+            # Write config
+            self.write_config()
+            
+            # Link structure file
+            pdb_path = Path(f"{structure_name}.pdb")
+            if not pdb_path.exists():
+                raise FileNotFoundError(f"Structure file not found: {pdb_path}")
+            os.symlink(pdb_path, "hydro.pdb")
+            
+            # Run HydroPro
+            result = subprocess.run([str(self.binary)], 
+                                 capture_output=True, 
+                                 text=True,
+                                 check=True)
+            
+            # Parse results
+            trans_damp, rot_damp = self.parse_output(f"{structure_name}.hydro-res.txt")
+            
+            return {
+                "translation_damping": trans_damp,
+                "rotation_damping": rot_damp
+            }
+            
+        finally:
+            if os.path.exists("hydro.pdb"):
+                os.unlink("hydro.pdb")
+            os.chdir(original_dir)
+
+class APBSRunner:
+    """Interface to APBS for electrostatics calculations"""
+    
+    def __init__(self,simconf=None, binary_path=None, psize_script=None):
+        """Initialize APBS interface.
+        Args:
+            binary_path: Path to APBS executable. If None, uses path from simconf
+            psize_script: Optional path to psize script
+            simconf: SimConf object (optional)
+        """
+        # Get binary path from simconf if provided and no explicit binary_path
+        if binary_path is None and simconf is not None:
+            binary_path = simconf.get_binary('apbs')
+        
+        # If still None, try binary_manager
+        if binary_path is None:
+            from .sim_config import binary_manager
+            binary_path = binary_manager.get_binary_path('apbs')
+        
+        # If still None, use 'apbs' and rely on PATH
+        if binary_path is None:
+            binary_path = 'apbs'
+                
+        self.binary = Path(binary_path)
+        # Check if binary exists or is in PATH
+        if not self.binary.exists() and not shutil.which(str(self.binary)):
+            raise FileNotFoundError(f"APBS binary not found at {binary_path}")
+            
+        self.psize = Path(psize_script) if psize_script else None
+        
+    def write_config(self, structure_name, xyz_dims, salt_conc=0.15, 
+                    temperature=300, buffer=50, large_system='Off'):
+        """Write APBS configuration file.
+        
+        Args:
+            structure_name: Base name of structure files
+            xyz_dims: [x, y, z] dimensions
+            salt_conc: Salt concentration in M
+            temperature: Temperature in K
+            buffer: Grid buffer size in Å
+            large_system: 'On' or 'Off' for large system mode
+        """
+        # Calculate grid dimensions
+        xyz_cg = [str(int(dim + buffer)) for dim in xyz_dims]
+        
+        if large_system == 'Off':
+            xyz_dime = xyz_cg
+            center = 'mol 1'
+        else:
+            # For large systems, reduce grid density
+            dividend = 2
+            xyz_dime = [str(int((dim + buffer) / dividend)) for dim in xyz_dims]
+            center = 'mol 1'
+            
+        config = f"""read
+mol pqr {structure_name}.pqr
+end
+elec
+mg-auto
+dime {' '.join(xyz_dime)}
+cglen {' '.join(xyz_cg)}
+cgcent {center}
+fglen {' '.join(xyz_cg)}
+fgcent {center}
+mol 1
+npbe
+bcfl sdh
+srfm smol
+chgm spl2
+ion 1 {salt_conc} 2.0
+ion -1 {salt_conc} 2.0
+pdie 12.0
+sdie 78.54
+sdens 10.0
+srad 1.4
+swin 0.3
+temp {temperature}
+gamma 0.105
+calcenergy no
+calcforce no
+write pot dx {structure_name}.elec.tmp
+end
+quit"""
+
+        with open(f"{structure_name}.apbs", 'w') as f:
+            f.write(config)
+            
+    def run_calculation(self, structure_name, xyz_dims, work_dir=".", 
+                       salt_conc=0.15, temperature=300):
+        """Run APBS calculation.
+        
+        Args:
+            structure_name: Base name of structure files
+            xyz_dims: [x, y, z] dimensions
+            work_dir: Working directory
+            salt_conc: Salt concentration in M
+            temperature: Temperature in K
+            
+        Returns:
+            Path to output potential file
+        """
+        original_dir = os.getcwd()
+        try:
+            os.chdir(work_dir)
+            
+            # Write config
+            self.write_config(structure_name, xyz_dims, salt_conc, temperature)
+            
+            # Run APBS
+            result = subprocess.run([str(self.binary), f"{structure_name}.apbs"],
+                                 capture_output=True,
+                                 text=True, 
+                                 check=True)
+            
+            output_file = Path(f"{structure_name}.elec.tmp")
+            if not output_file.exists():
+                raise RuntimeError("APBS failed to generate output file")
+                
+            return output_file
+            
+        finally:
+            os.chdir(original_dir)

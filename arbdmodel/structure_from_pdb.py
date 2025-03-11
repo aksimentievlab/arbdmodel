@@ -3,44 +3,44 @@ import sys
 import subprocess
 import numpy as np
 from pathlib import Path
-from . import logger
-from .runner import HydroProRunner, APBSRunner
+from . import logger,SimConf
+from .engine import HydroProRunner, APBSRunner
 from .grid import writeDx, loadGrid, blur3Dgrid, Bound_grid
+
 #Originally SimpleARBD by Chun
 
 class StructureProcessor:
     """Process molecular structure files to calculate properties and generate maps for ARBD"""
     
-    def __init__(self, structure_path, temperature=300, viscosity=0.01, 
-                 solvent_density=1.0, num_heavy_cluster=3, 
-                 vmd_path=None, hydro_path=None, apbs_path=None,
+    def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, 
                  parameters_folder="./parameters", work_dir=None):
         """
         Initialize processor with structure file
         
         Args:
             structure_path: Path to structure file (.psf/.pdb)
-            temperature: Temperature in Kelvin
-            viscosity: Solvent viscosity in poise
-            solvent_density: Solvent density in g/cm3
+            simconf: SimConf object containing configuration parameters
             num_heavy_cluster: Number of heavy atom clusters for VDW maps
-            vmd_path: Path to VMD executable
-            hydro_path: Path to HydroPro executable
-            apbs_path: Path to APBS executable
             parameters_folder: Path to parameters folder
             work_dir: Working directory
         """
         self.structure_path = Path(structure_path)
         self.base_name = self.structure_path.stem
-        self.temperature = temperature
-        self.viscosity = viscosity
-        self.solvent_density = solvent_density
         self.num_heavy_cluster = num_heavy_cluster
-        self.vmd_path = vmd_path or 'vmd'
-        self.hydro_path = hydro_path
-        self.apbs_path = apbs_path or 'apbs'
         self.parameters_folder = parameters_folder
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
+        
+        if simconf is None:
+            from . import DefaultSimConf
+            simconf = DefaultSimConf()
+            
+        # Extract parameters from simconf
+        self.temperature = simconf.temperature
+        self.viscosity = simconf.viscosity
+        self.solvent_density = simconf.solvent_density
+        self.vmd_path = simconf.get_binary('vmd') or 'vmd'
+        self.hydro_path = simconf.get_binary('hydropro')
+        self.apbs_path = simconf.get_binary('apbs') or 'apbs'
         
         # Create working directory if it doesn't exist
         os.makedirs(self.work_dir, exist_ok=True)

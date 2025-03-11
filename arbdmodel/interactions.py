@@ -3,7 +3,7 @@ import os, sys
 import scipy
 import numpy as np
 from shutil import copyfile
-
+from .grid import writeDx
 """ Module providing classes used to describe potentials in ARBD """
 
 
@@ -154,6 +154,197 @@ class TabulatedNonbonded(AbstractPotential):
     def write_file(self, filename, types):
         if filename != self.tableFile:
             copyfile(self.tableFile, filename)
+
+class BoundaryPotential(AbstractPotential):
+    """Boundary potential for confining simulations."""
+    
+    def __init__(self, cell_vectors, cell_origin=None, well_depth=1.0, 
+                 resolution=2.0, blur=5.0,filename="boundary.dx", **kwargs):
+        """Initialize boundary potential.
+        
+        Args:
+            cell_vectors: List of 3 cell basis vectors [[x1,y1,z1], [x2,y2,z2], [x3,y3,z3]]
+            cell_origin: Cell origin coordinates [x,y,z]
+            well_depth: Depth of potential well
+            resolution: Grid resolution
+            blur: Smoothing parameter
+            **kwargs: Additional parameters for AbstractPotential
+        """
+        default_range = (0, np.max([np.linalg.norm(v) for v in cell_vectors]))
+        if 'range_' not in kwargs:
+            kwargs['range_'] = default_range
+        if 'resolution' not in kwargs:
+            kwargs['resolution'] = resolution
+            
+        super().__init__(**kwargs)
+        
+        self.cell_vectors = cell_vectors
+        self.cell_origin = cell_origin or [0, 0, 0]
+        self.well_depth = well_depth
+        self.blur = blur
+        self.grid_cache = None
+        self.filename=filename
+    
+    def _find_boundary_resolution(self):
+        """Find appropriate boundary resolution for the cell vectors."""
+        v1, v2, v3 = self.cell_vectors
+        min_PBC_length = min([max(v1), max(v2), max(v3)])
+        
+        if min_PBC_length < self.resolution:
+            dd = round(min_PBC_length / 2)
+        else:
+            dd = self.resolution
+
+        n1 = round(np.linalg.norm(v1)/dd)
+        n2 = round(np.linalg.norm(v2)/dd)
+        n3 = round(np.linalg.norm(v3)/dd)
+
+        return dd, n1, n2, n3
+    
+    def _find_boundary_end_points(self):
+        """Find boundary endpoints from cell vectors and origin."""
+        v1, v2, v3 = self.cell_vectors
+        
+        xyz_travel = [sum([v1[ind], v2[ind], v3[ind]]) for ind in range(3)]
+        xyz_min = [self.cell_origin[ind] - xyz_travel[ind] * 0.5 for ind in range(3)]
+        xyz_max = [self.cell_origin[ind] + xyz_travel[ind] * 0.5 for ind in range(3)]
+
+        return (xyz_min[0], xyz_min[1], xyz_min[2], xyz_max[0], xyz_max[1], xyz_max[2])
+    
+    def _create_boundary_region(self, mx, my, mz, n1, n2, n3):
+        """Create boundary region points for the cell."""
+        v1, v2, v3 = self.cell_vectors
+        v1_scaled = np.array(v1) / n1
+        v2_scaled = np.array(v2) / n2
+        v3_scaled = np.array(v3) / n3
+        
+        region_pts = []
+        start_pt = np.array([mx, my, mz])
+        
+        for i in range(n1 + 1):
+            for j in range(n2 + 1):
+                for k in range(n3 + 1):
+                    region_pts.append(start_pt + i * v1_scaled + j * v2_scaled + k * v3_scaled)
+
+        return region_pts
+    
+    def _convert_to_mesh_points(self, region_pts, min_wallX, min_wallY, min_wallZ, dx, dy, dz, grid_shape):
+        """Convert region points to grid indices."""
+        mesh_pts = []
+        for pt in region_pts:
+            indx = round((pt[0] - min_wallX) / dx)
+            indy = round((pt[1] - min_wallY) / dy)
+            indz = round((pt[2] - min_wallZ) / dz)
+            if (0 <= indx < grid_shape[0] and 0 <= indy < grid_shape[1] and 0 <= indz < grid_shape[2]):
+                mesh_pts.append((indx, indy, indz))
+        return mesh_pts
+    
+    def _create_rectangular_mesh(self, wall_range_x, wall_range_y, wall_range_z, dd):
+        """Create a rectangular mesh grid."""
+        x = np.linspace(wall_range_x[0], wall_range_x[1], int((wall_range_x[1]-wall_range_x[0])/dd) + 1)
+        y = np.linspace(wall_range_y[0], wall_range_y[1], int((wall_range_y[1]-wall_range_y[0])/dd) + 1)
+        z = np.linspace(wall_range_z[0], wall_range_z[1], int((wall_range_z[1]-wall_range_z[0])/dd) + 1)
+        
+        dx = np.mean(np.diff(x))
+        dy = np.mean(np.diff(y))
+        dz = np.mean(np.diff(z))
+
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+        return X, Y, Z, dx, dy, dz
+    
+    def _blur_3d_grid(self, grid, blur_size, dd):
+        """Apply 3D Gaussian blur to a grid."""
+        # Create Gaussian kernel
+        sideLen = 2*int(blur_size*3)+1
+        gauss = scipy.signal.gaussian(sideLen, blur_size/dd)
+        i = np.arange(sideLen)
+        i, j, k = np.meshgrid(i, i, i, indexing='ij')
+        kernel = gauss[i]*gauss[j]*gauss[k]
+        kernel = kernel/kernel.sum()
+        
+        # Apply convolution
+        return scipy.signal.fftconvolve(grid, kernel, mode='same')
+    
+    def potential(self, r, types=None):
+        """Calculate potential at positions.
+        
+        This isn't used directly for grid potentials in ARBD, but implemented 
+        for consistency with the AbstractPotential interface.
+        """
+        # Calculate distance from boundary
+        max_dist = np.max([np.linalg.norm(v) for v in self.cell_vectors]) / 2
+        
+        potential = np.zeros_like(r)
+        for i, ri in enumerate(r):
+            # Simplified: calculate distance from origin in normalized coordinates
+            dist_vec = np.array([
+                ri/np.linalg.norm(self.cell_vectors[0]),
+                ri/np.linalg.norm(self.cell_vectors[1]),
+                ri/np.linalg.norm(self.cell_vectors[2])
+            ])
+            
+            # Distance from boundary (simplified)
+            dist_from_boundary = max_dist - np.max(np.abs(dist_vec))
+
+            if dist_from_boundary < 0:
+                potential[i] = self.well_depth * (1 - np.exp(dist_from_boundary/self.blur))
+                
+        return potential
+    
+    def write_file(self, filename=None, types=None):
+        """Write boundary potential to grid file."""
+        
+        # Find optimal resolution
+        dd, n1, n2, n3 = self._find_boundary_resolution()
+        
+        # Find boundary endpoints
+        mx, my, mz, Mx, My, Mz = self._find_boundary_end_points()
+        
+        # Set up wall ranges with buffer
+        scale = 1.5  # Scale factor for wall range
+        wall_range_x = (scale*(mx-2*self.blur), scale*(Mx+2*self.blur))
+        wall_range_y = (scale*(my-2*self.blur), scale*(My+2*self.blur))
+        wall_range_z = (scale*(mz-2*self.blur), scale*(Mz+2*self.blur))
+        
+        # Create mesh
+        X, Y, Z, dx, dy, dz = self._create_rectangular_mesh(
+            wall_range_x, wall_range_y, wall_range_z, dd)
+        
+        # Create boundary points
+        region_pts = self._create_boundary_region(
+            mx, my, mz, n1, n2, n3)
+        
+        # Convert to mesh points
+        mesh_pts = self._convert_to_mesh_points(
+            region_pts, wall_range_x[0], wall_range_y[0], wall_range_z[0], 
+            dx, dy, dz, X.shape)
+        
+        # Create potential
+        pot = np.zeros(np.shape(X))
+        for pt in mesh_pts:
+            pot[pt[0], pt[1], pt[2]] = -self.well_depth  # Negative for attraction
+        
+        # Apply Gaussian blur
+        pot_blur = self._blur_3d_grid(pot, self.blur, dd)
+        
+        # Write to DX file
+        origin_out = [wall_range_x[0], wall_range_y[0], wall_range_z[0]]
+        delta = [dx, dy, dz]
+        writeDx(self.filename, pot_blur, origin_out, delta)
+        
+        return self.filename
+
+class NullPotential(AbstractPotential):
+    def __init__(self, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
+
+    def potential(self, r, types):
+        return np.zeros(r.shape)
+
+    def filename(self, types=None):
+        return f"{self.filename_prefix}nullpot.dat"
 
 ## Bonded potentials            
 class HarmonicBondedPotential(AbstractPotential):
@@ -330,13 +521,3 @@ class WLCSKAngle(WLCSKPotential):
         u = self.kT * C * (1-np.cos(dr * np.pi / 180))
         return u
 
-class NullPotential(AbstractPotential):
-    def __init__(self, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
-        self.filename_prefix = filename_prefix
-        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
-
-    def potential(self, r, types):
-        return np.zeros(r.shape)
-
-    def filename(self, types=None):
-        return f"{self.filename_prefix}nullpot.dat"

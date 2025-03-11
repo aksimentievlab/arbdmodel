@@ -5,7 +5,47 @@ import os,sys
 from . import logger
 import unittest
 import numpy as np
+from pathlib import Path
 
+
+def writeDx(outfile, data, origin, delta, fmt="%.12f"):
+  shape = np.shape(data)
+  num = np.prod(shape)
+  assert( len(shape) == 3 )
+  assert( len(origin) == 3 )
+  assert( len(delta) == 3 )
+  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
+                     ox=origin[0], oy=origin[1], oz=origin[2],
+                     dx=delta[0], dy=delta[1], dz=delta[2],
+                     num=num
+                   )
+  data = data.flatten(order='C')
+  header = """# OpenDX density file
+# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
+object 1 class gridpositions counts  {nx} {ny} {nz}
+origin {ox} {oy} {oz}
+delta  {dx} 0.000000 0.000000
+delta  0.000000 {dy} 0.000000
+delta  0.000000 0.000000 {dz}
+object 2 class gridconnections counts  {nx} {ny} {nz}
+object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
+  len(data)
+
+  if num == 3*(num//3):
+    footer = ""
+  else:
+    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
+    footer += "\n"
+
+  footer += """attribute "dep" string "positions"
+object "density" class field 
+component "positions" value 1
+component "connections" value 2
+component "data" value 3
+"""
+  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
+              fmt=fmt,
+              header=header, comments='', footer=footer )
 
 
 def add_smaller_grid( grid, smaller_grid ):
@@ -106,46 +146,7 @@ def Bound_grid(inFile, outFile, lowerBound, upperBound):
     # Write output
     writeDx(outFile, grid, origin, [delta, delta, delta])
 
-def blur3Dgrid(g, blur):
-    """Apply 3D Gaussian blur"""
-    kernel = gaussian_kernel(voxels=2*int(blur*3)+1, sig=blur, ndim=3)
-    return signal.fftconvolve(g, kernel, mode='same')
 
-    
-def Create_a_rectangular_mesh(wallRangeX, wallRangeY, wallRangeZ, blur, dd):
-    x = np.linspace(wallRangeX[0], wallRangeX[1], int((wallRangeX[1]-wallRangeX[0])/dd) + 1)
-    y = np.linspace(wallRangeY[0], wallRangeY[1], int((wallRangeY[1]-wallRangeY[0])/dd) + 1)
-    z = np.linspace(wallRangeZ[0], wallRangeZ[1], int((wallRangeZ[1]-wallRangeZ[0])/dd) + 1)
-    dx = np.mean(np.diff(x))
-    dy = np.mean(np.diff(y))
-    dz = np.mean(np.diff(z))
-
-    X,Y,Z = np.meshgrid(x,y,z,indexing='ij')
-
-    return X, Y, Z, dx, dy, dz
-
-
-
-def Convert_math_pt_to_mesh_pt(region_pts, min_wallX, min_wallY, min_wallZ, dx, dy, dz):
-    mesh_pts = []
-    for pt in region_pts:
-        indx = round((pt[0] - min_wallX) / dx)
-        indy = round((pt[1] - min_wallY) / dy)
-        indz = round((pt[2] - min_wallZ) / dz)
-        mesh_pts.append((indx, indy, indz))
-    return mesh_pts
-
-def Create_the_well(X, wellDepth, mesh_pts, blur, dx, dy, dz, wX, wY, wZ, out_path):
-    """Create potential well"""
-    pot = np.zeros(np.shape(X))
-    for pt in mesh_pts:
-        pot[pt[0], pt[1], pt[2]] = wellDepth
-
-    dd = np.mean([dx, dy, dz])
-    pot_blur = blur3Dgrid(pot, blur/dd)
-
-    origin = [wX, wY, wZ]
-    writeDx(out_path, pot_blur, origin, [dd, dd, dd])
 
 def Create_null(grid_path='null.dx'):
     """Create null potential grid"""
@@ -497,47 +498,49 @@ def spherical_confinement(force_constant, radius, dimensions,  resolution, cente
   U[~sl] = 0
   return U
 
-  
-def writeDx(outfile, data, origin, delta, fmt="%.12f"):
-  shape = np.shape(data)
-  num = np.prod(shape)
-  assert( len(shape) == 3 )
-  assert( len(origin) == 3 )
-  assert( len(delta) == 3 )
-  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
-                     ox=origin[0], oy=origin[1], oz=origin[2],
-                     dx=delta[0], dy=delta[1], dz=delta[2],
-                     num=num
-                   )
-  data = data.flatten(order='C')
-  header = """# OpenDX density file
-# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
-object 1 class gridpositions counts  {nx} {ny} {nz}
-origin {ox} {oy} {oz}
-delta  {dx} 0.000000 0.000000
-delta  0.000000 {dy} 0.000000
-delta  0.000000 0.000000 {dz}
-object 2 class gridconnections counts  {nx} {ny} {nz}
-object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
-  len(data)
+def write_confine_dx(radius=100 ):  #Might merge with spherical confinement? 
 
-  if num == 3*(num//3):
-    footer = ""
-  else:
-    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
-    footer += "\n"
+    outfile=f'confine-{radius}.dx'
+    if Path(outfile).exists(): return
 
-  footer += """attribute "dep" string "positions"
-object "density" class field 
-component "positions" value 1
-component "connections" value 2
-component "data" value 3
-"""
-  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
-              fmt=fmt,
-              header=header, comments='', footer=footer )
+    k = 1                           # Spring constant [kcal/mol/AA^2]
+    # radius=800
+
+    x0 = y0 = -radius - 50
+    x1 = y1 = -x0
+    z0,z1 = x0,x1
+
+    dx = dy = dz = 2
+
+    assert( x1 > x0 )
+    assert( y1 > y0 )
+    assert( z1 > z0 )
+
+    """ Create grid axes """
+    x,y,z = [np.arange( a-res/2, b+res/2, res )
+             for a,b,res in zip((x0,y0,z0),(x1,y1,z1),(dx,dy,dz))]
+    # x = np.arange( -100, 100, dx ) # alternatively, be explicit
+
+    # assert( x[0] == -x[-1] )
+
+    X,Y,Z = np.meshgrid(x,y,z,indexing='ij')      # create meshgrid for making potential
+    R = np.sqrt(X**2 + Y**2 + Z**2)
 
 
+    """ Create the potential, adding 0.5 k deltaX**2 for each half plane """
+    pot = np.zeros( X.shape )
+
+
+    ids = R > radius
+    pot[ids] = 0.5*k*(R[ids]-radius)**2
+
+    ids = R > radius + 25
+    pot[ids] = 0.5*k*25**2 + 0.5*k*25**2*(R[ids]-radius-25) # switch to linear potential
+
+    """ Write the dx file """
+    writeDx(outfile, pot,
+             delta=(dx,dy,dz),
+             origin=(x[0],y[0],z[0]))
 
 ## Utility functions
 

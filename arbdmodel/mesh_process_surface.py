@@ -2,51 +2,49 @@ import numpy as np
 import gmsh
 from scipy.spatial import KDTree
 from pathlib import Path
-import subprocess
 import os
-import platform
 from .grid import writeDx
-from .runner import HydroProRunner
+from .engine import HydroProRunner
 from . import logger
 
 """
 Specialized surface mesh processor that handles triangle surface meshes 
-"""
-
+""" 
+    # Conversion factors
 class SurfaceMeshProcessor:
     """Process surface meshes to calculate inertia, hydrodynamics and generate potential fields"""
     
     # Conversion factors
     MICRON_TO_ANGSTROM = 10000
     
-    def __init__(self, mesh_file, density=19.3, temperature=295, viscosity=0.01, 
-                 solvent_density=1.0, unit_scale=MICRON_TO_ANGSTROM,
-                 binary_path=None, work_dir=None):
+    def __init__(self, mesh_file, density=19.3, simconf=None, 
+                 unit_scale=MICRON_TO_ANGSTROM, work_dir=None):
+        
         """
         Initialize processor with surface mesh file
-        
         Args:
             mesh_file: Path to .msh file with surface triangles
             density: Material density in g/cm^3
-            temperature: Temperature in Kelvin
-            viscosity: Solvent viscosity in poise
-            solvent_density: Solvent density in g/cm3
+            simconf: SimConf object containing configuration parameters
             unit_scale: Conversion factor from input units to angstroms
-            binary_path: Path to HydroPro binary
-            expected_mass: Optional expected mass in amu to calibrate calculations
             work_dir: Directory to store output files (default: current directory)
         """
         self.mesh_file = Path(mesh_file)
         self.density = density*0.6022
         self.unit_scale = unit_scale
-        self.temperature = temperature
-        self.viscosity = viscosity
-        self.solvent_density = solvent_density
-        self.binary_path = binary_path
         self.name = str(self.mesh_file.stem)
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         os.makedirs(self.work_dir, exist_ok=True)
 
+        if simconf is None:
+            from . import DefaultSimConf
+            simconf = DefaultSimConf()
+            
+        # Extract parameters from simconf
+        self.temperature = simconf.temperature
+        self.viscosity = simconf.viscosity
+        self.solvent_density = simconf.solvent_density
+        self.binary_path = simconf.get_binary('hydropro')
         # Initialize gmsh and read mesh
         gmsh.initialize()
         try:
