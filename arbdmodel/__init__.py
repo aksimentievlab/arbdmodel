@@ -12,7 +12,7 @@ __version__ = get_version()
 # Make everything available at package level
 __all__ = ['Transformable', 'Parent', 'Child', 'Clone',
     'ParticleType', 'PointParticle', 'RigidBodyType', 'RigidBody', 'Group',
-    'SimConf', 'DefaultSimConf', BinaryManager,
+    'SimConf', 'DefaultSimConf', 'BinaryManager',
     'PdbModel', 'ArbdModel',
     'SimEngine', 'ArbdEngine', 'NamdEngine']
 

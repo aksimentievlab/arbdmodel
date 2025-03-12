@@ -78,7 +78,7 @@ class StructureRigidBodyModel(ArbdModel):
     """Model class for structure-based rigid body simulations"""
     
     def __init__(self, diffusible_objects=None, static_objects=None, 
-                 cell_vectors=None, cell_origin=None, use_boundary=True, 
+                 config=DefaultSimConf, use_boundary=True, 
                  boundary_params=None, **kwargs):
         """Initialize structure model.
         
@@ -138,6 +138,8 @@ class StructureRigidBodyModel(ArbdModel):
             # Generate the boundary file and store it
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
             self.boundary_potential = boundary
+            self.add_nonbonded_interaction()
+
             
         # Add diffusible objects
         if diffusible_objects:
@@ -148,6 +150,8 @@ class StructureRigidBodyModel(ArbdModel):
         if static_objects:
             for obj in static_objects:
                 self.add_static_object(obj)
+                self.add_nonbonded_interaction()
+
     
     def add_diffusible_object(self, obj, copies=1, positions=None):
         """Add a diffusible (mobile) object to the model.
