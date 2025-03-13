@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 from .grid import writeDx
 from .engine import HydroProRunner
-from . import logger
+from .logger import logger
 
 """
 Improved mesh processor with corrected inertia calculations based purely on mesh geometry
@@ -38,14 +38,17 @@ class MeshProcessor:
         
         if simconf is None:
             from . import DefaultSimConf
-            simconf = DefaultSimConf()
-            
+            simconf=DefaultSimConf()
+        self.simconf=simconf
+
+
         # Extract parameters from simconf
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
         self.binary_path = simconf.get_binary('hydropro')
         self.name = str(self.mesh_file.stem)
+        self.attached_patricles=[]
         
         # Initialize gmsh and read mesh
         gmsh.initialize()
@@ -96,6 +99,18 @@ class MeshProcessor:
         finally:
             gmsh.finalize()
 
+    def get_attached_particles(self):
+        from . import ParticleType, PointParticle
+        rbp=ParticleType(name=f"{self.name}_attached", mass=1,diffusivity=1)
+        logger.info(f"attaching particles type {self.name}_attached using mesh nodes")
+
+        for i, node in enumerate(self.nodes):
+            x, y, z = node
+            rbpi=PointParticle(rbp,name=f"{self.name}_{i}",position=[x,y,z])
+            self.attached_patricles.append(rbpi)
+
+        return self.attached_patricles
+            
     def _get_nodes(self):
         """Get all mesh nodes with unit conversion"""
         node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
@@ -117,9 +132,11 @@ class MeshProcessor:
                 
         if tet_idx is None:
             logger.error("No tetrahedral elements found in mesh")
-            
         # Convert to 0-based indexing and reshape to Nx4 array
-        elements = np.array(node_tags[tet_idx]).reshape(-1, 4) - 1
+        try:
+            elements = np.array(node_tags[tet_idx]).reshape(-1, 4) - 1
+        except:
+            logger.error("You are not using a volume mesh")
         return elements
     
     def _extract_surface_mesh(self):
@@ -404,11 +421,7 @@ class MeshProcessor:
         
         # Run HydroPro to get hydrodynamic properties
         self.runner = HydroProRunner(
-            self.mass,
-            binary_path=self.binary_path,
-            temperature=self.temperature,
-            viscosity=self.viscosity,
-            solvent_density=self.solvent_density,
+            self.mass,self.simconf,
             structure_name="hydrocal",cal_type="mesh"
         )
         
@@ -576,10 +589,7 @@ class MeshProcessor:
         logger.info(f"Saved aligned mesh as PDB: {pdb_filename}")
     
 
-def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
-                     solvent_density=1.0, output_dx=None, 
-                     output_mesh=None, binary_path=None,
-                     expected_mass=None, **kwargs):
+def process_mesh_file(mesh_file, density=19.3, **kwargs):
     """
     Process mesh file and calculate all properties
     
@@ -598,12 +608,7 @@ def process_mesh_file(mesh_file, density=19.3, temperature=295, viscosity=0.01,
     """
     processor = MeshProcessor(
         mesh_file,
-        density=density,
-        temperature=temperature,
-        viscosity=viscosity,
-        solvent_density=solvent_density,
-        binary_path=binary_path,
-        expected_mass=expected_mass,)
+        density=density,)
     
     # Calculate hydrodynamic properties
     processor.calculate_damping()

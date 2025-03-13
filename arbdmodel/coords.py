@@ -1,4 +1,4 @@
-from . import logger
+from .logger import logger
 import numpy as np
 
 def minimizeRmsd(coordsB, coordsA, weights=None, maxIter=100):

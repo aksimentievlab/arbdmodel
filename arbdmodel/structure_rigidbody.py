@@ -2,7 +2,7 @@ import os
 import numpy as np
 from pathlib import Path
 from scipy import signal
-from . import logger
+from .logger import logger
 from . import RigidBody, RigidBodyType, SimConf
 from . import ArbdModel, ArbdEngine
 from .structure_from_pdb import StructureProcessor
@@ -150,7 +150,7 @@ class StructureRigidBodyModel(ArbdModel):
         if static_objects:
             for obj in static_objects:
                 self.add_static_object(obj)
-                self.add_nonbonded_interaction()
+                
 
     
     def add_diffusible_object(self, obj, copies=1, positions=None):
@@ -196,6 +196,8 @@ class StructureRigidBodyModel(ArbdModel):
 
         self.static_objects.append(obj)
         self.add(obj)
+
+        self.add_nonbonded_interaction()
         
     def generate_initial_positions(self, num_copies_per_object, initial_region=None,
                                   random_seed=None):

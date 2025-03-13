@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 from .grid import writeDx
 from .engine import HydroProRunner
-from . import logger
+from .version import logger
 
 """
 Specialized surface mesh processor that handles triangle surface meshes 
@@ -45,6 +45,7 @@ class SurfaceMeshProcessor:
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
         self.binary_path = simconf.get_binary('hydropro')
+        self.attached_patricles=[]
         # Initialize gmsh and read mesh
         gmsh.initialize()
         try:
@@ -75,6 +76,16 @@ class SurfaceMeshProcessor:
             logger.error(f"Error processing mesh: {e}")
         finally:
             gmsh.finalize()
+
+    def get_attached_particles(self):
+        from . import ParticleType, PointParticle
+        rbp=ParticleType(name=f"{self.name}_attached", mass=1,diffusivity=1)
+        logger.info(f"attaching particles type {self.name}_attached using mesh nodes")
+
+        for i, node in enumerate(self.nodes):
+            x, y, z = node
+            rbpi=arbdmodel.PointParticle(rbp,name=f"{self.name}_{i}",position=[x,y,z])
+            self.attached_patricles.append(rbpi)
 
     def _load_surface_mesh(self):
         """Load triangular surface mesh directly"""

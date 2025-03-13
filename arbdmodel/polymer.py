@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABCMeta
 
-from . import logger
+from .logger import logger
 
 from pathlib import Path
 from copy import deepcopy

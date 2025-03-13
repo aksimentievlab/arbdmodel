@@ -6,9 +6,8 @@ import platform
 from abc import abstractmethod, ABCMeta
 import shutil
 
-from . import devlogger, logger
+from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
-from . import get_resource_path
 from .sim_config import SimConf
 
 

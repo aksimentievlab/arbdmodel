@@ -3,7 +3,8 @@ import sys
 import subprocess
 import numpy as np
 from pathlib import Path
-from . import logger,SimConf
+from .logger import logger
+from sim_config import SimConf
 from .engine import HydroProRunner, APBSRunner
 from .grid import writeDx, loadGrid, blur3Dgrid, Bound_grid
 

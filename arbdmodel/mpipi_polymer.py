@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import pandas as pd
 ## Local imports
-from . import logger, get_resource_path
+from .logger import logger, get_resource_path
 from . import ParticleType, PointParticle
 
 from .polymer import PolymerBeads, PolymerModel

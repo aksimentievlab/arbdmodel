@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 ## Local imports
-from . import logger,  get_resource_path
+from .logger import logger,  get_resource_path
 from . import ParticleType, PointParticle, Group
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import TabulatedNonbonded, HarmonicBond, HarmonicAngle, HarmonicDihedral

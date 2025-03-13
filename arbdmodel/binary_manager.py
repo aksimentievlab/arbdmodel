@@ -8,7 +8,7 @@ import os
 import platform
 import shutil
 from pathlib import Path
-from . import logger, get_resource_path
+from .logger import logger, get_resource_path
 
 # Default binary names by platform
 DEFAULT_BINARIES = {

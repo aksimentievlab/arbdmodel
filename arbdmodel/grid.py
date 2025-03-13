@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 import numpy as np 
 from scipy import signal
 import os,sys
-from . import logger
+from .logger import logger
 import unittest
 import numpy as np
 from pathlib import Path

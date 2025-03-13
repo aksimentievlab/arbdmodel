@@ -32,13 +32,11 @@
 #
 #   include RELEASE-VERSION
 
-__all__ = ("get_version")
 
+## Import packages
 from pathlib import Path
-import subprocess
-from subprocess import Popen, PIPE
+from glob import glob
 
-_version_file = Path(__file__).parent / "RELEASE-VERSION"
 
 def check_git_repository():
     try:

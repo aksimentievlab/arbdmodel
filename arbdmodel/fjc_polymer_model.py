@@ -7,7 +7,7 @@ import numpy as np
 from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-from . import logger
+from .logger import logger
 
 
 """Define particle types"""

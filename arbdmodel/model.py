@@ -6,9 +6,9 @@ import MDAnalysis as mda
 from tqdm import tqdm, trange
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from . import devlogger, logger
+from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
-from . import Transformable, Parent, Group, get_resource_path
+from . import Transformable, Parent, Group
 from .sim_config import SimConf
 from .core_objects import GroupSite
 from .engine import ArbdEngine, NamdEngine

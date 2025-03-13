@@ -2,7 +2,8 @@ from abc import ABCMeta
 from scipy.signal import savgol_filter as savgol
 import numpy as np
 from pathlib import Path
-from . import ArbdModel, logger
+from . import ArbdModel
+from .version import logger
 from .interactions import AbstractPotential
 
 from tqdm import tqdm,trange

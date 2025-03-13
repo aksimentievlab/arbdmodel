@@ -7,7 +7,7 @@ classes for configuring simulation parameters.
 import os
 import numpy as np
 from copy import copy, deepcopy
-from . import logger, devlogger
+from .logger import logger, devlogger
 from .binary_manager import BinaryManager
 
 def _get_properties_and_dict_keys(obj):

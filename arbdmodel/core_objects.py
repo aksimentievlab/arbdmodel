@@ -2,7 +2,7 @@
 import numpy as np
 from inspect import ismethod
 from copy import copy, deepcopy
-from . import logger, get_resource_path,devlogger
+from .logger import logger, get_resource_path,devlogger
 
 
 ## Abstract classes
