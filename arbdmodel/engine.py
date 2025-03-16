@@ -5,7 +5,7 @@ import os, sys, subprocess
 import platform
 from abc import abstractmethod, ABCMeta
 import shutil
-
+from .core_objects import GroupSite
 from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
 from .sim_config import SimConf
@@ -900,7 +900,7 @@ class NamdEngine(SimEngine):
 
         self._write_conf( model, output_name, configuration )
 
-    def write_conf( self, output_name, minimization_steps=4800, num_steps = 1e6,
+    def write_conf( self,model,output_name, minimization_steps=4800, num_steps = 1e6,
                     output_directory = 'output',
                     update_dimensions=True, extrabonds=True ): 
 

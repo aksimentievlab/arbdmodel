@@ -12,6 +12,7 @@ from . import Transformable, Parent, Group
 from .sim_config import SimConf
 from .core_objects import GroupSite
 from .engine import ArbdEngine, NamdEngine
+from .coords import calculate_dimensions_from_cell_vectors
 
 
 class PdbModel(Transformable, Parent):
@@ -185,28 +186,71 @@ class PdbModel(Transformable, Parent):
 
 
 class ArbdModel(PdbModel):
-
-    def __init__(self, children, origin=None, dimensions=(1000,1000,1000),
-                 remove_duplicate_bonded_terms=True,
+    """
+    Advanced model class for ARBD simulations with improved cell vector handling.
+    """
+    def __init__(self, children, cell_vectors=None, cell_origin=None, dimensions=None,
+                 remove_duplicate_bonded_terms=True, buffer_factor=1.2,
                  configuration=None, dummy_types=tuple(), **conf_params):
+        """
+        Initialize ArbdModel with improved cell vector and dimension handling.
+        
+        Args:
+            children: Child objects for the model
+            cell_vectors: List of 3 cell basis vectors [[x1,y1,z1], [x2,y2,z2], [x3,y3,z3]]
+            cell_origin: Cell origin coordinates [x,y,z]
+            dimensions: Explicit dimensions for the simulation box (overrides cell_vectors)
+            remove_duplicate_bonded_terms: Whether to remove duplicate bonded terms
+            buffer_factor: Factor to scale dimensions derived from cell vectors
+            configuration: SimConf object with configuration parameters
+            dummy_types: Deprecated parameter, kept for backward compatibility
+            **conf_params: Additional configuration parameters
+        """
+        # Calculate dimensions from cell vectors if provided and dimensions not explicitly set
+        if dimensions is None and cell_vectors is not None:
+            dimensions = calculate_dimensions_from_cell_vectors(
+                cell_vectors, cell_origin, buffer_factor)
+        
+        # Default dimensions if neither dimensions nor cell vectors provided
+        if dimensions is None:
+            dimensions = (1000, 1000, 1000)
+            
+        # Set default cell vectors if not provided
+        if cell_vectors is None:
+            cell_vectors = [
+                [dimensions[0], 0, 0],
+                [0, dimensions[1], 0],
+                [0, 0, dimensions[2]]
+            ]
+            
+        # Set default cell origin if not provided
+        if cell_origin is None:
+            cell_origin = [0, 0, 0]
+            
+        # Initialize parent class
+        PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms,
+                         cell_vectors, cell_origin)
+        
+        
+        # Store origin which might be different from cell_origin
+        self.origin = cell_origin
 
-        PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
-        self.origin = origin
-
+        # Set up configuration
         if configuration is None: 
             configuration = SimConf(**conf_params)
         self.configuration = configuration
 
+        # Initialize model properties
         self.num_particles = 0
-        self.particles = [] # TODO decide if this should belong here, or with model
-        self.type_counts = None # TODO decide if this should belong here, or with model
+        self.particles = []  
+        self.type_counts = None 
 
-        self.dummy_types = dummy_types # TODO, determine whether these are really needed
+        self.dummy_types = dummy_types  # TODO, determine whether these are really needed
         if len(self.dummy_types) != 0:
             raise("Dummy types have been deprecated")
         
         self.nonbonded_interactions = []
-        self._nonbonded_interaction_files = [] # This could be made more robust
+        self._nonbonded_interaction_files = []  # This could be made more robust
 
         self.cacheUpToDate = False
 

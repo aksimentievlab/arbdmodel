@@ -326,6 +326,40 @@ def read_average_arbd_coordinates(psf,pdb,dcd,rmsd_threshold=3.5, first_frame=0,
     pos = np.mean(pos, axis=0)
     return pos
 
+
+def calculate_dimensions_from_cell_vectors(cell_vectors, cell_origin=None, buffer_factor=1.2):
+    """
+    Calculate simulation box dimensions from cell basis vectors with buffer.
+    
+    Args:
+        cell_vectors: List of 3 cell basis vectors [[x1,y1,z1], [x2,y2,z2], [x3,y3,z3]]
+        cell_origin: Cell origin coordinates [x,y,z], defaults to [0,0,0]
+        buffer_factor: Factor to scale the dimensions for additional buffer space
+        
+    Returns:
+        dimensions: 3D box dimensions as a tuple (x_dim, y_dim, z_dim)
+    """
+    if cell_vectors is None:
+        return None
+        
+    # Make sure we have proper cell vectors
+    if len(cell_vectors) != 3:
+        raise ValueError("Expected 3 cell basis vectors, got {}".format(len(cell_vectors)))
+    
+    # Convert to numpy arrays for easier manipulation
+    vectors = [np.array(v) for v in cell_vectors]
+    
+    # Calculate maximum extent along each dimension
+    dimensions = [0, 0, 0]
+    for i in range(3):
+        for v in vectors:
+            dimensions[i] += abs(v[i])
+    
+    # Apply buffer factor
+    dimensions = [dim * buffer_factor for dim in dimensions]
+    
+    return tuple(dimensions)
+
 def unit_quat_conversions():
     for axis in [[0,0,1],[1,1,1],[1,0,0],[-1,-2,0]]:
         for angle in np.linspace(-180,180,10):
