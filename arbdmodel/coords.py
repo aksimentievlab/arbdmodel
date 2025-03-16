@@ -321,7 +321,7 @@ def read_average_arbd_coordinates(psf,pdb,dcd,rmsd_threshold=3.5, first_frame=0,
         if rmsd > rmsd_threshold**2:
             break
     t0=t+1
-    logger.info("Averaging coordinates in %s after frame %d" % (dcd, t0) )
+    logger.info(f"Averaging coordinates in {dcd} after frame {t0}")
     
     pos = np.mean(pos, axis=0)
     return pos

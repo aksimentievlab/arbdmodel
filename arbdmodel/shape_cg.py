@@ -9,7 +9,7 @@ import numpy as np
 from pathlib import Path
 from scipy.spatial import KDTree
 
-from . import read_files
+import parmed
 import freesasa
 
 from .logger import logger, devlogger
@@ -18,6 +18,25 @@ from .interactions import AbstractPotential, HarmonicBond
 from .model import ArbdModel
 from .coords import rotationAboutAxis, read_arbd_coordinates
 
+def read_files( psf, pdb, parameter_files=None, system_type = 'charmm'):
+    if system_type == 'charmm':
+        p1 = parmed.charmm.CharmmPsfFile(psf)
+        c1 = parmed.load_file(pdb)
+        for a,b in zip(p1.atoms,c1.atoms):
+            a.xx = b.xx 
+            a.xy = b.xy
+            a.xz = b.xz
+            a.bfactor = b.bfactor
+        if parameter_files is not None:
+            if isinstance(parameter_files,str):
+                parameter_files = [parameter_files]
+            # import ipdb; ipdb.set_trace()
+            # params = parmed.charmm.CharmmParameterSet(parameter_files[-1])
+            params = parmed.charmm.CharmmParameterSet(*parameter_files)
+            p1.load_parameters( params )
+    else:
+        raise NotImplementedError(f'Cannot import a "{system_type}" model')
+    return p1
 
 def find_shape_based_sites(fine_positions, N_cg,
                           num_steps=None, learning_schedule=None,

@@ -1,6 +1,8 @@
 
 ## Set up loggers
 import logging
+from pathlib import Path
+
 def _get_username():
     import sys
     try:

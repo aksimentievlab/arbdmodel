@@ -1,13 +1,11 @@
 import os
 import numpy as np
 from pathlib import Path
-from scipy import signal
 from .logger import logger
 from . import RigidBody, RigidBodyType, DefaultSimConf
 from . import ArbdModel, ArbdEngine
 from .structure_from_pdb import StructureProcessor
 from .coords import Generate_coordinates, Generate_spanning_vectors
-from .grid import Create_null
 
 """Structure rigid body modeling module for ARBD.
 
@@ -472,7 +470,7 @@ class StructureRigidBodyModel(ArbdModel):
 
         self.static_objects.append(obj)
     
-    
+
 
 
 class SimpleArbdEngine(ArbdEngine):
