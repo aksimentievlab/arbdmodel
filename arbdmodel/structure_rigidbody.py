@@ -276,7 +276,6 @@ class StructureRigidBodyModel(ArbdModel):
             **kwargs: Additional arguments passed to ArbdModel
         """
         
-        
         self.simconf = configuration or DefaultSimConf()
         self.diffusible_objects = []
         self.static_objects = []
@@ -470,9 +469,6 @@ class StructureRigidBodyModel(ArbdModel):
 
         self.static_objects.append(obj)
     
-
-
-
 class SimpleArbdEngine(ArbdEngine):
     """Enhanced ARBD engine with additional functionality for structure simulations"""
     

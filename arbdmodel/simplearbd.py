@@ -5,7 +5,6 @@ import argparse
 from pathlib import Path
 
 from .structure_rigidbody import StructureRigidBodyModel, SimpleArbdEngine
-from .model import ArbdModel
 from .sim_config import SimConf
 from .logger import logger
 

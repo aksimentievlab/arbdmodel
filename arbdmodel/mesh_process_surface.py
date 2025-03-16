@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 from .grid import writeDx
 from .engine import HydroProRunner
-from .version import logger
+from .logger import logger
 
 """
 Specialized surface mesh processor that handles triangle surface meshes 

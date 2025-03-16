@@ -396,6 +396,45 @@ class ArbdModel(PdbModel):
         raise NotImplementedError
 
     def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
+        """
+        Run Iterative Boltzmann Inversion (IBI) to optimize coarse-grained potentials.
+        
+        This method performs IBI iterations to match target distributions. For each iteration,
+        it writes CG potentials, runs simulations, and extracts distributions from the resulting
+        trajectories to update the potentials for the next iteration.
+        
+        Parameters
+        ----------
+        iterations : int
+            Number of IBI iterations to run
+        directory : str, optional
+            Directory to store output files, defaults to current directory
+        engine : ArbdEngine, optional
+            Simulation engine to use. If None, creates a default engine with 5e6 steps
+            and 1e4 output period
+        replicas : int, optional
+            Number of replica simulations to run per iteration, defaults to 1
+        run_minimization : bool, optional
+            Whether to run a brief minimization before the first iteration, defaults to True
+        first_iteration : int, optional
+            Starting iteration number, useful for continuing previous IBI runs, defaults to 1
+        target_universe : MDAnalysis.Universe, optional
+            Universe object containing target structure and trajectory
+        target_trajectory : str or list, optional
+            Target trajectory file(s) to use if target_universe is provided
+            
+        Raises
+        ------
+        ValueError
+            If the model does not have any IBI potentials assigned
+        NotImplementedError
+            If the system does not have an orthorhombic unit cell
+            
+        Notes
+        -----
+        The method requires bonded_ibi_potentials and nonbonded_ibi_potentials to be 
+        defined in the model. Use assign_IBI_degrees_of_freedom() before calling this method.
+        """
         try:
             assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
         except:

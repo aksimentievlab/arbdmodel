@@ -3,7 +3,7 @@ from scipy.signal import savgol_filter as savgol
 import numpy as np
 from pathlib import Path
 from . import ArbdModel
-from .version import logger
+from . import logger
 from .interactions import AbstractPotential
 
 from tqdm import tqdm,trange
