@@ -6,7 +6,7 @@ Welcome to the documentation for ARBD Model!
 ARBD Model is an advanced rigid-body dynamics modeling and simulation package for biomolecular systems.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    Core/index

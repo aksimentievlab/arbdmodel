@@ -1,0 +1,1407 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>arbdmodel.structure_from_pdb &mdash; ARBD Model 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ARBD Model
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Core/index.html">Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Core/core_objects.html">core_objects module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Child"><code class="docutils literal notranslate"><span class="pre">Child</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Child.__getattr__"><code class="docutils literal notranslate"><span class="pre">Child.__getattr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Clone"><code class="docutils literal notranslate"><span class="pre">Clone</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Clone.__getattr__"><code class="docutils literal notranslate"><span class="pre">Clone.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Clone.get_original_recursively"><code class="docutils literal notranslate"><span class="pre">Clone.get_original_recursively()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Group"><code class="docutils literal notranslate"><span class="pre">Group</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Group.clone"><code class="docutils literal notranslate"><span class="pre">Group.clone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Group.duplicate"><code class="docutils literal notranslate"><span class="pre">Group.duplicate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.GroupSite"><code class="docutils literal notranslate"><span class="pre">GroupSite</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.GroupSite.add_restraint"><code class="docutils literal notranslate"><span class="pre">GroupSite.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.GroupSite.get_center"><code class="docutils literal notranslate"><span class="pre">GroupSite.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.GroupSite.get_restraints"><code class="docutils literal notranslate"><span class="pre">GroupSite.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent"><code class="docutils literal notranslate"><span class="pre">Parent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.__iter__"><code class="docutils literal notranslate"><span class="pre">Parent.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add"><code class="docutils literal notranslate"><span class="pre">Parent.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_bond"><code class="docutils literal notranslate"><span class="pre">Parent.add_bond()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_bond_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_bond_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_dihedral"><code class="docutils literal notranslate"><span class="pre">Parent.add_dihedral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_exclusion"><code class="docutils literal notranslate"><span class="pre">Parent.add_exclusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_improper"><code class="docutils literal notranslate"><span class="pre">Parent.add_improper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_product_potential"><code class="docutils literal notranslate"><span class="pre">Parent.add_product_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.add_vector_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_vector_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.clear_all"><code class="docutils literal notranslate"><span class="pre">Parent.clear_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_bond_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_bond_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_bonds"><code class="docutils literal notranslate"><span class="pre">Parent.get_bonds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_center"><code class="docutils literal notranslate"><span class="pre">Parent.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_dihedrals"><code class="docutils literal notranslate"><span class="pre">Parent.get_dihedrals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_exclusions"><code class="docutils literal notranslate"><span class="pre">Parent.get_exclusions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_impropers"><code class="docutils literal notranslate"><span class="pre">Parent.get_impropers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_product_potentials"><code class="docutils literal notranslate"><span class="pre">Parent.get_product_potentials()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_restraints"><code class="docutils literal notranslate"><span class="pre">Parent.get_restraints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.get_vector_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_vector_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.index"><code class="docutils literal notranslate"><span class="pre">Parent.index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.insert"><code class="docutils literal notranslate"><span class="pre">Parent.insert()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Parent.remove"><code class="docutils literal notranslate"><span class="pre">Parent.remove()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType"><code class="docutils literal notranslate"><span class="pre">ParticleType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType.__getattr__"><code class="docutils literal notranslate"><span class="pre">ParticleType.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType.__init__"><code class="docutils literal notranslate"><span class="pre">ParticleType.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">ParticleType.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType.is_same_type"><code class="docutils literal notranslate"><span class="pre">ParticleType.is_same_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.ParticleType.excludedAttributes"><code class="docutils literal notranslate"><span class="pre">ParticleType.excludedAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle"><code class="docutils literal notranslate"><span class="pre">PointParticle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle.__getattr__"><code class="docutils literal notranslate"><span class="pre">PointParticle.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">PointParticle.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle.add_restraint"><code class="docutils literal notranslate"><span class="pre">PointParticle.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle.duplicate"><code class="docutils literal notranslate"><span class="pre">PointParticle.duplicate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.PointParticle.get_restraints"><code class="docutils literal notranslate"><span class="pre">PointParticle.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBody"><code class="docutils literal notranslate"><span class="pre">RigidBody</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBody.__getattr__"><code class="docutils literal notranslate"><span class="pre">RigidBody.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBody.add_restraint"><code class="docutils literal notranslate"><span class="pre">RigidBody.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBody.duplicate"><code class="docutils literal notranslate"><span class="pre">RigidBody.duplicate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBody.get_restraints"><code class="docutils literal notranslate"><span class="pre">RigidBody.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType"><code class="docutils literal notranslate"><span class="pre">RigidBodyType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType.__init__"><code class="docutils literal notranslate"><span class="pre">RigidBodyType.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType.attach_particle"><code class="docutils literal notranslate"><span class="pre">RigidBodyType.attach_particle()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable"><code class="docutils literal notranslate"><span class="pre">Transformable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable.applyOrientation"><code class="docutils literal notranslate"><span class="pre">Transformable.applyOrientation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable.get_collapsed_position"><code class="docutils literal notranslate"><span class="pre">Transformable.get_collapsed_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable.rotate"><code class="docutils literal notranslate"><span class="pre">Transformable.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable.transform"><code class="docutils literal notranslate"><span class="pre">Transformable.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/core_objects.html#arbdmodel.core_objects.Transformable.translate"><code class="docutils literal notranslate"><span class="pre">Transformable.translate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Core/model.html">model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel"><code class="docutils literal notranslate"><span class="pre">ArbdModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.__init__"><code class="docutils literal notranslate"><span class="pre">ArbdModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.add"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.add_group_site"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add_group_site()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.add_nonbonded_interaction"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add_nonbonded_interaction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.assign_IBI_degrees_of_freedom"><code class="docutils literal notranslate"><span class="pre">ArbdModel.assign_IBI_degrees_of_freedom()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.clear_all"><code class="docutils literal notranslate"><span class="pre">ArbdModel.clear_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.dimensions_from_structure"><code class="docutils literal notranslate"><span class="pre">ArbdModel.dimensions_from_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.extend"><code class="docutils literal notranslate"><span class="pre">ArbdModel.extend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.getParticleTypesAndCounts"><code class="docutils literal notranslate"><span class="pre">ArbdModel.getParticleTypesAndCounts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.load_target_IBI_distributions"><code class="docutils literal notranslate"><span class="pre">ArbdModel.load_target_IBI_distributions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.prepare_for_simulation"><code class="docutils literal notranslate"><span class="pre">ArbdModel.prepare_for_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.run_IBI"><code class="docutils literal notranslate"><span class="pre">ArbdModel.run_IBI()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.simulate"><code class="docutils literal notranslate"><span class="pre">ArbdModel.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.update"><code class="docutils literal notranslate"><span class="pre">ArbdModel.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.ArbdModel.useNonbondedScheme"><code class="docutils literal notranslate"><span class="pre">ArbdModel.useNonbondedScheme()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.PdbModel"><code class="docutils literal notranslate"><span class="pre">PdbModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.PdbModel.write_pdb"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.PdbModel.write_pqr"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_pqr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/model.html#arbdmodel.model.PdbModel.write_psf"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_psf()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Core/sim_config.html">sim_config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.DefaultSimConf"><code class="docutils literal notranslate"><span class="pre">DefaultSimConf</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.DefaultSimConf.temperature"><code class="docutils literal notranslate"><span class="pre">DefaultSimConf.temperature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf"><code class="docutils literal notranslate"><span class="pre">SimConf</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf.combine"><code class="docutils literal notranslate"><span class="pre">SimConf.combine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf.get_binary"><code class="docutils literal notranslate"><span class="pre">SimConf.get_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf.items"><code class="docutils literal notranslate"><span class="pre">SimConf.items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf.set_binary"><code class="docutils literal notranslate"><span class="pre">SimConf.set_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Core/sim_config.html#arbdmodel.sim_config.SimConf.temperature"><code class="docutils literal notranslate"><span class="pre">SimConf.temperature</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Polymer%20Modeling/index.html">Polymer Modeling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html">polymer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement"><code class="docutils literal notranslate"><span class="pre">ConnectableElement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_location_at"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_location_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_locations"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_locations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection.delete"><code class="docutils literal notranslate"><span class="pre">Connection.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection.other"><code class="docutils literal notranslate"><span class="pre">Connection.other()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location"><code class="docutils literal notranslate"><span class="pre">Location</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.get_connected_location"><code class="docutils literal notranslate"><span class="pre">Location.get_connected_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.get_monomer_index"><code class="docutils literal notranslate"><span class="pre">Location.get_monomer_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.set_connection"><code class="docutils literal notranslate"><span class="pre">Location.set_connection()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads"><code class="docutils literal notranslate"><span class="pre">PolymerBeads</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads.monomers_per_bead_group"><code class="docutils literal notranslate"><span class="pre">PolymerBeads.monomers_per_bead_group</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads.num_bead_groups"><code class="docutils literal notranslate"><span class="pre">PolymerBeads.num_bead_groups</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup"><code class="docutils literal notranslate"><span class="pre">PolymerGroup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.__init__"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.dimensions_from_structure"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.dimensions_from_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.extend"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.extend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_center"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_connections"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.get_connections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.rotate"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.translate"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.translate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.update"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_cylinder_tcl"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.vmd_cylinder_tcl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_tube_tcl"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.vmd_tube_tcl()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel"><code class="docutils literal notranslate"><span class="pre">PolymerModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.__init__"><code class="docutils literal notranslate"><span class="pre">PolymerModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.generate_beads"><code class="docutils literal notranslate"><span class="pre">PolymerModel.generate_beads()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.update_splines"><code class="docutils literal notranslate"><span class="pre">PolymerModel.update_splines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection"><code class="docutils literal notranslate"><span class="pre">PolymerSection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.add_location"><code class="docutils literal notranslate"><span class="pre">PolymerSection.add_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_monomer_index"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_monomer_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_orientation"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_orientation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_position"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_tangent"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_center"><code class="docutils literal notranslate"><span class="pre">PolymerSection.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_contour_sorted_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">PolymerSection.get_contour_sorted_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.insert_monomers"><code class="docutils literal notranslate"><span class="pre">PolymerSection.insert_monomers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.iterate_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">PolymerSection.iterate_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.monomer_index_to_contour"><code class="docutils literal notranslate"><span class="pre">PolymerSection.monomer_index_to_contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.remove_monomers"><code class="docutils literal notranslate"><span class="pre">PolymerSection.remove_monomers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.rotate"><code class="docutils literal notranslate"><span class="pre">PolymerSection.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_orientation_splines"><code class="docutils literal notranslate"><span class="pre">PolymerSection.set_orientation_splines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_splines"><code class="docutils literal notranslate"><span class="pre">PolymerSection.set_splines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.translate"><code class="docutils literal notranslate"><span class="pre">PolymerSection.translate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/fjc_polymer_model.html">fjc_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcBeadsFromPolymer"><code class="docutils literal notranslate"><span class="pre">FjcBeadsFromPolymer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel"><code class="docutils literal notranslate"><span class="pre">FjcModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel.__init__"><code class="docutils literal notranslate"><span class="pre">FjcModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">FjcModel.set_damping_coefficient()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html">hps_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsBeads"><code class="docutils literal notranslate"><span class="pre">HpsBeads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel"><code class="docutils literal notranslate"><span class="pre">HpsModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.__init__"><code class="docutils literal notranslate"><span class="pre">HpsModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">HpsModel.set_damping_coefficient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.spring_constant"><code class="docutils literal notranslate"><span class="pre">HpsModel.spring_constant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsNonbonded"><code class="docutils literal notranslate"><span class="pre">HpsNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">HpsNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html">mpipi_polymer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiBeads"><code class="docutils literal notranslate"><span class="pre">MpipiBeads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel"><code class="docutils literal notranslate"><span class="pre">MpipiModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.__init__"><code class="docutils literal notranslate"><span class="pre">MpipiModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">MpipiModel.set_damping_coefficient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.spring_constant"><code class="docutils literal notranslate"><span class="pre">MpipiModel.spring_constant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiNonbonded"><code class="docutils literal notranslate"><span class="pre">MpipiNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">MpipiNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html">onck_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckBeads"><code class="docutils literal notranslate"><span class="pre">OnckBeads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckModel"><code class="docutils literal notranslate"><span class="pre">OnckModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckModel.__init__"><code class="docutils literal notranslate"><span class="pre">OnckModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">OnckModel.set_damping_coefficient()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckNonbonded"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html">sali_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.LinearBond"><code class="docutils literal notranslate"><span class="pre">LinearBond</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.LinearBond.potential"><code class="docutils literal notranslate"><span class="pre">LinearBond.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliBeadsFromPolymer"><code class="docutils literal notranslate"><span class="pre">SaliBeadsFromPolymer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel"><code class="docutils literal notranslate"><span class="pre">SaliModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.__init__"><code class="docutils literal notranslate"><span class="pre">SaliModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.generate_beads"><code class="docutils literal notranslate"><span class="pre">SaliModel.generate_beads()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.update_splines"><code class="docutils literal notranslate"><span class="pre">SaliModel.update_splines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliNonbonded"><code class="docutils literal notranslate"><span class="pre">SaliNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">SaliNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html">ssdna_two_bead module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaModel"><code class="docutils literal notranslate"><span class="pre">DnaModel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.b"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.b</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.nt"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.nt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.p"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.p</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../RigidBody%20Models/index.html">RigidBody Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html">structure_from_pdb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor"><code class="docutils literal notranslate"><span class="pre">StructureProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.align_structure"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.align_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.apply_gaussian_smoothing"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.apply_gaussian_smoothing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.calculate_hydrodynamic_properties"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.calculate_hydrodynamic_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_charge_distribution"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.generate_charge_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_electrostatic_map"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.generate_electrostatic_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_vdw_maps"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.generate_vdw_maps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.get_grid_files"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.get_grid_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.process_structure"><code class="docutils literal notranslate"><span class="pre">StructureProcessor.process_structure()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html">structure_rigidbody module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.DiffusiveRigidBodyType"><code class="docutils literal notranslate"><span class="pre">DiffusiveRigidBodyType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.DiffusiveRigidBodyType.__init__"><code class="docutils literal notranslate"><span class="pre">DiffusiveRigidBodyType.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.SimpleArbdEngine"><code class="docutils literal notranslate"><span class="pre">SimpleArbdEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.SimpleArbdEngine.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleArbdEngine.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.SimpleArbdEngine.run_simulation"><code class="docutils literal notranslate"><span class="pre">SimpleArbdEngine.run_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.SimpleArbdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">SimpleArbdEngine.write_simulation_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StaticObject"><code class="docutils literal notranslate"><span class="pre">StaticObject</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StaticObject.__init__"><code class="docutils literal notranslate"><span class="pre">StaticObject.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StaticObject.process"><code class="docutils literal notranslate"><span class="pre">StaticObject.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StructureRigidBodyModel"><code class="docutils literal notranslate"><span class="pre">StructureRigidBodyModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StructureRigidBodyModel.__init__"><code class="docutils literal notranslate"><span class="pre">StructureRigidBodyModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StructureRigidBodyModel.add_diffusible_object"><code class="docutils literal notranslate"><span class="pre">StructureRigidBodyModel.add_diffusible_object()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/structure_rigidbody.html#arbdmodel.structure_rigidbody.StructureRigidBodyModel.add_static_object"><code class="docutils literal notranslate"><span class="pre">StructureRigidBodyModel.add_static_object()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html">mesh_process_volume module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor"><code class="docutils literal notranslate"><span class="pre">MeshProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.calculate_damping"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.calculate_damping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.generate_potential_grid"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.generate_potential_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.get_attached_particles"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.get_attached_particles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.save_aligned_mesh"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.save_aligned_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.save_as_pdb"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.save_as_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.write_no_enter_potential"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.write_no_enter_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.MICRON_TO_ANGSTROM"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.MICRON_TO_ANGSTROM</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.process_mesh_file"><code class="docutils literal notranslate"><span class="pre">process_mesh_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html">mesh_process_surface module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.calculate_damping"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.calculate_damping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.generate_potential_grid"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.generate_potential_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.get_attached_particles"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.get_attached_particles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_aligned_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh_both_formats"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_aligned_mesh_both_formats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_as_pdb"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_as_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.write_no_enter_potential_dx"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.write_no_enter_potential_dx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.MICRON_TO_ANGSTROM"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.MICRON_TO_ANGSTROM</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.process_surface_mesh"><code class="docutils literal notranslate"><span class="pre">process_surface_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/mesh_rigidbody.html">mesh_rigidbody module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/mesh_rigidbody.html#arbdmodel.mesh_rigidbody.MeshRigidBodyType"><code class="docutils literal notranslate"><span class="pre">MeshRigidBodyType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/mesh_rigidbody.html#arbdmodel.mesh_rigidbody.MeshRigidBodyType.__init__"><code class="docutils literal notranslate"><span class="pre">MeshRigidBodyType.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html">simplearbd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.create_engine"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.create_engine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.create_model"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.create_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.run_simulation"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.run_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.setup_diffusible_objects"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.setup_diffusible_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.SimpleArbdConfig.setup_static_objects"><code class="docutils literal notranslate"><span class="pre">SimpleArbdConfig.setup_static_objects()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../RigidBody%20Models/simplearbd.html#arbdmodel.simplearbd.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Interaction%20Potentials/index.html">Interaction Potentials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html">interactions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.BoundaryPotential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.BoundaryPotential.__init__"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.BoundaryPotential.potential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.BoundaryPotential.write_file"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HalfHarmonic"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HalfHarmonic.potential"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBond"><code class="docutils literal notranslate"><span class="pre">HarmonicBond</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBond.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBond.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBond.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBondedPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBondedPotential.filename"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBondedPotential.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBondedPotential.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicBondedPotential.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicDihedral"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicDihedral.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.periodic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicDihedral.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicVectorAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicVectorAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.HarmonicVectorAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.LennardJones.potential"><code class="docutils literal notranslate"><span class="pre">LennardJones.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.NullPotential"><code class="docutils literal notranslate"><span class="pre">NullPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.NullPotential.filename"><code class="docutils literal notranslate"><span class="pre">NullPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.NullPotential.potential"><code class="docutils literal notranslate"><span class="pre">NullPotential.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.TabulatedNonbonded"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.TabulatedNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.TabulatedNonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKAngle"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKBond"><code class="docutils literal notranslate"><span class="pre">WLCSKBond</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKBond.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKBond.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKPotential"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/interactions.html#arbdmodel.interactions.WLCSKPotential.filename"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.filename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html">ibi module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AngleDof"><code class="docutils literal notranslate"><span class="pre">AngleDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.AngleDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">AngleDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.BondAngleDof"><code class="docutils literal notranslate"><span class="pre">BondAngleDof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.BondDof"><code class="docutils literal notranslate"><span class="pre">BondDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.BondDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">BondDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.compute_volume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.wrap_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.DihedralDof"><code class="docutils literal notranslate"><span class="pre">DihedralDof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBIAngle"><code class="docutils literal notranslate"><span class="pre">IBIAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBIDihedral"><code class="docutils literal notranslate"><span class="pre">IBIDihedral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBIDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">IBIDihedral.periodic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBINonbonded"><code class="docutils literal notranslate"><span class="pre">IBINonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.IBINonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">IBINonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.PairDistributionDof"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.compute_volume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.get_values"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.get_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.RadiusDof"><code class="docutils literal notranslate"><span class="pre">RadiusDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Interaction%20Potentials/ibi.html#arbdmodel.ibi.RadiusDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">RadiusDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Simulation%20Engines/index.html">Simulation Engines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Simulation%20Engines/engine.html">engine module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner"><code class="docutils literal notranslate"><span class="pre">APBSRunner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.__init__"><code class="docutils literal notranslate"><span class="pre">APBSRunner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">APBSRunner.run_calculation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.write_config"><code class="docutils literal notranslate"><span class="pre">APBSRunner.write_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine"><code class="docutils literal notranslate"><span class="pre">ArbdEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner"><code class="docutils literal notranslate"><span class="pre">HydroProRunner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.__init__"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.parse_output"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.parse_output()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.run_calculation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.write_config"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.write_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine"><code class="docutils literal notranslate"><span class="pre">NamdEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.write_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">NamdEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine"><code class="docutils literal notranslate"><span class="pre">SimEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">SimEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.simulate"><code class="docutils literal notranslate"><span class="pre">SimEngine.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">SimEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">SimEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html">parmed_bd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd"><code class="docutils literal notranslate"><span class="pre">ParmedArbd</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.parmed_structure"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.parmed_structure</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.atom_types"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.atom_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.atoms_map"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.atoms_map</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.__init__"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.convert_sod_to_mg"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.convert_sod_to_mg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.create_dual_topology"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.create_dual_topology()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.create_dual_topology_model"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.create_dual_topology_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.load_structure"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.load_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.simulate"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.write_restraint_files"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.write_restraint_files()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Shape-Based%20Models/index.html">Shape-Based Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html">shape_cg module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.calc_atom_sasa()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.generate_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.generate_protein()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_protein()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_types()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_confinement"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_confinement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_protein_nb_interactions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_proteins"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_proteins()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.calculate_total_mass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.concentration_to_debye_length()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.from_protein_list"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.from_protein_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.generate_random_protein_positions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.get_protein_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.get_protein_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.run_from_minimized"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_from_minimized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.run_minimization"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_minimization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.setup_and_run"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.setup_and_run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded.filename"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.find_shape_based_sites"><code class="docutils literal notranslate"><span class="pre">find_shape_based_sites()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.get_particle_assignments"><code class="docutils literal notranslate"><span class="pre">get_particle_assignments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Utilities/index.html">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../Utilities/coords.html">coords module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.Generate_coordinates"><code class="docutils literal notranslate"><span class="pre">Generate_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.Generate_spanning_vectors"><code class="docutils literal notranslate"><span class="pre">Generate_spanning_vectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.calculate_dimensions_from_cell_vectors"><code class="docutils literal notranslate"><span class="pre">calculate_dimensions_from_cell_vectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.minimizeRmsd"><code class="docutils literal notranslate"><span class="pre">minimizeRmsd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_exp"><code class="docutils literal notranslate"><span class="pre">quaternion_exp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_from_matrix"><code class="docutils literal notranslate"><span class="pre">quaternion_from_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_inverse"><code class="docutils literal notranslate"><span class="pre">quaternion_inverse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_product"><code class="docutils literal notranslate"><span class="pre">quaternion_product()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_slerp"><code class="docutils literal notranslate"><span class="pre">quaternion_slerp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.quaternion_to_matrix"><code class="docutils literal notranslate"><span class="pre">quaternion_to_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.readArbdCoords"><code class="docutils literal notranslate"><span class="pre">readArbdCoords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.readAvgArbdCoords"><code class="docutils literal notranslate"><span class="pre">readAvgArbdCoords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.read_arbd_coordinates"><code class="docutils literal notranslate"><span class="pre">read_arbd_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.read_average_arbd_coordinates"><code class="docutils literal notranslate"><span class="pre">read_average_arbd_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.rotationAboutAxis"><code class="docutils literal notranslate"><span class="pre">rotationAboutAxis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/coords.html#arbdmodel.coords.unit_quat_conversions"><code class="docutils literal notranslate"><span class="pre">unit_quat_conversions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Utilities/grid.html">grid module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.TestAverageGrids"><code class="docutils literal notranslate"><span class="pre">TestAverageGrids</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.TestAverageGrids.test_average_grids"><code class="docutils literal notranslate"><span class="pre">TestAverageGrids.test_average_grids()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.Bound_grid"><code class="docutils literal notranslate"><span class="pre">Bound_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.Create_null"><code class="docutils literal notranslate"><span class="pre">Create_null()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.add_smaller_grid"><code class="docutils literal notranslate"><span class="pre">add_smaller_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.average_grids"><code class="docutils literal notranslate"><span class="pre">average_grids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.constant_force"><code class="docutils literal notranslate"><span class="pre">constant_force()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.convolve_kernel_truncate"><code class="docutils literal notranslate"><span class="pre">convolve_kernel_truncate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.create_bounding_grid"><code class="docutils literal notranslate"><span class="pre">create_bounding_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.fill_nans"><code class="docutils literal notranslate"><span class="pre">fill_nans()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.gaussian_kernel"><code class="docutils literal notranslate"><span class="pre">gaussian_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.get_slice_enclosing_smaller_grid"><code class="docutils literal notranslate"><span class="pre">get_slice_enclosing_smaller_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.isotropic_kernel"><code class="docutils literal notranslate"><span class="pre">isotropic_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.loadGrid"><code class="docutils literal notranslate"><span class="pre">loadGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.neighborhood_average"><code class="docutils literal notranslate"><span class="pre">neighborhood_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.replace_false_with_distance"><code class="docutils literal notranslate"><span class="pre">replace_false_with_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.slab_potential_z"><code class="docutils literal notranslate"><span class="pre">slab_potential_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.spherical_confinement"><code class="docutils literal notranslate"><span class="pre">spherical_confinement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.writeDx"><code class="docutils literal notranslate"><span class="pre">writeDx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/grid.html#arbdmodel.grid.write_confine_dx"><code class="docutils literal notranslate"><span class="pre">write_confine_dx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Utilities/logger.html">logger module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/logger.html#arbdmodel.logger.get_resource_path"><code class="docutils literal notranslate"><span class="pre">get_resource_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Utilities/version.html">version module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.Citation"><code class="docutils literal notranslate"><span class="pre">Citation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.Citation.display"><code class="docutils literal notranslate"><span class="pre">Citation.display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.call_git_describe"><code class="docutils literal notranslate"><span class="pre">call_git_describe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.check_git_repository"><code class="docutils literal notranslate"><span class="pre">check_git_repository()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.get_version"><code class="docutils literal notranslate"><span class="pre">get_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.is_dirty"><code class="docutils literal notranslate"><span class="pre">is_dirty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.read_release_version"><code class="docutils literal notranslate"><span class="pre">read_release_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.read_version_file"><code class="docutils literal notranslate"><span class="pre">read_version_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/version.html#arbdmodel.version.write_release_version"><code class="docutils literal notranslate"><span class="pre">write_release_version()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../Utilities/binary_manager.html">binary_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../Utilities/binary_manager.html#arbdmodel.binary_manager.initialize_binary_paths"><code class="docutils literal notranslate"><span class="pre">initialize_binary_paths()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ARBD Model</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">arbdmodel.structure_from_pdb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for arbdmodel.structure_from_pdb</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sim_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimConf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">HydroProRunner</span><span class="p">,</span> <span class="n">APBSRunner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">writeDx</span><span class="p">,</span> <span class="n">loadGrid</span><span class="p">,</span> <span class="n">Bound_grid</span>
+
+<span class="c1">#Originally SimpleARBD by Chun</span>
+
+<div class="viewcode-block" id="StructureProcessor">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StructureProcessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process molecular structure files to calculate properties and generate maps for ARBD&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="StructureProcessor.__init__">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_path</span><span class="p">,</span> <span class="n">simconf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_heavy_cluster</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                 <span class="n">parameters_folder</span><span class="o">=</span><span class="s2">&quot;./parameters&quot;</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize processor with structure file</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            structure_path: Path to structure file (.psf/.pdb)</span>
+<span class="sd">            simconf: SimConf object containing configuration parameters</span>
+<span class="sd">            num_heavy_cluster: Number of heavy atom clusters for VDW maps</span>
+<span class="sd">            parameters_folder: Path to parameters folder</span>
+<span class="sd">            work_dir: Working directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">structure_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="o">.</span><span class="n">stem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heavy_cluster</span> <span class="o">=</span> <span class="n">num_heavy_cluster</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters_folder</span> <span class="o">=</span> <span class="n">parameters_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">work_dir</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">simconf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultSimConf</span>
+            <span class="n">simconf</span> <span class="o">=</span> <span class="n">DefaultSimConf</span><span class="p">()</span>
+            
+        <span class="c1"># Extract parameters from simconf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">viscosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">solvent_density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">get_binary</span><span class="p">(</span><span class="s1">&#39;vmd&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;vmd&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hydro_path</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">get_binary</span><span class="p">(</span><span class="s1">&#39;hydropro&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apbs_path</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">get_binary</span><span class="p">(</span><span class="s1">&#39;apbs&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;apbs&#39;</span>
+        
+        <span class="c1"># Create working directory if it doesn&#39;t exist</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Attributes for results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moment_of_inertia</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_pdb</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_psf</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_dx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elec_dx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vdw_pot_dxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vdw_den_dxs</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+        
+<div class="viewcode-block" id="StructureProcessor.process_structure">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.process_structure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process structure to get all properties and potential maps&quot;&quot;&quot;</span>
+        <span class="c1"># Step 1: Align structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">align_structure</span><span class="p">()</span>
+        
+        <span class="c1"># Step 2: Calculate hydrodynamic properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_hydrodynamic_properties</span><span class="p">()</span>
+        
+        <span class="c1"># Step 3: Generate charge distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_charge_distribution</span><span class="p">()</span>
+        
+        <span class="c1"># Step 4: Generate electrostatic map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_electrostatic_map</span><span class="p">()</span>
+        
+        <span class="c1"># Step 5: Generate VDW maps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_vdw_maps</span><span class="p">()</span>
+        
+        <span class="c1"># Step 6: Apply Gaussian smoothing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_gaussian_smoothing</span><span class="p">()</span>
+        
+        <span class="c1"># Return a dictionary of grid files for use in RigidBodyType</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_grid_files</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="StructureProcessor.align_structure">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.align_structure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">align_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align structure to principal axes using VMD.&quot;&quot;&quot;</span>
+        <span class="c1"># Write alignment TCL script</span>
+        <span class="n">align_tcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;align.tcl&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">align_tcl</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;lassign $argv prefix</span>
+<span class="s1">set seltext all</span>
+
+<span class="s1">proc rotationIsRightHanded {R {tol 0.01}} {</span>
+<span class="s1">    set x [coordtrans $R {1 0 0}]</span>
+<span class="s1">    set y [coordtrans $R {0 1 0}]</span>
+<span class="s1">    set z [coordtrans $R {0 0 1}]</span>
+
+<span class="s1">    set l [veclength [vecsub $z [veccross $x $y]]]</span>
+<span class="s1">    return [expr {$l &lt; $tol}]</span>
+<span class="s1">}</span>
+
+<span class="s1">set ID [mol new $prefix.psf]</span>
+<span class="s1">mol addfile $prefix.pdb waitfor all</span>
+<span class="s1">set all [atomselect $ID all]</span>
+<span class="s1">set sel [atomselect $ID $seltext]</span>
+
+<span class="s1">## Center system on $sel</span>
+<span class="s1">$all moveby [vecinvert [measure center $sel weight mass]]</span>
+
+<span class="s1">set continue 1</span>
+<span class="s1">while { $continue } {</span>
+<span class="s1">    ## Get current moment of inertia to determine rotation to align</span>
+<span class="s1">    lassign [measure inertia $sel moments] com principleAxes</span>
+
+<span class="s1">    ## Convert 3x3 rotation to 4x4 vmd transformation</span>
+<span class="s1">    set R [trans_from_rotate $principleAxes]</span>
+<span class="s1">    ## Fix left-handed principle axes sometimes returned by &#39;measure inertia&#39;</span>
+<span class="s1">    if { ! [rotationIsRightHanded $R] } {</span>
+<span class="s1">        puts &quot;This was true&quot;</span>
+<span class="s1">        # puts &quot;rotation $R is not right handed! Fixing!&quot;</span>
+<span class="s1">        set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]</span>
+<span class="s1">    }</span>
+
+<span class="s1">    puts &quot;My rotation is here: $R&quot;</span>
+<span class="s1">    puts &quot;My second line is here: [lassign [measure inertia $sel moments] com principleAxes]&quot;</span>
+
+<span class="s1">    ## Apply rotation and check that it worked</span>
+<span class="s1">    $all move $R</span>
+
+<span class="s1">    ## Get current moment of inertia to determine rotation to align</span>
+
+<span class="s1">    lassign [measure inertia $sel moments] com principleAxes moments</span>
+<span class="s1">    puts $principleAxes</span>
+<span class="s1">    set goodcount 0</span>
+<span class="s1">    foreach x0 {{1 0 0} {0 1 0} {0 0 1}} {</span>
+<span class="s1">        set x [coordtrans [trans_from_rotate $principleAxes] $x0]</span>
+<span class="s1">        if {[veclength [vecsub $x $x0]] &lt; 0.01} {</span>
+<span class="s1">            incr goodcount</span>
+<span class="s1">        }</span>
+<span class="s1">    }</span>
+<span class="s1">    if { $goodcount == 3 } {</span>
+<span class="s1">        set continue 0</span>
+<span class="s1">    }</span>
+<span class="s1">}</span>
+
+<span class="s1">## Write transformation matrix to return to original conformation</span>
+<span class="s1">set ch [open $prefix.rotate-back.txt w]</span>
+<span class="s1">foreach line [trans_to_rotate [transtranspose $R]] {</span>
+<span class="s1">    puts $ch $line</span>
+<span class="s1">}</span>
+<span class="s1">close $ch</span>
+
+<span class="s1">## Write out moments of inertia</span>
+<span class="s1">set ms &quot;&quot;</span>
+<span class="s1">foreach m $moments { lappend ms [veclength $m] }</span>
+<span class="s1">set ch [open $prefix.inertia.txt w]</span>
+<span class="s1">puts $ch $ms</span>
+<span class="s1">close $ch</span>
+
+<span class="s1">## Write out mass</span>
+<span class="s1">set ch [open $prefix.mass.txt w]</span>
+<span class="s1">puts $ch [measure sumweights $sel weight mass]</span>
+<span class="s1">close $ch</span>
+
+<span class="s1">## Write out dimension</span>
+<span class="s1">set ch [open $prefix.dimension.dat w]</span>
+<span class="s1">set minmax [measure minmax $sel]</span>
+<span class="s1">set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]</span>
+<span class="s1">set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]</span>
+<span class="s1">set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]</span>
+<span class="s1">puts $ch $x_dim</span>
+<span class="s1">puts $ch $y_dim</span>
+<span class="s1">puts $ch $z_dim</span>
+<span class="s1">close $ch</span>
+
+<span class="s1">## Write out psf, pdb of transformed selection</span>
+<span class="s1">$sel writepdb $prefix.aligned.pdb</span>
+<span class="s1">$sel writepsf $prefix.aligned.psf&#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Run alignment</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span><span class="si">}</span><span class="s2"> -dispdev text -args </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">align_tcl</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Verify alignment succeeded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_pdb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned.pdb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_psf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned.psf&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aligned_pdb</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">aligned_psf</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Alignment failed for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Read mass and inertia</span>
+        <span class="n">mass_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.mass.txt&quot;</span>
+        <span class="n">inertia_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.inertia.txt&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mass_file</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">inertia_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mass or inertia file not found after alignment&quot;</span><span class="p">)</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mass_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">inertia_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moment_of_inertia</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+            
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure aligned: Mass = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="si">}</span><span class="s2">, Inertia = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">moment_of_inertia</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="StructureProcessor.calculate_hydrodynamic_properties">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.calculate_hydrodynamic_properties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_hydrodynamic_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate hydrodynamic properties using HydroPro.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydro_path</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;HydroPro executable not provided, using default values&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="k">return</span>
+            
+        <span class="c1"># Initialize HydroPro runner</span>
+        <span class="n">hydro_runner</span> <span class="o">=</span> <span class="n">HydroProRunner</span><span class="p">(</span>
+            <span class="n">mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+            <span class="n">binary_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hydro_path</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">viscosity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span><span class="p">,</span>
+            <span class="n">solvent_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span><span class="p">,</span>
+            <span class="n">structure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Write config</span>
+        <span class="n">hydro_runner</span><span class="o">.</span><span class="n">write_config</span><span class="p">(</span><span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;hydropro.dat&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Prepare for HydroPro run</span>
+        <span class="n">hydro_pdb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;hydro.pdb&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create symlink to aligned PDB</span>
+            <span class="k">if</span> <span class="n">hydro_pdb</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">hydro_pdb</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aligned_pdb</span><span class="p">,</span> <span class="n">hydro_pdb</span><span class="p">)</span>
+            
+            <span class="c1"># Run HydroPro</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hydro_path</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="c1"># Parse results - handle possible filename truncation in HydroPro</span>
+            <span class="n">results_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">-res.txt&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">results_file</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="n">short_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span>
+                <span class="n">results_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">short_name</span><span class="si">}</span><span class="s2">-res.txt&quot;</span>
+                
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">results_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HydroPro results file not found, checking for any -res.txt file&quot;</span><span class="p">)</span>
+                <span class="n">results_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*-res.txt&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">results_files</span><span class="p">:</span>
+                    <span class="n">results_file</span> <span class="o">=</span> <span class="n">results_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;No HydroPro results file found&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Parse damping coefficients</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span> <span class="o">=</span> <span class="n">hydro_runner</span><span class="o">.</span><span class="n">parse_output</span><span class="p">(</span><span class="n">results_file</span><span class="p">)</span>
+            
+            <span class="c1"># Write to a damping-coeffs.txt file for reference</span>
+            <span class="n">damping_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.damping-coeffs.txt&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">damping_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hydrodynamic properties: trans_damp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="si">}</span><span class="s2">, rot_damp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error calculating hydrodynamic properties: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotdamp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Clean up</span>
+            <span class="k">if</span> <span class="n">hydro_pdb</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">hydro_pdb</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="StructureProcessor.generate_charge_distribution">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_charge_distribution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_charge_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate charge distribution using VMD.&quot;&quot;&quot;</span>
+        <span class="n">aligned_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned&quot;</span>
+        
+        <span class="c1"># Create TCL script for VMD</span>
+        <span class="n">charge_tcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;charge.tcl&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">charge_tcl</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;lassign $argv prefix</span>
+<span class="s1">set resolution </span><span class="si">{</span><span class="n">resolution</span><span class="si">}</span>
+<span class="s1">set ID [mol new $prefix.psf]</span>
+<span class="s1">mol addfile $prefix.pdb</span>
+<span class="s1">set all [atomselect $ID all]</span>
+<span class="s1">set netCharge [measure sumweights $all weight charge]</span>
+
+<span class="s1">## Write out charge density</span>
+<span class="s1">volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge</span>
+<span class="s1">## Write out pqr for subsequent EM calculation</span>
+<span class="s1">$all writepqr $prefix.pqr</span>
+
+<span class="s1">set ch [open $prefix.netCharge.dat w]</span>
+<span class="s1">puts $ch $netCharge</span>
+<span class="s1">close $ch</span>
+
+<span class="s1">set ch [open $prefix.dimension.dat w]</span>
+<span class="s1">set minmax [measure minmax $all]</span>
+<span class="s1">set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]</span>
+<span class="s1">set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]</span>
+<span class="s1">set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]</span>
+<span class="s1">puts $ch $x_dim</span>
+<span class="s1">puts $ch $y_dim</span>
+<span class="s1">puts $ch $z_dim</span>
+<span class="s1">close $ch&#39;&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Run VMD to generate charge density</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span><span class="si">}</span><span class="s2"> -dispdev text -args </span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">charge_tcl</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Fix charge distribution</span>
+        <span class="n">charge_dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.chargeDensity.dx&quot;</span>
+        <span class="n">charge_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.charge.dx&quot;</span>
+        <span class="n">netcharge_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.netCharge.dat&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">charge_dx</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charge density file not found: </span><span class="si">{</span><span class="n">charge_dx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Fix charge distribution - fix scientific notation in file</span>
+        <span class="n">temp_file1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;temp0.dx&quot;</span>
+        <span class="n">temp_file2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;temp1.dx&quot;</span>
+        
+        <span class="c1"># Handle numbers without decimal point in scientific notation</span>
+        <span class="n">cmd_in</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sed -r &#39;s/^([0-9]+)e/</span><span class="se">\\</span><span class="s2">1.0e/g; s/ ([0-9]+)e/ </span><span class="se">\\</span><span class="s2">1.0e/g&#39; </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">charge_dx</span><span class="p">)</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">temp_file1</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd_in</span><span class="p">)</span>
+        <span class="n">cmd_in</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sed -r &#39;s/^(-[0-9]+)e/</span><span class="se">\\</span><span class="s2">1.0e/g; s/ (-[0-9]+)e/ </span><span class="se">\\</span><span class="s2">1.0e/g&#39; </span><span class="si">{</span><span class="n">temp_file1</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">temp_file2</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd_in</span><span class="p">)</span>
+        
+        <span class="c1"># Read net charge</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">netcharge_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="n">netCharge</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        
+        <span class="c1"># Load grid data</span>
+        <span class="n">grid</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">loadGrid</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">temp_file2</span><span class="p">))</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="o">*</span> <span class="n">resolution</span><span class="o">**</span><span class="mi">3</span>
+        
+        <span class="c1"># Fix charge to match net charge</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">grid</span><span class="p">[:])</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">)</span>
+        <span class="n">numPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span> <span class="o">-</span> <span class="n">netCharge</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0001</span> <span class="ow">and</span> <span class="n">numPoints</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">grid</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">netCharge</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid</span><span class="p">))</span> <span class="o">/</span> <span class="n">numPoints</span>
+        
+        <span class="c1"># Write output</span>
+        <span class="n">writeDx</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">charge_out</span><span class="p">),</span> <span class="n">grid</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="p">[</span><span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">])</span>
+        
+        <span class="c1"># Clean up temporary files</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_file1</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_file2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_dx</span> <span class="o">=</span> <span class="n">charge_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_density_dx</span> <span class="o">=</span> <span class="n">charge_dx</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charge distribution generated with net charge: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="StructureProcessor.generate_electrostatic_map">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_electrostatic_map">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_electrostatic_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate electrostatic potential map using APBS.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">apbs_path</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;APBS executable not provided, skipping electrostatic calculations&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">aligned_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned&quot;</span>
+        
+        <span class="c1"># Read system dimensions</span>
+        <span class="n">dimension_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.dimension.dat&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dimension_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension file not found: </span><span class="si">{</span><span class="n">dimension_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dimension_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+            
+        <span class="c1"># Initialize APBS runner</span>
+        <span class="n">apbs_runner</span> <span class="o">=</span> <span class="n">APBSRunner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apbs_path</span><span class="p">)</span>
+        
+        <span class="c1"># Write APBS configuration using the runner</span>
+        <span class="n">apbs_runner</span><span class="o">.</span><span class="n">write_config</span><span class="p">(</span>
+            <span class="n">structure_name</span><span class="o">=</span><span class="n">aligned_name</span><span class="p">,</span> 
+            <span class="n">xyz_dims</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+            <span class="n">salt_conc</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Run APBS</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cd </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">apbs_path</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.apbs&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Bound the potential values</span>
+        <span class="n">tmp_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.elec.tmp.dx&quot;</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.elec.dx&quot;</span>
+        <span class="n">Bound_grid</span><span class="p">(</span>
+            <span class="n">inFile</span><span class="o">=</span><span class="n">tmp_file</span><span class="p">,</span>
+            <span class="n">outFile</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
+            <span class="n">lowerBound</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">upperBound</span><span class="o">=</span><span class="mi">20</span>
+        <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">elec_dx</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Electrostatic map generated for </span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="StructureProcessor.generate_vdw_maps">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.generate_vdw_maps">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_vdw_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">potResolution</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">denResolution</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate VDW maps using VMD.&quot;&quot;&quot;</span>
+        <span class="n">aligned_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned&quot;</span>
+        
+        <span class="c1"># Create VDW TCL script</span>
+        <span class="n">vdw_tcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;vdw.tcl&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">vdw_tcl</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;lassign $argv prefix</span>
+<span class="s1">package require inorganicbuilder</span>
+<span class="s1">set id [mol new $prefix.psf]</span>
+<span class="s1">mol addfile $prefix.pdb</span>
+
+<span class="s1"># Create temp folders</span>
+<span class="s1">set params_folder &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters_folder</span><span class="si">}</span><span class="s1">&quot;</span>
+<span class="s1">if </span><span class="se">{{</span><span class="s1">![file exists $params_folder]</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">    file mkdir $params_folder</span>
+<span class="se">}}</span>
+
+<span class="s1"># Load parameters</span>
+<span class="s1">global env</span>
+<span class="s1">set statefilename &quot;$params_folder/vdw.spt&quot;</span>
+<span class="s1">set statefile [open $statefilename w]</span>
+<span class="s1">set psffile $env(INORGANICBUILDER_BASEDIR)/spt/parameters/prot/prot-masses.spt</span>
+<span class="s1">puts &quot;loading parameters from $psffile&quot;</span>
+<span class="s1">source $psffile</span>
+<span class="s1">close $statefile</span>
+<span class="s1"># Define selection</span>
+<span class="s1">set sel [atomselect top all]</span>
+
+<span class="s1"># Loop over heavy atom clusters</span>
+<span class="s1">for </span><span class="se">{{</span><span class="s1">set i 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$i &lt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heavy_cluster</span><span class="si">}</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">incr i</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">    # Get atom types</span>
+<span class="s1">    set typemap  [dict create]</span>
+<span class="s1">    set typemap_reverse [dict create]</span>
+<span class="s1">    set types [lsort -unique [$sel get type]]</span>
+<span class="s1">    foreach t $types </span><span class="se">{{</span>
+<span class="s1">        set key [subst $t]</span>
+<span class="s1">        set vdw_type [subst $t]</span>
+<span class="s1">        if </span><span class="se">{{</span><span class="s1">![info exists VDW_TYPEMAP($key)]</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            puts &quot;No match for type $key, using default vdW parameters&quot;</span>
+<span class="s1">            set vdw_type &quot;CT&quot;</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> else </span><span class="se">{{</span>
+<span class="s1">            set vdw_type $VDW_TYPEMAP($key)</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">        dict set typemap $key $vdw_type</span>
+<span class="s1">        dict set typemap_reverse $vdw_type $key</span>
+<span class="s1">    </span><span class="se">}}</span>
+
+<span class="s1">    # Create VDW potential and density maps</span>
+<span class="s1">    set clust [expr $i % 4]</span>
+<span class="s1">    puts &quot;clust=$clust&quot;</span>
+<span class="s1">    </span>
+<span class="s1">    # Map atom type to VDW cluster</span>
+<span class="s1">    set vdwsel [atomselect top &quot;all&quot;]</span>
+<span class="s1">    set vdwtypes [list]</span>
+<span class="s1">    set vdwatomtypes [list]</span>
+<span class="s1">    set sel_type [$vdwsel get type]</span>
+<span class="s1">    # Remap into VDW types</span>
+<span class="s1">    foreach atype $sel_type </span><span class="se">{{</span>
+<span class="s1">        set vdwtype [dict get $typemap $atype]</span>
+<span class="s1">        set vdwsplit [split $vdwtype &quot;_&quot;]</span>
+<span class="s1">        set vdwgroup [lindex $vdwsplit 0]</span>
+<span class="s1">        </span>
+<span class="s1">        # Determine cluster membership</span>
+<span class="s1">        if </span><span class="se">{{</span><span class="s1">$i == 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            lappend vdwtypes &quot;VDW&quot;</span>
+<span class="s1">            lappend vdwatomtypes $vdwtype</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> elseif </span><span class="se">{{</span><span class="s1">([string compare -length 1 $vdwgroup &quot;C&quot;] == 0) &amp;&amp; ($clust == 1)</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            lappend vdwtypes &quot;VDW&quot;</span>
+<span class="s1">            lappend vdwatomtypes $vdwtype</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> elseif </span><span class="se">{{</span><span class="s1">([string compare -length 1 $vdwgroup &quot;N&quot;] == 0 || [string compare -length 2 $vdwgroup &quot;ON&quot;] == 0 || [string compare -length 2 $vdwgroup &quot;SN&quot;] == 0) &amp;&amp; ($clust == 2)</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            lappend vdwtypes &quot;VDW&quot;</span>
+<span class="s1">            lappend vdwatomtypes $vdwtype</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> elseif </span><span class="se">{{</span><span class="s1">([string compare -length 1 $vdwgroup &quot;O&quot;] == 0 || [string compare -length 2 $vdwgroup &quot;OS&quot;] == 0 || [string compare -length 1 $vdwgroup &quot;S&quot;] == 0) &amp;&amp; ($clust == 3)</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            lappend vdwtypes &quot;VDW&quot;</span>
+<span class="s1">            lappend vdwatomtypes $vdwtype</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> else </span><span class="se">{{</span>
+<span class="s1">            lappend vdwtypes &quot;NONE&quot;</span>
+<span class="s1">            lappend vdwatomtypes &quot;NONE&quot;</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    $vdwsel set user 0</span>
+<span class="s1">    $vdwsel set beta 1.0</span>
+<span class="s1">    </span>
+<span class="s1">    # Assign user values</span>
+<span class="s1">    for </span><span class="se">{{</span><span class="s1">set j 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$j &lt; [$vdwsel num]</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">incr j</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">        set vdwtype [lindex $vdwtypes $j]</span>
+<span class="s1">        if </span><span class="se">{{</span><span class="s1">[string compare $vdwtype &quot;VDW&quot;] == 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            set atomtype [lindex $vdwatomtypes $j]</span>
+<span class="s1">            set radius $VDW_RADIUS($atomtype)</span>
+<span class="s1">            set epsilon $VDW_EPSILON($atomtype)</span>
+<span class="s1">            set user [expr $radius * sqrt($epsilon)]</span>
+<span class="s1">            $vdwsel set user $user index $j</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    </span>
+<span class="s1">    # Generate density map</span>
+<span class="s1">    volmap density $vdwsel -res </span><span class="si">{</span><span class="n">denResolution</span><span class="si">}</span><span class="s1"> -weight user -o &quot;$prefix.vdw$i.den.dx&quot;</span>
+<span class="s1">    </span>
+<span class="s1">    # Generate potential map</span>
+<span class="s1">    set pot_outfile &quot;$prefix.vdw$i.pot.dx&quot;</span>
+<span class="s1">    if </span><span class="se">{{</span><span class="s1">$i == 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">        puts &quot;generating $pot_outfile&quot;</span>
+<span class="s1">        volmap occupancy $vdwsel -res </span><span class="si">{</span><span class="n">potResolution</span><span class="si">}</span><span class="s1"> -o &quot;$pot_outfile&quot;</span>
+<span class="s1">    </span><span class="se">}}</span><span class="s1"> else </span><span class="se">{{</span>
+<span class="s1">        set vdwsel2 [atomselect top &quot;user &gt; 0&quot;]</span>
+<span class="s1">        if </span><span class="se">{{</span><span class="s1">[$vdwsel2 num] &gt; 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
+<span class="s1">            volmap occupancy $vdwsel2 -res </span><span class="si">{</span><span class="n">potResolution</span><span class="si">}</span><span class="s1"> -o &quot;$pot_outfile&quot;</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">        $vdwsel2 delete</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="se">}}</span>
+<span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Run VMD to generate VDW maps</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;VMDNOCUDA=1 </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span><span class="si">}</span><span class="s2"> -dispdev text -args </span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">vdw_tcl</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Process all VDW maps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vdw_pot_dxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vdw_den_dxs</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heavy_cluster</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">pot_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.vdw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.pot.dx&quot;</span>
+            <span class="n">den_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.vdw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.den.dx&quot;</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VDW potential file not found: </span><span class="si">{</span><span class="n">pot_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+                
+            <span class="c1"># Bound the potential values</span>
+
+            <span class="n">Bound_grid</span><span class="p">(</span><span class="n">inFile</span><span class="o">=</span><span class="n">pot_file</span><span class="p">,</span>
+                <span class="n">outFile</span><span class="o">=</span><span class="n">pot_file</span><span class="p">,</span>
+                <span class="n">lowerBound</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span>
+                <span class="n">upperBound</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            
+            <span class="c1"># Store for later smoothing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vdw_pot_dxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pot_file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vdw_den_dxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">den_file</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VDW maps generated for </span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="StructureProcessor.apply_gaussian_smoothing">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.apply_gaussian_smoothing">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_gaussian_smoothing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gaussianWidth</span><span class="o">=</span><span class="mf">2.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply Gaussian smoothing to all potential maps.&quot;&quot;&quot;</span>
+        <span class="n">aligned_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.aligned&quot;</span>
+        
+        <span class="c1"># Create a tcl script for VMD to do the smoothing</span>
+        <span class="n">smooth_tcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;smooth.tcl&quot;</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">smooth_tcl</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1"># Get input parameters</span>
+<span class="s1">lassign $</span><span class="se">{{</span><span class="s1">argv</span><span class="se">}}</span><span class="s1"> in_file out_file</span>
+<span class="s1">puts &quot;Smoothing $in_file to $out_file&quot;</span>
+
+<span class="s1"># Load the volumetric data</span>
+<span class="s1">mol new $in_file</span>
+
+<span class="s1"># Apply smoothing</span>
+<span class="s1">set molid [molinfo top]</span>
+<span class="s1">set vol [molinfo $molid get </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s1">]</span>
+<span class="s1">volutil smooth $vol -gaussiansigma </span><span class="si">{</span><span class="n">gaussianWidth</span><span class="si">}</span>
+
+<span class="s1"># Save the result</span>
+<span class="s1">volutil save $vol $out_file</span>
+
+<span class="s1"># Exit</span>
+<span class="s1">quit</span>
+<span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
+            
+        <span class="c1"># Smooth electrostatic map</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elec_dx</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">elec_dx</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">smoothed_elec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.elec.smoothed.dx&quot;</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span><span class="si">}</span><span class="s2"> -dispdev text -args </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">elec_dx</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">smoothed_elec</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">smooth_tcl</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elec_smoothed_dx</span> <span class="o">=</span> <span class="n">smoothed_elec</span>
+            
+        <span class="c1"># Smooth VDW potential maps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vdw_smoothed_dxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pot_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vdw_pot_dxs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">smoothed_pot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aligned_name</span><span class="si">}</span><span class="s2">.vdw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.pot.smoothed.dx&quot;</span>
+                <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vmd_path</span><span class="si">}</span><span class="s2"> -dispdev text -args </span><span class="si">{</span><span class="n">pot_file</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">smoothed_pot</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">smooth_tcl</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vdw_smoothed_dxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">smoothed_pot</span><span class="p">)</span>
+                
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applied Gaussian smoothing to potential maps (width=</span><span class="si">{</span><span class="n">gaussianWidth</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+    
+    
+<div class="viewcode-block" id="StructureProcessor.get_grid_files">
+<a class="viewcode-back" href="../../RigidBody%20Models/structure_from_pdb.html#arbdmodel.structure_from_pdb.StructureProcessor.get_grid_files">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_grid_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dictionary of grid files for use in RigidBodyType.&quot;&quot;&quot;</span>
+        <span class="n">potential_grids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">charge_grids</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Add electrostatic grid</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;elec_smoothed_dx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">elec_smoothed_dx</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">elec_smoothed_dx</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">potential_grids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;elec&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elec_smoothed_dx</span><span class="p">),</span> <span class="mf">0.59616195</span><span class="p">))</span>
+        
+        <span class="c1"># Add charge grid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge_dx</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge_dx</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">charge_grids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;elec&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charge_dx</span><span class="p">)))</span>
+        
+        <span class="c1"># Add VDW grids</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pot_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vdw_smoothed_dxs</span><span class="p">):</span>
+            <span class="n">vdw_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;vdw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">pot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">potential_grids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vdw_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pot_file</span><span class="p">),</span> <span class="mf">0.59616195</span><span class="p">))</span>
+                
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">den_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vdw_den_dxs</span><span class="p">):</span>
+            <span class="n">vdw_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;vdw</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">den_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">charge_grids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vdw_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">den_file</span><span class="p">)))</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;potential_grids&quot;</span><span class="p">:</span> <span class="n">potential_grids</span><span class="p">,</span>
+            <span class="s2">&quot;charge_grids&quot;</span><span class="p">:</span> <span class="n">charge_grids</span><span class="p">}</span></div>
+</div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, ARBD Model Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

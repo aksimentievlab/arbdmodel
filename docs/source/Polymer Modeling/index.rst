@@ -7,5 +7,8 @@ Polymer Modeling
    polymer
    fjc_polymer_model
    hps_polymer_model
+   kh_polymer_model
    mpipi_polymer
+   onck_polymer_model
+   sali_polymer_model
    ssdna_two_bead

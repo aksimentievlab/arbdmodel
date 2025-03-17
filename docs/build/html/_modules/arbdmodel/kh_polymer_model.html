@@ -1,0 +1,811 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.kh_polymer_model &#8212; ARBD Model 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/kh_polymer_model';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model 0.1.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Core/index.html">
+    Core
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Polymer%20Modeling/index.html">
+    Polymer Modeling
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Structure%20Models/index.html">
+    Structure Models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Interaction%20Potentials/index.html">
+    Interaction Potentials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Simulation%20Engines/index.html">
+    Simulation Engines
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../Shape-Based%20Models/index.html">
+    Shape-Based Models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../Utilities/index.html">
+    Utilities
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Core/index.html">
+    Core
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Polymer%20Modeling/index.html">
+    Polymer Modeling
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Structure%20Models/index.html">
+    Structure Models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Interaction%20Potentials/index.html">
+    Interaction Potentials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Simulation%20Engines/index.html">
+    Simulation Engines
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Shape-Based%20Models/index.html">
+    Shape-Based Models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../Utilities/index.html">
+    Utilities
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<div id="searchbox"></div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">arbdmodel.kh_polymer_model</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.kh_polymer_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">## Test with `python -m arbdmodel.kh_polymer_model`</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1">## Local imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">get_resource_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span><span class="p">,</span> <span class="n">PointParticle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.polymer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolymerBeads</span><span class="p">,</span> <span class="n">PolymerModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interactions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractPotential</span><span class="p">,</span> <span class="n">HarmonicBond</span>
+
+<span class="sd">&quot;&quot;&quot;Define particle types&quot;&quot;&quot;</span>
+<span class="n">_types</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;ALA&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">71.08</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.04</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;ARG&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">156.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.56</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;ASN&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">114.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.68</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;ASP&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">115.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.58</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;CYS&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">103.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.48</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;GLN&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">128.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.02</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;GLU&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">129.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.92</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;GLY&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">57.05</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">4.5</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;HIS&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">137.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.08</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;ILE&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">113.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.18</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;LEU&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">113.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.18</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;LYS&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">128.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.36</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;MET&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">131.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.18</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;PHE&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">147.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.36</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;PRO&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">97.12</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.56</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;SER&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">87.08</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.18</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;THR&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">101.1</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.62</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;TRP&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">186.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.78</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;TYR&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">163.2</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">6.46</span><span class="p">,</span>
+                 <span class="p">),</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;VAL&quot;</span><span class="p">,</span>
+                     <span class="n">mass</span> <span class="o">=</span> <span class="mf">99.07</span><span class="p">,</span>
+                     <span class="n">charge</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">5.86</span><span class="p">,</span>
+                 <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">_types</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">resname</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">is_idp</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1">## Add types for IDPs</span>
+    <span class="n">_types</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">is_idp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">resname</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">resname</span><span class="p">)</span>
+
+
+<span class="n">data</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">get_resource_path</span><span class="p">(</span><span class="s2">&quot;kh_pairwise_epsilon.csv&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="n">epsilon_mj</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n2</span><span class="p">,</span><span class="n">n1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n1</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n2</span><span class="p">,</span><span class="n">n1</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n2</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">,</span><span class="n">n1</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n2</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">,</span><span class="n">n1</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+    <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">n1</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">,</span><span class="n">n2</span><span class="o">+</span><span class="s1">&#39;IDP&#39;</span><span class="p">)]</span><span class="o">=</span><span class="n">v</span>
+
+
+    
+<div class="viewcode-block" id="KhNonbonded">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhNonbonded">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KhNonbonded</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debye_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)):</span>
+        <span class="n">AbstractPotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debye_length</span> <span class="o">=</span> <span class="n">debye_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="o">=</span> <span class="mi">50</span>
+
+<div class="viewcode-block" id="KhNonbonded.potential">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhNonbonded.potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Electrostatics &quot;&quot;&quot;</span>
+        <span class="n">typeA</span><span class="p">,</span> <span class="n">typeB</span> <span class="o">=</span> <span class="n">types</span>
+        <span class="n">ld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">debye_length</span> 
+        <span class="n">q1</span> <span class="o">=</span> <span class="n">typeA</span><span class="o">.</span><span class="n">charge</span>
+        <span class="n">q2</span> <span class="o">=</span> <span class="n">typeB</span><span class="o">.</span><span class="n">charge</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="mi">80</span>                  <span class="c1"># dielectric of water</span>
+        <span class="c1">## units &quot;e**2 / (4 * pi * epsilon0 AA)&quot; kcal_mol</span>
+        <span class="n">A</span> <span class="o">=</span>  <span class="mf">332.06371</span>
+        <span class="n">u_elec</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">q1</span><span class="o">*</span><span class="n">q2</span><span class="o">/</span><span class="n">D</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span><span class="o">/</span><span class="n">ld</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span> 
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; KH scale model &quot;&quot;&quot;</span>
+        <span class="n">A_is_idp</span> <span class="o">=</span> <span class="n">B_is_idp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">A_is_idp</span> <span class="o">=</span> <span class="n">typeA</span><span class="o">.</span><span class="n">is_idp</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">B_is_idp</span> <span class="o">=</span> <span class="n">typeB</span><span class="o">.</span><span class="n">is_idp</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">_idp_scale</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">A_is_idp</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">B_is_idp</span><span class="p">))</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.159</span> <span class="o">+</span> <span class="n">_idp_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.228</span> <span class="o">-</span> <span class="mf">0.159</span><span class="p">)</span>
+        <span class="n">epsilon0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.36</span> <span class="o">+</span> <span class="n">_idp_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.36</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">e_mj</span> <span class="o">=</span> <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">typeA</span><span class="o">.</span><span class="n">resname</span><span class="p">,</span><span class="n">typeB</span><span class="o">.</span><span class="n">resname</span><span class="p">)]</span>        
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">e_mj</span> <span class="o">-</span> <span class="n">epsilon0</span> <span class="p">)</span>
+        <span class="n">lambda_</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">epsilon0</span> <span class="o">&gt;</span> <span class="n">e_mj</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">typeA</span><span class="o">.</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">typeB</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+        
+        <span class="n">r6</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span>
+        <span class="n">r12</span> <span class="o">=</span> <span class="n">r6</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">u_lj</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">r12</span><span class="o">-</span><span class="n">r6</span><span class="p">)</span>
+        <span class="n">u_hps</span> <span class="o">=</span> <span class="n">lambda_</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">u_lj</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">r</span><span class="o">&lt;=</span><span class="n">sigma</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">u_hps</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_lj</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">lambda_</span><span class="p">)</span> <span class="o">*</span> <span class="n">epsilon</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">u_elec</span> <span class="o">+</span> <span class="n">u_hps</span>
+        <span class="k">return</span> <span class="n">u</span></div>
+</div>
+
+
+<div class="viewcode-block" id="KhBeads">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhBeads">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KhBeads</span><span class="p">(</span><span class="n">PolymerBeads</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">spring_constant</span> <span class="o">=</span> <span class="mf">2.3900574</span><span class="p">,</span>
+                 <span class="n">rest_length</span> <span class="o">=</span> <span class="mf">3.8</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">sequence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="c1"># ... set random sequence</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spring_constant</span> <span class="o">=</span> <span class="n">spring_constant</span>
+        <span class="n">PolymerBeads</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">rest_length</span><span class="o">=</span><span class="n">rest_length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span> <span class="o">!=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of sequence does not match length of polymer&quot;</span><span class="p">)</span>                
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">polymer</span><span class="o">.</span><span class="n">idp_array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idp_array</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">idp_array</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;KhBeads processing a polymer without &#39;idp_array&#39; attribute set (boolean numpy array with one True/False value per amino acid with True corresponding to IDP... Assuming all amino acids are IDP.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idp_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idp_array</span><span class="p">)</span> <span class="o">!=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;polymer </span><span class="si">{</span><span class="n">polymer</span><span class="si">}</span><span class="s1"> idp_array has incorrect size != </span><span class="si">{</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+       
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_ith_bead_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">idp_array</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="s1">&#39;IDP&#39;</span>
+        <span class="k">return</span> <span class="n">PointParticle</span><span class="p">(</span><span class="n">_types</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">r</span><span class="p">,</span>
+                             <span class="n">name</span> <span class="o">=</span> <span class="n">s</span><span class="p">,</span>
+                             <span class="n">resid</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_join_adjacent_bead_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+
+        <span class="c1">## Two consecutive groups </span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">b1</span><span class="p">,</span><span class="n">b2</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">]</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot; units &quot;10 kJ/N_A&quot; kcal_mol &quot;&quot;&quot;</span>
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">HarmonicBond</span><span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_constant</span><span class="p">,</span>
+                                <span class="n">r0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_length</span><span class="p">,</span>
+                                <span class="n">range_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span>
+                                <span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                                <span class="n">max_force</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_bond</span><span class="p">(</span> <span class="n">i</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">bond</span> <span class="o">=</span> <span class="n">bond</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="KhModel">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KhModel</span><span class="p">(</span><span class="n">PolymerModel</span><span class="p">):</span>
+<div class="viewcode-block" id="KhModel.__init__">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhModel.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymers</span><span class="p">,</span>
+                 <span class="n">sequences</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rest_length</span> <span class="o">=</span> <span class="mf">3.8</span><span class="p">,</span>
+                 <span class="n">spring_constant</span> <span class="o">=</span> <span class="mf">2.3900574</span><span class="p">,</span>
+                 <span class="n">debye_length</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">damping_coefficient</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">idp_array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">DEBUG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        [debye_length]: angstroms</span>
+<span class="sd">        [damping_coefficient]: ns</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:</span>
+
+<span class="s2">Dignon GL, Zheng W, Kim YC, Best RB, Mittal J (2018) Sequence determinants of protein phase behavior from a coarse-grained model. PLOS Computational Biology 14(1) e1005941. https://doi.org/10.1371/journal.pcbi.1005941</span>
+
+<span class="s2">based upon:</span>
+
+<span class="s2">Young C. Kim, Gerhard Hummer (2008) Coarse-grained Models for Simulations of Multiprotein Complexes: Application to Ubiquitin Binding. Journal of Molecular Biology 375(5) 1416-1433. https://doi.org/10.1016/j.jmb.2007.11.063.</span>
+
+<span class="s2">Please cite all appropriate articles!&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="s1">&#39;timestep&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;timestep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10e-6</span>
+        <span class="k">if</span> <span class="s1">&#39;cutoff&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">debye_length</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;decomp_period&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;decomp_period&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rest_length</span> <span class="o">=</span> <span class="n">rest_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spring_constant</span> <span class="o">=</span> <span class="n">spring_constant</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Assign sequences &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sequences</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;KhModel must be provided a sequences argument&quot;</span><span class="p">)</span>
+
+        <span class="n">PolymerModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymers</span><span class="p">,</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">monomers_per_bead_group</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Update type diffusion coefficients &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="n">all_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">_types</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_damping_coefficient</span><span class="p">(</span> <span class="n">damping_coefficient</span> <span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Set up nonbonded interactions &quot;&quot;&quot;</span>
+        <span class="n">nonbonded</span> <span class="o">=</span> <span class="n">KhNonbonded</span><span class="p">(</span><span class="n">debye_length</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">all_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_nonbonded_interaction</span><span class="p">(</span><span class="n">nonbonded</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
+
+                
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_nonbonded_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">,</span> <span class="n">type_</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="k">if</span> <span class="n">type_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">)):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span> <span class="n">interaction</span><span class="p">,</span> <span class="n">typeA</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span> <span class="n">typeB</span><span class="o">=</span><span class="n">t</span> <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_polymer_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">polymer_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">KhBeads</span><span class="p">(</span><span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span>
+                       <span class="n">rest_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_length</span><span class="p">,</span>
+                       <span class="n">spring_constant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_constant</span><span class="p">,</span>
+                       <span class="n">monomers_per_bead_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span><span class="p">,</span>
+                       <span class="n">polymer_index</span> <span class="o">=</span> <span class="n">polymer_index</span>
+                       <span class="p">)</span>
+
+<div class="viewcode-block" id="KhModel.set_damping_coefficient">
+<a class="viewcode-back" href="../../Polymer%20Modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhModel.set_damping_coefficient">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_damping_coefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">damping_coefficient</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">damping_coefficient</span> <span class="o">=</span> <span class="n">damping_coefficient</span></div>
+</div>
+
+            <span class="c1"># t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_types</span><span class="p">)</span>
+    <span class="c1"># print(&quot;TYPES&quot;)</span>
+    <span class="c1"># for n,t in _types.items():</span>
+    <span class="c1">#     print(&quot;{}\t{}\t{}\t{}\t{}&quot;.format(t.name, t.mass, t.charge, t.sigma, t.lambda_))</span>
+    <span class="n">type_string</span> <span class="o">=</span> <span class="s1">&#39;WYFMLIVAPGCQNTSEDKHR&#39;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nt</span><span class="p">,</span><span class="n">nt</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">type_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">_types</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="n">type_string</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">t2</span> <span class="o">=</span> <span class="n">_types</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">nt</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">epsilon_mj</span><span class="p">[(</span><span class="n">t1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">t2</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
