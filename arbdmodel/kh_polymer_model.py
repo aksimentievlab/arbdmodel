@@ -4,7 +4,7 @@
 import numpy as np
 
 ## Local imports
-from .logger import logger
+from .logger import logger, get_resource_path
 from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
@@ -120,7 +120,8 @@ for k,t in list(_types.items()):
     ## Add types for IDPs
     _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
 
-data= np.loadtxt("resources/kh_pairwise_epsilon.csv", dtype=str)
+
+data= np.loadtxt(get_resource_path("kh_pairwise_epsilon.csv"), dtype=str)
 epsilon_mj = dict()
 for n1,n2,v in data:
     v = float(v)
