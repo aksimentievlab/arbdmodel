@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from .version import logger
+from .logger import logger
 from .core_objects import RigidBodyType
 
 

@@ -4,9 +4,9 @@ import subprocess
 import numpy as np
 from pathlib import Path
 from .logger import logger
-from sim_config import SimConf
+from .sim_config import SimConf
 from .engine import HydroProRunner, APBSRunner
-from .grid import writeDx, loadGrid, blur3Dgrid, Bound_grid
+from .grid import writeDx, loadGrid, Bound_grid
 
 #Originally SimpleARBD by Chun
 

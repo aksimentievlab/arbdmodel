@@ -4,7 +4,7 @@
 import numpy as np
 
 ## Local imports
-from .version import logger
+from .logger import logger
 from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond

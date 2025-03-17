@@ -6,7 +6,7 @@ import sys
 
 
 ## Local imports
-from . import ParticleType, PointParticle, Group, 
+from . import ParticleType, PointParticle, Group
 from .logger import logger, get_resource_path    
 from .model import ArbdModel
 from .polymer import PolymerSection, PolymerGroup
