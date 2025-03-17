@@ -1,111 +1,65 @@
-# -*- coding: utf-8 -*-
+# Project information
+# ===================
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import sys
-import os
-import re
+project = "Documentation Community"
+author = "Documentation Team"
 
-# Prefer to use the version of the theme in this repo
-# and not the installed version of the theme.
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.append(os.path.abspath('./demo/'))
 
-from sphinx_rtd_theme import __version__ as theme_version
-from sphinx_rtd_theme import __version_full__ as theme_version_full
-from sphinx.locale import _
+# General configuration
+# =====================
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-project = u'Read the Docs Sphinx Theme'
-slug = re.sub(r'\W+', '-', project.lower())
-version = theme_version
-release = theme_version_full
-author = u'Dave Snider, Read the Docs, Inc. & contributors'
-copyright = author
-language = 'en'
-
+# A list of strings that are module names of Sphinx extensions
 extensions = [
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'sphinx_rtd_theme',
+    "sphinx_copybutton",
+    "sphinx.ext.intersphinx",
+    "myst_parser",
 ]
 
-templates_path = ['_templates']
-source_suffix = '.rst'
-exclude_patterns = []
-locale_dirs = ['locale/']
-gettext_compact = False
+# The master toctree document
+master_doc = "index"
 
-master_doc = 'index'
-suppress_warnings = ['image.nonlocal_uri']
-pygments_style = 'default'
-
-if sys.version_info < (3, 0):
-    tags.add("python2")
-else:
-    tags.add("python3")
-
-intersphinx_mapping = {
-    'rtd': ('https://docs.readthedocs.io/en/stable/', None),
-    'rtd-dev': ('https://dev.readthedocs.io/en/stable/', None),
-    'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
-}
-
-html_theme = 'sphinx_rtd_theme'
-html_theme_options = {
-    'logo_only': True,
-    'navigation_depth': 5,
-}
-html_context = {}
-
-if not 'READTHEDOCS' in os.environ:
-    html_static_path = ['_static/']
-    html_js_files = ['debug.js']
-    html_context["DEBUG"] = True
-
-html_logo = "demo/static/logo-wordmark-light.svg"
-html_show_sourcelink = True
-html_favicon = "demo/static/favicon.ico"
-
-htmlhelp_basename = slug
-
-
-latex_documents = [
-  ('index', '{0}.tex'.format(slug), project, author, 'manual'),
+# Patterns to exclude during source file detetection
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
 ]
 
-man_pages = [
-    ('index', slug, project, [author], 1)
+# Minimum Sphinx version as a string
+needs_sphinx = "4.0"
+
+# Intersphinx configuration
+#intersphinx_mapping = {
+#    "python": ("https://docs.python.org/3/", None),
+#    "devguide": ("https://devguide.python.org/", None),
+#    "pep": ("https://peps.python.org/", None),
+#}
+intersphinx_disabled_reftypes = []
+
+# Options for HTML output
+# =======================
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+# The theme to use for HTML pages
+html_theme = "furo"
+
+
+# Options for the linkcheck builder
+# =================================
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-the-linkcheck-builder
+
+# A list of patterns to ignore when checking for broken links
+linkcheck_ignore = [
+    # The crawler gets "Anchor not found"
+    r"https://github.com.+?#.*",
+    r"https://hackmd\.io/[^?]+\?[^#]+#.+",
+    # Google Meet gives 404
+    r"https://meet.google.com/.*",
+    # RTD preview builds:
+    r"https://[a-zA-Z0-9.-]+\.org\.readthedocs\.build/[a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+/",
+    # Deleted pages:
+    r"https://plausible\.io/share/hugovk-cpython\.readthedocs\.io\?auth=XDF9fK3EB2dEHCr4sC9hn",
+    r"https://us.pycon.org/2024/registration/category/4",
 ]
-
-texinfo_documents = [
-  ('index', slug, project, author, slug, project, 'Miscellaneous'),
-]
-
-
-# Extensions to theme docs
-def setup(app):
-    from sphinx.domains.python import PyField
-    from sphinx.util.docfields import Field
-
-    app.add_object_type(
-        'confval',
-        'confval',
-        objname='configuration value',
-        indextemplate='pair: %s; configuration value',
-        doc_field_types=[
-            PyField(
-                'type',
-                label=_('Type'),
-                has_arg=False,
-                names=('type',),
-                bodyrolename='class'
-            ),
-            Field(
-                'default',
-                label=_('Default'),
-                has_arg=False,
-                names=('default',),
-            ),
-        ]
-    )
