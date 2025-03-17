@@ -1,3 +1,4 @@
+gendocs
 Sphinx
 MyST-Parser
 furo
