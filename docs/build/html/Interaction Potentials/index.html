@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interaction Potentials &mdash; ARBD Model 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="interactions module" href="interactions.html" />
+    <link rel="prev" title="mesh_process_surface module" href="../Structure%20Models/mesh_process_surface.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ARBD Model
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Core/index.html">Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Core/core_objects.html">core_objects module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Child"><code class="docutils literal notranslate"><span class="pre">Child</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Child.__getattr__"><code class="docutils literal notranslate"><span class="pre">Child.__getattr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Clone"><code class="docutils literal notranslate"><span class="pre">Clone</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Clone.__getattr__"><code class="docutils literal notranslate"><span class="pre">Clone.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Clone.get_original_recursively"><code class="docutils literal notranslate"><span class="pre">Clone.get_original_recursively()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Group"><code class="docutils literal notranslate"><span class="pre">Group</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Group.clone"><code class="docutils literal notranslate"><span class="pre">Group.clone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Group.duplicate"><code class="docutils literal notranslate"><span class="pre">Group.duplicate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.GroupSite"><code class="docutils literal notranslate"><span class="pre">GroupSite</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.GroupSite.add_restraint"><code class="docutils literal notranslate"><span class="pre">GroupSite.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.GroupSite.get_center"><code class="docutils literal notranslate"><span class="pre">GroupSite.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.GroupSite.get_restraints"><code class="docutils literal notranslate"><span class="pre">GroupSite.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent"><code class="docutils literal notranslate"><span class="pre">Parent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.__iter__"><code class="docutils literal notranslate"><span class="pre">Parent.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add"><code class="docutils literal notranslate"><span class="pre">Parent.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_bond"><code class="docutils literal notranslate"><span class="pre">Parent.add_bond()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_bond_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_bond_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_dihedral"><code class="docutils literal notranslate"><span class="pre">Parent.add_dihedral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_exclusion"><code class="docutils literal notranslate"><span class="pre">Parent.add_exclusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_improper"><code class="docutils literal notranslate"><span class="pre">Parent.add_improper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_product_potential"><code class="docutils literal notranslate"><span class="pre">Parent.add_product_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.add_vector_angle"><code class="docutils literal notranslate"><span class="pre">Parent.add_vector_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.clear_all"><code class="docutils literal notranslate"><span class="pre">Parent.clear_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_bond_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_bond_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_bonds"><code class="docutils literal notranslate"><span class="pre">Parent.get_bonds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_center"><code class="docutils literal notranslate"><span class="pre">Parent.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_dihedrals"><code class="docutils literal notranslate"><span class="pre">Parent.get_dihedrals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_exclusions"><code class="docutils literal notranslate"><span class="pre">Parent.get_exclusions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_impropers"><code class="docutils literal notranslate"><span class="pre">Parent.get_impropers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_product_potentials"><code class="docutils literal notranslate"><span class="pre">Parent.get_product_potentials()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_restraints"><code class="docutils literal notranslate"><span class="pre">Parent.get_restraints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.get_vector_angles"><code class="docutils literal notranslate"><span class="pre">Parent.get_vector_angles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.index"><code class="docutils literal notranslate"><span class="pre">Parent.index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.insert"><code class="docutils literal notranslate"><span class="pre">Parent.insert()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Parent.remove"><code class="docutils literal notranslate"><span class="pre">Parent.remove()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType"><code class="docutils literal notranslate"><span class="pre">ParticleType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType.__getattr__"><code class="docutils literal notranslate"><span class="pre">ParticleType.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType.__init__"><code class="docutils literal notranslate"><span class="pre">ParticleType.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">ParticleType.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType.is_same_type"><code class="docutils literal notranslate"><span class="pre">ParticleType.is_same_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.ParticleType.excludedAttributes"><code class="docutils literal notranslate"><span class="pre">ParticleType.excludedAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle"><code class="docutils literal notranslate"><span class="pre">PointParticle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle.__getattr__"><code class="docutils literal notranslate"><span class="pre">PointParticle.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">PointParticle.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle.add_restraint"><code class="docutils literal notranslate"><span class="pre">PointParticle.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle.duplicate"><code class="docutils literal notranslate"><span class="pre">PointParticle.duplicate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.PointParticle.get_restraints"><code class="docutils literal notranslate"><span class="pre">PointParticle.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBody"><code class="docutils literal notranslate"><span class="pre">RigidBody</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBody.__getattr__"><code class="docutils literal notranslate"><span class="pre">RigidBody.__getattr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBody.add_restraint"><code class="docutils literal notranslate"><span class="pre">RigidBody.add_restraint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBody.duplicate"><code class="docutils literal notranslate"><span class="pre">RigidBody.duplicate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBody.get_restraints"><code class="docutils literal notranslate"><span class="pre">RigidBody.get_restraints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType"><code class="docutils literal notranslate"><span class="pre">RigidBodyType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType.__init__"><code class="docutils literal notranslate"><span class="pre">RigidBodyType.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.RigidBodyType.attach_particle"><code class="docutils literal notranslate"><span class="pre">RigidBodyType.attach_particle()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable"><code class="docutils literal notranslate"><span class="pre">Transformable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable.applyOrientation"><code class="docutils literal notranslate"><span class="pre">Transformable.applyOrientation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable.get_collapsed_position"><code class="docutils literal notranslate"><span class="pre">Transformable.get_collapsed_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable.rotate"><code class="docutils literal notranslate"><span class="pre">Transformable.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable.transform"><code class="docutils literal notranslate"><span class="pre">Transformable.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/core_objects.html#arbdmodel.core_objects.Transformable.translate"><code class="docutils literal notranslate"><span class="pre">Transformable.translate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Core/model.html">model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel"><code class="docutils literal notranslate"><span class="pre">ArbdModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.__init__"><code class="docutils literal notranslate"><span class="pre">ArbdModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.add"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.add_group_site"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add_group_site()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.add_nonbonded_interaction"><code class="docutils literal notranslate"><span class="pre">ArbdModel.add_nonbonded_interaction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.assign_IBI_degrees_of_freedom"><code class="docutils literal notranslate"><span class="pre">ArbdModel.assign_IBI_degrees_of_freedom()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.clear_all"><code class="docutils literal notranslate"><span class="pre">ArbdModel.clear_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.dimensions_from_structure"><code class="docutils literal notranslate"><span class="pre">ArbdModel.dimensions_from_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.extend"><code class="docutils literal notranslate"><span class="pre">ArbdModel.extend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.getParticleTypesAndCounts"><code class="docutils literal notranslate"><span class="pre">ArbdModel.getParticleTypesAndCounts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.load_target_IBI_distributions"><code class="docutils literal notranslate"><span class="pre">ArbdModel.load_target_IBI_distributions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.prepare_for_simulation"><code class="docutils literal notranslate"><span class="pre">ArbdModel.prepare_for_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.run_IBI"><code class="docutils literal notranslate"><span class="pre">ArbdModel.run_IBI()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.simulate"><code class="docutils literal notranslate"><span class="pre">ArbdModel.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.update"><code class="docutils literal notranslate"><span class="pre">ArbdModel.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.ArbdModel.useNonbondedScheme"><code class="docutils literal notranslate"><span class="pre">ArbdModel.useNonbondedScheme()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/model.html#arbdmodel.model.PdbModel"><code class="docutils literal notranslate"><span class="pre">PdbModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.PdbModel.write_pdb"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.PdbModel.write_pqr"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_pqr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/model.html#arbdmodel.model.PdbModel.write_psf"><code class="docutils literal notranslate"><span class="pre">PdbModel.write_psf()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Core/sim_config.html">sim_config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.DefaultSimConf"><code class="docutils literal notranslate"><span class="pre">DefaultSimConf</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.DefaultSimConf.temperature"><code class="docutils literal notranslate"><span class="pre">DefaultSimConf.temperature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf"><code class="docutils literal notranslate"><span class="pre">SimConf</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf.combine"><code class="docutils literal notranslate"><span class="pre">SimConf.combine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf.get_binary"><code class="docutils literal notranslate"><span class="pre">SimConf.get_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf.items"><code class="docutils literal notranslate"><span class="pre">SimConf.items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf.set_binary"><code class="docutils literal notranslate"><span class="pre">SimConf.set_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Core/sim_config.html#arbdmodel.sim_config.SimConf.temperature"><code class="docutils literal notranslate"><span class="pre">SimConf.temperature</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Polymer%20Modeling/index.html">Polymer Modeling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Polymer%20Modeling/polymer.html">polymer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement"><code class="docutils literal notranslate"><span class="pre">ConnectableElement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_location_at"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_location_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_locations"><code class="docutils literal notranslate"><span class="pre">ConnectableElement.get_locations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection.delete"><code class="docutils literal notranslate"><span class="pre">Connection.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Connection.other"><code class="docutils literal notranslate"><span class="pre">Connection.other()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location"><code class="docutils literal notranslate"><span class="pre">Location</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.get_connected_location"><code class="docutils literal notranslate"><span class="pre">Location.get_connected_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.get_monomer_index"><code class="docutils literal notranslate"><span class="pre">Location.get_monomer_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.Location.set_connection"><code class="docutils literal notranslate"><span class="pre">Location.set_connection()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads"><code class="docutils literal notranslate"><span class="pre">PolymerBeads</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads.monomers_per_bead_group"><code class="docutils literal notranslate"><span class="pre">PolymerBeads.monomers_per_bead_group</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerBeads.num_bead_groups"><code class="docutils literal notranslate"><span class="pre">PolymerBeads.num_bead_groups</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup"><code class="docutils literal notranslate"><span class="pre">PolymerGroup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.__init__"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.add_grid_potential"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.add_grid_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.dimensions_from_structure"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.dimensions_from_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.extend"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.extend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_center"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_connections"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.get_connections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.rotate"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.translate"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.translate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.update"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_cylinder_tcl"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.vmd_cylinder_tcl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_tube_tcl"><code class="docutils literal notranslate"><span class="pre">PolymerGroup.vmd_tube_tcl()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel"><code class="docutils literal notranslate"><span class="pre">PolymerModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.__init__"><code class="docutils literal notranslate"><span class="pre">PolymerModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.generate_beads"><code class="docutils literal notranslate"><span class="pre">PolymerModel.generate_beads()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerModel.update_splines"><code class="docutils literal notranslate"><span class="pre">PolymerModel.update_splines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection"><code class="docutils literal notranslate"><span class="pre">PolymerSection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.add_location"><code class="docutils literal notranslate"><span class="pre">PolymerSection.add_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_monomer_index"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_monomer_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_orientation"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_orientation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_position"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_tangent"><code class="docutils literal notranslate"><span class="pre">PolymerSection.contour_to_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_center"><code class="docutils literal notranslate"><span class="pre">PolymerSection.get_center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_contour_sorted_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">PolymerSection.get_contour_sorted_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.insert_monomers"><code class="docutils literal notranslate"><span class="pre">PolymerSection.insert_monomers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.iterate_connections_and_locations"><code class="docutils literal notranslate"><span class="pre">PolymerSection.iterate_connections_and_locations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.monomer_index_to_contour"><code class="docutils literal notranslate"><span class="pre">PolymerSection.monomer_index_to_contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.remove_monomers"><code class="docutils literal notranslate"><span class="pre">PolymerSection.remove_monomers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.rotate"><code class="docutils literal notranslate"><span class="pre">PolymerSection.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_orientation_splines"><code class="docutils literal notranslate"><span class="pre">PolymerSection.set_orientation_splines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_splines"><code class="docutils literal notranslate"><span class="pre">PolymerSection.set_splines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/polymer.html#arbdmodel.polymer.PolymerSection.translate"><code class="docutils literal notranslate"><span class="pre">PolymerSection.translate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Polymer%20Modeling/fjc_polymer_model.html">fjc_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcBeadsFromPolymer"><code class="docutils literal notranslate"><span class="pre">FjcBeadsFromPolymer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel"><code class="docutils literal notranslate"><span class="pre">FjcModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel.__init__"><code class="docutils literal notranslate"><span class="pre">FjcModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/fjc_polymer_model.html#arbdmodel.fjc_polymer_model.FjcModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">FjcModel.set_damping_coefficient()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html">hps_polymer_model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsBeads"><code class="docutils literal notranslate"><span class="pre">HpsBeads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel"><code class="docutils literal notranslate"><span class="pre">HpsModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.__init__"><code class="docutils literal notranslate"><span class="pre">HpsModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">HpsModel.set_damping_coefficient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsModel.spring_constant"><code class="docutils literal notranslate"><span class="pre">HpsModel.spring_constant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsNonbonded"><code class="docutils literal notranslate"><span class="pre">HpsNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/hps_polymer_model.html#arbdmodel.hps_polymer_model.HpsNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">HpsNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html">mpipi_polymer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiBeads"><code class="docutils literal notranslate"><span class="pre">MpipiBeads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel"><code class="docutils literal notranslate"><span class="pre">MpipiModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.__init__"><code class="docutils literal notranslate"><span class="pre">MpipiModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.set_damping_coefficient"><code class="docutils literal notranslate"><span class="pre">MpipiModel.set_damping_coefficient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiModel.spring_constant"><code class="docutils literal notranslate"><span class="pre">MpipiModel.spring_constant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiNonbonded"><code class="docutils literal notranslate"><span class="pre">MpipiNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/mpipi_polymer.html#arbdmodel.mpipi_polymer.MpipiNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">MpipiNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html">ssdna_two_bead module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaModel"><code class="docutils literal notranslate"><span class="pre">DnaModel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.b"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.b</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.nt"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.nt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Polymer%20Modeling/ssdna_two_bead.html#arbdmodel.ssdna_two_bead.DnaStrandBeads.p"><code class="docutils literal notranslate"><span class="pre">DnaStrandBeads.p</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Structure%20Models/index.html">Structure Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html">mesh_process_volume module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor"><code class="docutils literal notranslate"><span class="pre">MeshProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.calculate_damping"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.calculate_damping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.generate_potential_grid"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.generate_potential_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.get_attached_particles"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.get_attached_particles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.save_aligned_mesh"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.save_aligned_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.save_as_pdb"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.save_as_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.write_no_enter_potential"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.write_no_enter_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.MeshProcessor.MICRON_TO_ANGSTROM"><code class="docutils literal notranslate"><span class="pre">MeshProcessor.MICRON_TO_ANGSTROM</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Structure%20Models/mesh_process_volume.html#arbdmodel.mesh_process_volume.process_mesh_file"><code class="docutils literal notranslate"><span class="pre">process_mesh_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html">mesh_process_surface module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.calculate_damping"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.calculate_damping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.generate_potential_grid"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.generate_potential_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.get_attached_particles"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.get_attached_particles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_aligned_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh_both_formats"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_aligned_mesh_both_formats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_as_pdb"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.save_as_pdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.write_no_enter_potential_dx"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.write_no_enter_potential_dx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.MICRON_TO_ANGSTROM"><code class="docutils literal notranslate"><span class="pre">SurfaceMeshProcessor.MICRON_TO_ANGSTROM</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Structure%20Models/mesh_process_surface.html#arbdmodel.mesh_process_surface.process_surface_mesh"><code class="docutils literal notranslate"><span class="pre">process_surface_mesh()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interaction Potentials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html">interactions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.__init__"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.potential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.write_file"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HalfHarmonic"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HalfHarmonic.potential"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond"><code class="docutils literal notranslate"><span class="pre">HarmonicBond</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.filename"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.periodic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.kscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.LennardJones.potential"><code class="docutils literal notranslate"><span class="pre">LennardJones.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential"><code class="docutils literal notranslate"><span class="pre">NullPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential.filename"><code class="docutils literal notranslate"><span class="pre">NullPotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential.potential"><code class="docutils literal notranslate"><span class="pre">NullPotential.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond"><code class="docutils literal notranslate"><span class="pre">WLCSKBond</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKPotential"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKPotential.filename"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.filename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html">ibi module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof"><code class="docutils literal notranslate"><span class="pre">AngleDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">AngleDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondAngleDof"><code class="docutils literal notranslate"><span class="pre">BondAngleDof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof"><code class="docutils literal notranslate"><span class="pre">BondDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">BondDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.compute_volume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.wrap_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DihedralDof"><code class="docutils literal notranslate"><span class="pre">DihedralDof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIAngle"><code class="docutils literal notranslate"><span class="pre">IBIAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral"><code class="docutils literal notranslate"><span class="pre">IBIDihedral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">IBIDihedral.periodic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded"><code class="docutils literal notranslate"><span class="pre">IBINonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">IBINonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.compute_volume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.get_values"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.get_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof"><code class="docutils literal notranslate"><span class="pre">RadiusDof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">RadiusDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Simulation%20Engines/index.html">Simulation Engines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Simulation%20Engines/engine.html">engine module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner"><code class="docutils literal notranslate"><span class="pre">APBSRunner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.__init__"><code class="docutils literal notranslate"><span class="pre">APBSRunner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">APBSRunner.run_calculation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.APBSRunner.write_config"><code class="docutils literal notranslate"><span class="pre">APBSRunner.write_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine"><code class="docutils literal notranslate"><span class="pre">ArbdEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.ArbdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner"><code class="docutils literal notranslate"><span class="pre">HydroProRunner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.__init__"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.parse_output"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.parse_output()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.run_calculation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.HydroProRunner.write_config"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.write_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine"><code class="docutils literal notranslate"><span class="pre">NamdEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.write_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.NamdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">NamdEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine"><code class="docutils literal notranslate"><span class="pre">SimEngine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">SimEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.simulate"><code class="docutils literal notranslate"><span class="pre">SimEngine.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">SimEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/engine.html#arbdmodel.engine.SimEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">SimEngine.default_binary</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html">parmed_bd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd"><code class="docutils literal notranslate"><span class="pre">ParmedArbd</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.parmed_structure"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.parmed_structure</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.atom_types"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.atom_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.atoms_map"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.atoms_map</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.__init__"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.convert_sod_to_mg"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.convert_sod_to_mg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.create_dual_topology"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.create_dual_topology()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.create_dual_topology_model"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.create_dual_topology_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.load_structure"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.load_structure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.simulate"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Simulation%20Engines/parmed_bd.html#arbdmodel.parmed_bd.ParmedArbd.write_restraint_files"><code class="docutils literal notranslate"><span class="pre">ParmedArbd.write_restraint_files()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Shape-Based%20Models/index.html">Shape-Based Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html">shape_cg module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.calc_atom_sasa()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.generate_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.generate_protein()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_protein()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_types()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_confinement"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_confinement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_protein_nb_interactions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.add_proteins"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_proteins()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.calculate_total_mass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.concentration_to_debye_length()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.from_protein_list"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.from_protein_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.generate_random_protein_positions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.get_protein_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.get_protein_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.run_from_minimized"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_from_minimized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.run_minimization"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_minimization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGModel.setup_and_run"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.setup_and_run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded.filename"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.ShapeCGNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.find_shape_based_sites"><code class="docutils literal notranslate"><span class="pre">find_shape_based_sites()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.get_particle_assignments"><code class="docutils literal notranslate"><span class="pre">get_particle_assignments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Shape-Based%20Models/shape_cg.html#arbdmodel.shape_cg.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/index.html">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Utilities/coords.html">coords module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.Generate_coordinates"><code class="docutils literal notranslate"><span class="pre">Generate_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.Generate_spanning_vectors"><code class="docutils literal notranslate"><span class="pre">Generate_spanning_vectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.calculate_dimensions_from_cell_vectors"><code class="docutils literal notranslate"><span class="pre">calculate_dimensions_from_cell_vectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.minimizeRmsd"><code class="docutils literal notranslate"><span class="pre">minimizeRmsd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_exp"><code class="docutils literal notranslate"><span class="pre">quaternion_exp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_from_matrix"><code class="docutils literal notranslate"><span class="pre">quaternion_from_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_inverse"><code class="docutils literal notranslate"><span class="pre">quaternion_inverse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_product"><code class="docutils literal notranslate"><span class="pre">quaternion_product()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_slerp"><code class="docutils literal notranslate"><span class="pre">quaternion_slerp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.quaternion_to_matrix"><code class="docutils literal notranslate"><span class="pre">quaternion_to_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.readArbdCoords"><code class="docutils literal notranslate"><span class="pre">readArbdCoords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.readAvgArbdCoords"><code class="docutils literal notranslate"><span class="pre">readAvgArbdCoords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.read_arbd_coordinates"><code class="docutils literal notranslate"><span class="pre">read_arbd_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.read_average_arbd_coordinates"><code class="docutils literal notranslate"><span class="pre">read_average_arbd_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.rotationAboutAxis"><code class="docutils literal notranslate"><span class="pre">rotationAboutAxis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/coords.html#arbdmodel.coords.unit_quat_conversions"><code class="docutils literal notranslate"><span class="pre">unit_quat_conversions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Utilities/grid.html">grid module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.TestAverageGrids"><code class="docutils literal notranslate"><span class="pre">TestAverageGrids</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.TestAverageGrids.test_average_grids"><code class="docutils literal notranslate"><span class="pre">TestAverageGrids.test_average_grids()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.Bound_grid"><code class="docutils literal notranslate"><span class="pre">Bound_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.Create_null"><code class="docutils literal notranslate"><span class="pre">Create_null()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.add_smaller_grid"><code class="docutils literal notranslate"><span class="pre">add_smaller_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.average_grids"><code class="docutils literal notranslate"><span class="pre">average_grids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.constant_force"><code class="docutils literal notranslate"><span class="pre">constant_force()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.convolve_kernel_truncate"><code class="docutils literal notranslate"><span class="pre">convolve_kernel_truncate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.create_bounding_grid"><code class="docutils literal notranslate"><span class="pre">create_bounding_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.fill_nans"><code class="docutils literal notranslate"><span class="pre">fill_nans()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.gaussian_kernel"><code class="docutils literal notranslate"><span class="pre">gaussian_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.get_slice_enclosing_smaller_grid"><code class="docutils literal notranslate"><span class="pre">get_slice_enclosing_smaller_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.isotropic_kernel"><code class="docutils literal notranslate"><span class="pre">isotropic_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.loadGrid"><code class="docutils literal notranslate"><span class="pre">loadGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.neighborhood_average"><code class="docutils literal notranslate"><span class="pre">neighborhood_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.replace_false_with_distance"><code class="docutils literal notranslate"><span class="pre">replace_false_with_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.slab_potential_z"><code class="docutils literal notranslate"><span class="pre">slab_potential_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.spherical_confinement"><code class="docutils literal notranslate"><span class="pre">spherical_confinement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.writeDx"><code class="docutils literal notranslate"><span class="pre">writeDx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/grid.html#arbdmodel.grid.write_confine_dx"><code class="docutils literal notranslate"><span class="pre">write_confine_dx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Utilities/logger.html">logger module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/logger.html#arbdmodel.logger.get_resource_path"><code class="docutils literal notranslate"><span class="pre">get_resource_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Utilities/version.html">version module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.Citation"><code class="docutils literal notranslate"><span class="pre">Citation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.Citation.display"><code class="docutils literal notranslate"><span class="pre">Citation.display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.call_git_describe"><code class="docutils literal notranslate"><span class="pre">call_git_describe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.check_git_repository"><code class="docutils literal notranslate"><span class="pre">check_git_repository()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.get_version"><code class="docutils literal notranslate"><span class="pre">get_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.is_dirty"><code class="docutils literal notranslate"><span class="pre">is_dirty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.read_release_version"><code class="docutils literal notranslate"><span class="pre">read_release_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.read_version_file"><code class="docutils literal notranslate"><span class="pre">read_version_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/version.html#arbdmodel.version.write_release_version"><code class="docutils literal notranslate"><span class="pre">write_release_version()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Utilities/binary_manager.html">binary_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../Utilities/binary_manager.html#arbdmodel.binary_manager.initialize_binary_paths"><code class="docutils literal notranslate"><span class="pre">initialize_binary_paths()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ARBD Model</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Interaction Potentials</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Interaction Potentials/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="interaction-potentials">
+<h1>Interaction Potentials<a class="headerlink" href="#interaction-potentials" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="interactions.html">interactions module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.__init__"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.potential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.BoundaryPotential.write_file"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HalfHarmonic"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HalfHarmonic.potential"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.kscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond"><code class="docutils literal notranslate"><span class="pre">HarmonicBond</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.kscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBond.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.filename"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.kscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicBondedPotential.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.kscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.periodic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicDihedral.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.kscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.HarmonicVectorAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.LennardJones.potential"><code class="docutils literal notranslate"><span class="pre">LennardJones.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential"><code class="docutils literal notranslate"><span class="pre">NullPotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential.filename"><code class="docutils literal notranslate"><span class="pre">NullPotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.NullPotential.potential"><code class="docutils literal notranslate"><span class="pre">NullPotential.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.TabulatedNonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond"><code class="docutils literal notranslate"><span class="pre">WLCSKBond</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKBond.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKPotential"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKPotential.filename"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.filename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ibi.html">ibi module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof"><code class="docutils literal notranslate"><span class="pre">AngleDof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">AngleDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondAngleDof"><code class="docutils literal notranslate"><span class="pre">BondAngleDof</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof"><code class="docutils literal notranslate"><span class="pre">BondDof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">BondDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.compute_volume()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.get_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.wrap_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DihedralDof"><code class="docutils literal notranslate"><span class="pre">DihedralDof</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIAngle"><code class="docutils literal notranslate"><span class="pre">IBIAngle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral"><code class="docutils literal notranslate"><span class="pre">IBIDihedral</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">IBIDihedral.periodic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded"><code class="docutils literal notranslate"><span class="pre">IBINonbonded</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">IBINonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.compute_volume()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.get_values"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.get_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof"><code class="docutils literal notranslate"><span class="pre">RadiusDof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">RadiusDof.compute_volume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Structure%20Models/mesh_process_surface.html" class="btn btn-neutral float-left" title="mesh_process_surface module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="interactions.html" class="btn btn-neutral float-right" title="interactions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, ARBD Model Contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
