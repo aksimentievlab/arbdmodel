@@ -11,7 +11,7 @@ ARBD Model is an advanced rigid-body dynamics modeling and simulation package fo
 
    Core/index
    Polymer Modeling/index
-   Structure Models/index
+   RigidBody Models/index
    Interaction Potentials/index
    Simulation Engines/index
    Shape-Based Models/index

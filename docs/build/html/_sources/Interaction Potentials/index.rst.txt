@@ -6,3 +6,4 @@ Interaction Potentials
 
    interactions
    ibi
+   grid
