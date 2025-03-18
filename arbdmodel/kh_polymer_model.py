@@ -143,6 +143,7 @@ class KhNonbonded(AbstractPotential):
     that accounts for hydrophobic effects using the KH (Kim-Hummer) scaling approach.
     The potential is particularly useful for modeling interactions between intrinsically
     disordered proteins (IDPs) and folded proteins.
+
     Parameters
     ----------
     debye_length : float, optional
@@ -152,17 +153,20 @@ class KhNonbonded(AbstractPotential):
     range_ : tuple, optional
         The range of distances (min, max) over which to compute the potential,
         default is (0, None) where None means no upper limit
+
     Attributes
     ----------
     debye_length : float
         The Debye screening length in Angstroms
     max_force : float
         Maximum allowed force from this potential, set to 50
+
     Methods
     -------
     potential(r, types)
         Calculates the nonbonded potential energy between two atom types at distance r.
         Combines electrostatic interactions with a modified Lennard-Jones potential.
+        
     References
     ----------
     Kim, Y. C., & Hummer, G. (2008). Coarse-grained models for simulations of 

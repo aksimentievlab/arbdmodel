@@ -188,7 +188,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -201,6 +200,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
@@ -573,7 +573,44 @@ document.write(`
 <div class="viewcode-block" id="OnckNonbonded">
 <a class="viewcode-back" href="../../polymer_modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckNonbonded">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OnckNonbonded</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Nonbonded interaction for 1BPA and 1BPA-1.1 &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Nonbonded interaction potential for 1BPA and 1BPA-1.1.</span>
+
+<span class="sd">    This class implements nonbonded interactions including electrostatics with</span>
+<span class="sd">    distance-dependent dielectric and Lennard-Jones type potentials.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    debye_length : float, optional</span>
+<span class="sd">        The Debye-Hückel screening length in angstroms. Default is 12.7 Å.</span>
+<span class="sd">    resolution : float, optional</span>
+<span class="sd">        The spatial resolution for potential calculation. Default is 0.1 Å.</span>
+<span class="sd">    range_ : tuple, optional</span>
+<span class="sd">        The range of distances for which to calculate the potential. Default is (0, None).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    debye_length : float</span>
+<span class="sd">        The Debye-Hückel screening length in angstroms.</span>
+<span class="sd">    max_force : float</span>
+<span class="sd">        Maximum allowed force in the system, used as a cap for stability.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    potential(r, types)</span>
+<span class="sd">        Calculate the nonbonded potential energy between two residue types at distance r.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The potential includes:</span>
+<span class="sd">    1. Electrostatic interactions with distance-dependent dielectric constant</span>
+<span class="sd">    2. Modified Lennard-Jones interactions that depend on residue types:</span>
+<span class="sd">       - Special 8-6 LJ potential for cationic-aromatic interactions in 1.0cp/1.1 versions</span>
+<span class="sd">       - General LJ-type potential for other interactions</span>
+
+<span class="sd">    The effective dielectric D decreases with distance according to a specific formula.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="OnckNonbonded.__init__">
 <a class="viewcode-back" href="../../polymer_modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckNonbonded.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debye_length</span><span class="o">=</span><span class="mf">12.7</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)):</span>
@@ -636,6 +673,56 @@ document.write(`
 <div class="viewcode-block" id="OnckBeads">
 <a class="viewcode-back" href="../../polymer_modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckBeads">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OnckBeads</span><span class="p">(</span><span class="n">PolymerBeads</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that represents polymer beads in the Onck model.</span>
+
+<span class="sd">    The Onck model is a coarse-grained model for proteins where each amino acid is represented</span>
+<span class="sd">    by a single bead. The model includes specific bonded interactions (bonds, angles, dihedrals)</span>
+<span class="sd">    based on the amino acid types in the sequence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polymer : Polymer</span>
+<span class="sd">        The parent polymer object to which these beads belong.</span>
+<span class="sd">    sequence : list, optional</span>
+<span class="sd">        The sequence of amino acid types for each bead, must match polymer length.</span>
+<span class="sd">    spring_constant : float, default=38.422562</span>
+<span class="sd">        Spring constant for peptide bonds in units of 8038 kJ/(N_A nm^2) or 0.5 kcal_mol/AA^2.</span>
+<span class="sd">    rest_length : float, default=3.8</span>
+<span class="sd">        Equilibrium length of peptide bonds.</span>
+<span class="sd">    version : float, optional</span>
+<span class="sd">        Version of the Onck model to use. Defaults to 1.1 if not specified.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments passed to the parent PolymerBeads constructor.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    version : float</span>
+<span class="sd">        The version of the Onck model being used.</span>
+<span class="sd">    types_dict : dict</span>
+<span class="sd">        Mapping between amino acid codes and bead types.</span>
+<span class="sd">    peptide_bond : HarmonicBond</span>
+<span class="sd">        Bond potential used for peptide bonds between adjacent beads.</span>
+<span class="sd">    polymer : Polymer</span>
+<span class="sd">        Reference to the parent polymer object.</span>
+<span class="sd">    sequence : list</span>
+<span class="sd">        The amino acid sequence.</span>
+<span class="sd">    spring_constant : float</span>
+<span class="sd">        The spring constant used for peptide bonds.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the version is not supported or if the sequence length doesn&#39;t match the polymer length.</span>
+<span class="sd">    NotImplementedError</span>
+<span class="sd">        If sequence is None (random sequence generation not implemented).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The Onck model distinguishes between proline (P), glycine (G), and all other amino acids (X)</span>
+<span class="sd">    for certain bonded interactions. Special potentials are loaded from files for angle and </span>
+<span class="sd">    dihedral interactions based on this classification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="OnckBeads.__init__">
 <a class="viewcode-back" href="../../polymer_modeling/onck_polymer_model.html#arbdmodel.onck_polymer_model.OnckBeads.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

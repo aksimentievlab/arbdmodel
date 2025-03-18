@@ -189,7 +189,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -202,6 +201,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="coords.html">coords module</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="logger.html">logger module</a></li>
@@ -442,7 +442,32 @@ document.write(`
 <dl class="py function" id="module-0">
 <dt class="sig sig-object py" id="arbdmodel.grid.writeDx">
 <span class="sig-prename descclassname"><span class="pre">arbdmodel.grid.</span></span><span class="sig-name descname"><span class="pre">writeDx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%.12f'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/grid.html#writeDx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.grid.writeDx" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Write 3D grid data to an OpenDX format file.
+Write 3D grid data to an OpenDX format file.</p>
+<p>OpenDX is a visualization software format that can be used to visualize
+volumetric data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outfile</strong> (<em>str</em><em> or </em><em>file-like object</em>) – The path to the output file or a file-like object.</p></li>
+<li><p><strong>data</strong> (<em>numpy.ndarray</em>) – 3D array containing the grid data to be written.</p></li>
+<li><p><strong>origin</strong> (<em>list</em><em> or </em><em>tuple</em>) – The (x, y, z) coordinates of the origin of the grid.</p></li>
+<li><p><strong>delta</strong> (<em>list</em><em> or </em><em>tuple</em>) – The grid spacing in the (x, y, z) directions.</p></li>
+<li><p><strong>fmt</strong> (<em>str</em><em>, </em><em>optional</em>) – Format string for the data values. Default is “%.12f”.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The output file follows the OpenDX format specification:
+<a class="reference external" href="http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF">http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF</a></p>
+<p>The data is written in a way that is compatible with visualization software
+that accepts OpenDX format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AssertionError</strong> – If data is not a 3D array or if origin or delta do not have length 3.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="arbdmodel.grid.add_smaller_grid">
@@ -660,7 +685,30 @@ It should accept a scalar or an array-like object and return a scalar or an arra
 <dl class="py function">
 <dt class="sig sig-object py" id="arbdmodel.grid.slab_potential_z">
 <span class="sig-prename descclassname"><span class="pre">arbdmodel.grid.</span></span><span class="sig-name descname"><span class="pre">slab_potential_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_constant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/grid.html#slab_potential_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.grid.slab_potential_z" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generate a potential energy field that depends only on the z-coordinate, creating a slab-like potential.
+:param force_constant: The strength of the potential (energy per unit distance^exponent).
+:type force_constant: float
+:param center: The (x, y, z) coordinates of the center of the potential.
+:type center: list or tuple
+:param dimensions: The (x, y, z) dimensions of the grid in length units.
+:type dimensions: list or tuple
+:param resolution: The grid spacing in length units. If a single value is provided, it’s used for all dimensions.
+:type resolution: float or list or tuple
+:param exponent: The exponent determining the shape of the potential. Default is 2 (harmonic potential).
+:type exponent: int, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A 3D array representing the potential energy field, where the energy depends only
+on the distance from the z-center raised to the specified exponent.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The potential U at each point is calculated as:
+U = (force_constant/exponent) * <a href="#id1"><span class="problematic" id="id2">|</span></a>z - center_z|^exponent</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="arbdmodel.grid.constant_force">

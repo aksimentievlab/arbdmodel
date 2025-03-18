@@ -46,7 +46,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'interaction_potentials/interactions';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ibi module" href="ibi.html" />
+    <link rel="next" title="Simulation Engines" href="../simulation_engines/index.html" />
     <link rel="prev" title="Interaction Potentials" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -189,7 +189,6 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -202,6 +201,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
@@ -405,12 +405,21 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.resolution"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.resolution</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.max_force"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_force</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.max_potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_potential</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.zero"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.zero</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul class="nav section-nav flex-column">
@@ -507,35 +516,143 @@ document.write(`
 <dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">AbstractPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Abstract class for writing potentials</p>
+<p>Abstract base class for implementing interaction potentials.
+This class defines the basic structure for creating and managing interaction potential
+functions that can be written to files and used in simulations.
+:param <a href="#id5"><span class="problematic" id="id6">range_</span></a>: The range of distances for the potential (min, max).</p>
+<blockquote>
+<div><p>If max is None, potential extends to infinity.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – The spacing between points in the discretized potential. Default is 0.1.</p></li>
+<li><p><strong>max_force</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Maximum allowed force magnitude. If provided, forces exceeding this value will be capped.</p></li>
+<li><p><strong>max_potential</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Maximum allowed potential energy. If provided, the potential will be modified
+to ensure it doesn’t exceed this value.</p></li>
+<li><p><strong>zero</strong> (<em>str</em><em>, </em><em>optional</em>) – Method to set the zero of the potential. Options are:
+- ‘min’: Zero is at the minimum value
+- ‘first’: Zero is at the first point
+- ‘last’: Zero is at the last point</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.range_">
+<span class="sig-name descname"><span class="pre">range_</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.range_" title="Link to this definition">#</a></dt>
+<dd><p>The range of distances for the potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple of (float, float or None)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.resolution">
+<span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.resolution" title="Link to this definition">#</a></dt>
+<dd><p>The spacing between points in the discretized potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.max_force">
+<span class="sig-name descname"><span class="pre">max_force</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.max_force" title="Link to this definition">#</a></dt>
+<dd><p>Maximum allowed force magnitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.max_potential">
+<span class="sig-name descname"><span class="pre">max_potential</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.max_potential" title="Link to this definition">#</a></dt>
+<dd><p>Maximum allowed potential energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.zero">
+<span class="sig-name descname"><span class="pre">zero</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.zero" title="Link to this definition">#</a></dt>
+<dd><p>Method to set the zero of the potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.periodic">
+<span class="sig-name descname"><span class="pre">periodic</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.periodic" title="Link to this definition">#</a></dt>
+<dd><p>Whether the potential is periodic (False by default).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.potential" title="Link to this definition">#</a></dt>
+<dd><p>Abstract method that must be implemented by subclasses.
+Calculates the potential value at distance r.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.write_file" title="Link to this definition">#</a></dt>
+<dd><p>Writes the potential to a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.filename" title="Link to this definition">#</a></dt>
+<dd><p>Abstract method that should be implemented by subclasses.
+Returns a filename for the potential.</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>Subclasses must implement at minimum the <cite>potential</cite> and <cite>filename</cite> methods.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.range_">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range_</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.range_" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range_</span></span><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.periodic">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">periodic</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.periodic" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">periodic</span></span><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.potential">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.filename">
-<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.filename" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.write_file">
-<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.write_file" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -852,11 +969,11 @@ for consistency with the AbstractPotential interface.</p>
       </div>
     </a>
     <a class="right-next"
-       href="ibi.html"
+       href="../simulation_engines/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ibi module</p>
+        <p class="prev-next-title">Simulation Engines</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -877,12 +994,21 @@ for consistency with the AbstractPotential interface.</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.resolution"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.resolution</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.max_force"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_force</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.max_potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_potential</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.zero"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.zero</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul class="nav section-nav flex-column">

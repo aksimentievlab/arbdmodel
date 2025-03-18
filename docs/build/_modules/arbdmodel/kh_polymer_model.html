@@ -188,7 +188,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -201,6 +200,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
@@ -499,6 +499,42 @@ document.write(`
 <div class="viewcode-block" id="KhNonbonded">
 <a class="viewcode-back" href="../../polymer_modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhNonbonded">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KhNonbonded</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class implementing the Kim-Hummer nonbonded potential energy model for protein interactions.</span>
+<span class="sd">    This model combines electrostatic interactions with a modified Lennard-Jones potential</span>
+<span class="sd">    that accounts for hydrophobic effects using the KH (Kim-Hummer) scaling approach.</span>
+<span class="sd">    The potential is particularly useful for modeling interactions between intrinsically</span>
+<span class="sd">    disordered proteins (IDPs) and folded proteins.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    debye_length : float, optional</span>
+<span class="sd">        The Debye screening length in Angstroms, default is 10Å</span>
+<span class="sd">    resolution : float, optional</span>
+<span class="sd">        The spatial resolution for potential calculations, default is 0.1Å</span>
+<span class="sd">    range_ : tuple, optional</span>
+<span class="sd">        The range of distances (min, max) over which to compute the potential,</span>
+<span class="sd">        default is (0, None) where None means no upper limit</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    debye_length : float</span>
+<span class="sd">        The Debye screening length in Angstroms</span>
+<span class="sd">    max_force : float</span>
+<span class="sd">        Maximum allowed force from this potential, set to 50</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    potential(r, types)</span>
+<span class="sd">        Calculates the nonbonded potential energy between two atom types at distance r.</span>
+<span class="sd">        Combines electrostatic interactions with a modified Lennard-Jones potential.</span>
+<span class="sd">        </span>
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Kim, Y. C., &amp; Hummer, G. (2008). Coarse-grained models for simulations of </span>
+<span class="sd">    multiprotein complexes: application to ubiquitin binding. Journal of molecular </span>
+<span class="sd">    biology, 375(5), 1416-1433.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="KhNonbonded.__init__">
 <a class="viewcode-back" href="../../polymer_modeling/kh_polymer_model.html#arbdmodel.kh_polymer_model.KhNonbonded.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debye_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)):</span>

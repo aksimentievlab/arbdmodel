@@ -189,7 +189,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -202,6 +201,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
@@ -405,8 +405,11 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded"><code class="docutils literal notranslate"><span class="pre">KhNonbonded</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.debye_length"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.debye_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.max_force"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.max_force</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhBeads"><code class="docutils literal notranslate"><span class="pre">KhBeads</span></code></a><ul class="nav section-nav flex-column">
@@ -436,14 +439,62 @@ document.write(`
 <dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.kh_polymer_model.</span></span><span class="sig-name descname"><span class="pre">KhNonbonded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/kh_polymer_model.html#KhNonbonded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../interaction_potentials/interactions.html#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<p>A class implementing the Kim-Hummer nonbonded potential energy model for protein interactions.
+This model combines electrostatic interactions with a modified Lennard-Jones potential
+that accounts for hydrophobic effects using the KH (Kim-Hummer) scaling approach.
+The potential is particularly useful for modeling interactions between intrinsically
+disordered proteins (IDPs) and folded proteins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>debye_length</strong> (<em>float</em><em>, </em><em>optional</em>) – The Debye screening length in Angstroms, default is 10Å</p></li>
+<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – The spatial resolution for potential calculations, default is 0.1Å</p></li>
+<li><p><strong>range</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The range of distances (min, max) over which to compute the potential,
+default is (0, None) where None means no upper limit</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded.debye_length">
+<span class="sig-name descname"><span class="pre">debye_length</span></span><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded.debye_length" title="Link to this definition">#</a></dt>
+<dd><p>The Debye screening length in Angstroms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded.max_force">
+<span class="sig-name descname"><span class="pre">max_force</span></span><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded.max_force" title="Link to this definition">#</a></dt>
+<dd><p>Maximum allowed force from this potential, set to 50</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/kh_polymer_model.html#KhNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded.potential" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the nonbonded potential energy between two atom types at distance r.
+Combines electrostatic interactions with a modified Lennard-Jones potential.</p>
+</dd></dl>
+
+<p class="rubric">References</p>
+<p>Kim, Y. C., &amp; Hummer, G. (2008). Coarse-grained models for simulations of
+multiprotein complexes: application to ubiquitin binding. Journal of molecular
+biology, 375(5), 1416-1433.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/kh_polymer_model.html#KhNonbonded.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.kh_polymer_model.KhNonbonded.potential">
-<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/kh_polymer_model.html#KhNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.kh_polymer_model.KhNonbonded.potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/kh_polymer_model.html#KhNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd><p>Electrostatics</p>
 </dd></dl>
 
@@ -532,8 +583,11 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded"><code class="docutils literal notranslate"><span class="pre">KhNonbonded</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.debye_length"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.debye_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.max_force"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.max_force</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">KhNonbonded.potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.kh_polymer_model.KhBeads"><code class="docutils literal notranslate"><span class="pre">KhBeads</span></code></a><ul class="nav section-nav flex-column">

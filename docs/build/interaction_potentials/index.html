@@ -189,7 +189,6 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -202,6 +201,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
@@ -412,12 +412,21 @@ document.write(`
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="interactions.html">interactions module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.resolution"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.resolution</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.max_force"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_force</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.max_potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.max_potential</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.zero"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.zero</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#id0"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#id1"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#id2"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#id3"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="interactions.html#id4"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="interactions.html#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul>
@@ -495,65 +504,6 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="interactions.html#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ibi.html">ibi module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.__init__"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.wrap_vector()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.get_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume"><code class="docutils literal notranslate"><span class="pre">DegreeOfFreedom.compute_volume()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof"><code class="docutils literal notranslate"><span class="pre">RadiusDof</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.RadiusDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">RadiusDof.compute_volume()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof"><code class="docutils literal notranslate"><span class="pre">BondDof</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">BondDof.compute_volume()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof"><code class="docutils literal notranslate"><span class="pre">AngleDof</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AngleDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">AngleDof.compute_volume()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.DihedralDof"><code class="docutils literal notranslate"><span class="pre">DihedralDof</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.BondAngleDof"><code class="docutils literal notranslate"><span class="pre">BondAngleDof</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.__init__"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.get_values"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.get_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume"><code class="docutils literal notranslate"><span class="pre">PairDistributionDof.compute_volume()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIBond.__init__"><code class="docutils literal notranslate"><span class="pre">IBIBond.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIAngle"><code class="docutils literal notranslate"><span class="pre">IBIAngle</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIAngle.__init__"><code class="docutils literal notranslate"><span class="pre">IBIAngle.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral"><code class="docutils literal notranslate"><span class="pre">IBIDihedral</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral.__init__"><code class="docutils literal notranslate"><span class="pre">IBIDihedral.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBIDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">IBIDihedral.periodic</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded"><code class="docutils literal notranslate"><span class="pre">IBINonbonded</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">IBINonbonded.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ibi.html#arbdmodel.ibi.IBINonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">IBINonbonded.write_file()</span></code></a></li>
 </ul>
 </li>
 </ul>

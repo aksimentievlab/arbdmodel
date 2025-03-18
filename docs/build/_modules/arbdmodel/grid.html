@@ -188,7 +188,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -201,6 +200,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
@@ -371,6 +371,39 @@ document.write(`
 <div class="viewcode-block" id="writeDx">
 <a class="viewcode-back" href="../../utilities/grid.html#arbdmodel.grid.writeDx">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">writeDx</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.12f</span><span class="s2">&quot;</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Write 3D grid data to an OpenDX format file.</span>
+<span class="sd">  Write 3D grid data to an OpenDX format file.</span>
+<span class="sd">  </span>
+<span class="sd">  OpenDX is a visualization software format that can be used to visualize </span>
+<span class="sd">  volumetric data.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  outfile : str or file-like object</span>
+<span class="sd">    The path to the output file or a file-like object.</span>
+<span class="sd">  data : numpy.ndarray</span>
+<span class="sd">    3D array containing the grid data to be written.</span>
+<span class="sd">  origin : list or tuple</span>
+<span class="sd">    The (x, y, z) coordinates of the origin of the grid.</span>
+<span class="sd">  delta : list or tuple</span>
+<span class="sd">    The grid spacing in the (x, y, z) directions.</span>
+<span class="sd">  fmt : str, optional</span>
+<span class="sd">    Format string for the data values. Default is &quot;%.12f&quot;.</span>
+<span class="sd">    </span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  The output file follows the OpenDX format specification:</span>
+<span class="sd">  http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF</span>
+<span class="sd">  </span>
+<span class="sd">  The data is written in a way that is compatible with visualization software</span>
+<span class="sd">  that accepts OpenDX format.</span>
+<span class="sd">  </span>
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  AssertionError</span>
+<span class="sd">    If data is not a 3D array or if origin or delta do not have length 3.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
   <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
   <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
   <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
@@ -848,6 +881,30 @@ document.write(`
 <div class="viewcode-block" id="slab_potential_z">
 <a class="viewcode-back" href="../../utilities/grid.html#arbdmodel.grid.slab_potential_z">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">slab_potential_z</span><span class="p">(</span><span class="n">force_constant</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">exponent</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Generate a potential energy field that depends only on the z-coordinate, creating a slab-like potential.</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  force_constant : float</span>
+<span class="sd">    The strength of the potential (energy per unit distance^exponent).</span>
+<span class="sd">  center : list or tuple</span>
+<span class="sd">    The (x, y, z) coordinates of the center of the potential.</span>
+<span class="sd">  dimensions : list or tuple</span>
+<span class="sd">    The (x, y, z) dimensions of the grid in length units.</span>
+<span class="sd">  resolution : float or list or tuple</span>
+<span class="sd">    The grid spacing in length units. If a single value is provided, it&#39;s used for all dimensions.</span>
+<span class="sd">  exponent : int, optional</span>
+<span class="sd">    The exponent determining the shape of the potential. Default is 2 (harmonic potential).</span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">    A 3D array representing the potential energy field, where the energy depends only</span>
+<span class="sd">    on the distance from the z-center raised to the specified exponent.</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  The potential U at each point is calculated as:</span>
+<span class="sd">  U = (force_constant/exponent) * |z - center_z|^exponent</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
   <span class="k">except</span><span class="p">:</span>

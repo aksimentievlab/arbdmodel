@@ -189,7 +189,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -202,6 +201,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
@@ -405,11 +405,20 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.debye_length"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.debye_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.max_force"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.max_force</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads"><code class="docutils literal notranslate"><span class="pre">OnckBeads</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.version"><code class="docutils literal notranslate"><span class="pre">OnckBeads.version</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.types_dict"><code class="docutils literal notranslate"><span class="pre">OnckBeads.types_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.peptide_bond"><code class="docutils literal notranslate"><span class="pre">OnckBeads.peptide_bond</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.polymer"><code class="docutils literal notranslate"><span class="pre">OnckBeads.polymer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.sequence"><code class="docutils literal notranslate"><span class="pre">OnckBeads.sequence</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.spring_constant"><code class="docutils literal notranslate"><span class="pre">OnckBeads.spring_constant</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.__init__"><code class="docutils literal notranslate"><span class="pre">OnckBeads.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -435,15 +444,65 @@ document.write(`
 <dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.onck_polymer_model.</span></span><span class="sig-name descname"><span class="pre">OnckNonbonded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckNonbonded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../interaction_potentials/interactions.html#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
-<p>Nonbonded interaction for 1BPA and 1BPA-1.1</p>
+<p>Nonbonded interaction potential for 1BPA and 1BPA-1.1.</p>
+<p>This class implements nonbonded interactions including electrostatics with
+distance-dependent dielectric and Lennard-Jones type potentials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>debye_length</strong> (<em>float</em><em>, </em><em>optional</em>) – The Debye-Hückel screening length in angstroms. Default is 12.7 Å.</p></li>
+<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – The spatial resolution for potential calculation. Default is 0.1 Å.</p></li>
+<li><p><strong>range</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The range of distances for which to calculate the potential. Default is (0, None).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded.debye_length">
+<span class="sig-name descname"><span class="pre">debye_length</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded.debye_length" title="Link to this definition">#</a></dt>
+<dd><p>The Debye-Hückel screening length in angstroms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded.max_force">
+<span class="sig-name descname"><span class="pre">max_force</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded.max_force" title="Link to this definition">#</a></dt>
+<dd><p>Maximum allowed force in the system, used as a cap for stability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded.potential" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the nonbonded potential energy between two residue types at distance r.</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>The potential includes:
+1. Electrostatic interactions with distance-dependent dielectric constant
+2. Modified Lennard-Jones interactions that depend on residue types:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Special 8-6 LJ potential for cationic-aromatic interactions in 1.0cp/1.1 versions</p></li>
+<li><p>General LJ-type potential for other interactions</p></li>
+</ul>
+</div></blockquote>
+<p>The effective dielectric D decreases with distance according to a specific formula.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckNonbonded.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckNonbonded.potential">
-<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckNonbonded.potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd><p>Electrostatics</p>
 </dd></dl>
 
@@ -453,6 +512,100 @@ document.write(`
 <dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.onck_polymer_model.</span></span><span class="sig-name descname"><span class="pre">OnckBeads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spring_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">38.422562</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckBeads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="polymer.html#arbdmodel.polymer.PolymerBeads" title="arbdmodel.polymer.PolymerBeads"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolymerBeads</span></code></a></p>
+<p>A class that represents polymer beads in the Onck model.</p>
+<p>The Onck model is a coarse-grained model for proteins where each amino acid is represented
+by a single bead. The model includes specific bonded interactions (bonds, angles, dihedrals)
+based on the amino acid types in the sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>polymer</strong> (<em>Polymer</em>) – The parent polymer object to which these beads belong.</p></li>
+<li><p><strong>sequence</strong> (<em>list</em><em>, </em><em>optional</em>) – The sequence of amino acid types for each bead, must match polymer length.</p></li>
+<li><p><strong>spring_constant</strong> (<em>float</em><em>, </em><em>default=38.422562</em>) – Spring constant for peptide bonds in units of 8038 kJ/(N_A nm^2) or 0.5 kcal_mol/AA^2.</p></li>
+<li><p><strong>rest_length</strong> (<em>float</em><em>, </em><em>default=3.8</em>) – Equilibrium length of peptide bonds.</p></li>
+<li><p><strong>version</strong> (<em>float</em><em>, </em><em>optional</em>) – Version of the Onck model to use. Defaults to 1.1 if not specified.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to the parent PolymerBeads constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.version">
+<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.version" title="Link to this definition">#</a></dt>
+<dd><p>The version of the Onck model being used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.types_dict">
+<span class="sig-name descname"><span class="pre">types_dict</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.types_dict" title="Link to this definition">#</a></dt>
+<dd><p>Mapping between amino acid codes and bead types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.peptide_bond">
+<span class="sig-name descname"><span class="pre">peptide_bond</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.peptide_bond" title="Link to this definition">#</a></dt>
+<dd><p>Bond potential used for peptide bonds between adjacent beads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../interaction_potentials/interactions.html#arbdmodel.interactions.HarmonicBond" title="arbdmodel.interactions.HarmonicBond">HarmonicBond</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.polymer">
+<span class="sig-name descname"><span class="pre">polymer</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.polymer" title="Link to this definition">#</a></dt>
+<dd><p>Reference to the parent polymer object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Polymer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.sequence">
+<span class="sig-name descname"><span class="pre">sequence</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.sequence" title="Link to this definition">#</a></dt>
+<dd><p>The amino acid sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.spring_constant">
+<span class="sig-name descname"><span class="pre">spring_constant</span></span><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.spring_constant" title="Link to this definition">#</a></dt>
+<dd><p>The spring constant used for peptide bonds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the version is not supported or if the sequence length doesn’t match the polymer length.</p></li>
+<li><p><strong>NotImplementedError</strong> – If sequence is None (random sequence generation not implemented).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Onck model distinguishes between proline (P), glycine (G), and all other amino acids (X)
+for certain bonded interactions. Special potentials are loaded from files for angle and
+dihedral interactions based on this classification.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="arbdmodel.onck_polymer_model.OnckBeads.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polymer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spring_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">38.422562</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/onck_polymer_model.html#OnckBeads.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.onck_polymer_model.OnckBeads.__init__" title="Link to this definition">#</a></dt>
@@ -526,11 +679,20 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.debye_length"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.debye_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.max_force"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.max_force</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">OnckNonbonded.potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads"><code class="docutils literal notranslate"><span class="pre">OnckBeads</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.version"><code class="docutils literal notranslate"><span class="pre">OnckBeads.version</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.types_dict"><code class="docutils literal notranslate"><span class="pre">OnckBeads.types_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.peptide_bond"><code class="docutils literal notranslate"><span class="pre">OnckBeads.peptide_bond</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.polymer"><code class="docutils literal notranslate"><span class="pre">OnckBeads.polymer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.sequence"><code class="docutils literal notranslate"><span class="pre">OnckBeads.sequence</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.spring_constant"><code class="docutils literal notranslate"><span class="pre">OnckBeads.spring_constant</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.onck_polymer_model.OnckBeads.__init__"><code class="docutils literal notranslate"><span class="pre">OnckBeads.__init__()</span></code></a></li>
 </ul>
 </li>

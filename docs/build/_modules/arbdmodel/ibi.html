@@ -188,7 +188,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -201,6 +200,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/ibi.html">ibi module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
@@ -375,7 +375,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DegreeOfFreedom">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DegreeOfFreedom">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DegreeOfFreedom</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Base class for representing a degree of freedom in the system.</span>
 
@@ -388,7 +388,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DegreeOfFreedom.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DegreeOfFreedom.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">particles</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">particles</span>
         <span class="c1"># self.ids = [p.idx for p in particles]</span>
@@ -420,7 +420,7 @@ document.write(`
         <span class="k">return</span> <span class="n">positions</span>
 
 <div class="viewcode-block" id="DegreeOfFreedom.wrap_vector">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrap_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span> <span class="o">==</span> <span class="mi">90</span> <span class="p">))</span>
@@ -435,7 +435,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DegreeOfFreedom.get_values">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">:</span>
@@ -451,14 +451,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="DegreeOfFreedom.compute_volume">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span></div>
 </div>
 
 
 <div class="viewcode-block" id="RadiusDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.RadiusDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.RadiusDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RadiusDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
@@ -468,14 +468,14 @@ document.write(`
         <span class="k">return</span> <span class="n">dist</span>
 
 <div class="viewcode-block" id="RadiusDof.compute_volume">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.RadiusDof.compute_volume">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.RadiusDof.compute_volume">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
          <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
 </div>
 
 
 <div class="viewcode-block" id="BondDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.BondDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BondDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
@@ -485,14 +485,14 @@ document.write(`
         <span class="k">return</span> <span class="n">dist</span>
 
 <div class="viewcode-block" id="BondDof.compute_volume">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondDof.compute_volume">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.BondDof.compute_volume">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
          <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
 </div>
 
 
 <div class="viewcode-block" id="AngleDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AngleDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AngleDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AngleDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
@@ -506,7 +506,7 @@ document.write(`
         <span class="k">return</span> <span class="n">angle</span>
 
 <div class="viewcode-block" id="AngleDof.compute_volume">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AngleDof.compute_volume">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AngleDof.compute_volume">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
         <span class="n">sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">bins</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
         <span class="k">return</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sin</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">sin</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
@@ -514,7 +514,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DihedralDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DihedralDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.DihedralDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DihedralDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
@@ -539,7 +539,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="BondAngleDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondAngleDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.BondAngleDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BondAngleDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
@@ -566,10 +566,10 @@ document.write(`
 
 
 <div class="viewcode-block" id="PairDistributionDof">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.PairDistributionDof">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairDistributionDof</span><span class="p">():</span>
 <div class="viewcode-block" id="PairDistributionDof.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.PairDistributionDof.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particles_A</span><span class="p">,</span> <span class="n">particles_B</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">exclusions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">exclusions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">exclusions</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -626,7 +626,7 @@ document.write(`
         <span class="k">return</span> <span class="n">ex</span>
 
 <div class="viewcode-block" id="PairDistributionDof.get_values">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.get_values">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.PairDistributionDof.get_values">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">MDAnalysis.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">distances</span>
 
@@ -647,17 +647,85 @@ document.write(`
 
 
 <div class="viewcode-block" id="PairDistributionDof.compute_volume">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
 </div>
 
 
 <div class="viewcode-block" id="AbstractIBIpotential">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AbstractIBIpotential</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that implements the Iterative Boltzmann Inversion method for generating potentials.</span>
+
+<span class="sd">    This abstract class provides the foundation for creating IBI potentials that are derived</span>
+<span class="sd">    from target distributions. IBI is a method to derive effective pair potentials from radial</span>
+<span class="sd">    distribution functions in molecular systems.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the potential, used for file naming.</span>
+<span class="sd">    degrees_of_freedom : list</span>
+<span class="sd">        List of degrees of freedom to consider in the potential.</span>
+<span class="sd">    range_ : tuple, optional</span>
+<span class="sd">        Range of distances to consider (min, max), default is (0, 30).</span>
+<span class="sd">    resolution : float, optional</span>
+<span class="sd">        Resolution of the binning for the distribution, default is 0.1.</span>
+<span class="sd">    max_force : float, optional</span>
+<span class="sd">        Maximum force allowed in the potential.</span>
+<span class="sd">    max_potential : float, optional</span>
+<span class="sd">        Maximum potential value allowed.</span>
+<span class="sd">    out_of_bounds_force : str or float, optional</span>
+<span class="sd">        Force to apply outside the well-defined density region, default is &#39;max_force&#39;.</span>
+<span class="sd">    zero : str, optional</span>
+<span class="sd">        Method to set the zero point of the potential, default is &#39;last&#39;.</span>
+<span class="sd">    smooth : int or None, optional</span>
+<span class="sd">        Window size for Savitzky-Golay filter, if None will be calculated automatically.</span>
+<span class="sd">    learning_rate : float or callable, optional</span>
+<span class="sd">        Learning rate for potential updates, default is 0.9.</span>
+<span class="sd">    iteration : int, optional</span>
+<span class="sd">        Current iteration number, default is 1.</span>
+<span class="sd">    filename_prefix : str, optional</span>
+<span class="sd">        Path prefix for saving potentials, default is &#39;IBIPotentials/&#39;.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bins : numpy.ndarray</span>
+<span class="sd">        Bin edges for the distribution.</span>
+<span class="sd">    potential : numpy.ndarray</span>
+<span class="sd">        Current potential values.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    potential(r)</span>
+<span class="sd">        Abstract method to calculate potential at distance r.</span>
+<span class="sd">    filename(types=None, iteration=None, smoothed=True)</span>
+<span class="sd">        Generate filename for the potential.</span>
+<span class="sd">    write_file()</span>
+<span class="sd">        Write the potential to a file.</span>
+<span class="sd">    get_target_distribution(universe=None, trajectory=None, recalculate=False)</span>
+<span class="sd">        Get or calculate the target distribution.</span>
+<span class="sd">    get_cg_distribution(universe, trajectory=None, box=None, recalculate=False)</span>
+<span class="sd">        Get or calculate the coarse-grained distribution.</span>
+<span class="sd">    read_cg_potential(iteration=None)</span>
+<span class="sd">        Read a potential from a file.</span>
+<span class="sd">    write_cg_potential(universe=None, scaling_factor=None, temperature=295, tol=None, clean_edges=True, box=None)</span>
+<span class="sd">        Calculate and save the potential based on distributions.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    IBI is an iterative method that refines potentials to match target distributions.</span>
+<span class="sd">    The process involves:</span>
+<span class="sd">    1. Starting with an initial guess (usually Boltzmann inversion of the target)</span>
+<span class="sd">    2. Running simulations with the current potential</span>
+<span class="sd">    3. Comparing resulting distributions with the target</span>
+<span class="sd">    4. Updating the potential based on the difference</span>
+<span class="sd">    5. Repeating until convergence</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="AbstractIBIpotential.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s1">&#39;IBIPotentials/&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span> <span class="o">=</span> <span class="n">degrees_of_freedom</span>
@@ -682,7 +750,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AbstractIBIpotential.potential">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
@@ -690,7 +758,7 @@ document.write(`
         <span class="c1">## self.filename_prefix=&quot;IBIpotentials/&quot;</span>
 
 <div class="viewcode-block" id="AbstractIBIpotential.filename">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoothed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span>
@@ -701,7 +769,7 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">()</span>
 
 <div class="viewcode-block" id="AbstractIBIpotential.write_file">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
@@ -763,7 +831,7 @@ document.write(`
         <span class="k">return</span> <span class="n">bins</span><span class="p">,</span> <span class="n">likelihood</span>
 
 <div class="viewcode-block" id="AbstractIBIpotential.get_target_distribution">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_target_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span> <span class="o">+</span> <span class="s1">&#39;.target.dat&#39;</span>
@@ -795,7 +863,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AbstractIBIpotential.get_cg_distribution">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_cg_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">smoothed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.dat&#39;</span><span class="p">,</span><span class="s1">&#39;.cg.dat&#39;</span><span class="p">)</span>
 
@@ -815,7 +883,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AbstractIBIpotential.read_cg_potential">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_cg_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -869,7 +937,7 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Removed too much density from the distribution ({100*total_after/total_before:</span><span class="si">%02d</span><span class="s1">})&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AbstractIBIpotential.write_cg_potential">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_cg_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling_factor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span> <span class="o">=</span> <span class="mi">295</span><span class="p">,</span> <span class="n">tol</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">clean_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">scaling_factor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>    <span class="n">scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">)</span>
@@ -953,10 +1021,10 @@ document.write(`
 
 <span class="c1">## Specialize with sensible defaults for r_range</span>
 <div class="viewcode-block" id="IBIBond">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIBond">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIBond">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IBIBond</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
 <div class="viewcode-block" id="IBIBond.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIBond.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIBond.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
         <span class="c1"># AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential)</span>
         <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
@@ -965,10 +1033,10 @@ document.write(`
 
 
 <div class="viewcode-block" id="IBIAngle">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIAngle">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIAngle">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IBIAngle</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
 <div class="viewcode-block" id="IBIAngle.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIAngle.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIAngle.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
         <span class="c1">#rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, iteration, filename_prefix)</span>
         <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
@@ -977,10 +1045,10 @@ document.write(`
 
 
 <div class="viewcode-block" id="IBIDihedral">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIDihedral">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIDihedral">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IBIDihedral</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
 <div class="viewcode-block" id="IBIDihedral.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIDihedral.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBIDihedral.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
         <span class="c1">#rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, filename_prefix)</span>
         <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
@@ -994,17 +1062,17 @@ document.write(`
 
 <span class="c1">## Specialize with sensible defaults for r_range</span>
 <div class="viewcode-block" id="IBINonbonded">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBINonbonded">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IBINonbonded</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
 <div class="viewcode-block" id="IBINonbonded.__init__">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded.__init__">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBINonbonded.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
         <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;IBInonbonded&#39;</span></div>
 
 
 <div class="viewcode-block" id="IBINonbonded.write_file">
-<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded.write_file">[docs]</a>
+<a class="viewcode-back" href="../../utilities/ibi.html#arbdmodel.ibi.IBINonbonded.write_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">)</span>

@@ -43,11 +43,11 @@
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'interaction_potentials/ibi';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'utilities/ibi';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Simulation Engines" href="../simulation_engines/index.html" />
-    <link rel="prev" title="interactions module" href="interactions.html" />
+    <link rel="next" title="coords module" href="coords.html" />
+    <link rel="prev" title="Utilities" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -187,9 +187,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/simplearbd.html">simplearbd module</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="interactions.html">interactions module</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ibi module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -201,12 +200,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../shape-based_models/shape_cg.html">shape_cg module</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/version.html">version module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/binary_manager.html">binary_manager module</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ibi module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary_manager.html">binary_manager module</a></li>
 </ul>
 </details></li>
 </ul>
@@ -280,7 +280,7 @@
       
       
       
-      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2Finteraction_potentials/ibi.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2Futilities/ibi.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -310,7 +310,7 @@
       
       
       
-      <li><a href="../_sources/interaction_potentials/ibi.rst" target="_blank"
+      <li><a href="../_sources/utilities/ibi.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -432,14 +432,23 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.bins"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.bins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a><ul class="nav section-nav flex-column">
@@ -580,45 +589,139 @@ pairs of particle types (with exclusions!).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.ibi.</span></span><span class="sig-name descname"><span class="pre">AbstractIBIpotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees_of_freedom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">30)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_bounds_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_force'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'IBIPotentials/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="interactions.html#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../interaction_potentials/interactions.html#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<p>A class that implements the Iterative Boltzmann Inversion method for generating potentials.</p>
+<p>This abstract class provides the foundation for creating IBI potentials that are derived
+from target distributions. IBI is a method to derive effective pair potentials from radial
+distribution functions in molecular systems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the potential, used for file naming.</p></li>
+<li><p><strong>degrees_of_freedom</strong> (<em>list</em>) – List of degrees of freedom to consider in the potential.</p></li>
+<li><p><strong>range</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Range of distances to consider (min, max), default is (0, 30).</p></li>
+<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – Resolution of the binning for the distribution, default is 0.1.</p></li>
+<li><p><strong>max_force</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum force allowed in the potential.</p></li>
+<li><p><strong>max_potential</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum potential value allowed.</p></li>
+<li><p><strong>out_of_bounds_force</strong> (<em>str</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Force to apply outside the well-defined density region, default is ‘max_force’.</p></li>
+<li><p><strong>zero</strong> (<em>str</em><em>, </em><em>optional</em>) – Method to set the zero point of the potential, default is ‘last’.</p></li>
+<li><p><strong>smooth</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Window size for Savitzky-Golay filter, if None will be calculated automatically.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – Learning rate for potential updates, default is 0.9.</p></li>
+<li><p><strong>iteration</strong> (<em>int</em><em>, </em><em>optional</em>) – Current iteration number, default is 1.</p></li>
+<li><p><strong>filename_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Path prefix for saving potentials, default is ‘IBIPotentials/’.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.bins">
+<span class="sig-name descname"><span class="pre">bins</span></span><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.bins" title="Link to this definition">#</a></dt>
+<dd><p>Bin edges for the distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.potential" title="Link to this definition">#</a></dt>
+<dd><p>Current potential values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
+<dd><p>Abstract method to calculate potential at distance r.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.filename" title="Link to this definition">#</a></dt>
+<dd><p>Generate filename for the potential.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.write_file" title="Link to this definition">#</a></dt>
+<dd><p>Write the potential to a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.get_target_distribution">
+<span class="sig-name descname"><span class="pre">get_target_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_target_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution" title="Link to this definition">#</a></dt>
+<dd><p>Get or calculate the target distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution">
+<span class="sig-name descname"><span class="pre">get_cg_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_cg_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution" title="Link to this definition">#</a></dt>
+<dd><p>Get or calculate the coarse-grained distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.read_cg_potential">
+<span class="sig-name descname"><span class="pre">read_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.read_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential" title="Link to this definition">#</a></dt>
+<dd><p>Read a potential from a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.write_cg_potential">
+<span class="sig-name descname"><span class="pre">write_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential" title="Link to this definition">#</a></dt>
+<dd><p>Calculate and save the potential based on distributions.</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>IBI is an iterative method that refines potentials to match target distributions.
+The process involves:
+1. Starting with an initial guess (usually Boltzmann inversion of the target)
+2. Running simulations with the current potential
+3. Comparing resulting distributions with the target
+4. Updating the potential based on the difference
+5. Repeating until convergence</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees_of_freedom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">30)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_bounds_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_force'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'IBIPotentials/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.potential">
-<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.filename">
-<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.filename" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.write_file">
-<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.write_file" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.get_target_distribution">
-<span class="sig-name descname"><span class="pre">get_target_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_target_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">get_target_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_target_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution">
-<span class="sig-name descname"><span class="pre">get_cg_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_cg_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">get_cg_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.get_cg_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.read_cg_potential">
-<span class="sig-name descname"><span class="pre">read_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.read_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">read_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.read_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="arbdmodel.ibi.AbstractIBIpotential.write_cg_potential">
-<span class="sig-name descname"><span class="pre">write_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">write_cg_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/ibi.html#AbstractIBIpotential.write_cg_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -691,20 +794,20 @@ pairs of particle types (with exclusions!).</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="interactions.html"
+       href="index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">interactions module</p>
+        <p class="prev-next-title">Utilities</p>
       </div>
     </a>
     <a class="right-next"
-       href="../simulation_engines/index.html"
+       href="coords.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Simulation Engines</p>
+        <p class="prev-next-title">coords module</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -752,14 +855,23 @@ pairs of particle types (with exclusions!).</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.bins"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.bins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.AbstractIBIpotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_target_distribution()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.get_cg_distribution()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.read_cg_potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">AbstractIBIpotential.write_cg_potential()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.ibi.IBIBond"><code class="docutils literal notranslate"><span class="pre">IBIBond</span></code></a><ul class="nav section-nav flex-column">

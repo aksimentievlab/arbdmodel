@@ -5,4 +5,3 @@ Interaction Potentials
    :maxdepth: 4
 
    interactions
-   ibi
