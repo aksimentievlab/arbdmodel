@@ -211,7 +211,44 @@ version_refs = {1.0: (__base_ref,),
 _types = _types_versions[1.1]
 
 class OnckNonbonded(AbstractPotential):
-    """ Nonbonded interaction for 1BPA and 1BPA-1.1 """
+    """
+    Nonbonded interaction potential for 1BPA and 1BPA-1.1.
+
+    This class implements nonbonded interactions including electrostatics with
+    distance-dependent dielectric and Lennard-Jones type potentials.
+
+    Parameters
+    ----------
+    debye_length : float, optional
+        The Debye-Hückel screening length in angstroms. Default is 12.7 Å.
+    resolution : float, optional
+        The spatial resolution for potential calculation. Default is 0.1 Å.
+    range_ : tuple, optional
+        The range of distances for which to calculate the potential. Default is (0, None).
+
+    Attributes
+    ----------
+    debye_length : float
+        The Debye-Hückel screening length in angstroms.
+    max_force : float
+        Maximum allowed force in the system, used as a cap for stability.
+
+    Methods
+    -------
+    potential(r, types)
+        Calculate the nonbonded potential energy between two residue types at distance r.
+
+    Notes
+    -----
+    The potential includes:
+    1. Electrostatic interactions with distance-dependent dielectric constant
+    2. Modified Lennard-Jones interactions that depend on residue types:
+       - Special 8-6 LJ potential for cationic-aromatic interactions in 1.0cp/1.1 versions
+       - General LJ-type potential for other interactions
+
+    The effective dielectric D decreases with distance according to a specific formula.
+    """
+
     def __init__(self, debye_length=12.7, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
@@ -265,6 +302,56 @@ class OnckNonbonded(AbstractPotential):
         return u
 
 class OnckBeads(PolymerBeads):
+    """
+    A class that represents polymer beads in the Onck model.
+
+    The Onck model is a coarse-grained model for proteins where each amino acid is represented
+    by a single bead. The model includes specific bonded interactions (bonds, angles, dihedrals)
+    based on the amino acid types in the sequence.
+
+    Parameters
+    ----------
+    polymer : Polymer
+        The parent polymer object to which these beads belong.
+    sequence : list, optional
+        The sequence of amino acid types for each bead, must match polymer length.
+    spring_constant : float, default=38.422562
+        Spring constant for peptide bonds in units of 8038 kJ/(N_A nm^2) or 0.5 kcal_mol/AA^2.
+    rest_length : float, default=3.8
+        Equilibrium length of peptide bonds.
+    version : float, optional
+        Version of the Onck model to use. Defaults to 1.1 if not specified.
+    **kwargs
+        Additional keyword arguments passed to the parent PolymerBeads constructor.
+
+    Attributes
+    ----------
+    version : float
+        The version of the Onck model being used.
+    types_dict : dict
+        Mapping between amino acid codes and bead types.
+    peptide_bond : HarmonicBond
+        Bond potential used for peptide bonds between adjacent beads.
+    polymer : Polymer
+        Reference to the parent polymer object.
+    sequence : list
+        The amino acid sequence.
+    spring_constant : float
+        The spring constant used for peptide bonds.
+
+    Raises
+    ------
+    ValueError
+        If the version is not supported or if the sequence length doesn't match the polymer length.
+    NotImplementedError
+        If sequence is None (random sequence generation not implemented).
+
+    Notes
+    -----
+    The Onck model distinguishes between proline (P), glycine (G), and all other amino acids (X)
+    for certain bonded interactions. Special potentials are loaded from files for angle and 
+    dihedral interactions based on this classification.
+    """
     def __init__(self, polymer, sequence=None,
                  spring_constant = 38.422562, # units "8038 kJ / (N_A nm**2)" "0.5 * kcal_mol/AA**2"
                  rest_length=3.8, version=None, **kwargs):

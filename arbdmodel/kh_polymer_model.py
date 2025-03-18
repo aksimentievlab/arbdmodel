@@ -137,6 +137,38 @@ for n1,n2,v in data:
 
     
 class KhNonbonded(AbstractPotential):
+    """
+    A class implementing the Kim-Hummer nonbonded potential energy model for protein interactions.
+    This model combines electrostatic interactions with a modified Lennard-Jones potential
+    that accounts for hydrophobic effects using the KH (Kim-Hummer) scaling approach.
+    The potential is particularly useful for modeling interactions between intrinsically
+    disordered proteins (IDPs) and folded proteins.
+    Parameters
+    ----------
+    debye_length : float, optional
+        The Debye screening length in Angstroms, default is 10Å
+    resolution : float, optional
+        The spatial resolution for potential calculations, default is 0.1Å
+    range_ : tuple, optional
+        The range of distances (min, max) over which to compute the potential,
+        default is (0, None) where None means no upper limit
+    Attributes
+    ----------
+    debye_length : float
+        The Debye screening length in Angstroms
+    max_force : float
+        Maximum allowed force from this potential, set to 50
+    Methods
+    -------
+    potential(r, types)
+        Calculates the nonbonded potential energy between two atom types at distance r.
+        Combines electrostatic interactions with a modified Lennard-Jones potential.
+    References
+    ----------
+    Kim, Y. C., & Hummer, G. (2008). Coarse-grained models for simulations of 
+    multiprotein complexes: application to ubiquitin binding. Journal of molecular 
+    biology, 375(5), 1416-1433.
+    """
     def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length

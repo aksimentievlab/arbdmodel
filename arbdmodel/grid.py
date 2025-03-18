@@ -9,6 +9,39 @@ from pathlib import Path
 
 
 def writeDx(outfile, data, origin, delta, fmt="%.12f"):
+  """Write 3D grid data to an OpenDX format file.
+  Write 3D grid data to an OpenDX format file.
+  
+  OpenDX is a visualization software format that can be used to visualize 
+  volumetric data.
+  
+  Parameters
+  ----------
+  outfile : str or file-like object
+    The path to the output file or a file-like object.
+  data : numpy.ndarray
+    3D array containing the grid data to be written.
+  origin : list or tuple
+    The (x, y, z) coordinates of the origin of the grid.
+  delta : list or tuple
+    The grid spacing in the (x, y, z) directions.
+  fmt : str, optional
+    Format string for the data values. Default is "%.12f".
+    
+  Notes
+  -----
+  The output file follows the OpenDX format specification:
+  http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
+  
+  The data is written in a way that is compatible with visualization software
+  that accepts OpenDX format.
+  
+  Raises
+  ------
+  AssertionError
+    If data is not a 3D array or if origin or delta do not have length 3.
+  """
+  
   shape = np.shape(data)
   num = np.prod(shape)
   assert( len(shape) == 3 )
@@ -444,6 +477,30 @@ def gaussian_kernel(voxels=5, sig=1., ndim=3):
 
 
 def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2):
+  """
+  Generate a potential energy field that depends only on the z-coordinate, creating a slab-like potential.
+  Parameters
+  ----------
+  force_constant : float
+    The strength of the potential (energy per unit distance^exponent).
+  center : list or tuple
+    The (x, y, z) coordinates of the center of the potential.
+  dimensions : list or tuple
+    The (x, y, z) dimensions of the grid in length units.
+  resolution : float or list or tuple
+    The grid spacing in length units. If a single value is provided, it's used for all dimensions.
+  exponent : int, optional
+    The exponent determining the shape of the potential. Default is 2 (harmonic potential).
+  Returns
+  -------
+  numpy.ndarray
+    A 3D array representing the potential energy field, where the energy depends only
+    on the distance from the z-center raised to the specified exponent.
+  Notes
+  -----
+  The potential U at each point is calculated as:
+  U = (force_constant/exponent) * |z - center_z|^exponent
+  """
   try:
     resolution[0]
   except:

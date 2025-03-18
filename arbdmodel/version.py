@@ -34,8 +34,8 @@
 
 
 ## Import packages
-from pathlib import Path
-from glob import glob
+import os,subprocess
+from subprocess import Popen, PIPE  # , STDOUT
 
 
 def check_git_repository():
