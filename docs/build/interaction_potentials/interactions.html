@@ -1,0 +1,1019 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>interactions module &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'interaction_potentials/interactions';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ibi module" href="ibi.html" />
+    <link rel="prev" title="Interaction Potentials" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../shape-based_models/shape_cg.html">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2Finteraction_potentials/interactions.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/interaction_potentials/interactions.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>interactions module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones.potential"><code class="docutils literal notranslate"><span class="pre">LennardJones.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HalfHarmonic"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HalfHarmonic.potential"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.__init__"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.potential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.write_file"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential"><code class="docutils literal notranslate"><span class="pre">NullPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.__init__"><code class="docutils literal notranslate"><span class="pre">NullPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.potential"><code class="docutils literal notranslate"><span class="pre">NullPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.filename"><code class="docutils literal notranslate"><span class="pre">NullPotential.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.filename"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond"><code class="docutils literal notranslate"><span class="pre">HarmonicBond</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.periodic</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential.filename"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond"><code class="docutils literal notranslate"><span class="pre">WLCSKBond</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-arbdmodel.interactions">
+<span id="interactions-module"></span><h1>interactions module<a class="headerlink" href="#module-arbdmodel.interactions" title="Link to this heading">#</a></h1>
+<dl class="py class" id="module-0">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">AbstractPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class for writing potentials</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.range_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range_</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.range_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.periodic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">periodic</span></span><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.periodic" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.potential">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.filename" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.AbstractPotential.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#AbstractPotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.AbstractPotential.write_file" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.LennardJones">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">LennardJones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#LennardJones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.LennardJones" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.LennardJones.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#LennardJones.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.LennardJones.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HalfHarmonic">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HalfHarmonic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_potential</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HalfHarmonic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HalfHarmonic" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HalfHarmonic.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HalfHarmonic.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HalfHarmonic.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.TabulatedNonbonded">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">TabulatedNonbonded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tableFile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#TabulatedNonbonded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.TabulatedNonbonded" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.TabulatedNonbonded.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tableFile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#TabulatedNonbonded.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.TabulatedNonbonded.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.TabulatedNonbonded.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#TabulatedNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.TabulatedNonbonded.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.TabulatedNonbonded.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#TabulatedNonbonded.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.TabulatedNonbonded.write_file" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.BoundaryPotential">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">BoundaryPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_vectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">well_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'boundary.dx'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#BoundaryPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.BoundaryPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<p>Boundary potential for confining simulations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.BoundaryPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_vectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">well_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'boundary.dx'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#BoundaryPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.BoundaryPotential.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialize boundary potential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell_vectors</strong> – List of 3 cell basis vectors [[x1,y1,z1], [x2,y2,z2], [x3,y3,z3]]</p></li>
+<li><p><strong>cell_origin</strong> – Cell origin coordinates [x,y,z]</p></li>
+<li><p><strong>well_depth</strong> – Depth of potential well</p></li>
+<li><p><strong>resolution</strong> – Grid resolution</p></li>
+<li><p><strong>blur</strong> – Smoothing parameter</p></li>
+<li><p><strong>**kwargs</strong> – Additional parameters for AbstractPotential</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.BoundaryPotential.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#BoundaryPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.BoundaryPotential.potential" title="Link to this definition">#</a></dt>
+<dd><p>Calculate potential at positions.</p>
+<p>This isn’t used directly for grid potentials in ARBD, but implemented
+for consistency with the AbstractPotential interface.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.BoundaryPotential.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#BoundaryPotential.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.BoundaryPotential.write_file" title="Link to this definition">#</a></dt>
+<dd><p>Write boundary potential to grid file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.NullPotential">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">NullPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./potentials/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#NullPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.NullPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.NullPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./potentials/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#NullPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.NullPotential.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.NullPotential.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#NullPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.NullPotential.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.NullPotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#NullPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.NullPotential.filename" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HarmonicBondedPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./potentials/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBondedPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./potentials/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBondedPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential.kscale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kscale</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential.kscale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential.type_">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBondedPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential.filename" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBondedPotential.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBondedPotential.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBondedPotential.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBond">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HarmonicBond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBond" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.HarmonicBondedPotential" title="arbdmodel.interactions.HarmonicBondedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBond.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBond.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBond.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBond.kscale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kscale</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicBond.kscale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBond.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicBond.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicBond.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicBond.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicBond.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicAngle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HarmonicAngle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicAngle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicAngle" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.HarmonicBondedPotential" title="arbdmodel.interactions.HarmonicBondedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicAngle.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicAngle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicAngle.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicAngle.kscale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kscale</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicAngle.kscale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicAngle.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicAngle.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicDihedral">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HarmonicDihedral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicDihedral"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicDihedral" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.HarmonicBondedPotential" title="arbdmodel.interactions.HarmonicBondedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicDihedral.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicDihedral.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicDihedral.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicDihedral.kscale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kscale</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicDihedral.kscale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicDihedral.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicDihedral.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicDihedral.periodic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">periodic</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicDihedral.periodic" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicVectorAngle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">HarmonicVectorAngle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicVectorAngle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicVectorAngle" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.HarmonicBondedPotential" title="arbdmodel.interactions.HarmonicBondedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicVectorAngle.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#HarmonicVectorAngle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.HarmonicVectorAngle.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicVectorAngle.kscale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kscale</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicVectorAngle.kscale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.HarmonicVectorAngle.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.HarmonicVectorAngle.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKPotential">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">WLCSKPotential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKPotential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKPotential" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.HarmonicBondedPotential" title="arbdmodel.interactions.HarmonicBondedPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a></p>
+<p>## <a class="reference external" href="https://aip.scitation.org/doi/full/10.1063/1.4968020">https://aip.scitation.org/doi/full/10.1063/1.4968020</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKPotential.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKPotential.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKPotential.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKPotential.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKPotential.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKPotential.filename" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKBond">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">WLCSKBond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKBond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKBond" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.WLCSKPotential" title="arbdmodel.interactions.WLCSKPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a></p>
+<p>## <a class="reference external" href="https://aip.scitation.org/doi/full/10.1063/1.4968020">https://aip.scitation.org/doi/full/10.1063/1.4968020</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKBond.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKBond.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKBond.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKBond.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.WLCSKBond.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKBond.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKBond.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKBond.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKAngle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.interactions.</span></span><span class="sig-name descname"><span class="pre">WLCSKAngle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKAngle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKAngle" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#arbdmodel.interactions.WLCSKPotential" title="arbdmodel.interactions.WLCSKPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a></p>
+<p>## <a class="reference external" href="https://aip.scitation.org/doi/full/10.1063/1.4968020">https://aip.scitation.org/doi/full/10.1063/1.4968020</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKAngle.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKAngle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKAngle.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKAngle.type_">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_</span></span><a class="headerlink" href="#arbdmodel.interactions.WLCSKAngle.type_" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.interactions.WLCSKAngle.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/interactions.html#WLCSKAngle.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.interactions.WLCSKAngle.potential" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Interaction Potentials</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ibi.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ibi module</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.range_"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.range_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.periodic"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.periodic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.potential"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.filename"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.AbstractPotential.write_file"><code class="docutils literal notranslate"><span class="pre">AbstractPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones"><code class="docutils literal notranslate"><span class="pre">LennardJones</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.LennardJones.potential"><code class="docutils literal notranslate"><span class="pre">LennardJones.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HalfHarmonic"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HalfHarmonic.potential"><code class="docutils literal notranslate"><span class="pre">HalfHarmonic.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.TabulatedNonbonded.write_file"><code class="docutils literal notranslate"><span class="pre">TabulatedNonbonded.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.__init__"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.potential"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.BoundaryPotential.write_file"><code class="docutils literal notranslate"><span class="pre">BoundaryPotential.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential"><code class="docutils literal notranslate"><span class="pre">NullPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.__init__"><code class="docutils literal notranslate"><span class="pre">NullPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.potential"><code class="docutils literal notranslate"><span class="pre">NullPotential.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.NullPotential.filename"><code class="docutils literal notranslate"><span class="pre">NullPotential.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.filename"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.filename()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBondedPotential.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBondedPotential.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond"><code class="docutils literal notranslate"><span class="pre">HarmonicBond</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicBond.potential"><code class="docutils literal notranslate"><span class="pre">HarmonicBond.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicDihedral.periodic"><code class="docutils literal notranslate"><span class="pre">HarmonicDihedral.periodic</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.__init__"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.kscale"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.kscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.HarmonicVectorAngle.type_"><code class="docutils literal notranslate"><span class="pre">HarmonicVectorAngle.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKPotential.filename"><code class="docutils literal notranslate"><span class="pre">WLCSKPotential.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond"><code class="docutils literal notranslate"><span class="pre">WLCSKBond</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKBond.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKBond.potential()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.__init__"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.type_"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.type_</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.interactions.WLCSKAngle.potential"><code class="docutils literal notranslate"><span class="pre">WLCSKAngle.potential()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

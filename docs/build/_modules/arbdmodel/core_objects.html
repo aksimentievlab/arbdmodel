@@ -1,0 +1,1465 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.core_objects &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/core_objects';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../shape-based_models/shape_cg.html">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/core_objects.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.core_objects</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">ismethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">get_resource_path</span><span class="p">,</span><span class="n">devlogger</span>
+
+
+<span class="c1">## Abstract classes</span>
+<div class="viewcode-block" id="Transformable">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transformable</span><span class="p">():</span>
+<div class="viewcode-block" id="Transformable.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span></div>
+
+
+<div class="viewcode-block" id="Transformable.translate">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.translate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transformable.rotate">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.rotate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">about</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span> <span class="n">R</span> <span class="o">=</span> <span class="n">R</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="n">about</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transformable.transform">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span>
+                  <span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+
+        <span class="n">R</span><span class="p">,</span><span class="n">center</span><span class="p">,</span><span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">center</span><span class="p">,</span><span class="n">offset</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">-</span><span class="n">center</span><span class="p">)</span><span class="o">+</span><span class="n">center</span><span class="o">+</span><span class="n">offset</span>
+                
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">## TODO: what if self.orientation is taken from parent?!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>  </div>
+
+
+<div class="viewcode-block" id="Transformable.get_collapsed_position">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.get_collapsed_position">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_collapsed_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># print(&quot;get_collapsed_position called&quot;, type(self), self.name)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Child</span><span class="p">):</span>
+            <span class="c1"># print(self.parent, isinstance(self.parent,Transformable))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">Transformable</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">applyOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_collapsed_position</span><span class="p">()</span>
+            
+                <span class="c1"># if self.parent.orientation is not None:</span>
+                <span class="c1">#     return self.parent.collapsedOrientation().dot(self.position) + self.parent.get_collapsed_position()</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="c1"># return a copy</span></div>
+
+                
+<div class="viewcode-block" id="Transformable.applyOrientation">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Transformable.applyOrientation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">applyOrientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">):</span>
+        <span class="c1"># print(&quot;applyOrientation called&quot;, self.name, obj)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Child</span><span class="p">):</span>
+            <span class="c1"># print( self.orientation, self.orientation is not None, None is not None )</span>
+            <span class="c1"># if self.orientation is not None:</span>
+            <span class="c1">#     # print(&quot;applyOrientation applying&quot;, self, self.name, self.orientation)</span>
+            <span class="c1">#     obj = self.orientation.dot(obj)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">Transformable</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">applyOrientation</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="c1"># print(&quot;applyOrientation returning&quot;, self.name, obj)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Parent">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Parent</span><span class="p">():</span>
+<div class="viewcode-block" id="Parent.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_duplicate_bonded_terms</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span> <span class="o">=</span> <span class="n">remove_duplicate_bonded_terms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bond_angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_potentials</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_sites</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+        
+        <span class="c1">## TODO: self.cacheInvalid = True # What will be in the cache?</span>
+
+<div class="viewcode-block" id="Parent.add">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1">## TODO: check the parent-child tree to make sure there are no cycles</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Child</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Attempted to add an object to a group that does not inherit from the &quot;Child&quot; type&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Child </span><span class="si">{}</span><span class="s2"> already belongs to some group&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.insert">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.insert">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1">## TODO: check the parent-child tree to make sure there are no cycles</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Child</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Attempted to add an object to a group that does not inherit from the &quot;Child&quot; type&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Child </span><span class="si">{}</span><span class="s2"> already belongs to some group&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.index">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.clear_all">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.clear_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_children</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keep_children</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bond_angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_potentials</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_sites</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="Parent.remove">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.remove">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_center">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_center">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">get_collapsed_position</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">weight</span> <span class="o">==</span> <span class="s1">&#39;mass&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">center</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_bond">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_bond">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_bond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">bond</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">j</span> <span class="p">)</span>
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">bond</span><span class="p">,</span> <span class="n">exclude</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_angle">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_angle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)))</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j,k): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_dihedral">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_dihedral">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_dihedral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">dihedral</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)))</span> <span class="o">==</span> <span class="mi">4</span> <span class="p">)</span>
+
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j,k,l): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">dihedral</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_vector_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">potential</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)))</span> <span class="o">==</span> <span class="mi">4</span> <span class="p">)</span>
+
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j,k,l): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">potential</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="Parent.add_improper">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_improper">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_improper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">dihedral</span><span class="p">):</span>
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j,k,l): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">dihedral</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_exclusion">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_exclusion">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_exclusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">):</span>
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+        <span class="c1">## TODO: perform following check elsewhere</span>
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_vector_angle">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_vector_angle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_vector_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">potential</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">potential</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_bond_angle">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_bond_angle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_bond_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">bond_angle</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)))</span> <span class="o">==</span> <span class="mi">4</span> <span class="p">)</span>
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+        <span class="c1"># beads = [b for b in self]</span>
+        <span class="c1"># for b in (i,j): assert(b in beads)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bond_angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span> <span class="n">bond_angle</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Parent.add_product_potential">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.add_product_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_product_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">potential_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; potential_list: list of tuples of form (particle_i, particle_j,..., TabulatedPotential) &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">potential_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too few potentials&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">potential_list</span><span class="p">:</span>
+            <span class="n">beads</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">pot</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">beads</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too few particles specified in product_potential&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">beads</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too many particles specified in product_potential&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_potentials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">potential_list</span><span class="p">)</span></div>
+
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+
+<div class="viewcode-block" id="Parent.get_restraints">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_restraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_restraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">+</span>  <span class="bp">self</span><span class="o">.</span><span class="n">group_sites</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_restraints</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_bonds">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_bonds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_bonds</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+
+<div class="viewcode-block" id="Parent.get_angles">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_angles">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_angles</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_dihedrals">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_dihedrals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dihedrals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_dihedrals</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_vector_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">vector_angles</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="Parent.get_impropers">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_impropers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_impropers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impropers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_impropers</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_exclusions">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_exclusions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_exclusions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_exclusions</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_vector_angles">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_vector_angles">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_vector_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vector_angles</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_vector_angles</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_bond_angles">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_bond_angles">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_bond_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bond_angles</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_bond_angles</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Parent.get_product_potentials">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.get_product_potentials">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_product_potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">product_potentials</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span> <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">get_product_potentials</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicate_bonded_terms</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_bond_potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bonds</span> <span class="o">=</span>  <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">ex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bonds</span><span class="p">()]</span>
+        <span class="n">bondangles1</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bond_angles</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bonds</span><span class="o">+</span><span class="n">bondangles1</span><span class="p">)</span> <span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_angle_potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">angles</span> <span class="o">=</span>  <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_angles</span><span class="p">()]</span>
+        <span class="n">bondangles1</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bond_angles</span><span class="p">()]</span>
+        <span class="n">bondangles2</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bond_angles</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">angles</span><span class="o">+</span><span class="n">bondangles1</span><span class="o">+</span><span class="n">bondangles2</span><span class="p">)</span> <span class="p">))</span>
+
+
+    <span class="c1">## Removed because prohibitively slow</span>
+    <span class="c1"># def remove_duplicate_terms(self):</span>
+    <span class="c1">#     for key in &quot;bonds angles dihedrals impropers exclusions&quot;.split():</span>
+    <span class="c1">#         self.remove_duplicate_item(key)</span>
+
+    <span class="c1"># def remove_duplicate_item(self, dict_key, existing=None):</span>
+    <span class="c1">#     if existing is None: existing = []</span>
+    <span class="c1">#     ret = [i for i in list(set(self.__dict__[dict_key])) if i not in existing]</span>
+    <span class="c1">#     self.__dict__[dict_key] = ret</span>
+    <span class="c1">#     existing.extend(ret)</span>
+    <span class="c1">#     for c in self.children:</span>
+    <span class="c1">#         if isinstance(c,Parent): </span>
+    <span class="c1">#             ret = ret + c.remove_duplicate_item(dict_key, existing)</span>
+    <span class="c1">#     return ret</span>
+        
+
+<div class="viewcode-block" id="Parent.__iter__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Parent.__iter__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">## TODO: decide if this is the nicest way to do it!</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Depth-first iteration through tree&quot;&quot;&quot;</span>
+        <span class="c1"># devlogger.info(f&#39;{self}.__iter__(): 0th child {None if len(self.children) == 0 else self.children[0]}&#39;)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Clone</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_original_recursively</span><span class="p">(),</span><span class="n">Parent</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">x</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">y</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">x</span>    </div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Parent</span><span class="p">):</span>
+                <span class="n">l</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">l</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">val</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+        
+<div class="viewcode-block" id="Child">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Child">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">():</span>
+<div class="viewcode-block" id="Child.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Child.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">Parent</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Child.__getattr__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Child.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get attribute from the parent</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if self.parent is not None:</span>
+        <span class="k">if</span> <span class="s2">&quot;parent&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;children&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+        <span class="c1">## Skip certain attributes from search</span>
+        <span class="n">excluded_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">excluded_attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39; and cannot look it up from the parent&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+        <span class="c1">## TODO: determine if there is a way to avoid __getattr__ if a method is being looked up  </span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ismethod</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no method &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ret</span> </div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clear_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_clear_types</span><span class="p">()</span></div>
+
+            
+    <span class="c1"># def __getstate__(self):</span>
+    <span class="c1">#     print(&quot;Child getstate called&quot;, self)</span>
+    <span class="c1">#     print(self.__dict__)</span>
+    <span class="c1">#     return (self.__dict__,)</span>
+
+    <span class="c1"># def __setstate__(self, state):</span>
+    <span class="c1">#     self.__dict__, = state</span>
+
+<div class="viewcode-block" id="Clone">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Clone">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Clone</span><span class="p">(</span><span class="n">Transformable</span><span class="p">,</span> <span class="n">Parent</span><span class="p">,</span> <span class="n">Child</span><span class="p">):</span>
+<div class="viewcode-block" id="Clone.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Clone.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">position</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">orientation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">original</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">original</span><span class="o">.</span><span class="n">position</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">original</span><span class="o">.</span><span class="n">orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">original</span><span class="o">.</span><span class="n">orientation</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original</span> <span class="o">=</span> <span class="n">original</span>
+        <span class="n">Child</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>        
+        <span class="n">Transformable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>        
+
+        <span class="c1">## TODO: keep own bond_list, etc, update when needed original changes</span>
+
+        <span class="k">if</span> <span class="s2">&quot;children&quot;</span> <span class="ow">in</span> <span class="n">original</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">original</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">Clone</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original</span><span class="o">.</span><span class="n">children</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="Clone.get_original_recursively">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Clone.get_original_recursively">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_original_recursively</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original</span><span class="p">,</span> <span class="n">Clone</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">original</span><span class="o">.</span><span class="n">get_original_recursively</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">original</span></div>
+
+
+<div class="viewcode-block" id="Clone.__getattr__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Clone.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get attribute from the original without descending the tree heirarchy, then look up parent</span>
+
+<span class="sd">        TODO: handle PointParticle lookups into ParticleType</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(&quot;Clone getattr&quot;,name)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">original</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">original</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;parent&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+</div>
+
+        
+<span class="c1">## Particle classes</span>
+<div class="viewcode-block" id="ParticleType">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.ParticleType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticleType</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that hold common attributes that particles can point to&quot;&quot;&quot;</span>
+
+    <span class="n">excludedAttributes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;idx&quot;</span><span class="p">,</span><span class="s2">&quot;type_&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot;position&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot;orientation&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot;children&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;excludedAttributes&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="ParticleType.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.ParticleType.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">diffusivity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">damping_coefficient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rigid_body_potentials</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Parent type is used to fall back on for nonbonded</span>
+<span class="sd">        interactions if this type is not specifically referenced &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">excludedAttributes</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1"># if diffusivity is None:</span>
+        <span class="c1">#     assert( (damping_coefficient is not None) and (mass is not None) )</span>
+
+        <span class="c1">## TODO: make most attributes @property</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span>   <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="n">charge</span>
+        <span class="k">if</span> <span class="n">mass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="k">if</span> <span class="n">damping_coefficient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_coefficient</span> <span class="o">=</span> <span class="n">damping_coefficient</span>
+        <span class="k">if</span> <span class="n">diffusivity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity</span> <span class="o">=</span> <span class="n">diffusivity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rigid_body_potentials</span> <span class="o">=</span> <span class="n">rigid_body_potentials</span>
+        <span class="n">devlogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Created </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> @ </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">excludedAttributes</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="ParticleType.is_same_type">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.ParticleType.is_same_type">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_same_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">consider_parents</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">consider_parents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">other</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">other</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="c1"># elif other.parent is not None and self.parent is not None and other.parent == self.parent:</span>
+            <span class="c1">#     return True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ParticleType.add_grid_potential">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.ParticleType.add_grid_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_grid_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gridfile</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">boundary_condition</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span><span class="s1">&#39;neumann&#39;</span><span class="p">,</span><span class="s1">&#39;periodic&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognized grid boundary condition &quot;</span><span class="si">{</span><span class="n">boundary_condition</span><span class="si">}</span><span class="s1">&quot;; should be one of &quot;dirichlet&quot;, &quot;neumann&quot; or &quot;periodic&quot;.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_potentials</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;grid_potentials&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">[(</span><span class="n">gridfile</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">boundary_condition</span><span class="p">)]</span></div>
+
+        
+<div class="viewcode-block" id="ParticleType.__getattr__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.ParticleType.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get attribute from the parent</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;parent&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;children&quot;</span><span class="p">:</span>
+           <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+        <span class="n">excluded_attributes</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="o">.</span><span class="n">excludedAttributes</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">excluded_attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39; and cannot look it up from the parent&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+        <span class="c1">## TODO: determine if there is a way to avoid __getattr__ if a method is being looked up</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ismethod</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no method &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ret</span> </div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hash_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">keyval</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keyval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span> <span class="n">keyval</span> <span class="o">=</span> <span class="p">(</span><span class="n">keyval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">tuple</span><span class="p">(</span><span class="n">keyval</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">keyval</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">())</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_equal_check</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">()</span> <span class="o">!=</span> <span class="n">b</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Two different ParticleTypes have same &#39;name&#39; attribute&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">check_equal</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">check_equal</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">_equal_check</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">_equal_check</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__le__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">_equal_check</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__gt__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">_equal_check</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__ge__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">_equal_check</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RigidBodyType">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBodyType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RigidBodyType</span><span class="p">(</span><span class="n">ParticleType</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that holds common attributes for RigidBody objects&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RigidBodyType.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBodyType.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moment_of_inertia</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rotational_diffusivity</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rotational_damping_coefficient</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">attached_particles</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="n">potential_grids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
+                 <span class="n">charge_grids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="n">pmf_grids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Parent type is used to fall back on for nonbonded</span>
+<span class="sd">        interactions if this type is not specifically referenced &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">rotational_diffusivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="p">(</span><span class="n">rotational_damping_coefficient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">moment_of_inertia</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_grids</span> <span class="ow">in</span> <span class="p">(</span><span class="n">potential_grids</span><span class="p">,</span><span class="n">charge_grids</span><span class="p">,</span><span class="n">pmf_grids</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">_grids</span><span class="p">:</span>
+                <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span> <span class="c1">#                 </span>
+                
+        <span class="n">ParticleType</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+                              <span class="n">moment_of_inertia</span> <span class="o">=</span> <span class="n">moment_of_inertia</span><span class="p">,</span>
+                              <span class="n">rotational_diffusivity</span><span class="o">=</span><span class="n">rotational_diffusivity</span><span class="p">,</span>
+                              <span class="n">rotational_damping_coefficient</span> <span class="o">=</span> <span class="n">rotational_damping_coefficient</span><span class="p">,</span>
+                              <span class="n">potential_grids</span> <span class="o">=</span> <span class="n">potential_grids</span><span class="p">,</span>
+                              <span class="n">charge_grids</span> <span class="o">=</span> <span class="n">charge_grids</span><span class="p">,</span>
+                              <span class="n">pmf_grids</span> <span class="o">=</span> <span class="n">pmf_grids</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_particles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">attached_particles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attach_particle</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RigidBodyType.attach_particle">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBodyType.attach_particle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attach_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particle</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; The particle argument must be a PointParticle. The position/orientation of the attached particle/group is in the RigidBody frame. &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">particle</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;RigidBody-attached particles are not allowed to have a parent&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_particles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">particle</span> <span class="p">)</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">_equal_check</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">()</span> <span class="o">!=</span> <span class="n">b</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Two different RigidBodyTypes have same &#39;name&#39; attribute&quot;</span><span class="p">)</span>    </div>
+
+
+<div class="viewcode-block" id="PointParticle">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PointParticle</span><span class="p">(</span><span class="n">Transformable</span><span class="p">,</span> <span class="n">Child</span><span class="p">):</span>
+<div class="viewcode-block" id="PointParticle.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;parent&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
+        <span class="n">Child</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Transformable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span>    <span class="o">=</span> <span class="n">type_</span>                
+        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span>     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rigid</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+        
+<div class="viewcode-block" id="PointParticle.add_restraint">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.add_restraint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_restraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraint</span><span class="p">):</span>
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">restraint</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PointParticle.add_grid_potential">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.add_grid_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_grid_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gridfile</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">):</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t0</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_g_</span><span class="si">{</span><span class="n">gridfile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.dx&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">_s_</span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">t0</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># TODO: REMOVE LINE: t = ParticleType(name, parent=t0)</span>
+             <span class="n">t</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">t0</span><span class="p">)(</span><span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">t0</span><span class="p">)</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">add_grid_potential</span><span class="p">(</span><span class="n">gridfile</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="n">boundary_condition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear_types</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="PointParticle.get_restraints">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.get_restraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_restraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PointParticle.duplicate">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.duplicate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="PointParticle.__getattr__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.PointParticle.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First try to get attribute from the parent, then type_</span>
+<span class="sd">        </span>
+<span class="sd">        Note that this data structure seems to be fragile, can result in stack overflow</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;__copy__&#39;</span><span class="p">,</span><span class="s1">&#39;__deepcopy__&#39;</span><span class="p">):</span>
+            <span class="c1">## Avoid using type_ and parent __copy__/__deepcopy__ functions!</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># return Child.__getattr__(self,name)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Child</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;type_&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;parent&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Programming error&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_psfpdb_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">segname</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">segname</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">segname</span> <span class="o">=</span> <span class="s2">&quot;A&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">chain</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="s2">&quot;A&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resname</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">resname</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">resname</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">resid</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">resid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">mass</span>
+            <span class="k">if</span> <span class="n">mass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">raise</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">occ</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">occupancy</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">occ</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">beta</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">segname</span> <span class="o">=</span> <span class="n">segname</span><span class="p">,</span>
+                    <span class="n">resname</span> <span class="o">=</span> <span class="n">resname</span><span class="p">,</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)[:</span><span class="mi">4</span><span class="p">],</span>
+                    <span class="n">chain</span> <span class="o">=</span> <span class="n">chain</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">resid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resid</span><span class="p">),</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="nb">type</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">type_</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="mi">7</span><span class="p">],</span>
+                    <span class="n">charge</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span><span class="p">,</span>
+                    <span class="n">occupancy</span> <span class="o">=</span> <span class="n">occ</span><span class="p">,</span>
+                    <span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type_</span><span class="si">}</span><span class="s1">&gt;&#39;</span></div>
+
+
+<div class="viewcode-block" id="RigidBody">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RigidBody</span><span class="p">(</span><span class="n">PointParticle</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RigidBody.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">attached_particles</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;parent&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
+        <span class="n">Child</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Transformable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RigidBodyType</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Attempted to create a RigidBody object from an invalid type </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span>    <span class="o">=</span> <span class="n">type_</span>                
+        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span>     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rigid</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1">## TODO: it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_particles</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">type_</span><span class="o">.</span><span class="n">attached_particles</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+        
+<div class="viewcode-block" id="RigidBody.add_restraint">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody.add_restraint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_restraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraint</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Harmonic restraints are not yet supported for rigid bodies; consider implementing this by attaching a dummy particle&#39;</span><span class="p">)</span>
+        <span class="c1">## TODO: how to handle duplicating and cloning bonds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">restraint</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RigidBody.get_restraints">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody.get_restraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_restraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RigidBody.duplicate">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody.duplicate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="RigidBody.__getattr__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.RigidBody.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First try to get attribute from the parent, then type_</span>
+<span class="sd">        </span>
+<span class="sd">        Note that this data structure seems to be fragile, can result in stack overflow</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># return Child.__getattr__(self,name)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Child</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;type_&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&#39;{type(self).__name__}&#39; object has no attribute &#39;</span><span class="si">{name}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Group">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Group">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Group</span><span class="p">(</span><span class="n">Transformable</span><span class="p">,</span> <span class="n">Parent</span><span class="p">,</span> <span class="n">Child</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Group.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Group.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span>
+                 <span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))),</span>
+                 <span class="n">remove_duplicate_bonded_terms</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">Transformable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="n">Child</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span> <span class="c1"># Initialize Child first</span>
+        <span class="n">Parent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">remove_duplicate_bonded_terms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isClone</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+
+<div class="viewcode-block" id="Group.clone">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Group.clone">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">isClone</span> <span class="o">=</span> <span class="kc">True</span>        <span class="c1"># TODO: use?</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">children</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="k">return</span> <span class="n">g</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                  <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="c1"># lists point to the same object</span></div>
+
+
+<div class="viewcode-block" id="Group.duplicate">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.Group.duplicate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">new</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="k">return</span> <span class="n">new</span></div>
+</div>
+
+
+    <span class="c1">## TODO override deepcopy so parent can be excluded from copying?</span>
+        
+    <span class="c1"># def __getstate__(self):</span>
+    <span class="c1">#     return (self.children, self.parent, self.position, self.orientation)</span>
+
+    <span class="c1"># def __setstate__(self, state):</span>
+    <span class="c1">#     self.children, self.parent, self.position, self.orientation = state</span>
+
+<span class="c1">#Not sure where should it go</span>
+<div class="viewcode-block" id="GroupSite">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.GroupSite">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GroupSite</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to represent a collection of particles that can be used by bond potentials. In arbdmodel only &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GroupSite.__init__">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.GroupSite.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particles</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+        
+<div class="viewcode-block" id="GroupSite.get_center">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.GroupSite.get_center">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">get_collapsed_position</span><span class="p">()</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="GroupSite.add_restraint">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.GroupSite.add_restraint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_restraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraint</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">restraint</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="GroupSite.get_restraints">
+<a class="viewcode-back" href="../../core/core_objects.html#arbdmodel.core_objects.GroupSite.get_restraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_restraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">]</span></div>
+</div>
+
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

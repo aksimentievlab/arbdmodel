@@ -1,0 +1,984 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.mesh_process_surface &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/mesh_process_surface';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../shape-based_models/shape_cg.html">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/mesh_process_surface.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.mesh_process_surface</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gmsh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">KDTree</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">writeDx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">HydroProRunner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Specialized surface mesh processor that handles triangle surface meshes </span>
+<span class="sd">&quot;&quot;&quot;</span> 
+    <span class="c1"># Conversion factors</span>
+<div class="viewcode-block" id="SurfaceMeshProcessor">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceMeshProcessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process surface meshes to calculate inertia, hydrodynamics and generate potential fields&quot;&quot;&quot;</span>
+    
+    <span class="c1"># Conversion factors</span>
+    <span class="n">MICRON_TO_ANGSTROM</span> <span class="o">=</span> <span class="mi">10000</span>
+    
+<div class="viewcode-block" id="SurfaceMeshProcessor.__init__">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_file</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">19.3</span><span class="p">,</span> <span class="n">simconf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">unit_scale</span><span class="o">=</span><span class="n">MICRON_TO_ANGSTROM</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize processor with surface mesh file</span>
+<span class="sd">        Args:</span>
+<span class="sd">            mesh_file: Path to .msh file with surface triangles</span>
+<span class="sd">            density: Material density in g/cm^3</span>
+<span class="sd">            simconf: SimConf object containing configuration parameters</span>
+<span class="sd">            unit_scale: Conversion factor from input units to angstroms</span>
+<span class="sd">            work_dir: Directory to store output files (default: current directory)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">mesh_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">density</span><span class="o">*</span><span class="mf">0.6022</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit_scale</span> <span class="o">=</span> <span class="n">unit_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_file</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">work_dir</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">simconf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultSimConf</span>
+            <span class="n">simconf</span> <span class="o">=</span> <span class="n">DefaultSimConf</span><span class="p">()</span>
+            
+        <span class="c1"># Extract parameters from simconf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">viscosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">solvent_density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span> <span class="o">=</span> <span class="n">simconf</span><span class="o">.</span><span class="n">get_binary</span><span class="p">(</span><span class="s1">&#39;hydropro&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_patricles</span><span class="o">=</span><span class="p">[]</span>
+        <span class="c1"># Initialize gmsh and read mesh</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully opened mesh file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_surface_mesh</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> nodes and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s2"> elements from surface mesh&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Calculate basic properties before alignment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_volume</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">density_correction</span> <span class="o">=</span> <span class="mf">1.0</span>
+                
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculated volume: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> Å³&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculated mass: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> amu&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Align mesh to center of mass and principal axes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_align_mesh</span><span class="p">()</span>
+            
+            <span class="c1"># Calculate final properties after alignment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inertia_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_inertia_tensor</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">principal_moments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inertia_tensor</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Principal moments of inertia: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">principal_moments</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing mesh: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SurfaceMeshProcessor.get_attached_particles">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.get_attached_particles">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_attached_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span><span class="p">,</span> <span class="n">PointParticle</span>
+        <span class="n">rbp</span><span class="o">=</span><span class="n">ParticleType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_attached&quot;</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">diffusivity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;attaching particles type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_attached using mesh nodes&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="n">rbpi</span><span class="o">=</span><span class="n">arbdmodel</span><span class="o">.</span><span class="n">PointParticle</span><span class="p">(</span><span class="n">rbp</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_patricles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rbpi</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_surface_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load triangular surface mesh directly&quot;&quot;&quot;</span>
+        <span class="c1"># Get all 2D entities (surfaces)</span>
+        <span class="n">surface_entities</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getEntities</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">surface_entities</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No surface entities found in mesh&quot;</span><span class="p">)</span>
+            
+        <span class="c1"># Collect all triangular elements</span>
+        <span class="n">all_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">all_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">surface_entities</span><span class="p">:</span>
+            <span class="n">element_types</span><span class="p">,</span> <span class="n">element_tags</span><span class="p">,</span> <span class="n">node_tags</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">getElements</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+            
+            <span class="c1"># Find triangular elements (type 2 in gmsh)</span>
+            <span class="n">tri_idx</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">type_num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">element_types</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">type_num</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># Triangle elements</span>
+                    <span class="n">tri_idx</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="k">break</span>
+                    
+            <span class="k">if</span> <span class="n">tri_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">element_node_tags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_tags</span><span class="p">[</span><span class="n">tri_idx</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Convert to 0-based</span>
+                <span class="n">all_elements</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">element_node_tags</span><span class="p">)</span>
+                <span class="n">all_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">element_node_tags</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_elements</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No triangular elements found in mesh&quot;</span><span class="p">)</span>
+            
+        <span class="c1"># Get coordinates of all nodes</span>
+        <span class="n">node_coords</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">node_idx</span> <span class="ow">in</span> <span class="n">all_nodes</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">getNode</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">node_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># +1 because gmsh uses 1-based indexing</span>
+            <span class="n">node_coords</span><span class="p">[</span><span class="n">node_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span>
+            
+        <span class="c1"># Create node array in sorted order</span>
+        <span class="n">sorted_node_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">node_coords</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">sorted_node_indices</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_scale</span>  <span class="c1"># Apply unit conversion</span>
+        
+        <span class="c1"># Create mapping from old to new indices</span>
+        <span class="n">node_index_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">old_idx</span><span class="p">:</span> <span class="n">new_idx</span> <span class="k">for</span> <span class="n">new_idx</span><span class="p">,</span> <span class="n">old_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_node_indices</span><span class="p">)}</span>
+        
+        <span class="c1"># Remap element indices</span>
+        <span class="n">remapped_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">all_elements</span><span class="p">:</span>
+            <span class="n">remapped_elements</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">node_index_map</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">element</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">remapped_elements</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate volume of the closed surface mesh using the divergence theorem&quot;&quot;&quot;</span>
+        <span class="n">total_volume</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># For a closed surface mesh, orientation is important for correct signing</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="c1"># Get vertices of triangle</span>
+            <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
+            
+            <span class="c1"># Calculate signed volume of tetrahedron formed by triangle and origin</span>
+            <span class="c1"># V = (1/6) * ((v1-v0) × (v2-v0)) · v0</span>
+            <span class="n">v01</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">-</span> <span class="n">v0</span>
+            <span class="n">v02</span> <span class="o">=</span> <span class="n">v2</span> <span class="o">-</span> <span class="n">v0</span>
+            <span class="n">cross_product</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v01</span><span class="p">,</span> <span class="n">v02</span><span class="p">)</span>
+            
+            <span class="c1"># For a properly oriented closed mesh, we use the signed volume</span>
+            <span class="c1"># This relies on triangle winding order being consistent</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cross_product</span><span class="p">,</span> <span class="n">v0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">6.0</span>
+            
+            <span class="c1"># Add the signed volume (will be negative for triangles facing inward)</span>
+            <span class="n">total_volume</span> <span class="o">+=</span> <span class="n">volume</span>
+        
+        <span class="c1"># Take absolute value of the final result to handle any mesh orientation issues</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">total_volume</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_center_of_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate center of mass of the surface mesh&quot;&quot;&quot;</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">total_weight</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># For a surface mesh, weight each triangle by its area</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="c1"># Get vertices of triangle</span>
+            <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
+            
+            <span class="c1"># Calculate area using cross product</span>
+            <span class="n">v01</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">-</span> <span class="n">v0</span>
+            <span class="n">v02</span> <span class="o">=</span> <span class="n">v2</span> <span class="o">-</span> <span class="n">v0</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v01</span><span class="p">,</span> <span class="n">v02</span><span class="p">))</span>
+            
+            <span class="c1"># Centroid of triangle</span>
+            <span class="n">centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">v0</span> <span class="o">+</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span>
+            
+            <span class="c1"># Add weighted contribution</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="n">centroid</span> <span class="o">*</span> <span class="n">area</span>
+            <span class="n">total_weight</span> <span class="o">+=</span> <span class="n">area</span>
+            
+        <span class="k">return</span> <span class="n">com</span> <span class="o">/</span> <span class="n">total_weight</span> <span class="k">if</span> <span class="n">total_weight</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_inertia_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inertia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        
+        <span class="c1"># Compute total mass based on volume and density</span>
+        <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">*</span> <span class="mf">0.6022</span>
+        
+        <span class="c1"># Get bounding box dimensions to estimate shape</span>
+        <span class="n">bounds_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bounds_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">bounds_max</span> <span class="o">-</span> <span class="n">bounds_min</span>
+        
+        <span class="c1"># Sort dimensions to identify major axes</span>
+        <span class="n">sorted_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        
+        <span class="c1"># For a rod-like object with aspect ratio AR</span>
+        <span class="c1"># Assuming AR is the ratio of length to diameter</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="n">diameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">diameter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">AR</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="n">diameter</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">AR</span> <span class="o">=</span> <span class="mf">1.0</span>
+            
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detected dimensions: </span><span class="si">{</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Estimated aspect ratio: </span><span class="si">{</span><span class="n">AR</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate moments of inertia for a cylindrical rod</span>
+        <span class="c1"># For a uniform rod of length L and radius R:</span>
+        <span class="c1"># I_axial = (1/2)MR²</span>
+        <span class="c1"># I_transverse = (1/12)ML² + (1/4)MR²</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">/</span> <span class="mf">2.0</span>
+        
+        <span class="c1"># Along major axis (assuming z is the major axis)</span>
+        <span class="n">I_axial</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span><span class="o">**</span><span class="mi">2</span>
+        
+        <span class="c1"># Perpendicular to major axis</span>
+        <span class="n">I_transverse</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">12.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">length</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">4.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">radius</span><span class="o">**</span><span class="mi">2</span>
+        
+        <span class="c1"># Create a diagonal inertia tensor based on these analytic expressions</span>
+        <span class="c1"># Identify which axis is the major axis (longest dimension)</span>
+        <span class="n">major_axis_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">major_axis_idx</span><span class="p">:</span>
+                <span class="n">inertia</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_axial</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inertia</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_transverse</span>
+        
+        <span class="k">return</span> <span class="n">inertia</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_align_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align mesh to center of mass and principal axes with longest dimension along Z-axis&quot;&quot;&quot;</span>
+        <span class="c1"># First center the mesh</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_center_of_mass</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">-=</span> <span class="n">com</span>
+        
+        <span class="c1"># Get bounding box dimensions to estimate shape</span>
+        <span class="n">bounds_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bounds_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">bounds_max</span> <span class="o">-</span> <span class="n">bounds_min</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pre-alignment dimensions: </span><span class="si">{</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate and diagonalize inertia tensor</span>
+        <span class="n">inertia</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_inertia_tensor</span><span class="p">()</span>
+        <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">inertia</span><span class="p">)</span>
+        
+        <span class="c1"># For a rod, smallest moment of inertia is along the rod axis</span>
+        <span class="c1"># We want this to be aligned with the Z-axis (axis 2)</span>
+        <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)</span>
+        
+        <span class="c1"># Reorder to put smallest moment (rod axis) as Z</span>
+        <span class="c1"># Z should be axis 2, so we want the smallest moment to be last</span>
+        <span class="n">z_vec</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">sort_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># Vector of smallest moment (rod axis)</span>
+        <span class="n">x_vec</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">sort_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">y_vec</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">sort_idx</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        
+        <span class="c1"># Create new eigenvector matrix with Z as the rod axis</span>
+        <span class="n">reordered_eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span><span class="p">])</span>
+        
+        <span class="c1"># Ensure right-handed coordinate system</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">reordered_eigenvectors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">reordered_eigenvectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            
+        <span class="c1"># Rotate mesh to align with principal axes with rod along Z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">@</span> <span class="n">reordered_eigenvectors</span>
+        
+        <span class="c1"># Get post-alignment dimensions</span>
+        <span class="n">bounds_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bounds_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">bounds_max</span> <span class="o">-</span> <span class="n">bounds_min</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Post-alignment dimensions: </span><span class="si">{</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Verify that Z is now the longest dimension</span>
+        <span class="k">if</span> <span class="n">dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;WARNING: Z-axis is not the longest dimension after alignment!&quot;</span><span class="p">)</span>
+            
+        <span class="c1"># Calculate aspect ratio (using Z as length)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Z axis should be the rod length</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Use max of X or Y for width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Calculated aspect ratio: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Store transformation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">reordered_eigenvectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translation</span> <span class="o">=</span> <span class="n">com</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aligned mesh to principal axes with rod along Z-axis, COM: </span><span class="si">{</span><span class="n">com</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SurfaceMeshProcessor.calculate_damping">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.calculate_damping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_damping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate hydrodynamic properties using HydroPro&quot;&quot;&quot;</span>
+        <span class="c1"># Create work directory if it doesn&#39;t exist</span>
+        <span class="k">if</span> <span class="n">work_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">work_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">work_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span>
+
+        <span class="n">base_path</span> <span class="o">=</span> <span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;hydrocal&quot;</span>
+        
+        <span class="c1"># Save the mesh in PDB format for HydroPro</span>
+        <span class="n">pdb_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.pdb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_as_pdb</span><span class="p">(</span><span class="n">pdb_path</span><span class="p">)</span>
+        
+        <span class="c1"># Run HydroPro to get hydrodynamic properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">HydroProRunner</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+            <span class="n">binary_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">viscosity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span><span class="p">,</span>
+            <span class="n">solvent_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span><span class="p">,</span>
+            <span class="n">structure_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">run_calculation</span><span class="p">(</span><span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;translation_damping&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotational_damping_coefficient</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;rotation_damping&#39;</span><span class="p">]</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Translational damping: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transdamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rotational damping: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotational_damping_coefficient</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">pdb_path</span></div>
+
+
+<div class="viewcode-block" id="SurfaceMeshProcessor.generate_potential_grid">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.generate_potential_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_potential_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate potential grid for ARBD&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate grid bounds with buffer</span>
+        <span class="n">bounds_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">buffer</span>
+        <span class="n">bounds_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">buffer</span>
+        
+        <span class="c1"># Create grid points</span>
+        <span class="n">npts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">bounds_max</span> <span class="o">-</span> <span class="n">bounds_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">spacing</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds_min</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds_max</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">npts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds_min</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds_max</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">npts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds_min</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bounds_max</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">npts</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Create KD-tree for fast distance calculations</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate distances to nearest surface points</span>
+        <span class="n">grid_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">X</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">Y</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">Z</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">distances</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        
+        <span class="c1"># Generate potential</span>
+        <span class="n">potential</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">distances</span> <span class="o">&lt;=</span> <span class="n">cutoff</span>
+        <span class="n">potential</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_potential</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">distances</span><span class="p">[</span><span class="n">mask</span><span class="p">])))</span>
+        
+        <span class="k">return</span> <span class="n">potential</span><span class="p">,</span> <span class="n">bounds_min</span><span class="p">,</span> <span class="n">spacing</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="SurfaceMeshProcessor.write_no_enter_potential_dx">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.write_no_enter_potential_dx">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_no_enter_potential_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;.dx&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate and write potential field to DX file&quot;&quot;&quot;</span>
+        <span class="n">potential</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_potential_grid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">writeDx</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SurfaceMeshProcessor.save_aligned_mesh">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_aligned_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the aligned mesh to a new .msh file&quot;&quot;&quot;</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;aligned_mesh&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># For surface mesh</span>
+        <span class="n">entity_dim</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">element_type</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Triangle in gmsh</span>
+            
+        <span class="c1"># Add a discrete entity</span>
+        <span class="n">entity_tag</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">addDiscreteEntity</span><span class="p">(</span><span class="n">entity_dim</span><span class="p">)</span>
+        
+        <span class="c1"># Add nodes</span>
+        <span class="n">node_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">node_coords</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">node_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="n">node_coords</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">node</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_scale</span><span class="p">)</span>  <span class="c1"># Convert back to mesh units</span>
+            
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">addNodes</span><span class="p">(</span><span class="n">entity_dim</span><span class="p">,</span> <span class="n">entity_tag</span><span class="p">,</span> <span class="n">node_tags</span><span class="p">,</span> <span class="n">node_coords</span><span class="p">)</span>
+        
+        <span class="c1"># Add elements</span>
+        <span class="n">element_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">element_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">element_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="n">element_nodes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">element</span><span class="p">])</span>  <span class="c1"># Convert to 1-based indexing</span>
+            
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">addElements</span><span class="p">(</span><span class="n">entity_dim</span><span class="p">,</span> <span class="n">entity_tag</span><span class="p">,</span> <span class="p">[</span><span class="n">element_type</span><span class="p">],</span> <span class="p">[</span><span class="n">element_tags</span><span class="p">],</span> <span class="p">[</span><span class="n">element_nodes</span><span class="p">])</span>
+        
+        <span class="c1"># Write mesh</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">))</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+
+            
+<div class="viewcode-block" id="SurfaceMeshProcessor.save_as_pdb">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_as_pdb">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_as_pdb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the aligned mesh as a PDB file (coordinates in Å)&quot;&quot;&quot;</span>
+        <span class="c1"># PDB format specifications</span>
+        <span class="n">HEADER</span> <span class="o">=</span> <span class="s2">&quot;HEADER    ALIGNED SURFACE MESH                   &quot;</span>
+        <span class="n">ATOM_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;ATOM  </span><span class="si">{:5d}</span><span class="s2"> </span><span class="si">{:4s}</span><span class="s2"> </span><span class="si">{:3s}</span><span class="s2"> </span><span class="si">{:1s}{:4d}</span><span class="s2">    </span><span class="si">{:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}</span><span class="s2">&quot;</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="c1"># Write header</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+            <span class="n">date_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%y&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HEADER</span><span class="si">}{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">   XXXX</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Calculate box dimensions for CRYST record</span>
+            <span class="n">bounds_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">bounds_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">bounds_max</span> <span class="o">-</span> <span class="n">bounds_min</span>
+            
+            <span class="c1"># Write crystallographic information</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CRYST1</span><span class="si">{</span><span class="n">box_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">9.3f</span><span class="si">}{</span><span class="n">box_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">9.3f</span><span class="si">}{</span><span class="n">box_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">9.3f</span><span class="si">}</span><span class="s2">  90.00  90.00  90.00 P 1           1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Write atoms (nodes from the mesh)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="c1"># PDB uses 1-indexed atom numbers</span>
+                <span class="n">atom_num</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="c1"># Use CA (alpha carbon) atom type for visibility in viewers</span>
+                <span class="n">atom_name</span> <span class="o">=</span> <span class="s2">&quot; CA &quot;</span>
+                <span class="c1"># Use residue name MES for mesh</span>
+                <span class="n">res_name</span> <span class="o">=</span> <span class="s2">&quot;MES&quot;</span>
+                <span class="c1"># Use chain ID A</span>
+                <span class="n">chain_id</span> <span class="o">=</span> <span class="s2">&quot;A&quot;</span>
+                <span class="c1"># Residue number = atom number for simplicity</span>
+                <span class="n">res_num</span> <span class="o">=</span> <span class="n">atom_num</span> <span class="o">%</span> <span class="mi">10000</span>  <span class="c1"># PDB format limits res numbers to 9999</span>
+                <span class="c1"># X, Y, Z coordinates in Ångströms (already in the correct units)</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="c1"># Use 1.0 for occupancy and 0.0 for temperature factor</span>
+                <span class="n">occupancy</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">temp_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+                
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ATOM_FORMAT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">atom_num</span><span class="p">,</span><span class="w"> </span><span class="n">atom_name</span><span class="p">,</span><span class="w"> </span><span class="n">res_name</span><span class="p">,</span><span class="w"> </span><span class="n">chain_id</span><span class="p">,</span><span class="w"> </span><span class="n">res_num</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">occupancy</span><span class="p">,</span><span class="w"> </span><span class="n">temp_factor</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Write connectivity (the mesh elements) as CONECT records</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+                <span class="c1"># PDB CONECT records use 1-indexed atom numbers</span>
+                <span class="n">atom_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">element</span><span class="p">]</span>
+                
+                <span class="c1"># Create a CONECT record for each edge of the triangle</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">atom_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atom_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> 
+                         <span class="p">(</span><span class="n">atom_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">atom_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> 
+                         <span class="p">(</span><span class="n">atom_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">atom_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                
+                <span class="k">for</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CONECT</span><span class="si">{</span><span class="n">a1</span><span class="si">:</span><span class="s2">5d</span><span class="si">}{</span><span class="n">a2</span><span class="si">:</span><span class="s2">5d</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Write end of file</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved aligned mesh as PDB: </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SurfaceMeshProcessor.save_aligned_mesh_both_formats">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.SurfaceMeshProcessor.save_aligned_mesh_both_formats">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_aligned_mesh_both_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_filename</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the aligned mesh in both MSH and PDB formats&quot;&quot;&quot;</span>
+        <span class="c1"># Save as MSH (in microns)</span>
+        <span class="n">msh_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_filename</span><span class="si">}</span><span class="s2">.msh&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_aligned_mesh</span><span class="p">(</span><span class="n">msh_filename</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved aligned mesh as MSH: </span><span class="si">{</span><span class="n">msh_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Save as PDB (in Ångströms)</span>
+        <span class="n">pdb_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_filename</span><span class="si">}</span><span class="s2">.pdb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_as_pdb</span><span class="p">(</span><span class="n">pdb_filename</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved aligned mesh as PDB: </span><span class="si">{</span><span class="n">pdb_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="process_surface_mesh">
+<a class="viewcode-back" href="../../rigidbody_models/mesh_process_surface.html#arbdmodel.mesh_process_surface.process_surface_mesh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_surface_mesh</span><span class="p">(</span><span class="n">mesh_file</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">19.3</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">303</span><span class="p">,</span> <span class="n">viscosity</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                        <span class="n">solvent_density</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">output_dx</span><span class="o">=</span><span class="s2">&quot;surface_potential.dx&quot;</span><span class="p">,</span> 
+                        <span class="n">output_mesh</span><span class="o">=</span><span class="s2">&quot;aligned_surface.msh&quot;</span><span class="p">,</span> <span class="n">binary_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process surface mesh file and calculate all properties</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        mesh_file: Path to .msh file containing surface triangles</span>
+<span class="sd">        density: Material density in g/cm³</span>
+<span class="sd">        temperature: Temperature in Kelvin</span>
+<span class="sd">        viscosity: Solvent viscosity in poise</span>
+<span class="sd">        solvent_density: Solvent density in g/cm³</span>
+<span class="sd">        output_dx: Optional path to output potential DX file</span>
+<span class="sd">        output_mesh: Optional path to save aligned mesh</span>
+<span class="sd">        binary_path: Path to HydroPro executable</span>
+<span class="sd">        expected_mass: Optional expected mass in amu to calibrate calculations</span>
+<span class="sd">        expected_aspect_ratio: Optional expected aspect ratio to calibrate inertia</span>
+<span class="sd">        **kwargs: Additional arguments for potential generation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">SurfaceMeshProcessor</span><span class="p">(</span>
+        <span class="n">mesh_file</span><span class="p">,</span>
+        <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="n">viscosity</span><span class="o">=</span><span class="n">viscosity</span><span class="p">,</span>
+        <span class="n">solvent_density</span><span class="o">=</span><span class="n">solvent_density</span><span class="p">,</span>
+        <span class="n">binary_path</span><span class="o">=</span><span class="n">binary_path</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Calculate hydrodynamic properties</span>
+    <span class="n">processor</span><span class="o">.</span><span class="n">calculate_damping</span><span class="p">()</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mass: </span><span class="si">{</span><span class="n">processor</span><span class="o">.</span><span class="n">mass</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> amu&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Volume: </span><span class="si">{</span><span class="n">processor</span><span class="o">.</span><span class="n">volume</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> Å³&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Principal moments of inertia:&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">processor</span><span class="o">.</span><span class="n">principal_moments</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Translational damping coefficients [1/ns]:&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">processor</span><span class="o">.</span><span class="n">transdamp</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rotational damping coefficients [1/ns]:&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">processor</span><span class="o">.</span><span class="n">rotational_damping_coefficient</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">output_dx</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">write_no_enter_potential_dx</span><span class="p">()</span>
+        
+    <span class="k">if</span> <span class="n">output_mesh</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">save_aligned_mesh</span><span class="p">(</span><span class="n">output_mesh</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">processor</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">process_surface_mesh</span><span class="p">(</span><span class="s2">&quot;surface_mesh.msh&quot;</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,634 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.sali_polymer_model &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/sali_polymer_model';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../shape-based_models/shape_cg.html">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/sali_polymer_model.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.sali_polymer_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">## Test with `python -m arbdmodel.hps_polymer_model`</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+
+<span class="c1">## Local imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParticleType</span><span class="p">,</span> <span class="n">PointParticle</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">get_resource_path</span>    
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArbdModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.polymer</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolymerSection</span><span class="p">,</span> <span class="n">PolymerGroup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interactions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractPotential</span><span class="p">,</span> <span class="n">HarmonicBond</span><span class="p">,</span> <span class="n">HarmonicBondedPotential</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.coords</span><span class="w"> </span><span class="kn">import</span> <span class="n">quaternion_to_matrix</span>
+
+
+<span class="sd">&quot;&quot;&quot;Define particle types&quot;&quot;&quot;</span>
+<span class="n">type_</span> <span class="o">=</span> <span class="n">ParticleType</span><span class="p">(</span><span class="s2">&quot;AA&quot;</span><span class="p">,</span>
+                     <span class="c1"># units &quot;297.15 k K / (6 pi 0.92 mPa s 6 AA)&quot; &quot;AA**2/ns&quot;</span>
+                     <span class="n">diffusivity</span> <span class="o">=</span> <span class="mf">39.429314</span>
+<span class="p">)</span>
+
+<span class="c1">## Bonded potentials</span>
+<div class="viewcode-block" id="LinearBond">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.LinearBond">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearBond</span><span class="p">(</span><span class="n">HarmonicBond</span><span class="p">):</span>
+<div class="viewcode-block" id="LinearBond.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.LinearBond.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">rRange</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">maxForce</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;potentials/&quot;</span><span class="p">):</span>
+        <span class="n">HarmonicBondedPotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">rRange</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">maxForce</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;linearbond&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kscale_</span> <span class="o">=</span> <span class="mf">1.0</span></div>
+
+
+<div class="viewcode-block" id="LinearBond.potential">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.LinearBond.potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="SaliNonbonded">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliNonbonded">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SaliNonbonded</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">):</span>
+<div class="viewcode-block" id="SaliNonbonded.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliNonbonded.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="n">AbstractPotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SaliNonbonded.potential">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliNonbonded.potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Constant force excluded volume &quot;&quot;&quot;</span>
+        <span class="n">force</span> <span class="o">=</span> <span class="mi">10</span>              <span class="c1"># kcal_mol/AA</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="mi">6</span>
+        
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">radius</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="o">*</span> <span class="n">force</span>            
+        <span class="k">return</span> <span class="n">u</span></div>
+</div>
+
+
+<div class="viewcode-block" id="SaliBeadsFromPolymer">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliBeadsFromPolymer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SaliBeadsFromPolymer</span><span class="p">(</span><span class="n">Group</span><span class="p">):</span>
+    <span class="c1"># p = PointParticle(_P, (0,0,0), &quot;P&quot;)</span>
+    <span class="c1"># b = PointParticle(_B, (3,0,1), &quot;B&quot;)</span>
+    <span class="c1"># nt = Group( name = &quot;nt&quot;, children = [p,b])</span>
+    <span class="c1"># nt.add_bond( i=p, j=b, bond = get_resource_path(&#39;two_bead_model/BPB.dat&#39;) )</span>
+
+<div class="viewcode-block" id="SaliBeadsFromPolymer.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliBeadsFromPolymer.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">sequence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="c1"># ... set random sequence</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span> <span class="o">=</span> <span class="n">polymer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span>
+
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;segname&#39;</span><span class="p">,</span><span class="s1">&#39;chain&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="c1"># import pdb</span>
+                <span class="c1"># pdb.set_trace()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span> <span class="o">!=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of sequence does not match length of polymer&quot;</span><span class="p">)</span>
+        <span class="n">Group</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_beads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span> <span class="o">/</span> <span class="mi">20</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clear_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># beads = self.children</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_beads</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb</span><span class="p">):</span>
+            <span class="c1"># c = self.polymer.monomer_index_to_contour(i)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">nb</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mf">0.5</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="n">bead</span> <span class="o">=</span> <span class="n">PointParticle</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span>
+                                 <span class="n">resid</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bead</span><span class="p">)</span>
+
+        <span class="c1">## Two consecutive nts </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">b1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">b2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot; units &quot;10 kJ/N_A&quot; kcal_mol &quot;&quot;&quot;</span>
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">LinearBond</span><span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                              <span class="n">r0</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span>
+                              <span class="n">rRange</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span>
+                              <span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                              <span class="n">maxForce</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_bond</span><span class="p">(</span> <span class="n">i</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">bond</span> <span class="o">=</span> <span class="n">bond</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SaliModel">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SaliModel</span><span class="p">(</span><span class="n">ArbdModel</span><span class="p">):</span>
+<div class="viewcode-block" id="SaliModel.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymers</span><span class="p">,</span>
+                 <span class="n">sequences</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">debye_length</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">damping_coefficient</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">DEBUG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        [debye_length]: angstroms</span>
+<span class="sd">        [damping_coefficient]: ns</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: diffusion coefficient arbitrarily set to 100 AA**2/ns in SaliModel&quot;</span><span class="p">)</span>
+        
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;timestep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1047e-6</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
+
+        <span class="k">if</span> <span class="s1">&#39;decompPeriod&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;decompPeriod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Assign sequences &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sequences</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;HpsModel must be provided a sequences argument&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span> <span class="o">=</span> <span class="n">PolymerGroup</span><span class="p">(</span><span class="n">polymers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequences</span> <span class="o">=</span> <span class="n">sequences</span>
+        <span class="n">ArbdModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># &quot;&quot;&quot; Update type diffusion coefficients &quot;&quot;&quot;</span>
+        <span class="c1"># self.set_damping_coefficient( damping_coefficient )</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Set up nonbonded interactions &quot;&quot;&quot;</span>
+        <span class="n">nonbonded</span> <span class="o">=</span> <span class="n">SaliNonbonded</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useNonbondedScheme</span><span class="p">(</span> <span class="n">nonbonded</span><span class="p">,</span> <span class="n">typeA</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span> <span class="n">typeB</span><span class="o">=</span><span class="n">type_</span> <span class="p">)</span>
+<span class="w">                </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Generate beads &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_beads</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SaliModel.update_splines">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.update_splines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_splines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span><span class="o">.</span><span class="n">polymers</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_splines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">n</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">n</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_beads</span><span class="p">()</span></div>
+
+        <span class="c1">## TODO Apply restraints, etc</span>
+
+<div class="viewcode-block" id="SaliModel.generate_beads">
+<a class="viewcode-back" href="../../polymer_modeling/sali_polymer_model.html#arbdmodel.sali_polymer_model.SaliModel.generate_beads">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peptides</span> <span class="o">=</span> <span class="p">[</span><span class="n">SaliBeadsFromPolymer</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span><span class="o">.</span><span class="n">polymers</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sequences</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peptides</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">_generate_beads</span><span class="p">()</span></div>
+</div>
+
+
+    <span class="c1"># def set_damping_coefficient(self, damping_coefficient):</span>
+    <span class="c1">#     for t in self.types:</span>
+    <span class="c1">#         t.damping_coefficient = damping_coefficient</span>
+    <span class="c1">#         # t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

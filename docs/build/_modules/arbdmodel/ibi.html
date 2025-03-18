@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.ibi &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/ibi';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../shape-based_models/shape_cg.html">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/ibi.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.ibi</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">savgol_filter</span> <span class="k">as</span> <span class="n">savgol</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArbdModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interactions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractPotential</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span><span class="p">,</span><span class="n">trange</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.contrib.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logging_redirect_tqdm</span>
+
+
+<span class="sd">&quot;&quot;&quot; This file includes various routines to simplify running</span>
+<span class="sd">simulations with Iterative Boltmann Inversion. &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DegreeOfFreedom">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DegreeOfFreedom</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Base class for representing a degree of freedom in the system.</span>
+
+<span class="sd">    Concrete examples include the distance, angle, or dihedral angle,</span>
+<span class="sd"> between nearby &quot;bonded&quot; interaction sites, or the distances between</span>
+<span class="sd"> pairs of particle types (with exclusions!).</span>
+
+<span class="sd">    Derived classes should calculate a value for the DoF from particle</span>
+<span class="sd">  coordinates.  &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DegreeOfFreedom.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">particles</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">particles</span>
+        <span class="c1"># self.ids = [p.idx for p in particles]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_particle_to_sel</span><span class="p">(</span><span class="n">particle</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Recursive function to convert particle or group_site to</span>
+<span class="sd">        selection or list of selections &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">particle</span><span class="p">,</span> <span class="n">ArbdModel</span><span class="o">.</span><span class="n">_GroupSite</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">DegreeOfFreedom</span><span class="o">.</span><span class="n">_particle_to_sel</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">universe</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">particle</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">universe</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span> <span class="s2">&quot;index </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">particle</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sel_list_to_positions</span><span class="p">(</span><span class="n">sel_list</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Recursive function to convert list of selctions into positions &quot;&quot;&quot;</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sel</span> <span class="ow">in</span> <span class="n">sel_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">DegreeOfFreedom</span><span class="o">.</span><span class="n">_sel_list_to_positions</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">sel</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">positions</span>
+
+<div class="viewcode-block" id="DegreeOfFreedom.wrap_vector">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.wrap_vector">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrap_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span> <span class="o">==</span> <span class="mi">90</span> <span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">sl</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">v</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">sl</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">v</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="DegreeOfFreedom.get_values">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.get_values">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DegreeOfFreedom</span><span class="o">.</span><span class="n">_particle_to_sel</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">universe</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">DegreeOfFreedom</span><span class="o">.</span><span class="n">_sel_list_to_positions</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">positions</span><span class="p">)]</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="DegreeOfFreedom.compute_volume">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DegreeOfFreedom.compute_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="RadiusDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.RadiusDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RadiusDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">ri</span><span class="p">,</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ri</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span>
+
+<div class="viewcode-block" id="RadiusDof.compute_volume">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.RadiusDof.compute_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+         <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="BondDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BondDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">ri</span><span class="p">,</span><span class="n">rj</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">rj</span><span class="o">-</span><span class="n">ri</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span>
+
+<div class="viewcode-block" id="BondDof.compute_volume">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondDof.compute_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+         <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="AngleDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AngleDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AngleDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">ri</span><span class="p">,</span><span class="n">rj</span><span class="p">,</span><span class="n">rk</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="n">rji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">ri</span><span class="o">-</span><span class="n">rj</span><span class="p">)</span>
+        <span class="n">rjk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">rk</span><span class="o">-</span><span class="n">rj</span><span class="p">)</span>
+        <span class="n">cos</span> <span class="o">=</span> <span class="n">rji</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rjk</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rji</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rjk</span><span class="p">))</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="k">return</span> <span class="n">angle</span>
+
+<div class="viewcode-block" id="AngleDof.compute_volume">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AngleDof.compute_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+        <span class="n">sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">bins</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sin</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">sin</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+</div>
+
+
+<div class="viewcode-block" id="DihedralDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.DihedralDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DihedralDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">posa</span><span class="p">,</span><span class="n">posb</span><span class="p">,</span><span class="n">posc</span><span class="p">,</span><span class="n">posd</span> <span class="o">=</span> <span class="n">positions</span>
+
+        <span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posa</span> <span class="o">-</span> <span class="n">posb</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posb</span> <span class="o">-</span> <span class="n">posc</span><span class="p">)</span>
+        <span class="n">cd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posc</span> <span class="o">-</span> <span class="n">posd</span><span class="p">)</span>
+
+        <span class="n">distbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">crossABC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">crossBCD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">cd</span><span class="p">)</span>
+        <span class="n">crossX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">crossABC</span><span class="p">)</span>
+
+        <span class="n">cos_phi</span> <span class="o">=</span> <span class="n">crossABC</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossABC</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">))</span>
+        <span class="n">sin_phi</span> <span class="o">=</span> <span class="n">crossX</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossX</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">))</span>
+
+        <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sin_phi</span><span class="p">,</span> <span class="n">cos_phi</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="k">return</span> <span class="n">angle</span></div>
+
+
+<div class="viewcode-block" id="BondAngleDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.BondAngleDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BondAngleDof</span><span class="p">(</span><span class="n">DegreeOfFreedom</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">posa</span><span class="p">,</span><span class="n">posb</span><span class="p">,</span><span class="n">posc</span><span class="p">,</span><span class="n">posd</span> <span class="o">=</span> <span class="n">positions</span>
+
+        <span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posa</span> <span class="o">-</span> <span class="n">posb</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posb</span> <span class="o">-</span> <span class="n">posc</span><span class="p">)</span>
+        <span class="n">cd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_vector</span><span class="p">(</span><span class="n">posc</span> <span class="o">-</span> <span class="n">posd</span><span class="p">)</span>
+
+        <span class="n">distbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">crossABC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">crossBCD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">cd</span><span class="p">)</span>
+        <span class="n">crossX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">crossABC</span><span class="p">)</span>
+
+        <span class="n">cos_phi</span> <span class="o">=</span> <span class="n">crossABC</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossABC</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">))</span>
+        <span class="n">sin_phi</span> <span class="o">=</span> <span class="n">crossX</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossX</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">crossBCD</span><span class="p">))</span>
+
+        <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sin_phi</span><span class="p">,</span> <span class="n">cos_phi</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="k">return</span> <span class="n">angle</span></div>
+
+
+<div class="viewcode-block" id="PairDistributionDof">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PairDistributionDof</span><span class="p">():</span>
+<div class="viewcode-block" id="PairDistributionDof.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particles_A</span><span class="p">,</span> <span class="n">particles_B</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">exclusions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">exclusions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">exclusions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles_A</span> <span class="o">=</span> <span class="n">particles_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particles_B</span> <span class="o">=</span> <span class="n">particles_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_</span>      <span class="o">=</span> <span class="n">range_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span>  <span class="o">=</span> <span class="n">resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span>  <span class="o">=</span> <span class="n">exclusions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sel_A</span>             <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sel_B</span>             <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusions_mask</span>   <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_particles_to_sel</span><span class="p">(</span><span class="n">particles</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">particle</span> <span class="ow">in</span> <span class="n">particles</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">particle</span><span class="p">,</span> <span class="n">ArbdModel</span><span class="o">.</span><span class="n">_GroupSite</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="n">sel_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;index </span><span class="si">{</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">particles</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">universe</span><span class="o">.</span><span class="n">select_atoms</span><span class="p">(</span> <span class="n">sel_string</span> <span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_exclusion_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusions_mask</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusions_mask</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Building exclusions&#39;</span><span class="p">)</span>
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_A</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_B</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">ex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusions_mask</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ex</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">_index_to_sel_order_A</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)</span>
+        <span class="n">_index_to_sel_order_B</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">I</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">indices</span><span class="p">):</span>
+            <span class="n">_index_to_sel_order_A</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">ex</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">I</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">indices</span><span class="p">):</span>
+            <span class="n">_index_to_sel_order_B</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">ex</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusions</span><span class="p">:</span>
+            <span class="n">_ids</span> <span class="o">=</span> <span class="p">[(</span><span class="n">_index_to_sel_order_A</span><span class="p">[</span><span class="n">p1</span><span class="o">.</span><span class="n">idx</span><span class="p">],</span> <span class="n">_index_to_sel_order_B</span><span class="p">[</span><span class="n">p2</span><span class="o">.</span><span class="n">idx</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">_index_to_sel_order_A</span><span class="p">[</span><span class="n">p2</span><span class="o">.</span><span class="n">idx</span><span class="p">],</span> <span class="n">_index_to_sel_order_B</span><span class="p">[</span><span class="n">p1</span><span class="o">.</span><span class="n">idx</span><span class="p">])]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">_ids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+                <span class="n">ex</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ex</span><span class="p">[(</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Done building exclusions&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ex</span>
+
+<div class="viewcode-block" id="PairDistributionDof.get_values">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.get_values">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">MDAnalysis.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">distances</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_A</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sel_A</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">PairDistributionDof</span><span class="o">.</span><span class="n">_particles_to_sel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles_A</span><span class="p">,</span> <span class="n">universe</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_B</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sel_B</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">PairDistributionDof</span><span class="o">.</span><span class="n">_particles_to_sel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles_B</span><span class="p">,</span> <span class="n">universe</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_A</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sel_B</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">_pairs</span><span class="p">,</span><span class="n">_dist</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">capped_distance</span><span class="p">(</span> <span class="n">A</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">range_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                                                <span class="n">box</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="c1"># n_atoms = len(universe.atoms)</span>
+        <span class="n">ex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_exclusion_matrix</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_pairs</span><span class="p">,</span><span class="n">_dist</span><span class="p">)</span> <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ex</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PairDistributionDof.compute_volume">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.PairDistributionDof.compute_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="AbstractIBIpotential">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbstractIBIpotential</span><span class="p">(</span><span class="n">AbstractPotential</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<div class="viewcode-block" id="AbstractIBIpotential.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s1">&#39;IBIPotentials/&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span> <span class="o">=</span> <span class="n">degrees_of_freedom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smooth</span> <span class="o">=</span> <span class="n">smooth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span>
+
+        <span class="n">AbstractPotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span> <span class="o">=</span> <span class="n">filename_prefix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_potential</span> <span class="o">=</span> <span class="n">max_potential</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_of_bounds_force</span> <span class="o">=</span> <span class="n">out_of_bounds_force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span>
+        <span class="c1"># self.smooth = 15 if smooth is None else smooth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">range_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="AbstractIBIpotential.potential">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+        <span class="c1">## self.filename_prefix=&quot;IBIpotentials/&quot;</span>
+
+<div class="viewcode-block" id="AbstractIBIpotential.filename">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.filename">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoothed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">iteration</span><span class="si">:</span><span class="s2">03d</span><span class="si">}{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">smoothed</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;-raw&#39;</span><span class="si">}</span><span class="s2">.dat&quot;</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AbstractIBIpotential.write_file">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">!=</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_potential</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodic</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># def _get_attr_mangle(obj,a):</span>
+        <span class="c1">#     try:</span>
+        <span class="c1">#         v = obj.__dict__[a]</span>
+        <span class="c1">#     except:</span>
+        <span class="c1">#         v = obj.__dict__[f&#39;_AbstractPotential__{a}&#39;]</span>
+        <span class="c1">#     return v</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;range_&quot;</span><span class="p">,</span> <span class="s2">&quot;resolution&quot;</span><span class="p">,</span> <span class="s2">&quot;max_force&quot;</span><span class="p">,</span> <span class="s2">&quot;max_potential&quot;</span><span class="p">,</span> <span class="s2">&quot;filename_prefix&quot;</span><span class="p">,</span> <span class="s2">&quot;periodic&quot;</span><span class="p">):</span>
+            <span class="c1"># if _get_attr_mangle(self,a) != _get_attr_mangle(other,a):</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">box</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">trajectory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">)</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+            <span class="n">trajectory</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">trajectory</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">._extract_distribution( u.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> ): using cache&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="c1"># devlogger.info(f&quot;{self}._extract_distribution( u.{key} ): calculating&quot;)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">nframes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">logging_redirect_tqdm</span><span class="p">(</span><span class="n">loggers</span><span class="o">=</span><span class="p">[</span><span class="n">logger</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Extracting distribution </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                <span class="c1"># if (t.frame % 100) == 0: logger.info(f&#39;Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}&#39;)</span>
+                <span class="k">if</span> <span class="n">box</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">box</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">dof</span><span class="o">.</span><span class="n">get_values</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span> <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">])</span>
+                <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="c1"># if (inds &lt; 0).sum() &gt; 0: (inds &gt;= len(counts)).sum() &gt; 0:</span>
+                <span class="c1">#     logger.warn(f&#39;inds contains {(inds &lt; 0).sum()} elements &lt; 0 and {(inds &gt;= len(counts)).sum()} elements &gt;= len(counts) ({len(counts)}) of {inds.size} total elements&#39;)</span>
+                <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[(</span><span class="n">inds</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">inds</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">)]</span>
+                <span class="n">counts</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span>
+                <span class="n">nframes</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Extracting distribution for &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot; failed because no values were found in the range </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">range_</span><span class="si">}</span><span class="s1">; consider specifying a larger range_ parameter when creating the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">nframes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">compute_volume</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">likelihood</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="p">(</span><span class="n">nframes</span><span class="o">*</span><span class="n">vol</span><span class="p">)</span>
+        <span class="c1">## don&#39;t normalize over num values in dofs just yet</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">bins</span><span class="p">,</span><span class="n">likelihood</span><span class="p">)</span> <span class="c1"># record for later</span>
+        <span class="k">return</span> <span class="n">bins</span><span class="p">,</span> <span class="n">likelihood</span>
+
+<div class="viewcode-block" id="AbstractIBIpotential.get_target_distribution">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_target_distribution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_target_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span> <span class="o">+</span> <span class="s1">&#39;.target.dat&#39;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span> <span class="ow">or</span> <span class="n">recalculate</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">universe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span>
+                <span class="n">bins</span><span class="p">,</span> <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_distribution</span><span class="p">(</span> <span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">vals</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span><span class="n">vals</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="o">=</span> <span class="p">(</span><span class="n">bins</span><span class="p">,</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">smooth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bins</span><span class="p">,</span><span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__target</span>
+            <span class="c1">## Set smooth to ~1/2 stddev</span>
+            <span class="n">_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span> <span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">vals</span> <span class="p">)</span>
+            <span class="n">_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span> <span class="p">(</span><span class="n">bins</span><span class="o">-</span><span class="n">_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">vals</span> <span class="p">)</span>
+            <span class="n">_dr</span> <span class="o">=</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">smooth</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_var</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">_dr</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">smooth</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">: Smoothing (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smooth</span><span class="si">}</span><span class="s1"> points) suggested by 1/2 of stddev (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_var</span><span class="p">)</span><span class="si">:</span><span class="s1">02f</span><span class="si">}</span><span class="s1">) is too low: setting smooth to 5&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">smooth</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">: Smoothing </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smooth</span><span class="si">}</span><span class="s1"> points as suggested by 1/2 of stddev (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_var</span><span class="p">)</span><span class="si">:</span><span class="s1">02f</span><span class="si">}</span><span class="s1">) 5&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__target</span></div>
+
+
+<div class="viewcode-block" id="AbstractIBIpotential.get_cg_distribution">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.get_cg_distribution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cg_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">smoothed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.dat&#39;</span><span class="p">,</span><span class="s1">&#39;.cg.dat&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span> <span class="ow">or</span> <span class="n">recalculate</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_cg_distribution(): writing to &#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_distribution</span><span class="p">(</span> <span class="n">universe</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="n">box</span> <span class="p">)</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)]</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">bins</span><span class="p">,</span><span class="n">vals</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span><span class="n">vals</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_cg_distribution(): reading from &#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dists</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bins</span><span class="p">,</span> <span class="n">vals</span></div>
+
+
+<div class="viewcode-block" id="AbstractIBIpotential.read_cg_potential">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.read_cg_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_cg_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">pot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span> <span class="n">smoothed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">bins</span><span class="p">,</span> <span class="n">pot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span> <span class="n">smoothed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">bins</span><span class="p">,</span> <span class="n">pot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">bins</span><span class="p">,</span><span class="n">pot</span></div>
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_max_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">savgol_opts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rho</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">valid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">valid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">u</span><span class="p">[:</span><span class="n">first</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">first</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="n">first</span><span class="p">]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="n">first</span><span class="p">])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span>
+            <span class="k">if</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">u</span><span class="p">[</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="n">last</span><span class="p">])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span>
+        <span class="k">return</span> <span class="n">u</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">tol</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Removes values to the left of the rightmost spot left of</span>
+<span class="sd">        the peak where rho dips below tol, and vice versa &quot;&quot;&quot;</span>
+
+        <span class="n">total_before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+        <span class="n">peak_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rho</span><span class="p">)))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">is_left</span>  <span class="o">=</span> <span class="p">(</span><span class="n">bins</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="n">peak_i</span><span class="p">])</span>
+        <span class="n">is_small</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">first_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_left</span> <span class="o">&amp;</span> <span class="n">is_small</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">first_i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">last_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="o">~</span><span class="n">is_left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">is_small</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">last_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+
+        <span class="n">rho</span><span class="p">[:</span><span class="n">first_i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">rho</span><span class="p">[</span><span class="n">last_i</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">total_after</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_after</span> <span class="o">&lt;</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">total_before</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Removed too much density from the distribution ({100*total_after/total_before:</span><span class="si">%02d</span><span class="s1">})&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractIBIpotential.write_cg_potential">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.AbstractIBIpotential.write_cg_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_cg_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling_factor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span> <span class="o">=</span> <span class="mi">295</span><span class="p">,</span> <span class="n">tol</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">clean_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">scaling_factor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>    <span class="n">scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span> <span class="n">scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span>
+
+        <span class="n">savgol_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">window_length</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smooth</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;wrap&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodic</span> <span class="k">else</span> <span class="s1">&#39;nearest&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">bins_aa</span><span class="p">,</span> <span class="n">rho_aa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_target_distribution</span><span class="p">()</span>
+        <span class="n">rho_aa</span> <span class="o">=</span> <span class="n">rho_aa</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rho_aa</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tol</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">rho_aa</span><span class="p">))</span> <span class="c1"># likely there is room for improvement here</span>
+
+        <span class="k">if</span> <span class="n">universe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">bins</span> <span class="o">-</span> <span class="n">bins_aa</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">clean_edges</span><span class="p">:</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">_clean_edges</span><span class="p">(</span><span class="n">bins_aa</span><span class="p">,</span> <span class="n">rho_aa</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
+
+            <span class="n">rho_aa</span> <span class="o">=</span> <span class="n">savgol</span><span class="p">(</span> <span class="n">rho_aa</span><span class="p">,</span> <span class="o">**</span><span class="n">savgol_opts</span> <span class="p">)</span>
+            <span class="n">rho_aa</span><span class="p">[</span><span class="n">rho_aa</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">]</span> <span class="o">=</span> <span class="n">tol</span>
+
+            <span class="c1">## units &quot;295 k K&quot; kcal_mol</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="o">-</span> <span class="n">scaling_factor</span> <span class="o">*</span> <span class="mf">0.58622592</span> <span class="o">*</span> <span class="p">(</span><span class="n">temperature</span><span class="o">/</span><span class="mi">295</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">rho_aa</span><span class="p">)</span>
+            <span class="n">rho_cg</span> <span class="o">=</span> <span class="n">rho_aa</span>     <span class="c1"># allows a common smoothing command below</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bins</span><span class="p">,</span> <span class="n">rho_cg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_distribution</span><span class="p">(</span> <span class="n">universe</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="n">box</span> <span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rho_cg</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="p">)</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">rho_cg</span><span class="p">)]</span>
+            <span class="n">rho_cg</span> <span class="o">=</span> <span class="n">rho_cg</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rho_cg</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">bins</span> <span class="o">-</span> <span class="n">bins_aa</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">clean_edges</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_clean_edges</span><span class="p">(</span><span class="n">bins_aa</span><span class="p">,</span> <span class="n">rho_aa</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
+                <span class="c1"># self._clean_edges(bins_aa, rho_cg, tol)</span>
+
+
+            <span class="n">r0</span><span class="p">,</span><span class="n">u0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_cg_potential</span><span class="p">()</span> <span class="c1"># iteration-2?</span>
+            <span class="n">rho_cg</span><span class="p">,</span><span class="n">rho_aa</span> <span class="o">=</span> <span class="p">[</span><span class="n">savgol</span><span class="p">(</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">savgol_opts</span> <span class="p">)</span> <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="p">[</span><span class="n">rho_cg</span><span class="p">,</span><span class="n">rho_aa</span><span class="p">]]</span>
+            <span class="n">rho_aa</span><span class="p">[</span><span class="n">rho_aa</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">]</span> <span class="o">=</span> <span class="n">tol</span>
+            <span class="n">rho_cg</span><span class="p">[</span><span class="n">rho_cg</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">]</span> <span class="o">=</span> <span class="n">tol</span>
+
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">rho_cg</span><span class="o">/</span><span class="n">rho_aa</span>
+            <span class="c1">## units &quot;295 k K&quot; &quot;kcal_mol&quot;</span>
+            <span class="n">du</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="n">ratio</span> <span class="p">)</span>
+            <span class="n">du</span> <span class="o">=</span> <span class="n">du</span> <span class="o">*</span> <span class="mf">0.58622592</span> <span class="o">*</span> <span class="p">(</span><span class="n">temperature</span><span class="o">/</span><span class="mi">295</span><span class="p">)</span>
+            <span class="n">du</span> <span class="o">=</span> <span class="n">du</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_aa</span><span class="o">/</span><span class="n">rho_aa</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">**</span><span class="mf">0.25</span> <span class="c1"># penalize learning for values where target density is very low</span>
+
+            <span class="k">try</span><span class="p">:</span>    <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">u0</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">du</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">smoothed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">bins</span><span class="p">,</span><span class="n">u</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">smoothed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1">## Only apply savgol filter in region where target density is well-defined</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rho_aa</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">valid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">valid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">savgol</span><span class="p">(</span> <span class="n">u</span><span class="p">[</span><span class="n">first</span><span class="p">:</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="n">savgol_opts</span> <span class="p">)</span>
+
+        <span class="c1">## Apply boundary force outside where target density is well-defined</span>
+        <span class="n">oobf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_bounds_force</span> <span class="o">==</span> <span class="s1">&#39;max_force&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_bounds_force</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">u</span><span class="p">[:</span><span class="n">first</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">first</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="n">first</span><span class="p">]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="n">first</span><span class="p">])</span><span class="o">*</span><span class="n">oobf</span>
+        <span class="k">if</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">u</span><span class="p">[</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="n">last</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="n">last</span><span class="p">])</span><span class="o">*</span><span class="n">oobf</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cap_potential</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">bins</span><span class="p">,</span><span class="n">u</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bins</span><span class="p">,</span><span class="n">u</span></div>
+</div>
+
+
+<span class="c1">## Specialize with sensible defaults for r_range</span>
+<div class="viewcode-block" id="IBIBond">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIBond">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IBIBond</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
+<div class="viewcode-block" id="IBIBond.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIBond.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
+        <span class="c1"># AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential)</span>
+        <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;IBIbond&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="IBIAngle">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIAngle">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IBIAngle</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
+<div class="viewcode-block" id="IBIAngle.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIAngle.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
+        <span class="c1">#rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, iteration, filename_prefix)</span>
+        <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;IBIangle&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="IBIDihedral">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIDihedral">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IBIDihedral</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
+<div class="viewcode-block" id="IBIDihedral.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBIDihedral.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
+        <span class="c1">#rm: AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, smooth, iteration, max_force, max_potential, filename_prefix)</span>
+        <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;IBIdihed&#39;</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">periodic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1">## Specialize with sensible defaults for r_range</span>
+<div class="viewcode-block" id="IBINonbonded">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IBINonbonded</span><span class="p">(</span><span class="n">AbstractIBIpotential</span><span class="p">):</span>
+<div class="viewcode-block" id="IBINonbonded.__init__">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="o">=</span><span class="p">[],</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_force</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="o">=</span><span class="s1">&#39;max_force&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">=</span><span class="s2">&quot;IBIPotentials/&quot;</span><span class="p">):</span>
+        <span class="n">AbstractIBIpotential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">max_force</span><span class="p">,</span> <span class="n">max_potential</span><span class="p">,</span> <span class="n">out_of_bounds_force</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;IBInonbonded&#39;</span></div>
+
+
+<div class="viewcode-block" id="IBINonbonded.write_file">
+<a class="viewcode-back" href="../../interaction_potentials/ibi.html#arbdmodel.ibi.IBINonbonded.write_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="n">filename</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">(</span><span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">)</span> <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,999 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>shape_cg module &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'shape-based_models/shape_cg';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utilities" href="../utilities/index.html" />
+    <link rel="prev" title="Shape-Based Models" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/sim_config.html">sim_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/structure_from_pdb.html">structure_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/structure_rigidbody.html">structure_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_process_volume.html">mesh_process_volume module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_process_surface.html">mesh_process_surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/mesh_rigidbody.html">mesh_rigidbody module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/simplearbd.html">simplearbd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../simulation_engines/engine.html">engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulation_engines/parmed_bd.html">parmed_bd module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">shape_cg module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2Fshape-based_models/shape_cg.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/shape-based_models/shape_cg.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>shape_cg module</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.find_shape_based_sites"><code class="docutils literal notranslate"><span class="pre">find_shape_based_sites()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.get_particle_assignments"><code class="docutils literal notranslate"><span class="pre">get_particle_assignments()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.filename"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.calc_atom_sasa()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_protein()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_types()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.generate_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.generate_protein()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.concentration_to_debye_length()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_protein_nb_interactions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.get_protein_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.get_protein_types()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_proteins"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_proteins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.generate_random_protein_positions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.setup_and_run"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.setup_and_run()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_confinement"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_confinement()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.run_minimization"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_minimization()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.run_from_minimized"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_from_minimized()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.from_protein_list"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.from_protein_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.calculate_total_mass()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-arbdmodel.shape_cg">
+<span id="shape-cg-module"></span><h1>shape_cg module<a class="headerlink" href="#module-arbdmodel.shape_cg" title="Link to this heading">#</a></h1>
+<p>Shape-based coarse-grained modeling module for protein simulations.</p>
+<p>This module provides classes for creating shape-based coarse-grained models
+of proteins for use in molecular dynamics simulations.</p>
+<p id="module-0">Shape-based coarse-grained modeling module for protein simulations.</p>
+<p>This module provides classes for creating shape-based coarse-grained models
+of proteins for use in molecular dynamics simulations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.read_files">
+<span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">read_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'charmm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#read_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.read_files" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.find_shape_based_sites">
+<span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">find_shape_based_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fine_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_cg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1234</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#find_shape_based_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.find_shape_based_sites" title="Link to this definition">#</a></dt>
+<dd><p>Find optimal placement of coarse-grained sites based on structure shape.</p>
+<p>This function uses a competitive learning algorithm to determine optimal
+placement of coarse-grained sites within a molecular structure, considering
+both geometry and optional weights (like atom masses).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fine_positions</strong> – Array of atomic positions, shape (n_atoms, 3)</p></li>
+<li><p><strong>N_cg</strong> – Number of coarse-grained sites to create</p></li>
+<li><p><strong>num_steps</strong> – Number of learning steps (default: 400*N_cg)</p></li>
+<li><p><strong>learning_schedule</strong> – Custom schedule for learning parameters (default: None)</p></li>
+<li><p><strong>weights</strong> – Optional weights for each atom (default: uniform)</p></li>
+<li><p><strong>seed</strong> – Random seed for reproducibility</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of positions for coarse-grained sites, shape (N_cg, 3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.get_particle_assignments">
+<span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">get_particle_assignments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fine_sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarse_sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#get_particle_assignments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.get_particle_assignments" title="Link to this definition">#</a></dt>
+<dd><p>Assign fine-grained particles to coarse-grained sites.</p>
+<p>This function maps each atom to its closest coarse-grained site,
+using a KD-tree for efficient distance calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fine_sites</strong> – Array of atomic positions, shape (n_atoms, 3)</p></li>
+<li><p><strong>coarse_sites</strong> – Array of coarse-grained site positions, shape (n_cg, 3)</p></li>
+<li><p><strong>max_distance</strong> – Maximum distance to consider for assignments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of assignments, indicating which CG site each atom belongs to</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGNonbonded">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">ShapeCGNonbonded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">50)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGNonbonded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGNonbonded" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../interaction_potentials/interactions.html#arbdmodel.interactions.AbstractPotential" title="arbdmodel.interactions.AbstractPotential"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPotential</span></code></a></p>
+<p>Nonbonded potential for shape-based coarse grained models.</p>
+<p>The potential includes electrostatic and Lennard-Jones components.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGNonbonded.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">50)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGNonbonded.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGNonbonded.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGNonbonded.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGNonbonded.potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGNonbonded.potential" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the potential energy at distance r.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> – Array of distances</p></li>
+<li><p><strong>types</strong> – Tuple of (typeA, typeB) particle types</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of potential energies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGNonbonded.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGNonbonded.filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGNonbonded.filename" title="Link to this definition">#</a></dt>
+<dd><p>Get filename for potential lookup table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>types</strong> – Tuple of particle types</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filename string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">ShapeCGFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disordered_residues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SHCG'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Factory class for creating coarse-grained protein models.</p>
+<p>This class creates reduced-resolution models of proteins based on
+their shape, with customizable resolution and properties.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disordered_residues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SHCG'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialize the factory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psf</strong> – Path to PSF file</p></li>
+<li><p><strong>pdb</strong> – Path to PDB file</p></li>
+<li><p><strong>disordered_residues</strong> – List of residue indices considered disordered</p></li>
+<li><p><strong>name</strong> – Name prefix for generated particles</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa">
+<span class="sig-name descname"><span class="pre">calc_atom_sasa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_slice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory.calc_atom_sasa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa" title="Link to this definition">#</a></dt>
+<dd><p>Calculate solvent accessible surface area for atoms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atom_slice</strong> – Slice or indices for atoms to calculate SASA</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (normalized SASA, atomic radii)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein">
+<span class="sig-name descname"><span class="pre">get_coarse_protein</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory.get_coarse_protein"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein" title="Link to this definition">#</a></dt>
+<dd><p>Generate a coarse-grained protein model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_CG_sites</strong> – Number of sites to represent the protein (default: based on mass)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Group containing the coarse-grained protein</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types">
+<span class="sig-name descname"><span class="pre">get_coarse_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory.get_coarse_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types" title="Link to this definition">#</a></dt>
+<dd><p>Get particle types used in the coarse-grained model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_CG_sites</strong> – Number of sites to represent the protein</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of ParticleType objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGFactory.generate_protein">
+<span class="sig-name descname"><span class="pre">generate_protein</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGFactory.generate_protein"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGFactory.generate_protein" title="Link to this definition">#</a></dt>
+<dd><p>Generate a new protein instance at the specified position and orientation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> – 3D position for the protein</p></li>
+<li><p><strong>orientation</strong> – Optional orientation matrix</p></li>
+<li><p><strong>index</strong> – Unique index for this protein instance</p></li>
+<li><p><strong>num_CG_sites</strong> – Number of CG sites to use</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Group containing the positioned protein</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">arbdmodel.shape_cg.</span></span><span class="sig-name descname"><span class="pre">ShapeCGModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_factories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../core/model.html#arbdmodel.model.ArbdModel" title="arbdmodel.model.ArbdModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbdModel</span></code></a></p>
+<p>Model class for shape-based coarse-grained protein simulations.</p>
+<p>This class handles creating and simulating systems with multiple
+shape-based coarse-grained proteins.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_factories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialize the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_factories</strong> – Dictionary mapping protein names to ShapeCGFactory objects</p></li>
+<li><p><strong>box_size</strong> – Size of simulation box (default: None for automatic sizing)</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments for ArbdModel</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length">
+<span class="sig-name descname"><span class="pre">concentration_to_debye_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">295</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.concentration_to_debye_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length" title="Link to this definition">#</a></dt>
+<dd><p>Convert salt concentration to Debye length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> – Salt concentration in mM</p></li>
+<li><p><strong>temperature</strong> – Temperature in K</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Debye length in Angstroms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions">
+<span class="sig-name descname"><span class="pre">add_protein_nb_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debye_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.add_protein_nb_interactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions" title="Link to this definition">#</a></dt>
+<dd><p>Add nonbonded interactions between protein particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prot_types</strong> – List of protein particle types</p></li>
+<li><p><strong>nt_sigma</strong> – Sigma parameter for nucleic acid interactions</p></li>
+<li><p><strong>debye_length</strong> – Debye length for electrostatics (default: calculated from 150 mM)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.get_protein_types">
+<span class="sig-name descname"><span class="pre">get_protein_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.get_protein_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.get_protein_types" title="Link to this definition">#</a></dt>
+<dd><p>Get all protein types for the given protein counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>num_CG_sites</strong> – Number of CG sites per protein</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of all protein particle types</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.add_proteins">
+<span class="sig-name descname"><span class="pre">add_proteins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.add_proteins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.add_proteins" title="Link to this definition">#</a></dt>
+<dd><p>Add proteins to the simulation model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>protein_positions</strong> – List of positions for all proteins</p></li>
+<li><p><strong>num_CG_sites</strong> – Number of CG sites per protein</p></li>
+<li><p><strong>nt_sigma</strong> – Sigma parameter for nucleic acid interactions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Group containing all added proteins</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions">
+<span class="sig-name descname"><span class="pre">generate_random_protein_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.generate_random_protein_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions" title="Link to this definition">#</a></dt>
+<dd><p>Generate random positions for proteins within a spherical volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>radius</strong> – Radius of the sphere</p></li>
+<li><p><strong>seed</strong> – Random seed (default: None)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of 3D positions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.setup_and_run">
+<span class="sig-name descname"><span class="pre">setup_and_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salt_concentration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.setup_and_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.setup_and_run" title="Link to this definition">#</a></dt>
+<dd><p>Set up and run a simulation with the specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>radius</strong> – Confinement radius</p></li>
+<li><p><strong>num_CG_sites</strong> – Number of CG sites per protein</p></li>
+<li><p><strong>salt_concentration</strong> – Salt concentration in mM</p></li>
+<li><p><strong>gpu</strong> – GPU index to use</p></li>
+<li><p><strong>dry_run</strong> – If True, don’t actually run the simulation</p></li>
+<li><p><strong>num_steps</strong> – Number of simulation steps</p></li>
+<li><p><strong>output_period</strong> – Steps between outputs</p></li>
+<li><p><strong>timestep</strong> – Simulation timestep</p></li>
+<li><p><strong>positions</strong> – Optional pre-defined positions for proteins</p></li>
+<li><p><strong>restart_file</strong> – Optional restart file path</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Final simulation state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.add_confinement">
+<span class="sig-name descname"><span class="pre">add_confinement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.add_confinement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.add_confinement" title="Link to this definition">#</a></dt>
+<dd><p>Add spherical confinement to all protein particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_group</strong> – Group containing proteins</p></li>
+<li><p><strong>radius</strong> – Confinement radius</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.run_minimization">
+<span class="sig-name descname"><span class="pre">run_minimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'run_1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.run_minimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.run_minimization" title="Link to this definition">#</a></dt>
+<dd><p>Run a minimization simulation with minimal CG sites.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>radius</strong> – Confinement radius</p></li>
+<li><p><strong>gpu</strong> – GPU index to use</p></li>
+<li><p><strong>num_steps</strong> – Number of minimization steps</p></li>
+<li><p><strong>output_period</strong> – Steps between outputs</p></li>
+<li><p><strong>timestep</strong> – Simulation timestep</p></li>
+<li><p><strong>directory</strong> – Output directory</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to restart file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.run_from_minimized">
+<span class="sig-name descname"><span class="pre">run_from_minimized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_CG_sites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salt_concentration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimization_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.run_from_minimized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.run_from_minimized" title="Link to this definition">#</a></dt>
+<dd><p>Run a full simulation starting from a minimized configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p></li>
+<li><p><strong>radius</strong> – Confinement radius</p></li>
+<li><p><strong>num_CG_sites</strong> – Number of CG sites per protein</p></li>
+<li><p><strong>salt_concentration</strong> – Salt concentration in mM</p></li>
+<li><p><strong>gpu</strong> – GPU index to use</p></li>
+<li><p><strong>dry_run</strong> – If True, don’t actually run the simulation</p></li>
+<li><p><strong>num_steps</strong> – Number of simulation steps</p></li>
+<li><p><strong>output_period</strong> – Steps between outputs</p></li>
+<li><p><strong>timestep</strong> – Simulation timestep</p></li>
+<li><p><strong>minimization_file</strong> – Path to minimization restart file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Final simulation state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.from_protein_list">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_protein_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.from_protein_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.from_protein_list" title="Link to this definition">#</a></dt>
+<dd><p>Create a model from a list of protein PDB IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdb_list</strong> – List of protein PDB IDs</p></li>
+<li><p><strong>pdb_paths</strong> – Optional dictionary mapping PDB IDs to PSF/PDB file paths</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments for the ShapeCGModel constructor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ShapeCGModel instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass">
+<span class="sig-name descname"><span class="pre">calculate_total_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_counts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/arbdmodel/shape_cg.html#ShapeCGModel.calculate_total_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass" title="Link to this definition">#</a></dt>
+<dd><p>Calculate total mass of proteins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>protein_counts</strong> – Dictionary mapping protein names to counts</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Total mass in daltons</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Shape-Based Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../utilities/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Utilities</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.find_shape_based_sites"><code class="docutils literal notranslate"><span class="pre">find_shape_based_sites()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.get_particle_assignments"><code class="docutils literal notranslate"><span class="pre">get_particle_assignments()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.potential"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.potential()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGNonbonded.filename"><code class="docutils literal notranslate"><span class="pre">ShapeCGNonbonded.filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.calc_atom_sasa"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.calc_atom_sasa()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_protein()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.get_coarse_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.get_coarse_types()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGFactory.generate_protein"><code class="docutils literal notranslate"><span class="pre">ShapeCGFactory.generate_protein()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.__init__"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.concentration_to_debye_length"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.concentration_to_debye_length()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_protein_nb_interactions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_protein_nb_interactions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.get_protein_types"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.get_protein_types()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_proteins"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_proteins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.generate_random_protein_positions"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.generate_random_protein_positions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.setup_and_run"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.setup_and_run()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.add_confinement"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.add_confinement()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.run_minimization"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_minimization()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.run_from_minimized"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.run_from_minimized()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.from_protein_list"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.from_protein_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arbdmodel.shape_cg.ShapeCGModel.calculate_total_mass"><code class="docutils literal notranslate"><span class="pre">ShapeCGModel.calculate_total_mass()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
