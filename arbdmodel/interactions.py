@@ -9,6 +9,55 @@ from .grid import writeDx
 
 ## Abstract classes that others inherit from
 class AbstractPotential(metaclass=ABCMeta):
+    """
+    Abstract base class for implementing interaction potentials.
+    This class defines the basic structure for creating and managing interaction potential
+    functions that can be written to files and used in simulations.
+    Parameters
+    ----------
+    range_ : tuple of (float, float or None)
+        The range of distances for the potential (min, max).
+        If max is None, potential extends to infinity.
+    resolution : float, optional
+        The spacing between points in the discretized potential. Default is 0.1.
+    max_force : float or None, optional
+        Maximum allowed force magnitude. If provided, forces exceeding this value will be capped.
+    max_potential : float or None, optional
+        Maximum allowed potential energy. If provided, the potential will be modified
+        to ensure it doesn't exceed this value.
+    zero : str, optional
+        Method to set the zero of the potential. Options are:
+        - 'min': Zero is at the minimum value
+        - 'first': Zero is at the first point
+        - 'last': Zero is at the last point
+    Attributes
+    ----------
+    range_ : tuple of (float, float or None)
+        The range of distances for the potential.
+    resolution : float
+        The spacing between points in the discretized potential.
+    max_force : float or None
+        Maximum allowed force magnitude.
+    max_potential : float or None
+        Maximum allowed potential energy.
+    zero : str
+        Method to set the zero of the potential.
+    periodic : bool
+        Whether the potential is periodic (False by default).
+    Methods
+    -------
+    potential(r, types=None)
+        Abstract method that must be implemented by subclasses.
+        Calculates the potential value at distance r.
+    write_file(filename=None, types=None)
+        Writes the potential to a file.
+    filename(types=None)
+        Abstract method that should be implemented by subclasses.
+        Returns a filename for the potential.
+    Notes
+    -----
+    Subclasses must implement at minimum the `potential` and `filename` methods.
+    """
     """ Abstract class for writing potentials """
 
     def __init__(self, range_=(0,None), resolution=0.1, 
