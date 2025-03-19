@@ -142,7 +142,24 @@ class SimEngine(metaclass=ABCMeta):
     """
 
 class ArbdEngine(SimEngine):
-    """ Interface to ARBD simulation engine """
+    """
+    Interface to ARBD simulation engine.
+    The ArbdEngine class provides an interface to the ARBD (Atomically-Resolved Brownian Dynamics) 
+    simulation engine. It handles the generation of simulation configuration files, particle coordinates,
+    and various potential files required for ARBD simulations.
+
+    Attributes:
+        extra_bd_file_lines (str): Additional lines to be added to the BD configuration file.
+        configuration (SimConf): The simulation configuration object.
+        num_particles (int): Number of particles in the system.
+        particles (list): List of particles in the system.
+        type_counts (dict): Count of each particle type.
+        _written_bond_files (dict): Dictionary tracking written bond files.
+        cacheUpToDate (bool): Flag indicating if the cache is current.
+        potential_directory (str): Directory for storing potential files.
+        rb_type_dirs (dict): Directories for rigid body types.
+
+    """
     def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
         self.extra_bd_file_lines = extra_bd_file_lines
         
@@ -183,6 +200,36 @@ class ArbdEngine(SimEngine):
     # -------------------------- #
 
     def write_simulation_files(self, model, output_name, configuration=None, **conf_params):
+        """
+        Write simulation files for a model.
+        This method generates all necessary files for simulation, including system 
+        topology files (PSF, PDB), particle coordinates, and various potential files.
+
+        Parameters
+        ----------
+        model : object
+            The model object containing all necessary information about the system.
+        output_name : str
+            Base name for output files.
+        configuration : dict, optional
+            Configuration dictionary for the model. If None, a configuration will be 
+            generated using _get_combined_conf.
+        **conf_params : dict
+            Additional configuration parameters to pass to _get_combined_conf if
+            configuration is None.
+
+        Note
+        -----
+        The method creates directory structure for potentials and rigid body types
+        if they don't exist. It generates the following files:
+        - PSF and PDB topology files
+        - Particle configuration file
+        - Various potential files (restraint, bond, angle, dihedral, etc.)
+        - Rigid body coordinate and configuration files
+        - Creates directories if they don't exist
+        - Sets self.potential_directory and self.rb_type_dirs attributes
+        - Writes multiple files to disk
+        """
         if configuration is None:
             configuration = self._get_combined_conf(model, **conf_params)
         

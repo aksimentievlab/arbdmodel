@@ -27,7 +27,7 @@ class Transformable():
         applyOrientation(obj): Apply the orientation chain to an object, considering
             parent orientations if the object is a Child.
 
-    Notes:
+    Note:
         - The class is designed to work with the Child class for hierarchical transformations.
         - Orientation is represented as a rotation matrix.
         - All transformation methods modify the object in place.
@@ -533,7 +533,7 @@ class ParticleType():
         damping_coefficient (float, optional): Damping coefficient for dynamics.
         parent (ParticleType, optional): Parent type to inherit properties from.
 
-    Notes:
+    Note:
         - When a parent is specified, all non-excluded attributes are inherited.
         - Particle types with the same name must have identical properties.
         - The class implements custom copy behavior to prevent unnecessary duplication.
@@ -599,7 +599,7 @@ class ParticleType():
         bool
             True if objects are considered of the same type, False otherwise
             
-        Notes
+        Note
         -----
         The method assumes both objects are of the same Python class type.
         """
@@ -812,7 +812,7 @@ class PointParticle(Transformable, Child):
         restraint : Restraint
             The restraint object to add to the model.
 
-        Notes
+        Note
         -----
         TODO: Determine how to handle duplicating and cloning bonds.
         """
@@ -841,7 +841,7 @@ class PointParticle(Transformable, Child):
         None
             The method updates the particle's type in place.
         
-        Notes
+        Note
         -----
         This method will create a copy of the particle's type if it already has a parent,
         or create a new derived type if it doesn't.
@@ -992,9 +992,10 @@ class RigidBody(PointParticle):
     attached_particles : list
         Copied particles attached to the rigid body. 
 
-    Note:
-        TODO: for attached_particles, it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; 
-        here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
+    Note
+    ----------
+    TODO: for attached_particles, it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; 
+    here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
 
     """
 
@@ -1138,7 +1139,7 @@ class GroupSite:
     get_restraints()
         Get all restraints associated with this group site as tuples of (site, restraint).
 
-    Notes
+    Note
     -----
     Currently does not support weighted particles (weights parameter in __init__).
     """

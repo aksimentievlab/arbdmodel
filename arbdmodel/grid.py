@@ -28,7 +28,7 @@ def writeDx(outfile, data, origin, delta, fmt="%.12f"):
   fmt : str, optional
     Format string for the data values. Default is "%.12f".
     
-  Notes
+  Note
   -----
   The output file follows the OpenDX format specification:
   http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
@@ -211,7 +211,7 @@ def neighborhood_average(grid, neighborhood = 1, fill_value='mirror'):
     Returns:
         ndarray: The grid with the neighborhood average computed.
 
-    Notes:
+    Note:
         - Currently, only the 'mirror' fill value option is implemented.
         - This function requires the 'average_grids' function from an external source.
 
@@ -313,7 +313,7 @@ def fill_nans(grid, neighborhood=1, max_iterations=np.inf, mask=None):
     Returns:
         ndarray: The grid with NaN values filled using neighborhood averaging.
 
-    Notes:
+    Note:
         - This function requires the 'skimage' package, specifically the 'find_boundaries' function from 'skimage.segmentation'.
 
     Example:
@@ -355,7 +355,7 @@ def convolve_kernel_truncate( array, kernel ):
         AssertionError: If the dimensions of the array and kernel do not match.
         AssertionError: If any dimension of the array is smaller than the corresponding dimension of the kernel.
 
-    Notes:
+    Note:
         - This function assumes that the kernel has odd dimensions along each dimension.
         - If any dimension of the kernel has an even number of elements, a warning message is printed to stderr indicating that the output may be shifted.
 
@@ -479,6 +479,7 @@ def gaussian_kernel(voxels=5, sig=1., ndim=3):
 def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2):
   """
   Generate a potential energy field that depends only on the z-coordinate, creating a slab-like potential.
+
   Parameters
   ----------
   force_constant : float
@@ -491,12 +492,14 @@ def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2)
     The grid spacing in length units. If a single value is provided, it's used for all dimensions.
   exponent : int, optional
     The exponent determining the shape of the potential. Default is 2 (harmonic potential).
+
   Returns
   -------
   numpy.ndarray
     A 3D array representing the potential energy field, where the energy depends only
     on the distance from the z-center raised to the specified exponent.
-  Notes
+
+  Note:
   -----
   The potential U at each point is calculated as:
   U = (force_constant/exponent) * |z - center_z|^exponent
@@ -514,6 +517,29 @@ def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2)
   return U
 
 def constant_force(force, dimensions, resolution, origin=None):
+  """
+  Generate a constant force field over a 3D grid.
+
+  Parameters
+  ----------
+  force : float or list
+    The force vector [fx, fy, fz] to apply. If a scalar is provided, 
+    it's interpreted as [0, 0, scalar].
+  dimensions : list
+    The physical dimensions [dx, dy, dz] of the grid in length units.
+  resolution : float or list
+    The resolution of each voxel [rx, ry, rz]. If a scalar is provided, 
+    it's used for all three dimensions.
+  origin : list, optional
+    The coordinates of the grid origin [ox, oy, oz]. If not provided, 
+    defaults to [-dx/2, -dy/2, -dz/2].
+
+  Returns
+  -------
+  numpy.ndarray
+    A 3D array representing the potential field U = fx*X + fy*Y + fz*Z, 
+    where X, Y, Z are the coordinate grids.
+  """
   try:
     force[0]
   except:
@@ -535,6 +561,36 @@ def constant_force(force, dimensions, resolution, origin=None):
   return U
 
 def spherical_confinement(force_constant, radius, dimensions,  resolution, center=(0,0,0), exponent=2):
+  """
+  Creates a spherical confinement potential field in 3D space.
+  The potential is zero inside the sphere (R <= radius) and follows a power law 
+  (force_constant/exponent) * (R-radius)^exponent outside the sphere (R > radius).
+
+  Parameters
+  ----------
+  force_constant : float
+    The force constant that determines the strength of the confinement potential.
+  radius : float
+    Radius of the spherical confinement in the same units as dimensions and resolution.
+  dimensions : list or tuple
+    The dimensions of the 3D space [x_dim, y_dim, z_dim].
+  resolution : float or list or tuple
+    The spatial resolution of the grid. If a single value is provided, it will be used 
+    for all three dimensions. Otherwise, provide [x_res, y_res, z_res].
+  center : tuple, optional
+    The center coordinates of the sphere (x, y, z), default is (0, 0, 0).
+  exponent : int, optional
+    The exponent in the power law of the potential, default is 2.
+
+  Returns
+  -------
+  U : numpy.ndarray
+    3D array containing the potential energy values at each grid point.
+
+  Note
+  -----
+  The function seems to have an unused 'force' variable that might be part of incomplete code.
+  """
   try:
     force[0]
   except:
@@ -556,6 +612,32 @@ def spherical_confinement(force_constant, radius, dimensions,  resolution, cente
   return U
 
 def write_confine_dx(radius=100 ):  #Might merge with spherical confinement? 
+    """
+    Create and write a spherical confinement potential to a DX file.
+
+    This function generates a spherical confinement potential with a harmonic potential
+    outside the specified radius and a linear potential beyond radius + 25Å. The potential
+    is written to a DX file named 'confine-{radius}.dx'.
+
+    Parameters
+    ----------
+    radius : float, default=100
+    Radius of the spherical confinement in Angstroms. The potential is zero within
+    this radius and increases harmonically outside it.
+
+    Returns
+    -------
+    None
+    The function returns nothing but writes the potential to a DX file.
+    If the file already exists, the function returns without doing anything.
+
+    Note
+    -----
+    - The grid extends from -radius-50 to +radius+50 in all dimensions
+    - Grid spacing is 2Å in all dimensions
+    - The spring constant k is set to 1 kcal/mol/Å²
+    - The potential transitions from harmonic to linear at radius + 25Å
+    """
 
     outfile=f'confine-{radius}.dx'
     if Path(outfile).exists(): return
@@ -627,6 +709,39 @@ def create_bounding_grid( *grids ):
     return g1
 
 def get_slice_enclosing_smaller_grid( grid, smaller_grid ):
+    """
+    Calculates the slices necessary to extract a portion of a larger grid that encloses a smaller grid.
+    This function computes the slice indices needed to extract a subgrid from a larger grid
+    that corresponds to the region covered by a smaller grid. The function assumes that both
+    grids are orthonormal and have the same grid spacing (delta).
+
+    Parameters
+    ----------
+    grid : Grid
+      The larger grid object containing a 3D array and grid metadata.
+      Must have attributes: grid (3D numpy array), origin (3D coordinates), and delta (grid spacing).
+    smaller_grid : Grid
+      The smaller grid object that is fully contained within the larger grid.
+      Must have the same attributes as grid.
+
+    Returns
+    -------
+    list of slice
+      A list of three slice objects, one for each dimension, that can be used to extract
+      the portion of the larger grid that corresponds to the smaller grid.
+
+    Raises
+    ------
+    AssertionError
+      If grids are not 3D, if grid spacings are not identical, if smaller_grid is not
+      contained within grid, if grids are not aligned on grid points, or if smaller_grid
+      extends beyond the boundaries of grid.
+
+    Note
+    -----
+    The function assumes that both grids are aligned such that the origin of smaller_grid
+    falls exactly on a grid point of the larger grid.
+    """
     
     ## Check grids are orthonormal
     assert( len(grid.grid.shape) == 3 )

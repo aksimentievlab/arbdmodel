@@ -110,7 +110,7 @@ class ConnectableElement():
         get_connections_and_locations(connection_type=None, exclude=()):
             Returns a list of [connection, location_in_self, location_in_other] for each connection.
 
-    Notes:
+    Note:
         - The class is designed to be subclassed.
         - It appears to be part of a system for modeling polymer structures, possibly DNA origami or similar structures.
         - The class enforces that objects cannot be connected to themselves directly.
@@ -257,7 +257,7 @@ class PolymerSection(ConnectableElement):
             Coordinates of the polymer, shape (n_points, n_dimensions).
             Each row represents the position of a polymer segment in space.
 
-        Notes
+        Note
         -----
         The method uses scipy.interpolate.splprep with linear splines (k=1) and no smoothing (s=0).
         The resulting spline parameters are stored in self.position_spline_params as a tuple 
@@ -282,7 +282,7 @@ class PolymerSection(ConnectableElement):
             Array of quaternions defining orientations at each contour point.
             Should be of shape (n, 4) where n is the number of contour points.
             
-        Notes
+        Note
         -----
         Uses scipy.interpolate.splprep with smoothing factor s=0 (exact interpolation)
         and k=1 (linear interpolation).

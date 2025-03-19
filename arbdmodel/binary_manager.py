@@ -202,11 +202,11 @@ def initialize_binary_paths():
     This function should be called during package initialization.
     If users don't wish to call this function, they can set the paths manually.
 
-    Usage example: 
-    arbd_path = BinaryManager.get_binary_path("arbd")
-    print(f"ARBD binary path: {arbd_path}")
+    Example: 
+    >>arbd_path = BinaryManager.get_binary_path("arbd")
+    >>print(f"ARBD binary path: {arbd_path}")
 
-    BinaryManager.set_binary_path("hydropro", "/path/to/hydropro")
+    >>BinaryManager.set_binary_path("hydropro", "/path/to/hydropro")
     """
     # Check environment variables for binary paths
     for binary in DEFAULT_BINARIES:
