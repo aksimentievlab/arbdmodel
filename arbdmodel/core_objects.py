@@ -7,6 +7,31 @@ from .logger import logger, get_resource_path,devlogger
 
 ## Abstract classes
 class Transformable():
+    """
+    A class for objects that can be transformed in 3D space.
+    The Transformable class provides basic functionality for positioning and orienting
+    objects in 3D space, as well as methods for applying transformations such as
+    translations and rotations.
+
+    Attributes:
+        position (numpy.ndarray): The position of the object in 3D space.
+        orientation (numpy.ndarray or None): The orientation matrix of the object.
+            If None, the object has no orientation.
+
+    Methods:
+        translate(offset): Translate the object by the given offset.
+        rotate(R, about): Rotate the object by the rotation matrix R about a center point.
+        transform(R, center, offset): Apply a general transformation to the object.
+        get_collapsed_position(): Get the absolute position of the object, taking into
+            account parent transformations if the object is a Child.
+        applyOrientation(obj): Apply the orientation chain to an object, considering
+            parent orientations if the object is a Child.
+
+    Notes:
+        - The class is designed to work with the Child class for hierarchical transformations.
+        - Orientation is represented as a rotation matrix.
+        - All transformation methods modify the object in place.
+    """
     def __init__(self, position, orientation=None):
         self.position = np.array(position)
         if orientation is not None:
@@ -56,6 +81,24 @@ class Transformable():
         return obj
 
 class Parent():
+    """
+    The Parent class implements a hierarchical tree structure for organizing objects in a simulation.
+    This class serves as a container for child objects and provides methods for managing relationships, properties, and interactions between these objects within a molecular simulation context.
+
+    Attributes:
+        children (list): A list of child objects belonging to this parent.
+        remove_duplicate_bonded_terms (bool): Whether to remove duplicate bonded terms when collecting them.
+        bonds (list): List of bond interactions between particles.
+        angles (list): List of angle interactions between triplets of particles.
+        dihedrals (list): List of dihedral interactions between quartets of particles.
+        vector_angles (list): List of vector angle interactions.
+        impropers (list): List of improper dihedral interactions.
+        exclusions (list): List of pairwise exclusions from non-bonded interactions.
+        bond_angles (list): List of combined bond-angle interactions.
+        product_potentials (list): List of product potentials.
+        group_sites (list): List of group sites.
+    This class implements iteration methods to traverse the tree structure depth-first.
+    """
     def __init__(self, children=None, remove_duplicate_bonded_terms=False):
         self.children = []
         if children is not None:
@@ -77,7 +120,25 @@ class Parent():
         ## TODO: self.cacheInvalid = True # What will be in the cache?
 
     def add(self,x):
-        ## TODO: check the parent-child tree to make sure there are no cycles
+        """
+        Adds a Child object to this group.
+        
+        This method establishes a parent-child relationship between the current object
+        and the provided Child object. It checks that the provided object is a Child,
+        and that it doesn't already belong to another parent.
+        
+        Parameters
+        ----------
+        x : Child
+            The Child object to add to this group
+            
+        Raises
+        ------
+        Exception
+            If x is not an instance of Child
+            If x already belongs to another parent
+        """
+
         if not isinstance(x,Child):
             raise Exception('Attempted to add an object to a group that does not inherit from the "Child" type')
 
@@ -87,7 +148,27 @@ class Parent():
         self.children.append(x)
 
     def insert(self,idx,x):
-        ## TODO: check the parent-child tree to make sure there are no cycles
+        """
+        Insert a child object at a specific position in the group's children list.
+
+        This method inserts a new child object into the group at the specified index.
+        It performs checks to ensure the object is a valid Child type and that it
+        doesn't already belong to another parent group to maintain the integrity
+        of the parent-child hierarchy.
+
+        Parameters
+        ----------
+        idx : int
+            The index position where the child should be inserted.
+        x : Child
+            The child object to be inserted. Must inherit from the Child class.
+
+        Raises
+        ------
+        Exception
+            If the provided object doesn't inherit from the Child class or
+            if the child already belongs to another parent group.
+        """
         if not isinstance(x,Child):
             raise Exception('Attempted to add an object to a group that does not inherit from the "Child" type')
 
@@ -338,6 +419,22 @@ class Parent():
         self.children[i] = val
         
 class Child():
+    """
+    A class that represents a child object which can inherit attributes from a parent.
+    This class establishes a parent-child relationship where attributes not found in the child 
+    can be looked up from the parent. This implementation allows for a form of delegation where 
+    attribute access is forwarded to the parent object.
+
+    Attributes:
+        parent (Parent, optional): The parent object that this child is associated with.
+                                  When set, the child registers itself with the parent.
+                                  Defaults to None.
+    
+    Note:
+        - When a parent is provided, it must be an instance of the Parent class.
+        - Method lookups from the parent are explicitly prevented.
+        - Certain attributes like 'parent' are excluded from the parent lookup mechanism.
+    """
     def __init__(self, parent=None):
         self.parent = parent
         if parent is not None:
@@ -347,7 +444,6 @@ class Child():
     def __getattr__(self, name):
         """
         Try to get attribute from the parent
-
         """
         # if self.parent is not None:
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
@@ -422,7 +518,26 @@ class Clone(Transformable, Parent, Child):
         
 ## Particle classes
 class ParticleType():
-    """Class that hold common attributes that particles can point to"""
+    """
+    Class that holds common attributes that particles can point to.
+    ParticleType serves as a template for properties shared across multiple particles.
+    It supports inheritance through parent types, attribute lookup, and provides mechanisms
+    for comparing particle types.
+
+    Attributes:
+        excludedAttributes (tuple): Attributes that are not inherited from parent types.
+        name (str): Unique identifier for this particle type.
+        charge (float): Electric charge of the particle. Defaults to 0.
+        mass (float, optional): Mass of the particle.
+        diffusivity (float, optional): Diffusion coefficient of the particle.
+        damping_coefficient (float, optional): Damping coefficient for dynamics.
+        parent (ParticleType, optional): Parent type to inherit properties from.
+
+    Notes:
+        - When a parent is specified, all non-excluded attributes are inherited.
+        - Particle types with the same name must have identical properties.
+        - The class implements custom copy behavior to prevent unnecessary duplication.
+    Class that hold common attributes that particles can point to"""
 
     excludedAttributes = ("idx","type_",
                           "position",
@@ -465,6 +580,29 @@ class ParticleType():
             self.__dict__[key] = val
 
     def is_same_type(self, other, consider_parents=True):
+        """
+        Checks if this object is of the same type as another object.
+        
+        This method compares two objects to determine if they are of the same type.
+        Objects are considered the same type if they are equal or if one is the parent
+        of the other (when consider_parents=True).
+        
+        Parameters
+        ----------
+        other : same type as self
+            The object to compare with
+        consider_parents : bool, default=True
+            If True, objects are considered the same type if one is the parent of the other
+            
+        Returns
+        -------
+        bool
+            True if objects are considered of the same type, False otherwise
+            
+        Notes
+        -----
+        The method assumes both objects are of the same Python class type.
+        """
         assert( type(other) == type(self) )
         if self == other:
             return True
@@ -479,6 +617,31 @@ class ParticleType():
             return False
 
     def add_grid_potential(self, gridfile, scale=1, boundary_condition='dirichlet'):
+        """
+        Adds a grid potential to the model.
+
+        This method appends a new grid potential to the model's list of grid potentials.
+        The grid potential is defined by a grid file, a scaling factor, and boundary conditions.
+
+        Parameters
+        ----------
+        gridfile : str
+            Path to the file containing the grid potential data.
+        scale : float, default=1
+            Scaling factor to apply to the grid potential.
+        boundary_condition : str, default='dirichlet'
+            The type of boundary condition to use for the grid potential.
+            Must be one of 'dirichlet', 'neumann', or 'periodic'.
+
+        Raises
+        ------
+        ValueError
+            If the boundary_condition is not one of 'dirichlet', 'neumann', or 'periodic'.
+
+        Returns
+        -------
+        None
+        """
         if boundary_condition not in ('dirichlet','neumann','periodic'):
             raise ValueError(f'Unrecognized grid boundary condition "{boundary_condition}"; should be one of "dirichlet", "neumann" or "periodic".')
         self.grid_potentials = getattr(self, 'grid_potentials', []) + [(gridfile,scale,boundary_condition)]
@@ -546,6 +709,25 @@ class ParticleType():
         return '<{} {}{}>'.format( type(self), self.name, '[{}]'.format(self.parent) if self.parent is not None else '' )
 
 class RigidBodyType(ParticleType):
+    """Class that holds common attributes for RigidBody objects.
+    This class extends ParticleType to represent rigid bodies that can have
+    attached particles, orientation, and rotational dynamics.
+
+    Attributes:
+        name (str): Name identifier for the rigid body type.
+        parent (ParticleType, optional): Parent type to fall back on for nonbonded interactions.
+        moment_of_inertia (float or array-like, optional): Moment of inertia tensor for the rigid body.
+        rotational_diffusivity (float or array-like, optional): Rotational diffusivity coefficient.
+        rotational_damping_coefficient (float or array-like, optional): Rotational damping coefficient.
+        attached_particles (tuple or list): Particles attached to this rigid body.
+        potential_grids (tuple): Collection of potential grid definitions, each with length 2 or 3.
+        charge_grids (tuple): Collection of charge grid definitions, each with length 2 or 3.
+        pmf_grids (tuple): Collection of pmf grid definitions, each with length 2 or 3.
+
+    Note:
+        If rotational_diffusivity is not provided, both moment_of_inertia and 
+        rotational_damping_coefficient must be specified.
+    """
 
     """Class that holds common attributes for RigidBody objects"""
 
@@ -591,6 +773,19 @@ class RigidBodyType(ParticleType):
                 raise Exception("Two different RigidBodyTypes have same 'name' attribute")    
 
 class PointParticle(Transformable, Child):
+    """
+    A class representing a point particle in a simulation system.
+    This class inherits from both Transformable and Child base classes, allowing
+    it to be positioned in space and exist in a parent-child hierarchy.
+
+    Attributes:
+        type_ (ParticleType): Type definition of the particle.
+        idx (int): Index of the particle in the system, default is None.
+        name (str): Name identifier for the particle, default is "A".
+        counter (int): Counter for operations on this particle, initialized to 0.
+        restraints (list): List of restraints applied to this particle.
+        rigid (bool): Flag indicating whether the particle is rigid, default is False.
+    """
     def __init__(self, type_, position, name="A", **kwargs):
         parent = None
         if 'parent' in kwargs:
@@ -609,10 +804,48 @@ class PointParticle(Transformable, Child):
             self.__dict__[key] = val
         
     def add_restraint(self, restraint):
-        ## TODO: how to handle duplicating and cloning bonds
+        """
+        Add a restraint to the model's restraint list.
+
+        Parameters
+        ----------
+        restraint : Restraint
+            The restraint object to add to the model.
+
+        Notes
+        -----
+        TODO: Determine how to handle duplicating and cloning bonds.
+        """
         self.restraints.append( restraint )
 
     def add_grid_potential(self, gridfile, scale=1, boundary_condition='dirichlet'):
+        """
+        Add a grid-based potential to the particle type.
+        
+        This method creates a new particle type derived from the current one and adds 
+        a grid-based potential to it. The grid potential is loaded from the specified file.
+        After adding the potential, the particle's type is updated to the new type.
+        
+        Parameters
+        ----------
+        gridfile : str
+            Path to the grid file in .dx format containing the potential data.
+        scale : float, optional
+            Scaling factor applied to the potential values. Default is 1.
+        boundary_condition : str, optional
+            Type of boundary condition to use for the grid potential.
+            Options are 'dirichlet' (default) or other boundary types supported by the system.
+        
+        Returns
+        -------
+        None
+            The method updates the particle's type in place.
+        
+        Notes
+        -----
+        This method will create a copy of the particle's type if it already has a parent,
+        or create a new derived type if it doesn't.
+        """
         t0 = self.type_
         name = f'{t0.name}_g_{gridfile.replace(".dx","")}_s_{scale}'
         if t0.parent is not None:
@@ -626,9 +859,26 @@ class PointParticle(Transformable, Child):
         self._clear_types()
         
     def get_restraints(self):
+        """
+        Get all restraints associated with this model.
+
+        Returns:
+            list[tuple]: A list of tuples, where each tuple contains:
+                - First element: this model instance
+                - Second element: a restraint object associated with this model
+        """
         return [(self,r) for r in self.restraints]
 
     def duplicate(self):
+        """
+        Create a deep copy of the current object.
+
+        This method creates a completely independent copy of the object, using the `deepcopy` function.
+        Any modifications to the returned object will not affect the original object.
+
+        Returns:
+            A new instance of the same class with identical attribute values.
+        """
         new = deepcopy(self)
         return new
 
@@ -705,6 +955,48 @@ class PointParticle(Transformable, Child):
         return f'<{__name__}.{self.__class__.__name__} "{self.name}" of {self.type_}>'
 
 class RigidBody(PointParticle):
+    """
+    Represents a rigid body in a physical simulation.
+    A rigid body is a collection of particles that maintain fixed positions relative to each other.
+    It inherits from PointParticle and implements transformation capabilities to move and rotate as a single unit.
+
+    Parameters
+    ----------
+    type_ : RigidBodyType
+        The type definition for this rigid body.
+    position : array-like
+        The initial position of the rigid body in 3D space.
+    orientation : array-like or quaternion
+        The initial orientation of the rigid body.
+    name : str, optional
+        A name identifier for this rigid body. Defaults to "A".
+    attached_particles : tuple, optional
+        Particles to attach to the rigid body, which will move with it. Defaults to empty tuple.
+    **kwargs : 
+        Additional keyword arguments to set as attributes.
+
+    Attributes
+    ----------
+    type_ : RigidBodyType
+        The type definition for this rigid body.
+    idx : int or None
+        Index identifier, assigned when added to a simulation.
+    name : str
+        Name identifier for this rigid body.
+    counter : int
+        Counter value, initialized at 0.
+    restraints : list
+        List of restraints applied to this rigid body.
+    rigid : bool
+        Boolean flag indicating if the object is rigid, always True for this class.
+    attached_particles : list
+        Copied particles attached to the rigid body. 
+
+    Note:
+        TODO: for attached_particles, it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; 
+        here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
+
+    """
 
     def __init__(self, type_, position, orientation, name="A", attached_particles=tuple(), **kwargs):
         parent = None
@@ -723,7 +1015,6 @@ class RigidBody(PointParticle):
         self.restraints = []
         self.rigid = True
 
-        ## TODO: it should be possible to uniquely apply bonds/angles etc to these particles, but their types should be fixed or otherwise unified among rbs; here we are copying them simply so that they can recieve and index and be used in bonded potentials and group sites
         self.attached_particles = [copy(p) for p in type_.attached_particles]
         
         for key,val in kwargs.items():
@@ -758,6 +1049,27 @@ class RigidBody(PointParticle):
                 raise AttributeError(r"'{type(self).__name__}' object has no attribute '{name}'")
 
 class Group(Transformable, Parent, Child):
+    """
+    A class representing a group of objects that can be transformed, have children, and be a child.
+    The Group class inherits from Transformable, Parent, and Child, combining the functionality
+    of all three classes. It allows for hierarchical grouping of objects, where each group can
+    have a position, orientation, parent, and children.
+
+    Attributes:
+        name (str, optional): The name of the group.
+        children (list, optional): A list of child objects belonging to this group.
+        parent (Parent, optional): The parent object of this group.
+        position (numpy.ndarray): The 3D position of the group, defaults to origin (0,0,0).
+        orientation (numpy.ndarray): The 3x3 rotation matrix representing the orientation,
+            defaults to identity matrix.
+        isClone (bool): Flag indicating whether this group is a clone, defaults to False.
+        remove_duplicate_bonded_terms (bool): Whether to remove duplicate bonded terms when
+            combining children, defaults to False.
+            
+    Methods:
+        clone(): Creates a clone of this group.
+        duplicate(): Creates a deep copy of this group, preserving parent-child relationships.
+    """
 
     def __init__(self, name=None, children = None, parent=None, 
                  position = np.array((0,0,0)),
@@ -801,9 +1113,35 @@ class Group(Transformable, Parent, Child):
     # def __setstate__(self, state):
     #     self.children, self.parent, self.position, self.orientation = state
 
-#Not sure where should it go
+
 class GroupSite:
-    """ Class to represent a collection of particles that can be used by bond potentials. In arbdmodel only """
+    """
+    Class to represent a collection of particles that can be used by bond potentials in arbdmodel.
+    This class groups multiple particles together and provides methods to calculate their center
+    and manage restraints applied to the group.
+
+    Attributes
+    ----------
+    particles : list
+        List of particle objects to be included in the group.
+    idx : int or None
+        Identifier for the group site, default is None.
+    restraints : list
+        List of restraints applied to the group site.
+
+    Methods
+    -------
+    get_center()
+        Calculate the center position of the group by averaging particle positions.
+    add_restraint(restraint)
+        Add a restraint to the group site.
+    get_restraints()
+        Get all restraints associated with this group site as tuples of (site, restraint).
+
+    Notes
+    -----
+    Currently does not support weighted particles (weights parameter in __init__).
+    """
     def __init__(self, particles, weights=None):
         if weights is not None:
             raise NotImplementedError

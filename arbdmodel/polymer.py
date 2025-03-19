@@ -11,6 +11,7 @@ from scipy import interpolate
 from .model import ArbdModel
 from .coords import rotationAboutAxis, quaternion_from_matrix, quaternion_to_matrix
 from . import Group, PointParticle
+from .interactions import HarmonicBond
 
 """
 TODO:
@@ -91,7 +92,29 @@ class Connection():
         return "<Connection {}--{}--{}]>".format( self.A, self.type_, self.B )
         
 class ConnectableElement():
-    """ Abstract base class """
+    """
+    ConnectableElement is an abstract base class that represents an object that can be connected to other objects.
+    This class provides functionality for managing connections between objects, where connections are typically made between 'Location' objects that are associated with the ConnectableElement.
+
+    Attributes:
+        locations (list): A list of Location objects associated with this element. Alias for connection_locations.
+        connection_locations (list): A list of Location objects associated with this element.
+        connections (list): A list of Connection objects that this element is a part of.
+
+    Methods:
+        get_locations(type_=None, exclude=()): 
+            Returns locations of a specified type, excluding certain types.
+        get_location_at(contour_position, on_fwd_strand=True, new_type="crossover"):
+            Returns a location at a specific contour position and strand orientation, 
+            creating one if necessary.
+        get_connections_and_locations(connection_type=None, exclude=()):
+            Returns a list of [connection, location_in_self, location_in_other] for each connection.
+
+    Notes:
+        - The class is designed to be subclassed.
+        - It appears to be part of a system for modeling polymer structures, possibly DNA origami or similar structures.
+        - The class enforces that objects cannot be connected to themselves directly.
+    """
     def __init__(self, connection_locations=None, connections=None):
         if connection_locations is None: connection_locations = []
         if connections is None: connections = []
@@ -162,7 +185,24 @@ class ConnectableElement():
         if B not in l: l.append(B)
 
 class PolymerSection(ConnectableElement):
-    """ Base class that describes a linear section of a polymer """
+    """
+    Base class that describes a linear section of a polymer.
+    A PolymerSection represents a continuous section of a polymer, defined by the number of monomers
+    and their spatial properties. It handles spatial transformations, contour-to-position mapping,
+    and manages connections to other polymer elements.
+
+    Attributes:
+        segname (str): Name of the polymer section.
+        num_monomers (int): Number of monomers in this polymer section.
+        monomer_length (float): Length of each monomer.
+        start_position (ndarray): 3D coordinates of the section's starting point.
+        end_position (ndarray): 3D coordinates of the section's ending point.
+        start_orientation (ndarray, optional): Initial orientation matrix.
+        position_spline_params (tuple): Spline parameters for position interpolation.
+        quaternion_spline_params (tuple, optional): Spline parameters for orientation interpolation.
+        sequence (list, optional): Sequence of monomers if applicable.
+
+    """
 
     def __init__(self, name, num_monomers,
                  monomer_length,
@@ -200,10 +240,53 @@ class PolymerSection(ConnectableElement):
         return "<{} {}[{:d}]>".format( type(self), self.segname, self.num_monomers )
 
     def set_splines(self, contours, coords):
+        """
+        Sets up splines for the polymer's position.
+
+        This method creates cubic splines that interpolate the polymer's position coordinates
+        along its contour. These splines can be used for smooth interpolation between discrete
+        polymer positions.
+
+        Parameters
+        ----------
+        contours : array_like
+            Contour parameter values corresponding to each coordinate point.
+            Typically represents positions along the polymer chain.
+            
+        coords : ndarray
+            Coordinates of the polymer, shape (n_points, n_dimensions).
+            Each row represents the position of a polymer segment in space.
+
+        Notes
+        -----
+        The method uses scipy.interpolate.splprep with linear splines (k=1) and no smoothing (s=0).
+        The resulting spline parameters are stored in self.position_spline_params as a tuple 
+        containing the knot points, coefficients, and degree of the spline (tck) and 
+        the parameter values (u).
+        """
         tck, u = interpolate.splprep( coords.T, u=contours, s=0, k=1)
         self.position_spline_params = (tck,u)
 
     def set_orientation_splines(self, contours, quaternions):
+        """
+        Set spline interpolation parameters for orientation.
+        
+        Creates a linear interpolation spline (k=1) for quaternion orientations along contour points.
+        The spline parameters are stored in the self.quaternion_spline_params attribute.
+        
+        Parameters
+        ----------
+        contours : array_like
+            Parametric positions along the polymer contour where orientations are defined.
+        quaternions : array_like
+            Array of quaternions defining orientations at each contour point.
+            Should be of shape (n, 4) where n is the number of contour points.
+            
+        Notes
+        -----
+        Uses scipy.interpolate.splprep with smoothing factor s=0 (exact interpolation)
+        and k=1 (linear interpolation).
+        """
         tck, u = interpolate.splprep( quaternions.T, u=contours, s=0, k=1)
         self.quaternion_spline_params = (tck,u)
 

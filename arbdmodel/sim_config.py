@@ -21,7 +21,34 @@ def _get_properties_and_dict_keys(obj):
     return properties + list(obj.__dict__.keys())
 
 class SimConf:
-    """ Class describing properties for a (ARBD or NAMD) simulation """
+    """
+    Class describing properties for a simulation (ARBD or NAMD).
+    This class stores various simulation parameters, manages binary paths, and provides
+    methods to combine simulation configurations.
+
+    Attributes:
+        num_steps (int): Total number of simulation steps.
+        output_period (int): Frequency of output generation.
+        integrator (str): Type of integrator used (e.g., 'MD', 'BD').
+        timestep (float): Simulation time step.
+        thermostat (str): Type of thermostat used.
+        barostat (str): Type of barostat used.
+        temperature (float): Simulation temperature (must be positive).
+        pressure (float): Simulation pressure.
+        cutoff (float): Cutoff distance for interactions.
+        pairlist_distance (float): Distance for generating pair lists.
+        decomp_period (int): Period for decomposition.
+        gpu (bool): Whether to use GPU acceleration.
+        seed (int): Random seed for reproducibility.
+        restart_file (str): Path to restart file.
+        # ARBD-specific parameters
+        rigid_body_integrator (str): Type of rigid body integrator. 
+        rigid_body_grid_grid_period (int): Period for rigid body grid updates.
+        # SimpleARBD parameters
+        viscosity (float): Solvent viscosity. 
+        solvent_density (float): Solvent density. in g/cm^3
+        num_heavy_cluster (int): Number of heavy clusters.
+    """
 
     def __init__(self, num_steps=None, output_period=None,
                  integrator=None, timestep=None, thermostat=None, barostat=None,
@@ -96,6 +123,29 @@ class SimConf:
         return None
     
     def set_binary(self, name, path):
+        """
+        Set the path to a specific binary.
+
+        This method updates the path for a binary in the BinaryManager. It associates the given binary name
+        with the specified file path.
+
+        Parameters
+        ----------
+        name : str
+            The name of the binary to set the path for.
+        path : str
+            The file system path to the binary.
+
+        Returns
+        -------
+        str
+            The path that was set.
+
+        Examples
+        --------
+        >>> config.set_binary('ffmpeg', '/usr/local/bin/ffmpeg')
+        '/usr/local/bin/ffmpeg'
+        """
         """Set the path to a specific binary."""
         BinaryManager.set_binary_path(name, path)
         return path
@@ -111,10 +161,36 @@ class SimConf:
         self.__temperature = value
 
     def combine(self, other, policy='override', warn=False):
-        """ 
-        Creates a new SimConf object whose properties are
-        initialized to be from "self", but are overridden with
-        properties in "other", provided they are not None
+        """
+        Combines two SimConf objects into a new one based on a specified policy.
+
+        This method creates a new SimConf object whose properties are initialized from 'self',
+        but are potentially overridden with properties from 'other' according to the specified policy.
+
+        Parameters
+        ----------
+        other : SimConf
+            The SimConf object whose properties may override the properties of 'self'.
+        policy : str, optional
+            The policy to use when combining properties. Options are:
+            - 'override': Always use the value from 'other' if it's not None (default).
+            - 'best': Use the more appropriate value based on property-specific rules:
+                - For 'timestep', 'output_period', 'decomp_period': uses the minimum value.
+                - For 'num_steps', 'cutoff', 'pairlist_distance': uses the maximum value.
+                - For 'integrator': prefers 'MD' over 'BD'.
+                - For other attributes: uses the value from 'other' with a warning.
+        warn : bool, optional
+            If True, log warnings when attribute values differ and policy='best' (default: False).
+
+        Returns
+        -------
+        SimConf
+            A new SimConf object with combined properties.
+
+        Raises
+        ------
+        ValueError
+            If an unrecognized policy is specified.
         """
         new_conf = copy(self)
         for attr in _get_properties_and_dict_keys(other):
@@ -156,8 +232,76 @@ class SimConf:
             yield attr, val
 
 class DefaultSimConf(SimConf):
-    """ Generic class describing properties for a simulation with default binary paths """
+    """
+    Generic class describing properties for a simulation with default binary paths.
+    This class extends SimConf to provide default binary paths and configuration parameters
+    for molecular dynamics simulations using ARBD.
 
+    Parameters
+    ----------
+    num_steps : float, optional
+        Number of simulation steps to run, default 1e5.
+    output_period : float, optional
+        Period for output generation, default 1e3.
+    integrator : str, optional
+        Integration method, default 'MD'.
+    timestep : float, optional
+        Simulation timestep in ns, default 20e-6.
+    thermostat : str, optional
+        Thermostat type, default 'Langevin'.
+    barostat : str or None, optional
+        Barostat type if any, default None.
+    temperature : float, optional
+        Simulation temperature in K, default 295.
+    pressure : float, optional
+        Pressure value for barostat if used, default 1.
+    cutoff : float, optional
+        Interaction cutoff distance, default 50.
+    pairlist_distance : float or None, optional
+        Pairlist buffer distance, default None.
+    decomp_period : int, optional
+        Period for domain decomposition updates, default 40.
+    seed : int or None, optional
+        Random seed for simulation, default None (random).
+    restart_file : str or None, optional
+        Path to restart file if continuing a simulation, default None.
+    gpu : int, optional
+        GPU device index to use, default 0.
+    viscosity : float, optional
+        Solvent viscosity, default 0.01.
+    solvent_density : float, optional
+        Density of the solvent, default 1.0.
+    num_heavy_cluster : int, optional
+        Number of heavy atoms per cluster, default 3.
+    **kwargs
+        Additional keyword arguments to pass to SimConf.
+
+    Attributes
+    ----------
+    num_steps : float
+        Number of simulation steps.
+    output_period : float
+        Period for output generation.
+    pressure : float
+        Pressure value for barostat if used.
+    viscosity : float
+        Solvent viscosity.
+    solvent_density : float
+        Density of the solvent.
+    num_heavy_cluster : int
+        Number of heavy atoms per cluster.
+
+    Properties
+    ----------
+    temperature : float
+        Simulation temperature with validation (must be positive).
+
+    Notes
+    -----
+    The class automatically searches for binary dependencies like 'arbd', 'hydropro', 'apbs',
+    'vmd', and 'namd', and adds their paths to the configuration if found.
+    Essential binaries (currently only 'arbd') will generate warnings if not found.
+    """
     def __init__(self, num_steps=1e5, output_period=1e3,
                  integrator='MD', timestep=20e-6, thermostat='Langevin', barostat=None,
                  temperature=295, pressure=1,
