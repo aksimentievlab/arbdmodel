@@ -13,19 +13,10 @@ class Transformable():
     objects in 3D space, as well as methods for applying transformations such as
     translations and rotations.
 
-    Attributes:
+    Parameters:
         position (numpy.ndarray): The position of the object in 3D space.
         orientation (numpy.ndarray or None): The orientation matrix of the object.
             If None, the object has no orientation.
-
-    Methods:
-        translate(offset): Translate the object by the given offset.
-        rotate(R, about): Rotate the object by the rotation matrix R about a center point.
-        transform(R, center, offset): Apply a general transformation to the object.
-        get_collapsed_position(): Get the absolute position of the object, taking into
-            account parent transformations if the object is a Child.
-        applyOrientation(obj): Apply the orientation chain to an object, considering
-            parent orientations if the object is a Child.
 
     Note:
         - The class is designed to work with the Child class for hierarchical transformations.
@@ -85,7 +76,7 @@ class Parent():
     The Parent class implements a hierarchical tree structure for organizing objects in a simulation.
     This class serves as a container for child objects and provides methods for managing relationships, properties, and interactions between these objects within a molecular simulation context.
 
-    Attributes:
+    Parameters:
         children (list): A list of child objects belonging to this parent.
         remove_duplicate_bonded_terms (bool): Whether to remove duplicate bonded terms when collecting them.
         bonds (list): List of bond interactions between particles.
@@ -425,7 +416,7 @@ class Child():
     can be looked up from the parent. This implementation allows for a form of delegation where 
     attribute access is forwarded to the parent object.
 
-    Attributes:
+    Parameters:
         parent (Parent, optional): The parent object that this child is associated with.
                                   When set, the child registers itself with the parent.
                                   Defaults to None.
@@ -524,8 +515,8 @@ class ParticleType():
     It supports inheritance through parent types, attribute lookup, and provides mechanisms
     for comparing particle types.
 
-    Attributes:
-        excludedAttributes (tuple): Attributes that are not inherited from parent types.
+    Parameters:
+        excludedParameters (tuple): Parameters that are not inherited from parent types.
         name (str): Unique identifier for this particle type.
         charge (float): Electric charge of the particle. Defaults to 0.
         mass (float, optional): Mass of the particle.
@@ -539,12 +530,12 @@ class ParticleType():
         - The class implements custom copy behavior to prevent unnecessary duplication.
     Class that hold common attributes that particles can point to"""
 
-    excludedAttributes = ("idx","type_",
+    excludedParameters = ("idx","type_",
                           "position",
                           "orientation",
                           "children",
                           "name",
-                          "parent", "excludedAttributes",
+                          "parent", "excludedParameters",
     )
 
     def __init__(self, name, charge=0, mass=None, diffusivity=None,
@@ -556,7 +547,7 @@ class ParticleType():
 
         if parent is not None:
             for k,v in parent.__dict__.items():
-                if k not in ParticleType.excludedAttributes:
+                if k not in ParticleType.excludedParameters:
                     self.__dict__[k] = v
             assert( type(parent) == type(self) )
 
@@ -573,7 +564,7 @@ class ParticleType():
         self.rigid_body_potentials = rigid_body_potentials
         devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
         
-        for key in ParticleType.excludedAttributes:
+        for key in ParticleType.excludedParameters:
             assert( key not in kwargs )
 
         for key,val in kwargs.items():
@@ -654,7 +645,7 @@ class ParticleType():
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
 
-        excluded_attributes = ParticleType.excludedAttributes
+        excluded_attributes = ParticleType.excludedParameters
         if name in excluded_attributes:
             raise AttributeError("'{}' object has no attribute '{}' and cannot look it up from the parent".format(type(self).__name__, name))
 
@@ -713,7 +704,7 @@ class RigidBodyType(ParticleType):
     This class extends ParticleType to represent rigid bodies that can have
     attached particles, orientation, and rotational dynamics.
 
-    Attributes:
+    Parameters:
         name (str): Name identifier for the rigid body type.
         parent (ParticleType, optional): Parent type to fall back on for nonbonded interactions.
         moment_of_inertia (float or array-like, optional): Moment of inertia tensor for the rigid body.
@@ -778,7 +769,7 @@ class PointParticle(Transformable, Child):
     This class inherits from both Transformable and Child base classes, allowing
     it to be positioned in space and exist in a parent-child hierarchy.
 
-    Attributes:
+    Parameters:
         type_ (ParticleType): Type definition of the particle.
         idx (int): Index of the particle in the system, default is None.
         name (str): Name identifier for the particle, default is "A".
@@ -964,21 +955,6 @@ class RigidBody(PointParticle):
     ----------
     type_ : RigidBodyType
         The type definition for this rigid body.
-    position : array-like
-        The initial position of the rigid body in 3D space.
-    orientation : array-like or quaternion
-        The initial orientation of the rigid body.
-    name : str, optional
-        A name identifier for this rigid body. Defaults to "A".
-    attached_particles : tuple, optional
-        Particles to attach to the rigid body, which will move with it. Defaults to empty tuple.
-    **kwargs : 
-        Additional keyword arguments to set as attributes.
-
-    Attributes
-    ----------
-    type_ : RigidBodyType
-        The type definition for this rigid body.
     idx : int or None
         Index identifier, assigned when added to a simulation.
     name : str
@@ -991,6 +967,8 @@ class RigidBody(PointParticle):
         Boolean flag indicating if the object is rigid, always True for this class.
     attached_particles : list
         Copied particles attached to the rigid body. 
+    **kwargs : 
+        Additional keyword arguments to set as attributes.
 
     Note
     ----------
@@ -1056,7 +1034,7 @@ class Group(Transformable, Parent, Child):
     of all three classes. It allows for hierarchical grouping of objects, where each group can
     have a position, orientation, parent, and children.
 
-    Attributes:
+    Parameters:
         name (str, optional): The name of the group.
         children (list, optional): A list of child objects belonging to this group.
         parent (Parent, optional): The parent object of this group.
@@ -1121,7 +1099,7 @@ class GroupSite:
     This class groups multiple particles together and provides methods to calculate their center
     and manage restraints applied to the group.
 
-    Attributes
+    Parameters
     ----------
     particles : list
         List of particle objects to be included in the group.

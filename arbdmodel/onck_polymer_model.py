@@ -225,22 +225,13 @@ class OnckNonbonded(AbstractPotential):
         The spatial resolution for potential calculation. Default is 0.1 Å.
     range_ : tuple, optional
         The range of distances for which to calculate the potential. Default is (0, None).
-
-    Attributes
-    ----------
-    debye_length : float
-        The Debye-Hückel screening length in angstroms.
     max_force : float
-        Maximum allowed force in the system, used as a cap for stability.
+        Maximum allowed force in the system, used as a cap for stability. Default is 50
 
-    Methods
-    -------
-    potential(r, types)
-        Calculate the nonbonded potential energy between two residue types at distance r.
-
-    Notes
+    Note
     -----
     The potential includes:
+    
     1. Electrostatic interactions with distance-dependent dielectric constant
     2. Modified Lennard-Jones interactions that depend on residue types:
        - Special 8-6 LJ potential for cationic-aromatic interactions in 1.0cp/1.1 versions
@@ -323,21 +314,10 @@ class OnckBeads(PolymerBeads):
         Version of the Onck model to use. Defaults to 1.1 if not specified.
     **kwargs
         Additional keyword arguments passed to the parent PolymerBeads constructor.
-
-    Attributes
-    ----------
-    version : float
-        The version of the Onck model being used.
     types_dict : dict
         Mapping between amino acid codes and bead types.
     peptide_bond : HarmonicBond
         Bond potential used for peptide bonds between adjacent beads.
-    polymer : Polymer
-        Reference to the parent polymer object.
-    sequence : list
-        The amino acid sequence.
-    spring_constant : float
-        The spring constant used for peptide bonds.
 
     Raises
     ------
@@ -346,7 +326,7 @@ class OnckBeads(PolymerBeads):
     NotImplementedError
         If sequence is None (random sequence generation not implemented).
 
-    Notes
+    Note
     -----
     The Onck model distinguishes between proline (P), glycine (G), and all other amino acids (X)
     for certain bonded interactions. Special potentials are loaded from files for angle and 
@@ -431,6 +411,48 @@ class OnckBeads(PolymerBeads):
             raise Exception('Programming error!')
 
 class OnckModel(PolymerModel):
+    """
+    A polymer model based on Onck's coarse-grained model for disordered FG-Nup peptides.
+
+    The OnckModel class implements a coarse-grained model of polymers based on the work by Onck et al.
+    This model is specifically designed for disordered FG-Nup peptides and incorporates
+    electrostatic interactions through a Debye-Hückel potential.
+
+    Parameters
+    ----------
+    polymers : list
+        List of polymers to be modeled.
+    sequences : list, optional
+        List of amino acid sequences corresponding to each polymer.
+        Must be provided. Default is None.
+    debye_length : float, optional
+        Debye screening length in angstroms. Default is 10.
+    damping_coefficient : float, optional
+        Damping coefficient in ns. Default is 100.
+    version : float, optional
+        Version of the Onck model to use. Default is 1.1 (corresponding to 1BPA-1.1 from 2023).
+    DEBUG : bool, optional
+        Whether to enable debug mode. Default is False.
+    **kwargs : dict
+        Additional keyword arguments to pass to the parent PolymerModel class.
+        Common options include:
+        - timestep: Simulation timestep (default: 20e-6)
+        - cutoff: Cutoff distance for non-bonded interactions (default: max(5*debye_length, 25))
+        - decomp_period: Decomposition period (default: 1000)
+    types_dict : dict
+        Dictionary mapping from type keys to type objects for the given version.
+    types : list
+        List of all types used in the model.
+
+    Note
+    -----
+    The model differs from the published Onck model if a Debye length other than 12.7 Å is chosen.
+    In such cases, the non-bonded cutoff is set to 5 * debye_length.
+
+    References
+    ----------
+    Please refer to the citations displayed during initialization.
+    """
     def __init__(self, polymers,
                  sequences = None,
                  debye_length = 10,
@@ -440,11 +462,6 @@ class OnckModel(PolymerModel):
                  DEBUG=False,
                  **kwargs):
 
-        """
-        [debye_length]: angstroms
-        [damping_coefficient]: ns
-
-        """
 
         if version is None:
             logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')

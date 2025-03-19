@@ -26,7 +26,7 @@ class SimConf:
     This class stores various simulation parameters, manages binary paths, and provides
     methods to combine simulation configurations.
 
-    Attributes:
+    Parameters:
         num_steps (int): Total number of simulation steps.
         output_period (int): Frequency of output generation.
         integrator (str): Type of integrator used (e.g., 'MD', 'BD').
@@ -276,7 +276,7 @@ class DefaultSimConf(SimConf):
     **kwargs
         Additional keyword arguments to pass to SimConf.
 
-    Attributes
+    Parameters
     ----------
     num_steps : float
         Number of simulation steps.

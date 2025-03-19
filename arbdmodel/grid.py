@@ -89,15 +89,18 @@ def average_grids(grids, mask='nan'):
     """
     Compute the average of multiple grids.
 
-    :param grids: The input grids to average.
-    :type grids: list of ndarrays
-    :param mask: The mask type to use for averaging. If 'nan', only non-NaN values are considered. Default is 'nan'.
-    :type mask: str
-    :return: The average grid.
-    :rtype: ndarray
-    :raises NotImplementedError: If the mask option is not implemented.
+    Parameters
+    ----------
+      param grids: The input grids to average.
+      type grids: list of ndarrays
+      param mask: The mask type to use for averaging. If 'nan', only non-NaN values are considered. Default is 'nan'.
+      type mask: str
+      return: The average grid.
+      rtype: ndarray
+      raises NotImplementedError: If the mask option is not implemented.
 
     Example:
+    ----------
         >>> grid1 = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         >>> grid2 = np.array([[2, 4, 6], [8, 10, 12], [14, 16, 18]])
         >>> averaged_grid = average_grids([grid1, grid2], mask='nan')

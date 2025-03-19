@@ -15,7 +15,7 @@ class ParmedArbd(ArbdModel):
     into ARBD simulation models, preserving bonded and non-bonded interactions.
     It also supports creating dual topology models for free energy calculations.
     
-    Attributes:
+    Parameters:
         parmed_structure: The original ParmEd structure
         atom_types: Dictionary mapping atom type names to ParticleType objects
         atoms_map: Mapping from ParmEd atoms to ARBD atoms

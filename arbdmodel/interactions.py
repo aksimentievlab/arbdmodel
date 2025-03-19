@@ -13,6 +13,7 @@ class AbstractPotential(metaclass=ABCMeta):
     Abstract base class for implementing interaction potentials.
     This class defines the basic structure for creating and managing interaction potential
     functions that can be written to files and used in simulations.
+
     Parameters
     ----------
     range_ : tuple of (float, float or None)
@@ -30,31 +31,10 @@ class AbstractPotential(metaclass=ABCMeta):
         - 'min': Zero is at the minimum value
         - 'first': Zero is at the first point
         - 'last': Zero is at the last point
-    Attributes
-    ----------
-    range_ : tuple of (float, float or None)
-        The range of distances for the potential.
-    resolution : float
-        The spacing between points in the discretized potential.
-    max_force : float or None
-        Maximum allowed force magnitude.
-    max_potential : float or None
-        Maximum allowed potential energy.
-    zero : str
-        Method to set the zero of the potential.
     periodic : bool
         Whether the potential is periodic (False by default).
-    Methods
-    -------
-    potential(r, types=None)
-        Abstract method that must be implemented by subclasses.
-        Calculates the potential value at distance r.
-    write_file(filename=None, types=None)
-        Writes the potential to a file.
-    filename(types=None)
-        Abstract method that should be implemented by subclasses.
-        Returns a filename for the potential.
-    Notes
+
+    Note
     -----
     Subclasses must implement at minimum the `potential` and `filename` methods.
     """
@@ -143,6 +123,31 @@ class AbstractPotential(metaclass=ABCMeta):
         return u
 
     def write_file(self, filename=None, types=None):
+        """
+        Write potential energy values as a function of distance to a file.
+
+        This method evaluates the potential function over a range of distances and writes
+        the distance-potential pairs to a text file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The path to the output file. If None, a default filename will be generated using
+            the `filename` method with the given types.
+        types : tuple or list, optional
+            The particle types for which to calculate the potential. Used for both filename 
+            generation (if filename is None) and potential evaluation. If None, defaults to 
+            the types defined in the interaction model.
+
+        Note
+        -----
+        The potential values are capped using the `_cap_potential` method to handle
+        potential singularities or extreme values. The output file contains two columns:
+        distance (r) and potential energy (u).
+
+        Any 'divide by zero' or 'invalid value' numpy warnings are ignored during
+        the potential calculation.
+        """
         if filename is None:
             filename = self.filename(types)
         rmin,rmax = self.range_

@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Binary path management module for simulation engines and processors.
-This module provides a singleton object to manage paths to external binaries.
-"""
 
 import os
 import platform
@@ -203,10 +199,9 @@ def initialize_binary_paths():
     If users don't wish to call this function, they can set the paths manually.
 
     Example: 
-    >>arbd_path = BinaryManager.get_binary_path("arbd")
-    >>print(f"ARBD binary path: {arbd_path}")
-
-    >>BinaryManager.set_binary_path("hydropro", "/path/to/hydropro")
+        >>> arbd_path = BinaryManager.get_binary_path("arbd")
+        >>> print(f"ARBD binary path: {arbd_path}")
+        >>> BinaryManager.set_binary_path("hydropro", "/path/to/hydropro")
     """
     # Check environment variables for binary paths
     for binary in DEFAULT_BINARIES:
