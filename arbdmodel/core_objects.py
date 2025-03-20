@@ -88,7 +88,6 @@ class Parent():
         bond_angles (list): List of combined bond-angle interactions.
         product_potentials (list): List of product potentials.
         group_sites (list): List of group sites.
-    This class implements iteration methods to traverse the tree structure depth-first.
     """
     def __init__(self, children=None, remove_duplicate_bonded_terms=False):
         self.children = []

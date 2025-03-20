@@ -233,7 +233,6 @@ class SimConf:
 
 class DefaultSimConf(SimConf):
     """
-    Generic class describing properties for a simulation with default binary paths.
     This class extends SimConf to provide default binary paths and configuration parameters
     for molecular dynamics simulations using ARBD.
 
@@ -275,21 +274,6 @@ class DefaultSimConf(SimConf):
         Number of heavy atoms per cluster, default 3.
     **kwargs
         Additional keyword arguments to pass to SimConf.
-
-    Parameters
-    ----------
-    num_steps : float
-        Number of simulation steps.
-    output_period : float
-        Period for output generation.
-    pressure : float
-        Pressure value for barostat if used.
-    viscosity : float
-        Solvent viscosity.
-    solvent_density : float
-        Density of the solvent.
-    num_heavy_cluster : int
-        Number of heavy atoms per cluster.
 
     Properties
     ----------

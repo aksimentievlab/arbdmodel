@@ -299,8 +299,41 @@ def neighborhood_average(grid, neighborhood = 1, fill_value='mirror'):
     return result
   
 def replace_false_with_distance(boolean_grid, sampling):
-    import ndimage
-    return ndimage.morphology.distance_transform_edt( boolean_grid, sampling=[Dxy,Dxy,Dz] )
+    """
+    Calculate the Euclidean distance transform of a boolean grid.
+
+    This function takes a boolean grid and replaces each False value with the 
+    Euclidean distance to the closest True value, while keeping True values as 0.
+
+    Parameters
+    ----------
+    boolean_grid : ndarray
+      Boolean grid where True represents obstacles/objects and False represents 
+      free space. Each False value will be replaced by the distance to the closest True.
+      
+    sampling : float or sequence of floats, optional
+      Spacing of elements along each dimension. If a sequence, must be the same 
+      length as the boolean_grid dimensions. If a single value, this is used for all dimensions.
+
+    Returns
+    -------
+    ndarray
+      The Euclidean distance transform of the boolean grid with the same shape as the input.
+      At each position where boolean_grid is True, the output is 0. At each position where 
+      boolean_grid is False, the output is the distance to the closest True value.
+
+    Examples
+    --------
+    >>> grid = np.array([[True, False, False], 
+    ...                   [False, False, False], 
+    ...                   [False, False, True]])
+    >>> replace_false_with_distance(grid, sampling=1.0)
+    array([[0.        , 1.        , 2.        ],
+         [1.        , 1.41421356, 1.        ],
+         [2.        , 1.        , 0.        ]])
+    """
+    from scipy.ndimage import distance_transform_edt
+    return distance_transform_edt( boolean_grid, sampling=sampling )
 
   
 def fill_nans(grid, neighborhood=1, max_iterations=np.inf, mask=None):
@@ -502,7 +535,7 @@ def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2)
     A 3D array representing the potential energy field, where the energy depends only
     on the distance from the z-center raised to the specified exponent.
 
-  Note:
+  Note
   -----
   The potential U at each point is calculated as:
   U = (force_constant/exponent) * |z - center_z|^exponent
@@ -569,7 +602,7 @@ def spherical_confinement(force_constant, radius, dimensions,  resolution, cente
   The potential is zero inside the sphere (R <= radius) and follows a power law 
   (force_constant/exponent) * (R-radius)^exponent outside the sphere (R > radius).
 
-  Parameters
+  Args
   ----------
   force_constant : float
     The force constant that determines the strength of the confinement potential.
@@ -622,7 +655,7 @@ def write_confine_dx(radius=100 ):  #Might merge with spherical confinement?
     outside the specified radius and a linear potential beyond radius + 25Å. The potential
     is written to a DX file named 'confine-{radius}.dx'.
 
-    Parameters
+    Args
     ----------
     radius : float, default=100
     Radius of the spherical confinement in Angstroms. The potential is zero within
@@ -686,7 +719,7 @@ def write_confine_dx(radius=100 ):  #Might merge with spherical confinement?
 
 ## Utility functions
 
-def create_bounding_grid( *grids ):
+def _create_bounding_grid( *grids ):
     """ Construct a grid bigger than all the (GridDataFormats) grids provided in the arguments; note that the inputs must be orthonormal and have exactly overlapping voxels """
     def _create_bounding_grid( grid1, grid2 ):
       assert( len(grid1.grid.shape) == 3 )
@@ -718,7 +751,7 @@ def get_slice_enclosing_smaller_grid( grid, smaller_grid ):
     that corresponds to the region covered by a smaller grid. The function assumes that both
     grids are orthonormal and have the same grid spacing (delta).
 
-    Parameters
+    Args
     ----------
     grid : Grid
       The larger grid object containing a 3D array and grid metadata.

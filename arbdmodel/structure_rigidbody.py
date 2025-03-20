@@ -452,11 +452,35 @@ class StructureRigidBodyModel(ArbdModel):
         return created_bodies
 
     def add_static_object(self,structure_path, work_dir=None,is_gigantic=False, threshold=300):
-        """Add this static object to an ARBD model.
-        
-        Args:
-            model: ArbdModel to add this static object to
         """
+        Adds a static object to the simulation.
+        
+        This method creates a StaticObject from the specified structure file, extracts its
+        electrostatic and potential/charge grids, and adds them to the simulation as
+        non-bonded interactions.
+        
+        Parameters
+        ----------
+        structure_path : str
+            Path to the structure file of the static object.
+        work_dir : str, optional
+            Working directory for the static object.
+        is_gigantic : bool, default=False
+            Flag indicating whether the structure is exceptionally large.
+        threshold : int, default=300
+            Size threshold for processing large structures.
+        
+        Returns
+        -------
+        None
+            The static object is added to the simulation environment.
+        
+        Note
+        -----
+        The method adds the created StaticObject to the `static_objects` list after
+        setting up all necessary non-bonded interactions.
+            """
+
         obj=StaticObject(structure_path=structure_path, work_dir=work_dir,
                          simconf=self.simconf,is_gigantic=is_gigantic,threshold=threshold)
         elec_grid = obj.elec_grid
@@ -486,7 +510,7 @@ class SimpleArbdEngine(ArbdEngine):
         """Write all simulation files.
         
         Args:
-            model: ArbdModel to simulate
+            model: StructureRigidBodyModel to simulate
             output_name: Base name for output files
             configuration: SimConf object
             **conf_params: Additional configuration parameters
@@ -505,7 +529,7 @@ class SimpleArbdEngine(ArbdEngine):
         """Run ARBD simulation.
         
         Args:
-            model: ArbdModel to simulate
+            model: StructureRigidBodyModel to simulate
             output_name: Base name for output files
             replicas: Number of replicas to run
             gpu: GPU index to use

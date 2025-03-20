@@ -39,6 +39,17 @@ from subprocess import Popen, PIPE  # , STDOUT
 
 
 def check_git_repository():
+    """
+    Checks if the current working directory is part of a git repository
+    that has 'arbdmodel.git' as one of its remotes.
+    
+    Uses the 'git remote -v' command to get a list of remotes and 
+    checks if 'arbdmodel.git' is in the output.
+    
+    Returns:
+        bool: True if 'arbdmodel.git' is found in the remotes, False otherwise
+              or if an error occurs while running the git command.
+    """
     try:
         remotes = subprocess.check_output(['git', 'remote', '-v'], stderr=subprocess.STDOUT)
         return b'arbdmodel.git' in remotes
@@ -46,6 +57,27 @@ def check_git_repository():
         return False   
 
 def call_git_describe(abbrev):
+    """
+    Call git describe command to get the current tag and commit information.
+    
+    This function executes the 'git describe --tags --abbrev=N' command to retrieve
+    the tag and abbreviated commit hash of the current git repository.
+    
+    Parameters
+    ----------
+    abbrev : int
+        The length of the abbreviated commit hash to return.
+        
+    Returns
+    -------
+    str or None
+        The output of git describe command (tag-commits-hash) as a string if successful,
+        or None if the command fails (e.g., not in a git repository).
+    
+    Note
+    -----
+    Requires git to be installed and the code to be within a git repository.
+    """
     try:
         p = Popen(['git', 'describe', '--tags', '--abbrev=%d' % abbrev],
                   stdout=PIPE, stderr=PIPE)
@@ -58,6 +90,17 @@ def call_git_describe(abbrev):
 
 
 def is_dirty():
+    """
+    Check if the Git repository has uncommitted changes.
+
+    This function determines if the current Git repository is "dirty", meaning it has
+    uncommitted changes to tracked files. It runs the Git command 'diff-index --name-only HEAD'
+    which lists files that differ from the current HEAD commit.
+
+    Returns:
+        bool: True if there are uncommitted changes (repository is dirty), 
+              False if the repository is clean or if an error occurs when running the Git command.
+    """
     try:
         p = Popen(["git", "diff-index", "--name-only", "HEAD"],
                   stdout=PIPE, stderr=PIPE)
@@ -138,6 +181,25 @@ def read_version_file(filename):
     return version
 
 class Citation():
+    """
+    A class to represent a citation in academic publications.
+
+    This class provides functionality to create and display a citation with various
+    bibliographic information such as author, title, journal, etc.
+
+    Attributes:
+        author (str): The author(s) of the publication.
+        title (str): The title of the publication.
+        journal (str): The journal in which the publication appeared.
+        volume (str): The volume number of the publication.
+        number (str): The issue number of the publication.
+        pages (str): The page range of the publication.
+        year (str): The year of publication.
+        doi (str): The Digital Object Identifier or URL of the publication.
+
+    Methods:
+        display(): Returns a formatted string representation of the citation.
+    """
     def __init__(self, author=None, title=None, journal=None, volume=None, number=None, pages=None, year=None, doi=None):
         self.author = author
         self.title = title

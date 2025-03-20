@@ -222,6 +222,7 @@ class BoundaryPotential(AbstractPotential):
             well_depth: Depth of potential well
             resolution: Grid resolution
             blur: Smoothing parameter
+            filename: Output filename
             **kwargs: Additional parameters for AbstractPotential
         """
         default_range = (0, np.max([np.linalg.norm(v) for v in cell_vectors]))

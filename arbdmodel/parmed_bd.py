@@ -14,11 +14,6 @@ class ParmedArbd(ArbdModel):
     This class facilitates the conversion of molecular structures loaded with ParmEd
     into ARBD simulation models, preserving bonded and non-bonded interactions.
     It also supports creating dual topology models for free energy calculations.
-    
-    Parameters:
-        parmed_structure: The original ParmEd structure
-        atom_types: Dictionary mapping atom type names to ParticleType objects
-        atoms_map: Mapping from ParmEd atoms to ARBD atoms
     """
     
     def __init__(self, parmed_structure=None, psf=None, pdb=None, parameter_files=None, 
@@ -35,6 +30,10 @@ class ParmedArbd(ArbdModel):
             integrator: Simulation integrator type
             cutoff: Non-bonded interaction cutoff distance
             **kwargs: Additional arguments for ArbdModel
+
+        Attributes:
+            atom_types: Dictionary mapping atom type names to ParticleType objects
+            atoms_map: Mapping from ParmEd atoms to ARBD atoms
         """
         # Initialize empty model first
         ArbdModel.__init__(self, [], integrator=integrator, cutoff=cutoff, **kwargs)

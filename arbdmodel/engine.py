@@ -148,16 +148,16 @@ class ArbdEngine(SimEngine):
     simulation engine. It handles the generation of simulation configuration files, particle coordinates,
     and various potential files required for ARBD simulations.
 
-    Attributes:
-        extra_bd_file_lines (str): Additional lines to be added to the BD configuration file.
-        configuration (SimConf): The simulation configuration object.
-        num_particles (int): Number of particles in the system.
-        particles (list): List of particles in the system.
-        type_counts (dict): Count of each particle type.
-        _written_bond_files (dict): Dictionary tracking written bond files.
-        cacheUpToDate (bool): Flag indicating if the cache is current.
-        potential_directory (str): Directory for storing potential files.
-        rb_type_dirs (dict): Directories for rigid body types.
+    Parameters
+    ----------
+    extra_bd_file_lines (str): Additional lines to be added to the BD configuration file.
+    configuration (SimConf): The simulation configuration object.
+    num_particles (int): Number of particles in the system.
+    particles (list): List of particles in the system.
+    type_counts (dict): Count of each particle type.
+    cacheUpToDate (bool): Flag indicating if the cache is current.
+    potential_directory (str): Directory for storing potential files.
+    rb_type_dirs (dict): Directories for rigid body types.
 
     """
     def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
