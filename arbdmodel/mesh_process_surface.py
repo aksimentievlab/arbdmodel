@@ -39,7 +39,7 @@ class SurfaceMeshProcessor:
         if simconf is None:
             from . import DefaultSimConf
             simconf = DefaultSimConf()
-            
+        self.simconf=simconf
         # Extract parameters from simconf
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
@@ -313,11 +313,8 @@ class SurfaceMeshProcessor:
         # Run HydroPro to get hydrodynamic properties
         self.runner = HydroProRunner(
             self.mass,
-            binary_path=self.binary_path,
-            temperature=self.temperature,
-            viscosity=self.viscosity,
-            solvent_density=self.solvent_density,
-            structure_name=self.name
+            simconf=self.simconf,
+            structure_name="hydrocal"
         )
         
         results = self.runner.run_calculation(work_dir=work_dir)
