@@ -17,7 +17,7 @@ class MeshProcessor:
     MICRON_TO_ANGSTROM = 10000
 
     def __init__(self, mesh_file, density=19.3, simconf=None, unit_scale=MICRON_TO_ANGSTROM, 
-                 grid_spacing=2.0, grid_buffer=20.0,
+                 grid_spacing=10, grid_buffer=200.0,
                  work_dir=None, expected_mass=None):
         """
         Initialize processor with mesh file
@@ -414,8 +414,171 @@ class MeshProcessor:
         aspect_ratio = length / width if width > 0 else 1.0
         logger.info(f"Calculated aspect ratio after alignment: {aspect_ratio:.2f}")
         self.inertia_tensor=inertia
-     
+
     def _create_grid_and_mask(self, spacing=2.0, buffer=20.0):
+        """
+        Create grid and inside/outside mask for the mesh using a robust signed distance approach.
+        
+        This function creates a 3D grid and determines which points are inside and outside
+        the mesh using a combination of ray casting and the winding number method.
+        
+        Parameters:
+            spacing (float): Grid spacing in Angstroms
+            buffer (float): Extra space to add around the mesh bounds
+        """
+        import numpy as np
+        from scipy.spatial import KDTree
+        
+        # Calculate grid bounds with buffer
+        bounds_min = np.min(self.volume_nodes, axis=0) - buffer
+        bounds_max = np.max(self.volume_nodes, axis=0) + buffer
+        
+        # Create grid points
+        npts = np.ceil((bounds_max - bounds_min) / spacing).astype(int)
+        logger.info(f"Creating grid with dimensions {npts}")
+        
+        x = np.linspace(bounds_min[0], bounds_max[0], npts[0])
+        y = np.linspace(bounds_min[1], bounds_max[1], npts[1])
+        z = np.linspace(bounds_min[2], bounds_max[2], npts[2])
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        
+        # Create array of grid points for testing
+        grid_points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+        
+        logger.info(f"Classifying {len(grid_points)} grid points as inside or outside the mesh...")
+        
+        # Get triangles from surface mesh
+        triangles = self.nodes[self.elements]
+        
+        # Pre-compute triangle normals for consistent orientation
+        triangle_normals = np.zeros((len(triangles), 3))
+        for i, tri in enumerate(triangles):
+            # Compute normalized triangle normal
+            v1 = tri[1] - tri[0]
+            v2 = tri[2] - tri[0]
+            n = np.cross(v1, v2)
+            norm = np.linalg.norm(n)
+            if norm > 0:
+                triangle_normals[i] = n / norm
+        
+        # Find mesh center for reference
+        mesh_center = np.mean(self.nodes, axis=0)
+        
+        # Build KD-tree for the mesh triangles (using triangle centers)
+        triangle_centers = np.mean(triangles, axis=1)
+        tri_tree = KDTree(triangle_centers)
+        
+        # Process points in chunks to avoid memory issues
+        chunk_size = 5000
+        num_points = grid_points.shape[0]
+        inside_mask = np.zeros(num_points, dtype=bool)
+        
+        for i in range(0, num_points, chunk_size):
+            end_idx = min(i + chunk_size, num_points)
+            if i % (chunk_size * 10) == 0:
+                logger.info(f"Processing points {i} to {end_idx} of {num_points}...")
+            
+            chunk_points = grid_points[i:end_idx]
+            chunk_inside = np.zeros(len(chunk_points), dtype=bool)
+            
+            # For each point, determine inside/outside using winding number approach
+            for j, point in enumerate(chunk_points):
+                # Find nearest triangles to the point
+                dists, tri_indices = tri_tree.query(point, k=30)  # Query k nearest triangles
+                
+                # Cast a ray in the +x direction
+                ray_origin = point
+                ray_direction = np.array([1.0, 0.0, 0.0])
+                
+                # Count ray intersections with triangles
+                intersections = 0
+                
+                # Only test against the nearest triangles for efficiency
+                for tri_idx in tri_indices:
+                    triangle = triangles[tri_idx]
+                    
+                    # Basic ray-triangle intersection test
+                    v0, v1, v2 = triangle
+                    
+                    # Using Möller–Trumbore algorithm
+                    edge1 = v1 - v0
+                    edge2 = v2 - v0
+                    h = np.cross(ray_direction, edge2)
+                    a = np.dot(edge1, h)
+                    
+                    # If ray is parallel to triangle, skip
+                    if abs(a) < 1e-6:
+                        continue
+                    
+                    f = 1.0 / a
+                    s = ray_origin - v0
+                    u = f * np.dot(s, h)
+                    
+                    # If intersection is outside triangle, skip
+                    if u < 0.0 or u > 1.0:
+                        continue
+                    
+                    q = np.cross(s, edge1)
+                    v = f * np.dot(ray_direction, q)
+                    
+                    # If intersection is outside triangle, skip
+                    if v < 0.0 or u + v > 1.0:
+                        continue
+                    
+                    # Compute distance to intersection
+                    t = f * np.dot(edge2, q)
+                    
+                    # Only count intersections in the positive direction
+                    if t > 0.0:
+                        # Ensure consistent counting using triangle normal
+                        # For triangles facing the ray, count normally
+                        # For triangles facing away from the ray, don't count
+                        dot_product = np.dot(triangle_normals[tri_idx], ray_direction)
+                        if dot_product < 0:  # Triangle facing the ray
+                            intersections += 1
+                
+                # Odd number of intersections means point is inside
+                if intersections % 2 == 1:
+                    chunk_inside[j] = True
+                    
+            inside_mask[i:end_idx] = chunk_inside
+        
+        # Reshape mask to match grid shape
+        inside_mask = inside_mask.reshape(X.shape)
+        
+        # Clean up the mask using morphological operations if scipy is available
+        try:
+            from scipy import ndimage
+            
+            # Fill small holes (isolated outside points surrounded by inside points)
+            filled_mask = ndimage.binary_fill_holes(inside_mask)
+            
+            # Remove small islands (isolated inside points surrounded by outside points)
+            cleaned_mask = ndimage.binary_opening(filled_mask, structure=np.ones((3,3,3)))
+            
+            # Count changes
+            added = np.sum(cleaned_mask & ~inside_mask)
+            removed = np.sum(~cleaned_mask & inside_mask)
+            logger.info(f"Mask cleaning: filled {added} holes, removed {removed} isolated points")
+            
+            inside_mask = cleaned_mask
+        except ImportError:
+            logger.warning("SciPy ndimage not available for mask cleaning")
+        
+        # Store grid information as instance variables
+        self.grid_points = grid_points
+        self.grid_shape = X.shape
+        self.inside_mask = inside_mask
+        self.grid_origin = bounds_min
+        self.grid_delta = spacing * np.ones(3)
+        from .grid import writeDx
+        mask_array = np.zeros(self.grid_shape, dtype=float)
+        mask_array[self.inside_mask] = mask_value
+    
+        writeDx("mask.dx", mask_array, self.grid_origin, self.grid_delta)
+        logger.info(f"Grid created with {np.sum(inside_mask)} inside points out of {num_points} total points")
+
+    def _create_grid_and_maskbak(self, spacing=2.0, buffer=20.0):
         """
         Create grid and inside/outside mask for the mesh.
         
@@ -483,25 +646,49 @@ class MeshProcessor:
             chunk_points = grid_points[i:end_idx]
             
             # Scale points back to mesh units
-            scaled_points = chunk_points / self.unit_scale
+            scaled_points = chunk_points/self.unit_scale
             
             # Test each point for each volume entity
             chunk_inside = np.zeros(len(chunk_points), dtype=bool)
             
             for dim, tag in volume_entities:
-                # Use Gmsh point containment test
-                for j, point in enumerate(scaled_points):
-                    # pointInEntity returns:
-                    # - 0: outside
-                    # - 1: inside
-                    # - -1: on boundary
-                    in_entity = gmsh.model.getPointContainment([tag], [point[0], point[1], point[2]])
+                # Process points in batches for each entity
+                for j in range(0, len(scaled_points), 100):  # Process 100 points at a time
+                    batch_end = min(j + 100, len(scaled_points))
+                    batch_points = scaled_points[j:batch_end]
                     
-                    if in_entity[0] >= 0:  # Inside or on boundary
-                        chunk_inside[j] = True
-            
-            inside_mask[i:end_idx] = chunk_inside
+                    # Flatten the coordinates for gmsh.model.isInside
+                    coords_flat = batch_points.flatten().tolist()
+                    
+                    try:
+                        # Use gmsh.model.isInside to test if points are inside the entity
+                        # Returns the number of points inside
+                        num_inside = gmsh.model.isInside(dim, tag, coords_flat)
+                        
+                        if num_inside > 0:
+                            # If any points are inside, we need to test them individually
+                            # since isInside doesn't tell us which specific points are inside
+                            for k, point in enumerate(batch_points):
+                                try:
+                                    # Test each point individually
+                                    is_inside = gmsh.model.isInside(dim, tag, point.tolist())
+                                    if is_inside > 0:
+                                        chunk_inside[j + k] = True
+                                except Exception as e:
+                                    logger.warning(f"Error testing point {j+k}: {e}")
+                    except Exception as e:
+                        logger.warning(f"Error batch testing points {j}-{batch_end}: {e}")
+                        # Fall back to testing points individually
+                        for k, point in enumerate(batch_points):
+                            try:
+                                is_inside = gmsh.model.isInside(dim, tag, point.tolist())
+                                if is_inside > 0:
+                                    chunk_inside[j + k] = True
+                            except Exception as e:
+                                logger.warning(f"Error testing point {j+k}: {e}")
         
+        inside_mask[i:end_idx] = chunk_inside
+    
         # Reshape mask to match grid shape
         inside_mask = inside_mask.reshape(X.shape)
         
@@ -511,8 +698,9 @@ class MeshProcessor:
         self.inside_mask = inside_mask
         self.grid_origin = bounds_min
         self.grid_delta = spacing * np.ones(3)
+
         
-        logger.info(f"Grid created with {np.sum(inside_mask)} inside points out of {num_points} total points")
+        
 
     def calculate_damping(self):
         """Calculate hydrodynamic properties using HydroPro"""
@@ -565,7 +753,7 @@ class MeshProcessor:
         """
         import numpy as np
         from scipy.ndimage import gaussian_filter
-        
+
         # Check if grid and mask exist
         if not hasattr(self, 'inside_mask') or self.inside_mask is None:
             logger.error("Grid and mask not created. Call _create_grid_and_mask first.")
@@ -589,7 +777,7 @@ class MeshProcessor:
         return potential, self.grid_origin, self.grid_delta
 
 
-    def write_no_enter_potential(self, output_file=None, max_potential=1000.0, transition_width=5.0):
+    def write_no_enter_potential(self, output_file=None, max_potential=500.0, transition_width=5.0):
         """
         Generate and write potential field to DX file so particles do not fall inside rigidbody.
         
@@ -603,11 +791,13 @@ class MeshProcessor:
         """
         from .grid import writeDx
         
+        
         if output_file is None:
             output_file = self.work_dir / f"{self.name}-no-enter.dx"
         else:
             if not os.path.isabs(output_file):
                 output_file = self.work_dir / output_file
+        
 
         logger.info(f"Generating no-enter potential grid to {output_file}...")
         potential, origin, delta = self.generate_potential_grid(
@@ -620,6 +810,8 @@ class MeshProcessor:
         
         writeDx(output_file, potential, origin, delta)
         logger.info(f"Potential grid written to {output_file}")
+
+
         return output_file
     
     def save_aligned_mesh(self, output_file):

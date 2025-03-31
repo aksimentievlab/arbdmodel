@@ -228,8 +228,7 @@ class ArbdModel(PdbModel):
             cell_origin = [0, 0, 0]
             
         # Initialize parent class
-        PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms,
-                         cell_vectors, cell_origin)
+        PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
         
         
         # Store origin which might be different from cell_origin

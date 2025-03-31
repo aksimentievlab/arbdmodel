@@ -76,9 +76,9 @@ component "positions" value 1
 component "connections" value 2
 component "data" value 3
 """
-  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
-              fmt=fmt,
-              header=header, comments='', footer=footer )
+  with open(outfile,"w") as file:
+    np.savetxt( file, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
+              fmt=fmt, header=header, comments='', footer=footer )
 
 
 def add_smaller_grid( grid, smaller_grid ):

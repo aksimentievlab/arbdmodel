@@ -515,7 +515,7 @@ class ParticleType():
     for comparing particle types.
 
     Parameters:
-        excludedParameters (tuple): Parameters that are not inherited from parent types.
+        excludedAttributes (tuple): Parameters that are not inherited from parent types.
         name (str): Unique identifier for this particle type.
         charge (float): Electric charge of the particle. Defaults to 0.
         mass (float, optional): Mass of the particle.
@@ -529,12 +529,12 @@ class ParticleType():
         - The class implements custom copy behavior to prevent unnecessary duplication.
     Class that hold common attributes that particles can point to"""
 
-    excludedParameters = ("idx","type_",
+    excludedAttributes = ("idx","type_",
                           "position",
                           "orientation",
                           "children",
                           "name",
-                          "parent", "excludedParameters",
+                          "parent", "excludedAttributes",
     )
 
     def __init__(self, name, charge=0, mass=None, diffusivity=None,
@@ -546,7 +546,7 @@ class ParticleType():
 
         if parent is not None:
             for k,v in parent.__dict__.items():
-                if k not in ParticleType.excludedParameters:
+                if k not in ParticleType.excludedAttributes:
                     self.__dict__[k] = v
             assert( type(parent) == type(self) )
 
@@ -563,7 +563,7 @@ class ParticleType():
         self.rigid_body_potentials = rigid_body_potentials
         devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
         
-        for key in ParticleType.excludedParameters:
+        for key in ParticleType.excludedAttributes:
             assert( key not in kwargs )
 
         for key,val in kwargs.items():
@@ -644,7 +644,7 @@ class ParticleType():
         if "parent" not in self.__dict__ or self.__dict__["parent"] is None or name == "children":
            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
 
-        excluded_attributes = ParticleType.excludedParameters
+        excluded_attributes = ParticleType.excludedAttributes
         if name in excluded_attributes:
             raise AttributeError("'{}' object has no attribute '{}' and cannot look it up from the parent".format(type(self).__name__, name))
 
