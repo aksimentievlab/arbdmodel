@@ -556,7 +556,7 @@ def constant_force(force, dimensions, resolution, origin=None):
   """
   Generate a constant force field over a 3D grid.
 
-  Parameters
+  Args
   ----------
   force : float or list
     The force vector [fx, fy, fz] to apply. If a scalar is provided, 

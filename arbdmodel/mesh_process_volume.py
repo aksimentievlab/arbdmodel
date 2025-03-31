@@ -17,6 +17,7 @@ class MeshProcessor:
     MICRON_TO_ANGSTROM = 10000
 
     def __init__(self, mesh_file, density=19.3, simconf=None, unit_scale=MICRON_TO_ANGSTROM, 
+                 grid_spacing=2.0, grid_buffer=20.0,
                  work_dir=None, expected_mass=None):
         """
         Initialize processor with mesh file
@@ -26,6 +27,8 @@ class MeshProcessor:
             density: Material density in g/cm^3
             simconf: SimConf object containing configuration parameters
             unit_scale: Conversion factor from input units to angstroms
+            grid_spacing: Grid spacing for potential grid in Angstroms
+            grid_buffer: Extra space around mesh for potential grid
             work_dir: Working directory
             expected_mass: Optional expected mass in amu to calibrate calculations
         """
@@ -61,6 +64,11 @@ class MeshProcessor:
             self.volume_elements = self._get_elements()
             logger.info(f"Loaded {len(self.volume_nodes)} nodes and {len(self.volume_elements)} elements from volume mesh")
             
+            # Store volume entities for later use
+            self.volume_entities = gmsh.model.getEntities(3)
+            if not self.volume_entities:
+                logger.warning("No volume entities found in mesh, potential grid generation may fail")
+                
             # Then extract surface mesh for visualization and HydroPro
             self.nodes, self.elements = self._extract_surface_mesh()
             logger.info(f"Extracted {len(self.nodes)} nodes and {len(self.elements)} elements from surface mesh")
@@ -84,7 +92,6 @@ class MeshProcessor:
             logger.info(f"Calculated mass: {self.mass:.2f} amu")
             
             # Align both meshes to center of mass and principal axes
-            # Important: Center of mass calculation needs to be fixed to use the volumetric mesh
             self._align_mesh()
             
             # Calculate inertia tensor using volumetric mesh with corrected method
@@ -93,6 +100,9 @@ class MeshProcessor:
             self.principal_moments = np.diag(self.inertia_tensor)
             logger.info(f"Principal moments of inertia: {self.principal_moments}")
             
+            # Create grid and mask for potential calculation after alignment
+            self._create_grid_and_mask(spacing=grid_spacing, buffer=grid_buffer)
+                
         except Exception as e:
             logger.info(f"Error processing mesh: {e}")
             raise
@@ -403,6 +413,106 @@ class MeshProcessor:
         width = max(dimensions[0], dimensions[1])  # Larger of X,Y (transverse)
         aspect_ratio = length / width if width > 0 else 1.0
         logger.info(f"Calculated aspect ratio after alignment: {aspect_ratio:.2f}")
+        self.inertia_tensor=inertia
+     
+    def _create_grid_and_mask(self, spacing=2.0, buffer=20.0):
+        """
+        Create grid and inside/outside mask for the mesh.
+        
+        This function creates a 3D grid and determines which points are
+        inside and outside the mesh. It uses the volume entities to test
+        point containment.
+        
+        Stores the results as instance variables:
+            self.grid_points: 3D points for the grid
+            self.grid_shape: Shape of the 3D grid
+            self.inside_mask: Boolean mask of inside/outside points
+            self.grid_origin: Coordinates of the grid origin
+            self.grid_delta: Grid spacing in each dimension
+        
+        Parameters:
+            spacing (float): Grid spacing in Angstroms
+            buffer (float): Extra space to add around the mesh bounds
+        """
+        
+        # Calculate grid bounds with buffer
+        bounds_min = np.min(self.volume_nodes, axis=0) - buffer
+        bounds_max = np.max(self.volume_nodes, axis=0) + buffer
+        
+        # Create grid points
+        npts = np.ceil((bounds_max - bounds_min) / spacing).astype(int)
+        logger.info(f"Creating grid with dimensions {npts}")
+        
+        x = np.linspace(bounds_min[0], bounds_max[0], npts[0])
+        y = np.linspace(bounds_min[1], bounds_max[1], npts[1])
+        z = np.linspace(bounds_min[2], bounds_max[2], npts[2])
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        
+        # Create array of grid points for testing
+        grid_points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+        
+        logger.info(f"Classifying {len(grid_points)} grid points as inside or outside the mesh...")
+        
+        # Process points in chunks to avoid memory issues
+        chunk_size = 10000
+        num_points = grid_points.shape[0]
+        inside_mask = np.zeros(num_points, dtype=bool)
+        
+        # Check if we have volume entities stored
+        if not hasattr(self, 'volume_entities') or not self.volume_entities:
+            logger.warning("No volume entities stored, checking model...")
+            volume_entities = gmsh.model.getEntities(3)
+            if not volume_entities:
+                logger.error("No volume entities found for inside/outside testing")
+                inside_mask = np.zeros(num_points, dtype=bool)
+                self.grid_points = grid_points
+                self.grid_shape = X.shape
+                self.inside_mask = inside_mask.reshape(X.shape)
+                self.grid_origin = bounds_min
+                self.grid_delta = spacing * np.ones(3)
+                return
+        else:
+            volume_entities = self.volume_entities
+        
+        # Process points in chunks
+        for i in range(0, num_points, chunk_size):
+            end_idx = min(i + chunk_size, num_points)
+            if i % (chunk_size * 10) == 0:
+                logger.info(f"Processing points {i} to {end_idx} of {num_points}...")
+            
+            chunk_points = grid_points[i:end_idx]
+            
+            # Scale points back to mesh units
+            scaled_points = chunk_points / self.unit_scale
+            
+            # Test each point for each volume entity
+            chunk_inside = np.zeros(len(chunk_points), dtype=bool)
+            
+            for dim, tag in volume_entities:
+                # Use Gmsh point containment test
+                for j, point in enumerate(scaled_points):
+                    # pointInEntity returns:
+                    # - 0: outside
+                    # - 1: inside
+                    # - -1: on boundary
+                    in_entity = gmsh.model.getPointContainment([tag], [point[0], point[1], point[2]])
+                    
+                    if in_entity[0] >= 0:  # Inside or on boundary
+                        chunk_inside[j] = True
+            
+            inside_mask[i:end_idx] = chunk_inside
+        
+        # Reshape mask to match grid shape
+        inside_mask = inside_mask.reshape(X.shape)
+        
+        # Store grid information as instance variables
+        self.grid_points = grid_points
+        self.grid_shape = X.shape
+        self.inside_mask = inside_mask
+        self.grid_origin = bounds_min
+        self.grid_delta = spacing * np.ones(3)
+        
+        logger.info(f"Grid created with {np.sum(inside_mask)} inside points out of {num_points} total points")
 
     def calculate_damping(self):
         """Calculate hydrodynamic properties using HydroPro"""
@@ -434,47 +544,84 @@ class MeshProcessor:
         logger.info(f"Rotational damping: {self.rotdamp}")
         
         return pdb_path
+    
+    def generate_potential_grid(self, max_potential=500.0, transition_width=10.0):
+        """
+        Generate potential grid from pre-computed inside/outside mask.
+        
+        This function uses the grid and inside/outside mask created during initialization
+        to generate a potential field with high values inside the mesh and zero outside,
+        with a smooth transition at the boundary.
+        
+        Parameters:
+            max_potential (float): Maximum potential value (used inside the mesh)
+            transition_width (float): Width of the transition region at the boundary in Angstroms
+            
+        Returns:
+            tuple: (potential_grid, origin, delta) where:
+                - potential_grid is a 3D numpy array containing potential values
+                - origin is the coordinates of the grid origin
+                - delta is the grid spacing in each dimension
+        """
+        import numpy as np
+        from scipy.ndimage import gaussian_filter
+        
+        # Check if grid and mask exist
+        if not hasattr(self, 'inside_mask') or self.inside_mask is None:
+            logger.error("Grid and mask not created. Call _create_grid_and_mask first.")
+            return None, None, None
+        
+        # Create potential grid based on inside/outside mask
+        potential = np.zeros(self.grid_shape)
+        
+        # Set high potential inside the mesh
+        potential[self.inside_mask] = max_potential
+        
+        # Apply Gaussian filter to smooth the boundary
+        sigma = transition_width / (2.0 * self.grid_delta[0])  # Convert to grid units
+        logger.info(f"Applying Gaussian filter with sigma={sigma} to smooth boundary...")
+        potential = gaussian_filter(potential, sigma=sigma)
+        
+        # Normalize potential while preserving max_potential
+        if np.max(potential) > 0:
+            potential = max_potential * potential / np.max(potential)
+        
+        return potential, self.grid_origin, self.grid_delta
 
-    def generate_potential_grid(self, spacing=2.0, buffer=20.0, k=1.0, cutoff=10.0, max_potential=1000.0):
-        """Generate potential grid for ARBD"""
-        # Calculate grid bounds with buffer
-        bounds_min = np.min(self.nodes, axis=0) - buffer
-        bounds_max = np.max(self.nodes, axis=0) + buffer
+
+    def write_no_enter_potential(self, output_file=None, max_potential=1000.0, transition_width=5.0):
+        """
+        Generate and write potential field to DX file so particles do not fall inside rigidbody.
         
-        # Create grid points
-        npts = np.ceil((bounds_max - bounds_min) / spacing).astype(int)
-        x = np.linspace(bounds_min[0], bounds_max[0], npts[0])
-        y = np.linspace(bounds_min[1], bounds_max[1], npts[1])
-        z = np.linspace(bounds_min[2], bounds_max[2], npts[2])
-        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        Args:
+            output_file: Path to output DX file
+            max_potential: Maximum potential value (inside the mesh)
+            transition_width: Width of the transition region at the boundary in Angstroms
+            
+        Returns:
+            Path to the written DX file
+        """
+        from .grid import writeDx
         
-        # Create KD-tree for fast distance calculations
-        tree = KDTree(self.nodes)
-        
-        # Calculate distances to nearest surface points
-        grid_points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
-        distances, _ = tree.query(grid_points)
-        distances = distances.reshape(X.shape)
-        
-        # Generate potential
-        potential = np.zeros_like(distances)
-        mask = distances <= cutoff
-        potential[mask] = max_potential * (1 - 1/(1 + np.exp(-k * distances[mask])))
-        
-        return potential, bounds_min, spacing * np.ones(3)
-        
-    def write_no_enter_potential(self, output_file=None, **kwargs):
-        """Generate and write potential field to DX file so particles do not fall inside rigidbody."""
         if output_file is None:
-            output_file=self.work_dir/f"{self.name}-no-enter.dx"
+            output_file = self.work_dir / f"{self.name}-no-enter.dx"
         else:
             if not os.path.isabs(output_file):
                 output_file = self.work_dir / output_file
 
-        potential, origin, delta = self.generate_potential_grid(**kwargs)
+        logger.info(f"Generating no-enter potential grid to {output_file}...")
+        potential, origin, delta = self.generate_potential_grid(
+            max_potential=max_potential,
+            transition_width=transition_width)
+        
+        if potential is None:
+            logger.error("Failed to generate potential grid")
+            return None
+        
         writeDx(output_file, potential, origin, delta)
+        logger.info(f"Potential grid written to {output_file}")
         return output_file
-
+    
     def save_aligned_mesh(self, output_file):
         if not os.path.isabs(output_file):
             output_file = self.work_dir / output_file

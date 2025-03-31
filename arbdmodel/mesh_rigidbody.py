@@ -17,6 +17,7 @@ class MeshRigidBodyType(RigidBodyType):
     def __init__(self, name, mesh_file, density=19.3, simconf=None, unit_scale=1e4, 
                  use_surface=False, **kwargs):
         """Initialize shape type.
+        
         Args:
             name: Name identifier for this type
             mesh_file: Path to structure file (.psf/.pdb)
