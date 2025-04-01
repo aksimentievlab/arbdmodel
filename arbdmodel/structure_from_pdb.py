@@ -34,6 +34,7 @@ class StructureProcessor:
             simconf = DefaultSimConf()
             
         # Extract parameters from simconf
+        self.simconf=simconf
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
@@ -182,14 +183,13 @@ $sel writepsf $prefix.aligned.psf''')
         # Verify alignment succeeded
         self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
         self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
-        
-        if not (self.aligned_pdb.exists() and self.aligned_psf.exists()):
-            raise RuntimeError(f"Alignment failed for {self.base_name}")
-        
+        Path(f"{self.base_name}.aligned.pdb").rename(self.aligned_pdb)
+        Path(f"{self.base_name}.aligned.psf").rename(self.aligned_psf)
         # Read mass and inertia
         mass_file = self.work_dir / f"{self.base_name}.mass.txt"
         inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
-        
+        Path(f"{self.base_name}.mass.txt").rename(mass_file)
+        Path(f"{self.base_name}.inertia.txt").rename(inertia_file)
         if not mass_file.exists() or not inertia_file.exists():
             raise FileNotFoundError(f"Mass or inertia file not found after alignment")
             
@@ -211,19 +211,15 @@ $sel writepsf $prefix.aligned.psf''')
             
         # Initialize HydroPro runner
         hydro_runner = HydroProRunner(
-            mass=self.mass,
-            binary_path=self.hydro_path,
-            temperature=self.temperature,
-            viscosity=self.viscosity,
-            solvent_density=self.solvent_density,
-            structure_name=self.base_name
-        )
+            mass=self.mass,simconf=self.simconf)
         
         # Write config
         hydro_runner.write_config(output_path=self.work_dir / "hydropro.dat")
         
         # Prepare for HydroPro run
-        hydro_pdb = self.work_dir / "hydro.pdb"
+        hydro_pdb = self.work_dir / self.aligned_pdb
+        import shutil
+        shutil.copyfile(self.aligned_pdb,"hydro.pdb")
         try:
             # Create symlink to aligned PDB
             if hydro_pdb.exists():
@@ -270,7 +266,7 @@ $sel writepsf $prefix.aligned.psf''')
     
     def generate_charge_distribution(self, resolution=2.0):
         """Generate charge distribution using VMD."""
-        aligned_name = f"{self.base_name}.aligned"
+        aligned_name = str(self.work_dir/f"{self.base_name}.aligned")
         
         # Create TCL script for VMD
         charge_tcl = self.work_dir / "charge.tcl"
@@ -304,11 +300,13 @@ close $ch''')
         # Run VMD to generate charge density
         cmd = f"{self.vmd_path} -dispdev text -args {aligned_name} < {charge_tcl}"
         subprocess.run(cmd, shell=True, check=True)
-        
+        import os
+        print(os.getcwd())
         # Fix charge distribution
         charge_dx = self.work_dir / f"{aligned_name}.chargeDensity.dx"
         charge_out = self.work_dir / f"{aligned_name}.charge.dx"
         netcharge_file = self.work_dir / f"{aligned_name}.netCharge.dat"
+        
         
         if not charge_dx.exists():
             raise FileNotFoundError(f"Charge density file not found: {charge_dx}")

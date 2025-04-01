@@ -58,9 +58,9 @@ class MeshRigidBodyType(RigidBodyType):
                 work_dir=self.type_dir)
                 
         rbprocess.calculate_damping()
-        potential_dx = str(self.type_dir / f"{name}_potential.dx")
-        potential_grid = rbprocess.write_no_enter_potential(output_file=potential_dx)
-        potential_grids = [(potential_grid, 1.0)]
+        #potential_dx = str(self.type_dir / f"{name}_potential.dx")
+        #potential_grid = rbprocess.write_no_enter_potential(output_file=potential_dx)
+        #potential_grids = [(potential_grid, 1.0)]
         attached_particles= rbprocess.get_attached_particles()
 
         super().__init__(

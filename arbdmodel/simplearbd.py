@@ -275,6 +275,8 @@ class SimpleArbdConfig:
             }
             
         # Add each diffusible object
+        work_root = Path(self.config.get('parameters_folder', './parameters'))
+            
         for obj_name in self.config['diffusible_objects']:
             # Skip parametrization if requested
             if self.config.get('skip_parametrizing_diffusible', False):
@@ -295,7 +297,7 @@ class SimpleArbdConfig:
             logger.info(f"Adding diffusible object: {obj_name} with {copies} copies")
             
             # Create work directory
-            work_dir = Path(self.config.get('parameters_folder', './parameters')) / obj_name
+            work_dir = work_root / obj_name
             
             # Add to model
             model.add_diffusible_object(
@@ -372,7 +374,7 @@ class SimpleArbdConfig:
         )
 
 
-def main():
+def simplearbd():
     """
     Main function to process SimpleARBD configuration file and run simulation.
     """
@@ -403,7 +405,3 @@ def main():
         logger.info("Setup complete. Simulation not started (--setup-only flag used)")
     
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

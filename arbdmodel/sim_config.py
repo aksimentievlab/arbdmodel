@@ -97,7 +97,7 @@ class SimConf:
         if apbs_path: BinaryManager.set_binary_path('apbs', apbs_path)
         if gmsh_path: BinaryManager.set_binary_path('gmsh', gmsh_path)
 
-    def get_binary(self, name):
+    def get_binary(self, name=None):
         """
         Get the path to a specific binary with improved error handling.
         
@@ -110,17 +110,21 @@ class SimConf:
         This method does not raise exceptions when binaries are not found, allowing
         for graceful handling of missing optional dependencies.
         """
-        binary_path = BinaryManager.get_binary_path(name)
+        if name is None:
+            binary_path = BinaryManager.export_to_dict()
+            print(binary_path)
+        else:
+            binary_path = BinaryManager.get_binary_path(name)
+            
+            # Check if we found a binary and convert to string if needed
+            if binary_path is not None:
+                return str(binary_path)
+            
+            
+            # Determine if this is an essential binary
+            if BinaryManager.is_binary_essential(name):
+                logger.warning(f"Essential binary '{name}' not found. Core functionality may be limited.")
         
-        # Check if we found a binary and convert to string if needed
-        if binary_path is not None:
-            return str(binary_path)
-        
-        # Determine if this is an essential binary
-        if BinaryManager.is_binary_essential(name):
-            logger.warning(f"Essential binary '{name}' not found. Core functionality may be limited.")
-        
-        return None
     
     def set_binary(self, name, path):
         """

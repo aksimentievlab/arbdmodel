@@ -312,7 +312,7 @@ class BoundaryPotential(AbstractPotential):
         """Apply 3D Gaussian blur to a grid."""
         # Create Gaussian kernel
         sideLen = 2*int(blur_size*3)+1
-        gauss = scipy.signal.gaussian(sideLen, blur_size/dd)
+        gauss = scipy.signal.windows.gaussian(sideLen, blur_size/dd)
         i = np.arange(sideLen)
         i, j, k = np.meshgrid(i, i, i, indexing='ij')
         kernel = gauss[i]*gauss[j]*gauss[k]

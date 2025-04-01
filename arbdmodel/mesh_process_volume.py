@@ -101,7 +101,7 @@ class MeshProcessor:
             logger.info(f"Principal moments of inertia: {self.principal_moments}")
             
             # Create grid and mask for potential calculation after alignment
-            self._create_grid_and_mask(spacing=grid_spacing, buffer=grid_buffer)
+            #self._create_grid_and_mask(spacing=grid_spacing, buffer=grid_buffer)
                 
         except Exception as e:
             logger.info(f"Error processing mesh: {e}")

@@ -259,7 +259,7 @@ class StructureRigidBodyModel(ArbdModel):
     """Model class for structure-based rigid body simulations"""
     
     def __init__(self, cell_vectors=None, cell_origin=None, 
-                 dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=True, 
+                 dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False, 
                  boundary_params=None, **kwargs):
         """Initialize structure model.
         
@@ -291,7 +291,9 @@ class StructureRigidBodyModel(ArbdModel):
             **kwargs
         )
         # Process boundary if requested
+        use_boundary=False
         if use_boundary:
+            logger.info("use boundary, getting nonbonded interactions")
             # Create boundary potential
             from .interactions import BoundaryPotential
             
@@ -299,8 +301,8 @@ class StructureRigidBodyModel(ArbdModel):
             bp_params = boundary_params or {}
             
             boundary = BoundaryPotential(
-                cell_vectors=self.cell_vectors,
-                cell_origin=self.cell_origin,
+                cell_vectors=cell_vectors,
+                cell_origin=cell_origin,
                 well_depth=bp_params.get('well_depth', 1.0),
                 resolution=bp_params.get('resolution', 2.0),
                 blur=bp_params.get('blur', 5.0)
@@ -308,8 +310,8 @@ class StructureRigidBodyModel(ArbdModel):
             
             # Generate the boundary file and store it
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
-            self.boundary_potential = boundary
-            self.add_nonbonded_interaction()
+            self.boundary_potential = boundary.potential()
+            #self.add_nonbonded_interaction(self.boundary_potential)
             
 
     def add_diffusible_object(self, structure_path=None, rb_type=None, copies=1, positions=None, 
@@ -331,6 +333,7 @@ class StructureRigidBodyModel(ArbdModel):
         Returns:
             List of created RigidBody instances
         """
+        logger.info("use boundary, getting nonbonded interactions")
         # Process the structure to create a RigidBodyType if structure_path provided
         if structure_path is not None:
             # Create a StructureRigidBodyType from the structure files
