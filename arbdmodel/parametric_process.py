@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 from .grid import writeDx
 
-class ParametricSurfaceGenerator:
+class ParametricProcessor:
     """
     Generate 3D meshes from parametric equations and feed them into the arbdmodel workflow.
     Generates mesh, calculates hydrodynamic properties, and creates potential grids.
@@ -13,7 +13,8 @@ class ParametricSurfaceGenerator:
     to define surfaces with mathematical functions.
     """
     
-    def __init__(self, name, mesh_size=0.001, unit_scale=10000, work_dir=None):
+    def __init__(self, name, mesh_size=0.001, unit_scale=10000, work_dir=None,function=None,
+                 u_range=None, v_range=None, entity_dim=None, param_bounds=None):
         """
         Initialize the parametric surface generator.
         
@@ -29,9 +30,9 @@ class ParametricSurfaceGenerator:
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         os.makedirs(self.work_dir, exist_ok=True)
         self.mesh_file = self.work_dir / f"{name}.msh"
-        self.parametric_function = None
-        self.u_range = None
-        self.v_range = None
+        self.parametric_function = function
+        self.u_range = u_range
+        self.v_range = v_range
         self.entity_tag = None
         self.entity_dim = None
         self.param_bounds = None

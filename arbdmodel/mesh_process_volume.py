@@ -735,6 +735,7 @@ class MeshProcessor:
     
     def generate_potential_grid(self, max_potential=500.0, transition_width=10.0):
         """
+        ! NOT YET OPTIMIZED
         Generate potential grid from pre-computed inside/outside mask.
         
         This function uses the grid and inside/outside mask created during initialization
