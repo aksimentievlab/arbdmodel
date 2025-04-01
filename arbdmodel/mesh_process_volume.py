@@ -14,9 +14,8 @@ Improved mesh processor with corrected inertia calculations based purely on mesh
 class MeshProcessor:
     """Process gmsh files to calculate inertia, hydrodynamics and generate potential fields"""    
     # Conversion factors
-    MICRON_TO_ANGSTROM = 10000
 
-    def __init__(self, mesh_file, density=19.3, simconf=None, unit_scale=MICRON_TO_ANGSTROM, 
+    def __init__(self, mesh_file, density=19.3, simconf=None, unit_scale=10000, 
                  grid_spacing=10, grid_buffer=200.0,
                  work_dir=None, expected_mass=None):
         """
@@ -26,19 +25,21 @@ class MeshProcessor:
             mesh_file: Path to .msh file
             density: Material density in g/cm^3
             simconf: SimConf object containing configuration parameters
-            unit_scale: Conversion factor from input units to angstroms
+            unit_scale: Conversion factor from input units to angstroms, default mesh units are in microns
             grid_spacing: Grid spacing for potential grid in Angstroms
             grid_buffer: Extra space around mesh for potential grid
             work_dir: Working directory
             expected_mass: Optional expected mass in amu to calibrate calculations
         """
+
+        
         self.mesh_file = Path(mesh_file)
         self.density = density
         self.unit_scale = unit_scale
         self.expected_mass = expected_mass
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         os.makedirs(self.work_dir, exist_ok=True)
-        
+        print(unit_scale)
         if simconf is None:
             from . import DefaultSimConf
             simconf=DefaultSimConf()

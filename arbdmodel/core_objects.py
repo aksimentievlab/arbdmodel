@@ -732,10 +732,10 @@ class RigidBodyType(ParticleType):
 
         if rotational_diffusivity is None:
             assert( (rotational_damping_coefficient is not None) and (moment_of_inertia is not None) )
-
+        
         for _grids in (potential_grids,charge_grids,pmf_grids):
-            for val in _grids:
-                assert( len(val) in (2,3) ) #                 
+                for val in _grids:
+                    assert( len(val) in (2,3) ) #                 
                 
         ParticleType.__init__(self, name, parent=parent,
                               moment_of_inertia = moment_of_inertia,

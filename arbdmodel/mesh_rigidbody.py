@@ -15,7 +15,7 @@ class MeshRigidBodyType(RigidBodyType):
     """RigidBodyType subclass for shape rigid body objects"""
     
     def __init__(self, name, mesh_file, density=19.3, simconf=None, unit_scale=1e4, 
-                 use_surface=False,potential_grids=None, **kwargs):
+                 use_surface=False,potential_grids=tuple(), **kwargs):
         """Initialize shape type.
         
         Args:
@@ -69,7 +69,7 @@ class MeshRigidBodyType(RigidBodyType):
             moment_of_inertia=rbprocess.principal_moments,
             damping_coefficient=rbprocess.transdamp,
             rotational_damping_coefficient=rbprocess.rotdamp,
-            potential_grids=potential_grids, 
+            #potential_grids=potential_grids, 
             attached_particles=attached_particles,
             **kwargs)
 
@@ -105,9 +105,9 @@ class Parametric_RigidBodyType(RigidBodyType):
             work_dir=self.type_dir)
                 
         rbprocess.calculate_damping()
-        #potential_dx = str(self.type_dir / f"{name}_potential.dx")
-        #potential_grid = rbprocess.write_no_enter_potential(output_file=potential_dx)
-        #potential_grids = [(potential_grid, 1.0)]
+        potential_dx = str(self.type_dir / f"{name}_potential.dx")
+        potential_grid = rbprocess.write_no_enter_potential(output_file=potential_dx)
+        potential_grids = [(potential_grid, 1.0)]
         attached_particles= rbprocess.get_attached_particles()
 
         super().__init__(
@@ -119,3 +119,13 @@ class Parametric_RigidBodyType(RigidBodyType):
             potential_grids=potential_grids, 
             attached_particles=attached_particles,
             **kwargs)
+
+
+        # Override the calculated properties with our analytically-determined ones
+        rb_type.mass = self.mass
+        rb_type.principal_moments = self.principal_moments
+        rb_type.damping_coefficient = getattr(self, 'transdamp', [1.0, 1.0, 1.0])
+        rb_type.rotational_damping_coefficient = getattr(self, 'rotdamp', [1.0, 1.0, 1.0])
+        
+        return rb_type
+
