@@ -12,7 +12,7 @@ class StructureProcessor:
     """Process molecular structure files to calculate properties and generate maps for ARBD"""
     
     def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, 
-                 parameters_folder="./parameters", work_dir=None):
+                 parameters_folder_name="parameters", work_dir=None):
         """
         Initialize processor with structure file
         
@@ -301,7 +301,7 @@ close $ch''')
         cmd = f"{self.vmd_path} -dispdev text -args {aligned_name} < {charge_tcl}"
         subprocess.run(cmd, shell=True, check=True)
         import os
-        print(os.getcwd())
+        print(f"current directory is {os.getcwd()}")
         # Fix charge distribution
         charge_dx = self.work_dir / f"{aligned_name}.chargeDensity.dx"
         charge_out = self.work_dir / f"{aligned_name}.charge.dx"

@@ -83,17 +83,17 @@ class ParametricProcessor:
         
         logger.info(prop_dict)
         return prop_dict
-    
+
     def create_potential_grid(self, spacing=2.0, buffer=20.0, max_potential=100.0, 
-                        decay_distance=5.0, blur_sigma=1.0, grid_file=None):
+                        blur_sigma=2, grid_file=None):
         """
-        Generate a potential grid based on is_inside function with smooth transitions and blurring.
+        Generate a potential grid based on vectorized is_inside function.
+        Points inside the shape have max_potential value, outside have zero.
         
         Args:
             spacing: Grid spacing in Angstroms
             buffer: Additional buffer space around the shape in Angstroms
-            max_potential: Maximum potential value inside the shape
-            decay_distance: Distance over which potential decays to zero outside the shape
+            max_potential: Potential value for points inside the shape
             blur_sigma: Standard deviation for Gaussian blur to smooth the potential
             grid_file: Output DX file path (default: {name}_potential.dx)
             
@@ -111,7 +111,6 @@ class ParametricProcessor:
             min_coords, max_coords = self.bounding_box()
         else:
             # Fallback to sampling if no bounding box function is available
-            # Sample the parametric function to get approximate bounding box
             u_samples = np.linspace(self.u_range[0], self.u_range[1], 50)
             v_samples = np.linspace(self.v_range[0], self.v_range[1], 50)
             
@@ -138,82 +137,38 @@ class ParametricProcessor:
         y = np.linspace(min_coords[1], max_coords[1], ny)
         z = np.linspace(min_coords[2], max_coords[2], nz)
         
-        # Create grid for potential
-        potential = np.zeros((nx, ny, nz))
-        
         # Create a grid of 3D points
         X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
         
         # Track progress
         total_points = nx * ny * nz
-        logger.info(f"Creating potential grid with {total_points} points...")
+        print(f"Creating potential grid with {total_points} points...")
         
-        # Process in batches to avoid memory issues
-        batch_size = 10000
-        points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
-        potential_flat = np.zeros(len(points))
+        # Create a binary potential grid using vectorized is_inside
+        print("Calculating inside/outside mask with vectorized operation...")
+        inside_mask = self.is_inside(x,y,z)
         
-        for i in range(0, len(points), batch_size):
-            end = min(i + batch_size, len(points))
-            batch_points = points[i:end]
-            
-            # For each point, determine if it's inside the shape
-            for j, point in enumerate(batch_points):
-                # Get signed distance from the shape surface
-                # Negative inside, positive outside
-
-                if hasattr(self, 'signed_distance'):
-                    distance = self.signed_distance(point[0], point[1], point[2])
-                    
-                    # Inside the shape
-                    if distance >= 0:
-                        potential_flat[i + j] = 0
-                    # In the transition region
-                    elif np.abs(distance) < decay_distance:
-                        # Smooth decay function: max_potential * (1 - distance/decay_distance)^2
-                        decay_factor = (1 - distance/decay_distance)**2
-                        potential_flat[i + j] = max_potential * decay_factor
-                else:
-                    # Use is_inside if signed_distance is not available
-                    if not self.is_inside(point[0], point[1], point[2]):
-                        potential_flat[i + j] = 0
-                    else:
-                        # If we don't have signed distance, we can approximate a transition
-                        # Check if we're close to the surface by randomly sampling nearby points
-                        # This is a simple approximation and can be slow for many points
-                        num_inside = 0
-                        num_samples = 8
-                        sample_dist = decay_distance / 2
-                        
-                        # Sample nearby points
-                        for dx in [-sample_dist, sample_dist]:
-                            for dy in [-sample_dist, sample_dist]:
-                                for dz in [-sample_dist, sample_dist]:
-                                    if self.is_inside(point[0] + dx, point[1] + dy, point[2] + dz):
-                                        num_inside += 1
-                        
-                        # If any nearby points are inside, apply a potential
-                        if num_inside > 0:
-                            potential_flat[i + j] = max_potential * (num_inside / num_samples)
-
-            # logger.info progress periodically
-            if i % (5 * batch_size) == 0:
-                logger.info(f"Processed {i}/{len(points)} points ({i/len(points)*100:.1f}%)")
+        # Initialize potential grid (all zeros by default = outside)
+        potential = np.zeros((nx, ny, nz))
         
-        # Reshape the flattened array back to 3D
-        potential = potential_flat.reshape((nx, ny, nz))
+        # Set values for inside points
+        potential[inside_mask] = max_potential
+        
+        # Count inside points
+        num_inside = np.sum(inside_mask)
+        print(f"Found {num_inside} points inside the shape ({num_inside/total_points*100:.2f}% of total)")
         
         # Apply Gaussian blur to smooth the potential field
         if blur_sigma > 0:
-            logger.info(f"Applying Gaussian blur with sigma={blur_sigma}...")
+            print(f"Applying Gaussian blur with sigma={blur_sigma}...")
             from scipy import ndimage
-            potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
+            #potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
         
         # Write DX file
-        logger.info(f"Writing potential to {grid_file}...")
+        print(f"Writing potential to {grid_file}...")
         writeDx(str(grid_file), potential, min_coords, [spacing, spacing, spacing])
         
-        logger.info("Potential grid created successfully.")
+        print("Potential grid created successfully.")
         return grid_file
 
     def _to_gmsh_units(self, value):

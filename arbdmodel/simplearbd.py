@@ -29,6 +29,10 @@ class SimpleArbdConfig:
             
         self.config = self._parse_config()
         self.simconf = self._create_simconf()
+        from .binary_manager import initialize_binary_paths
+        initialize_binary_paths()
+        import ipdb
+        ipdb.set_trace()
         
     def _parse_config(self):
         """
