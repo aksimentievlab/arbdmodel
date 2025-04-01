@@ -70,7 +70,7 @@ class ParametricProcessor:
             # Calculate principal moments
             if self.inertia_tensor is not None:
                 eigenvalues, eigenvectors = np.linalg.eigh(self.inertia_tensor)
-                self.principal_moments = np.sort(eigenvalues)
+                self.principal_moments = eigenvalues[::-1]
                 
         prop_dict = {
             "volume": self.volume,
@@ -83,14 +83,17 @@ class ParametricProcessor:
         print(prop_dict)
         return prop_dict
     
-    def create_potential_grid(self, spacing=2.0, buffer=20.0, max_potential=100.0, grid_file=None):
+    def create_potential_grid(self, spacing=2.0, buffer=20.0, max_potential=100.0, 
+                        decay_distance=5.0, blur_sigma=1.0, grid_file=None):
         """
-        Generate a potential grid based directly on the parametric definition.
+        Generate a potential grid based on is_inside function with smooth transitions and blurring.
         
         Args:
-            spacing: Grid spacing in mesh units
-            buffer: Additional buffer space around the shape
-            max_potential: Maximum potential value
+            spacing: Grid spacing in Angstroms
+            buffer: Additional buffer space around the shape in Angstroms
+            max_potential: Maximum potential value inside the shape
+            decay_distance: Distance over which potential decays to zero outside the shape
+            blur_sigma: Standard deviation for Gaussian blur to smooth the potential
             grid_file: Output DX file path (default: {name}_potential.dx)
             
         Returns:
@@ -99,8 +102,8 @@ class ParametricProcessor:
         if grid_file is None:
             grid_file = self.work_dir / f"{self.name}_potential.dx"
         
-        if not hasattr(self, 'distance_function'):
-            raise ValueError("No distance function defined. Cannot generate potential.")
+        if not hasattr(self, 'is_inside'):
+            raise ValueError("No is_inside function defined. Cannot generate potential.")
         
         # Determine bounding box from shape parameters
         if hasattr(self, 'bounding_box'):
@@ -134,45 +137,83 @@ class ParametricProcessor:
         y = np.linspace(min_coords[1], max_coords[1], ny)
         z = np.linspace(min_coords[2], max_coords[2], nz)
         
-        # Use shape-specific potential function if available
-        if hasattr(self, 'generate_potential'):
-            potential = self.generate_potential(x, y, z)
-        else:
-            # Create a grid of 3D points
-            X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        # Create grid for potential
+        potential = np.zeros((nx, ny, nz))
+        
+        # Create a grid of 3D points
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+        
+        # Track progress
+        total_points = nx * ny * nz
+        print(f"Creating potential grid with {total_points} points...")
+        
+        # Process in batches to avoid memory issues
+        batch_size = 10000
+        points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+        potential_flat = np.zeros(len(points))
+        
+        for i in range(0, len(points), batch_size):
+            end = min(i + batch_size, len(points))
+            batch_points = points[i:end]
             
-            # Calculate signed distance for each point using vectorized operations if possible
-            # Init with a large positive value
-            distances = np.ones(X.shape) * 1000.0
+            # For each point, determine if it's inside the shape
+            for j, point in enumerate(batch_points):
+                # Get signed distance from the shape surface
+                # Negative inside, positive outside
+                if hasattr(self, 'signed_distance'):
+                    distance = self.signed_distance(point[0], point[1], point[2])
+                    
+                    # Inside the shape
+                    if distance <= 0:
+                        potential_flat[i + j] = max_potential
+                    # In the transition region
+                    elif distance < decay_distance:
+                        # Smooth decay function: max_potential * (1 - distance/decay_distance)^2
+                        decay_factor = (1 - distance/decay_distance)**2
+                        potential_flat[i + j] = max_potential * decay_factor
+                else:
+                    # Use is_inside if signed_distance is not available
+                    if self.is_inside(point[0], point[1], point[2]):
+                        potential_flat[i + j] = max_potential
+                    else:
+                        # If we don't have signed distance, we can approximate a transition
+                        # Check if we're close to the surface by randomly sampling nearby points
+                        # This is a simple approximation and can be slow for many points
+                        num_inside = 0
+                        num_samples = 8
+                        sample_dist = decay_distance / 2
+                        
+                        # Sample nearby points
+                        for dx in [-sample_dist, sample_dist]:
+                            for dy in [-sample_dist, sample_dist]:
+                                for dz in [-sample_dist, sample_dist]:
+                                    if self.is_inside(point[0] + dx, point[1] + dy, point[2] + dz):
+                                        num_inside += 1
+                        
+                        # If any nearby points are inside, apply a potential
+                        if num_inside > 0:
+                            potential_flat[i + j] = max_potential * (num_inside / num_samples)
             
-            # Calculate distances in batches to avoid memory issues
-            batch_size = 10000
-            points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
-            
-            for i in range(0, len(points), batch_size):
-                end = min(i + batch_size, len(points))
-                batch_points = points[i:end]
-                
-                # Calculate distances for this batch
-                batch_distances = np.zeros(len(batch_points))
-                for j, p in enumerate(batch_points):
-                    batch_distances[j] = self.distance_function(p[0], p[1], p[2])
-                
-                # Store in the flattened distances array
-                distances.ravel()[i:end] = batch_distances
-            
-            # Convert distances to potential
-            # Inside gets maximum value, outside decays exponentially
-            scale = spacing * 2.0  # Scale factor for decay
-            potential = np.zeros_like(distances)
-            potential[distances <= 0] = max_potential
-            potential[distances > 0] = max_potential * np.exp(-distances[distances > 0] / scale)
+            # Print progress periodically
+            if i % (5 * batch_size) == 0:
+                print(f"Processed {i}/{len(points)} points ({i/len(points)*100:.1f}%)")
+        
+        # Reshape the flattened array back to 3D
+        potential = potential_flat.reshape((nx, ny, nz))
+        
+        # Apply Gaussian blur to smooth the potential field
+        if blur_sigma > 0:
+            print(f"Applying Gaussian blur with sigma={blur_sigma}...")
+            from scipy import ndimage
+            potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
         
         # Write DX file
+        print(f"Writing potential to {grid_file}...")
         writeDx(str(grid_file), potential, min_coords, [spacing, spacing, spacing])
         
+        print("Potential grid created successfully.")
         return grid_file
-    
+
     def _to_gmsh_units(self, value):
         """Convert from Angstroms to gmsh units using the unit scale"""
         if isinstance(value, (list, tuple, np.ndarray)):
@@ -849,6 +890,7 @@ class ParametricProcessor:
         print(rb_type.mass,rb_type.moment_of_inertia)
         # Override the calculated properties with our analytically-determined ones
         rb_type.mass = self.mass
-        rb_type.moment_of_inertia = self.principal_moments
+        rb_type.moment_of_inertia = np.sort(self.principal_moments)
+        rb_type.potential_grids=[potential_dx]
         
         return rb_type
