@@ -127,8 +127,7 @@ _types_versions = {1.0: _types}
 _types_versions['1.0cp'] = {k:ParticleType(t.name,
                                            mass = t.mass,
                                            charge = t.charge,
-                                           epsilon = t.epsilon,
-                                           version = '1.0cp') for k,t in _types.items()}
+                                           epsilon = t.epsilon) for k,t in _types.items()}
 for k in 'R D E K'.split(): _types_versions['1.0cp'][k].epsilon = 0.005
 
 _types_versions[1.1] = dict()   # https://www.pnas.org/doi/10.1073/pnas.2221804120
@@ -240,6 +239,7 @@ class OnckNonbonded(AbstractPotential):
     The effective dielectric D decreases with distance according to a specific formula.
     """
 
+    """ Nonbonded interaction for 1BPA and 1BPA-1.1 """
     def __init__(self, debye_length=12.7, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
@@ -462,8 +462,13 @@ class OnckModel(PolymerModel):
                  DEBUG=False,
                  **kwargs):
 
+        """
+        [debye_length]: angstroms
+        [damping_coefficient]: ns
 
-        if version is None:
+        """
+
+        if version == None:
             logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')
             version = 1.1
         if version not in _types_versions:
