@@ -25,7 +25,7 @@ class ParametricProcessor:
         Args:
             name: Base name for the generated files
             mesh_size: Characteristic mesh element size
-            unit_scale: Conversion factor from angstroms to mesh units
+            mesh_unit_scale: Conversion factor from angstroms to desired mesh units, should be 1e-n
             work_dir: Working directory for output files
         """
         self.name = name
@@ -267,7 +267,8 @@ class ParametricProcessor:
         # Generate mesh using GMSH
         gmsh.initialize()
         gmsh.model.add(self.name)
-        
+        center=center*self.unit_scale
+        radius=radius*self.unit_scale
         # Create sphere
         sphere = gmsh.model.occ.addSphere(center[0], center[1], center[2], radius)
         gmsh.model.occ.synchronize()
@@ -461,6 +462,10 @@ class ParametricProcessor:
         gmsh.model.add(self.name)
         
         # Create cylinder aligned with provided axis
+        center=center*self.unit_scale
+        height=height*self.unit_scale
+        radius=radius*self.unit_scale
+
         cylinder = gmsh.model.occ.addCylinder(
             center[0], center[1], center[2], 
             axis_norm[0]*height, axis_norm[1]*height, axis_norm[2]*height, 
@@ -724,13 +729,17 @@ class ParametricProcessor:
         gmsh.model.add(self.name)
         
         # Add hemisphere at bottom
+        radius=radius*self.unit_scale
+        center=center*self.unit_scale
         bottom_center = np.array(center) - (cylinder_height/2) * axis_norm
+        bottom_center=bottom_center*self.unit_scale
         bottom_sphere = gmsh.model.occ.addSphere(
             bottom_center[0], bottom_center[1], bottom_center[2], 
             radius
         )
         
         # Add cylinder in the middle
+
         cylinder = gmsh.model.occ.addCylinder(
             bottom_center[0], bottom_center[1], bottom_center[2],
             cylinder_height * axis_norm[0], cylinder_height * axis_norm[1], cylinder_height * axis_norm[2],
@@ -738,6 +747,7 @@ class ParametricProcessor:
         )
         # Add hemisphere at top
         top_center = np.array(center) + (cylinder_height/2) * axis_norm
+        top_center = top_center*self.unit_scale
         top_sphere = gmsh.model.occ.addSphere(
             top_center[0], top_center[1], top_center[2],
             radius
@@ -764,221 +774,223 @@ class ParametricProcessor:
         
         return self.mesh_file
     
-        def generate_ellipsoid(self, a, b, c, center=(0, 0, 0), axis=(0, 0, 1), density=1.0):
-            """
-            Generate an ellipsoid mesh and calculate properties analytically.
+    def generate_ellipsoid(self, a, b, c, center=(0, 0, 0), axis=(0, 0, 1), density=1.0):
+        """
+        Generate an ellipsoid mesh and calculate properties analytically.
+        
+        Args:
+            a, b, c: Semi-principal axes of the ellipsoid
+            center: Center coordinates (x, y, z)
+            axis: Direction axis for orienting the ellipsoid
+            density: Material density in g/cm^3
             
-            Args:
-                a, b, c: Semi-principal axes of the ellipsoid
-                center: Center coordinates (x, y, z)
-                axis: Direction axis for orienting the ellipsoid
-                density: Material density in g/cm^3
-                
-            Returns:
-                Path to the generated mesh file
-            """
-            # Normalize axis
-            axis_norm = np.array(axis) / np.linalg.norm(axis)
+        Returns:
+            Path to the generated mesh file
+        """
+        # Normalize axis
+        axis_norm = np.array(axis) / np.linalg.norm(axis)
+        
+        # Store parameters for analytical calculations
+        self.a = a
+        self.b = b
+        self.c = c
+        self.center = center
+        self.axis = axis_norm
+        
+        # Define analytical formulas for ellipsoid
+        self._volume_formula = lambda: (4/3) * np.pi * a * b * c
+        self._com_formula = lambda: np.array(center)
+        
+        # Define inertia tensor formula
+        def ellipsoid_inertia(mass):
+            # Inertia tensor in principal axes
+            I_local = np.diag([
+                mass/5 * (b**2 + c**2),
+                mass/5 * (a**2 + c**2),
+                mass/5 * (a**2 + b**2)
+            ])
             
-            # Store parameters for analytical calculations
-            self.a = a
-            self.b = b
-            self.c = c
-            self.center = center
-            self.axis = axis_norm
+            # Now rotate to the global coordinate system
+            # We need to create a rotation matrix that aligns [0,0,1] with axis_norm
+            v = np.cross([0, 0, 1], axis_norm)
+            s = np.linalg.norm(v)
             
-            # Define analytical formulas for ellipsoid
-            self._volume_formula = lambda: (4/3) * np.pi * a * b * c
-            self._com_formula = lambda: np.array(center)
-            
-            # Define inertia tensor formula
-            def ellipsoid_inertia(mass):
-                # Inertia tensor in principal axes
-                I_local = np.diag([
-                    mass/5 * (b**2 + c**2),
-                    mass/5 * (a**2 + c**2),
-                    mass/5 * (a**2 + b**2)
+            if s < 1e-10:  # Axes are nearly aligned already
+                R = np.eye(3)
+            else:
+                c = np.dot([0, 0, 1], axis_norm)  # cosine of angle
+                v_skew = np.array([
+                    [0, -v[2], v[1]],
+                    [v[2], 0, -v[0]],
+                    [-v[1], v[0], 0]
                 ])
+                # Rodrigues' rotation formula
+                R = np.eye(3) + v_skew + v_skew.dot(v_skew) * (1-c)/s**2
+            
+            # Transform inertia tensor
+            I_global = R.dot(I_local).dot(R.T)
+            
+            return I_global
+        
+        self._inertia_formula = ellipsoid_inertia
+        
+        # Define parametric function for ellipsoid
+        def ellipsoid_function(u, v):
+            # u is longitude (0 to 2π)
+            # v is latitude (0 to π)
+            
+            # Create coordinate system with axis_norm as z
+            if abs(axis_norm[2]) < 0.9:
+                v1 = np.cross(axis_norm, [0, 0, 1])
+            else:
+                v1 = np.cross(axis_norm, [1, 0, 0])
+            v1 = v1 / np.linalg.norm(v1)
+            v2 = np.cross(axis_norm, v1)
+            
+            # Local coordinates for ellipsoid
+            local_x = a * np.sin(v) * np.cos(u)
+            local_y = b * np.sin(v) * np.sin(u)
+            local_z = c * np.cos(v)
+            
+            # Transform to global coordinates
+            global_point = np.array(center) + \
+                        local_x * v1 + \
+                        local_y * v2 + \
+                        local_z * axis_norm
+            
+            return global_point[0], global_point[1], global_point[2]
+        
+        # Store for later use
+        self.parametric_function = ellipsoid_function
+        self.u_range = (0, 2*np.pi)
+        self.v_range = (0, np.pi)
+        
+        # Define bounding box function
+        def bounding_box():
+            # Create coordinate system with axis_norm as z-axis
+            if abs(axis_norm[2]) < 0.9:
+                v1 = np.cross(axis_norm, [0, 0, 1])
+            else:
+                v1 = np.cross(axis_norm, [1, 0, 0])
+            v1 = v1 / np.linalg.norm(v1)
+            v2 = np.cross(axis_norm, v1)
+            
+            # Find the 8 corners of the bounding box in local coordinates
+            corners = []
+            for sx in [-1, 1]:
+                for sy in [-1, 1]:
+                    for sz in [-1, 1]:
+                        local_point = np.array([sx*a, sy*b, sz*c])
+                        global_point = np.array(center) + \
+                                    local_point[0] * v1 + \
+                                    local_point[1] * v2 + \
+                                    local_point[2] * axis_norm
+                        corners.append(global_point)
+            
+            corners = np.array(corners)
+            min_coords = np.min(corners, axis=0)
+            max_coords = np.max(corners, axis=0)
+            
+            return min_coords, max_coords
+        
+        self.bounding_box = bounding_box
+        
+        # Define distance function for potential calculation
+        def ellipsoid_distance(x, y, z):
+            # Transform point to local coordinate system
+            p = np.array([x, y, z]) - np.array(center)
+            
+            # Create coordinate system with axis_norm as z
+            if abs(axis_norm[2]) < 0.9:
+                v1 = np.cross(axis_norm, [0, 0, 1])
+            else:
+                v1 = np.cross(axis_norm, [1, 0, 0])
+            v1 = v1 / np.linalg.norm(v1)
+            v2 = np.cross(axis_norm, v1)
+            
+            # Transform to local ellipsoid coordinates
+            local_x = np.dot(p, v1)
+            local_y = np.dot(p, v2)
+            local_z = np.dot(p, axis_norm)
+            
+            # For ellipsoid, distance calculation is more complex
+            # Approximate by scaling to sphere and back
+            scaled_point = np.array([local_x/a, local_y/b, local_z/c])
+            scaled_dist = np.linalg.norm(scaled_point)
+            
+            # If point is at origin, return -min(a,b,c)
+            if scaled_dist < 1e-10:
+                return -min(a, b, c)
+            
+            # Scale back
+            if scaled_dist <= 1.0:  # Inside ellipsoid
+                # Approximation: scale the distance by the radius in the direction of the point
+                dist_factor = min(a, b, c)
+                return -dist_factor * (1.0 - scaled_dist)
+            else:  # Outside ellipsoid
+                # Approximation: scale the distance by the radius in the direction of the point
+                norm_vector = scaled_point / scaled_dist
+                # Get ellipsoid radius in the direction of norm_vector
+                radius_dir = np.sqrt(1.0 / (
+                    (norm_vector[0]/a)**2 + 
+                    (norm_vector[1]/b)**2 + 
+                    (norm_vector[2]/c)**2
+                ))
+                # Scale the distance
+                unscaled_dist = np.linalg.norm(np.array([local_x, local_y, local_z]))
+                return unscaled_dist - radius_dir
+        
+        self.distance_function = ellipsoid_distance
+        
+        # Calculate physical properties
+        self.calculate_properties(density)
+        
+        # Generate mesh using GMSH
+        gmsh.initialize()
+        gmsh.model.add(self.name)
+        a=a*self.unit_scale
+        b=b*self.unit_scale
+        c=c*self.unit_scale
+        # Create sphere of radius 1
+        sphere = gmsh.model.occ.addSphere(0, 0, 0, 1)
+        
+        # Scale it to create ellipsoid
+        gmsh.model.occ.dilate([(3, sphere)], 0, 0, 0, a, b, c)
+        
+        # If axis is not aligned with z, rotate the ellipsoid
+        if not np.allclose(axis_norm, [0, 0, 1]):
+            # Calculate rotation axis and angle
+            rotation_axis = np.cross([0, 0, 1], axis_norm)
+            if np.linalg.norm(rotation_axis) > 1e-10:
+                rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+                cos_angle = np.dot([0, 0, 1], axis_norm)
+                angle = np.arccos(cos_angle) * 180 / np.pi  # Convert to degrees for GMSH
                 
-                # Now rotate to the global coordinate system
-                # We need to create a rotation matrix that aligns [0,0,1] with axis_norm
-                v = np.cross([0, 0, 1], axis_norm)
-                s = np.linalg.norm(v)
-                
-                if s < 1e-10:  # Axes are nearly aligned already
-                    R = np.eye(3)
-                else:
-                    c = np.dot([0, 0, 1], axis_norm)  # cosine of angle
-                    v_skew = np.array([
-                        [0, -v[2], v[1]],
-                        [v[2], 0, -v[0]],
-                        [-v[1], v[0], 0]
-                    ])
-                    # Rodrigues' rotation formula
-                    R = np.eye(3) + v_skew + v_skew.dot(v_skew) * (1-c)/s**2
-                
-                # Transform inertia tensor
-                I_global = R.dot(I_local).dot(R.T)
-                
-                return I_global
-            
-            self._inertia_formula = ellipsoid_inertia
-            
-            # Define parametric function for ellipsoid
-            def ellipsoid_function(u, v):
-                # u is longitude (0 to 2π)
-                # v is latitude (0 to π)
-                
-                # Create coordinate system with axis_norm as z
-                if abs(axis_norm[2]) < 0.9:
-                    v1 = np.cross(axis_norm, [0, 0, 1])
-                else:
-                    v1 = np.cross(axis_norm, [1, 0, 0])
-                v1 = v1 / np.linalg.norm(v1)
-                v2 = np.cross(axis_norm, v1)
-                
-                # Local coordinates for ellipsoid
-                local_x = a * np.sin(v) * np.cos(u)
-                local_y = b * np.sin(v) * np.sin(u)
-                local_z = c * np.cos(v)
-                
-                # Transform to global coordinates
-                global_point = np.array(center) + \
-                            local_x * v1 + \
-                            local_y * v2 + \
-                            local_z * axis_norm
-                
-                return global_point[0], global_point[1], global_point[2]
-            
-            # Store for later use
-            self.parametric_function = ellipsoid_function
-            self.u_range = (0, 2*np.pi)
-            self.v_range = (0, np.pi)
-            
-            # Define bounding box function
-            def bounding_box():
-                # Create coordinate system with axis_norm as z-axis
-                if abs(axis_norm[2]) < 0.9:
-                    v1 = np.cross(axis_norm, [0, 0, 1])
-                else:
-                    v1 = np.cross(axis_norm, [1, 0, 0])
-                v1 = v1 / np.linalg.norm(v1)
-                v2 = np.cross(axis_norm, v1)
-                
-                # Find the 8 corners of the bounding box in local coordinates
-                corners = []
-                for sx in [-1, 1]:
-                    for sy in [-1, 1]:
-                        for sz in [-1, 1]:
-                            local_point = np.array([sx*a, sy*b, sz*c])
-                            global_point = np.array(center) + \
-                                        local_point[0] * v1 + \
-                                        local_point[1] * v2 + \
-                                        local_point[2] * axis_norm
-                            corners.append(global_point)
-                
-                corners = np.array(corners)
-                min_coords = np.min(corners, axis=0)
-                max_coords = np.max(corners, axis=0)
-                
-                return min_coords, max_coords
-            
-            self.bounding_box = bounding_box
-            
-            # Define distance function for potential calculation
-            def ellipsoid_distance(x, y, z):
-                # Transform point to local coordinate system
-                p = np.array([x, y, z]) - np.array(center)
-                
-                # Create coordinate system with axis_norm as z
-                if abs(axis_norm[2]) < 0.9:
-                    v1 = np.cross(axis_norm, [0, 0, 1])
-                else:
-                    v1 = np.cross(axis_norm, [1, 0, 0])
-                v1 = v1 / np.linalg.norm(v1)
-                v2 = np.cross(axis_norm, v1)
-                
-                # Transform to local ellipsoid coordinates
-                local_x = np.dot(p, v1)
-                local_y = np.dot(p, v2)
-                local_z = np.dot(p, axis_norm)
-                
-                # For ellipsoid, distance calculation is more complex
-                # Approximate by scaling to sphere and back
-                scaled_point = np.array([local_x/a, local_y/b, local_z/c])
-                scaled_dist = np.linalg.norm(scaled_point)
-                
-                # If point is at origin, return -min(a,b,c)
-                if scaled_dist < 1e-10:
-                    return -min(a, b, c)
-                
-                # Scale back
-                if scaled_dist <= 1.0:  # Inside ellipsoid
-                    # Approximation: scale the distance by the radius in the direction of the point
-                    dist_factor = min(a, b, c)
-                    return -dist_factor * (1.0 - scaled_dist)
-                else:  # Outside ellipsoid
-                    # Approximation: scale the distance by the radius in the direction of the point
-                    norm_vector = scaled_point / scaled_dist
-                    # Get ellipsoid radius in the direction of norm_vector
-                    radius_dir = np.sqrt(1.0 / (
-                        (norm_vector[0]/a)**2 + 
-                        (norm_vector[1]/b)**2 + 
-                        (norm_vector[2]/c)**2
-                    ))
-                    # Scale the distance
-                    unscaled_dist = np.linalg.norm(np.array([local_x, local_y, local_z]))
-                    return unscaled_dist - radius_dir
-            
-            self.distance_function = ellipsoid_distance
-            
-            # Calculate physical properties
-            self.calculate_properties(density)
-            
-            # Generate mesh using GMSH
-            gmsh.initialize()
-            gmsh.model.add(self.name)
-            
-            # Create sphere of radius 1
-            sphere = gmsh.model.occ.addSphere(0, 0, 0, 1)
-            
-            # Scale it to create ellipsoid
-            gmsh.model.occ.dilate([(3, sphere)], 0, 0, 0, a, b, c)
-            
-            # If axis is not aligned with z, rotate the ellipsoid
-            if not np.allclose(axis_norm, [0, 0, 1]):
-                # Calculate rotation axis and angle
-                rotation_axis = np.cross([0, 0, 1], axis_norm)
-                if np.linalg.norm(rotation_axis) > 1e-10:
-                    rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-                    cos_angle = np.dot([0, 0, 1], axis_norm)
-                    angle = np.arccos(cos_angle) * 180 / np.pi  # Convert to degrees for GMSH
-                    
-                    # Rotate
-                    gmsh.model.occ.rotate([(3, sphere)], 0, 0, 0, 
-                                        rotation_axis[0], rotation_axis[1], rotation_axis[2], 
-                                        angle)
-            
-            # Translate to center
-            gmsh.model.occ.translate([(3, sphere)], center[0], center[1], center[2])
-            
-            gmsh.model.occ.synchronize()
-            
-            # Store entity for later use
-            self.entity_dim = 3
-            self.entity_tag = sphere
-            
-            # Mesh settings
-            gmsh.option.setNumber("Mesh.MeshSizeMin", self.mesh_size)
-            gmsh.option.setNumber("Mesh.MeshSizeMax", self.mesh_size)
-            
-            # Generate mesh
-            gmsh.model.mesh.generate(3)
-            
-            # Save mesh
-            gmsh.write(str(self.mesh_file))
-            gmsh.finalize()
-            
-            return self.mesh_file
+                # Rotate
+                gmsh.model.occ.rotate([(3, sphere)], 0, 0, 0, 
+                                    rotation_axis[0], rotation_axis[1], rotation_axis[2], 
+                                    angle)
+        
+        # Translate to center
+        gmsh.model.occ.translate([(3, sphere)], center[0], center[1], center[2])
+        
+        gmsh.model.occ.synchronize()
+        
+        # Store entity for later use
+        self.entity_dim = 3
+        self.entity_tag = sphere
+        
+        # Mesh settings
+        gmsh.option.setNumber("Mesh.MeshSizeMin", self.mesh_size)
+        gmsh.option.setNumber("Mesh.MeshSizeMax", self.mesh_size)
+        
+        # Generate mesh
+        gmsh.model.mesh.generate(3)
+        
+        # Save mesh
+        gmsh.write(str(self.mesh_file))
+        gmsh.finalize()
+        
+        return self.mesh_file
 
     
