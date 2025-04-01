@@ -2,12 +2,6 @@ import numpy as np
 import gmsh
 from pathlib import Path
 import os
-from .grid import writeDx
-
-import numpy as np
-import gmsh
-from pathlib import Path
-import os
 from scipy import integrate
 from .grid import writeDx
 
@@ -18,19 +12,22 @@ class ParametricProcessor:
     potential fields directly from the parametric definitions.
     """
     
-    def __init__(self, name, mesh_size=0.5, mesh_unit_scale=1, work_dir=None, **kwargs):
+    def __init__(self, name, mesh_size=0.5, unit_scale=1.0, density=1.0, work_dir=None, **kwargs):
         """
         Initialize the parametric processor.
         
         Args:
             name: Base name for the generated files
             mesh_size: Characteristic mesh element size
-            mesh_unit_scale: Conversion factor from angstroms to desired mesh units, should be 1e-n
+            unit_scale: Conversion factor from angstroms to mesh units (e.g., 1e-4 for Å to μm)
+            density: Material density in g/cm³
             work_dir: Working directory for output files
         """
         self.name = name
         self.mesh_size = mesh_size
-        self.unit_scale = mesh_unit_scale
+        self.unit_scale = unit_scale  # Factor to convert from Å to mesh units
+        self.density = density  # Material density in g/cm³
+        self.density_amu = self.density * 0.6022  # Density in amu/Å³ for mass calculations
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         os.makedirs(self.work_dir, exist_ok=True)
         self.mesh_file = self.work_dir / f"{name}.msh"
@@ -47,12 +44,9 @@ class ParametricProcessor:
         self.inertia_tensor = None
         self.principal_moments = None
         
-    def calculate_properties(self, density=1.0):
+    def calculate_properties(self):
         """
         Calculate physical properties analytically from the parametric definition.
-        
-        Args:
-            density: Material density in g/cm^3
             
         Returns:
             Dictionary with calculated properties
@@ -60,13 +54,10 @@ class ParametricProcessor:
         if self.parametric_function is None:
             raise ValueError("Parametric function not defined. Generate a shape first.")
         
-        # Convert density to amu/Å^3
-        density_amu = density * 0.6022  # Conversion factor
-        
         # Use analytical formulas if available
         if hasattr(self, '_volume_formula'):
             self.volume = self._volume_formula()
-            self.mass = self.volume * density_amu
+            self.mass = self.volume * self.density_amu
             
             if hasattr(self, '_com_formula'):
                 self.center_of_mass = self._com_formula()
@@ -79,13 +70,16 @@ class ParametricProcessor:
             # Calculate principal moments
             if self.inertia_tensor is not None:
                 eigenvalues, eigenvectors = np.linalg.eigh(self.inertia_tensor)
-                self.principal_moments = eigenvalues
-        prop_dict={
+                self.principal_moments = np.sort(eigenvalues)
+                
+        prop_dict = {
             "volume": self.volume,
             "mass": self.mass,
             "center_of_mass": self.center_of_mass,
             "inertia_tensor": self.inertia_tensor,
-            "principal_moments": self.principal_moments}
+            "principal_moments": self.principal_moments
+        }
+        
         print(prop_dict)
         return prop_dict
     
@@ -127,8 +121,8 @@ class ParametricProcessor:
             max_coords = np.max(sample_points, axis=0)
         
         # Add buffer
-        min_coords = min_coords-buffer
-        max_coords = max_coords+buffer
+        min_coords = min_coords - buffer
+        max_coords = max_coords + buffer
         
         # Calculate grid dimensions
         nx = int(np.ceil((max_coords[0] - min_coords[0]) / spacing))
@@ -179,14 +173,20 @@ class ParametricProcessor:
         
         return grid_file
     
-    def generate_sphere(self, radius, center=(0, 0, 0), density=1.0):
+    def _to_gmsh_units(self, value):
+        """Convert from Angstroms to gmsh units using the unit scale"""
+        if isinstance(value, (list, tuple, np.ndarray)):
+            return np.array(value) * self.unit_scale
+        else:
+            return value * self.unit_scale
+    
+    def generate_sphere(self, radius, center=(0, 0, 0)):
         """
         Generate a spherical mesh and calculate properties analytically.
         
         Args:
-            radius: Radius of the sphere
-            center: Center coordinates (x, y, z)
-            density: Material density in g/cm^3
+            radius: Radius of the sphere in Angstroms
+            center: Center coordinates (x, y, z) in Angstroms
             
         Returns:
             Path to the generated mesh file
@@ -262,15 +262,21 @@ class ParametricProcessor:
         self.generate_potential = generate_potential
         
         # Calculate physical properties
-        self.calculate_properties(density)
+        self.calculate_properties()
+        
+        # Convert values to gmsh units for mesh generation
+        gmsh_radius = self._to_gmsh_units(radius)
+        gmsh_center = self._to_gmsh_units(center)
         
         # Generate mesh using GMSH
         gmsh.initialize()
         gmsh.model.add(self.name)
-        center=center*self.unit_scale
-        radius=radius*self.unit_scale
+        
         # Create sphere
-        sphere = gmsh.model.occ.addSphere(center[0], center[1], center[2], radius)
+        sphere = gmsh.model.occ.addSphere(
+            gmsh_center[0], gmsh_center[1], gmsh_center[2], 
+            gmsh_radius
+        )
         gmsh.model.occ.synchronize()
         
         # Store entity for later use
@@ -290,217 +296,16 @@ class ParametricProcessor:
         
         return self.mesh_file
         
-    def generate_cylinder(self, radius, height, center=(0, 0, 0), axis=(0, 0, 1), density=1.0):
-        """
-        Generate a cylindrical mesh and calculate properties analytically.
-        
-        Args:
-            radius: Radius of the cylinder
-            height: Height of the cylinder
-            center: Base center coordinates (x, y, z)
-            axis: Direction axis (normalized)
-            density: Material density in g/cm^3
-            
-        Returns:
-            Path to the generated mesh file
-        """
-        # Normalize axis
-        axis_norm = np.array(axis) / np.linalg.norm(axis)
-        
-        # Store parameters for analytical calculations
-        self.radius = radius
-        self.height = height
-        self.center = center
-        self.axis = axis_norm
-        
-        # Define analytical formulas for cylinder
-        self._volume_formula = lambda: np.pi * radius**2 * height
-        
-        # Center of mass is at the middle of the cylinder
-        self._com_formula = lambda: np.array(center) + height/2 * axis_norm
-        
-        # Define inertia tensor formula
-        def cylinder_inertia(mass):
-            # Inertia tensor depends on orientation
-            # First calculate inertia in the cylinder's local coordinate system
-            # For a cylinder with axis along z:
-            # I_xx = I_yy = m/12 * (3r² + h²) and I_zz = m/2 * r²
-            I_axial = mass/2 * radius**2
-            I_radial = mass/12 * (3*radius**2 + height**2)
-            
-            # The diagonal elements directly
-            I_local = np.diag([I_radial, I_radial, I_axial])
-            
-            # Now rotate to the global coordinate system
-            # We need to create a rotation matrix that aligns [0,0,1] with axis_norm
-            v = np.cross([0, 0, 1], axis_norm)
-            s = np.linalg.norm(v)
-            
-            if s < 1e-10:  # Axes are nearly aligned already
-                R = np.eye(3)
-            else:
-                c = np.dot([0, 0, 1], axis_norm)  # cosine of angle
-                v_skew = np.array([
-                    [0, -v[2], v[1]],
-                    [v[2], 0, -v[0]],
-                    [-v[1], v[0], 0]
-                ])
-                # Rodrigues' rotation formula
-                R = np.eye(3) + v_skew + v_skew.dot(v_skew) * (1-c)/s**2
-            
-            # Transform inertia tensor
-            I_global = R.dot(I_local).dot(R.T)
-            
-            return I_global
-        
-        self._inertia_formula = cylinder_inertia
-        
-        # Define parametric function for cylinder
-        def cylinder_function(u, v):
-            # u is height (0 to height)
-            # v is angle (0 to 2π)
-            
-            # Create two orthogonal vectors to axis
-            if abs(axis_norm[2]) < 0.9:
-                v1 = np.cross(axis_norm, [0, 0, 1])
-            else:
-                v1 = np.cross(axis_norm, [1, 0, 0])
-            v1 = v1 / np.linalg.norm(v1)
-            v2 = np.cross(axis_norm, v1)
-            
-            # Calculate point on cylinder
-            base = np.array(center)
-            point = base + u * axis_norm + radius * (v1 * np.cos(v) + v2 * np.sin(v))
-            
-            return point[0], point[1], point[2]
-        
-        # Store for later use
-        self.parametric_function = cylinder_function
-        self.u_range = (0, height)
-        self.v_range = (0, 2*np.pi)
-        
-        # Define bounding box function
-        def bounding_box():
-            # Create coordinate system with axis_norm as z-axis
-            if abs(axis_norm[2]) < 0.9:
-                v1 = np.cross(axis_norm, [0, 0, 1])
-            else:
-                v1 = np.cross(axis_norm, [1, 0, 0])
-            v1 = v1 / np.linalg.norm(v1)
-            v2 = np.cross(axis_norm, v1)
-            
-            # For a cylinder, the bounding box depends on its orientation
-            # We need to calculate the 8 corner points of the cylinder's bounding box
-            corners = []
-            
-            # Center of base and top
-            base_center = np.array(center)
-            top_center = base_center + height * axis_norm
-            
-            # Calculate the 8 corners (4 on each end of the cylinder)
-            for h in [base_center, top_center]:
-                for i in range(4):
-                    angle = i * np.pi/2
-                    corner = h + radius * (v1 * np.cos(angle) + v2 * np.sin(angle))
-                    corners.append(corner)
-            
-            corners = np.array(corners)
-            min_coords = np.min(corners, axis=0)
-            max_coords = np.max(corners, axis=0)
-            
-            return min_coords, max_coords
-        
-        self.bounding_box = bounding_box
-        
-        # Define distance function for potential calculation
-        def cylinder_distance(x, y, z):
-            # Calculate coordinates in cylinder's local frame
-            p = np.array([x, y, z]) - np.array(center)
-            
-            # Calculate height along axis (dot product)
-            h = np.dot(p, axis_norm)
-            
-            # Calculate radial distance
-            radial_vector = p - h * axis_norm
-            radial_dist = np.linalg.norm(radial_vector)
-            
-            # Calculate signed distance
-            # Inside cylinder: both h between 0 and height, and radial_dist < radius
-            if 0 <= h <= height and radial_dist <= radius:
-                # Inside - negative distance
-                dist_to_side = radius - radial_dist
-                dist_to_base = h
-                dist_to_top = height - h
-                return -min(dist_to_side, dist_to_base, dist_to_top)
-            else:
-                # Outside - positive distance
-                # Distance to side cylinder
-                if 0 <= h <= height:
-                    return radial_dist - radius
-                
-                # Distance to base
-                if h < 0:
-                    if radial_dist <= radius:
-                        return -h
-                    else:
-                        return np.sqrt((-h)**2 + (radial_dist - radius)**2)
-                
-                # Distance to top
-                if h > height:
-                    if radial_dist <= radius:
-                        return h - height
-                    else:
-                        return np.sqrt((h - height)**2 + (radial_dist - radius)**2)
-        
-        self.distance_function = cylinder_distance
-        
-        # Calculate physical properties
-        self.calculate_properties(density)
-        
-        # Generate mesh using GMSH
-        gmsh.initialize()
-        gmsh.model.add(self.name)
-        
-        # Create cylinder aligned with provided axis
-        center=center*self.unit_scale
-        height=height*self.unit_scale
-        radius=radius*self.unit_scale
-
-        cylinder = gmsh.model.occ.addCylinder(
-            center[0], center[1], center[2], 
-            axis_norm[0]*height, axis_norm[1]*height, axis_norm[2]*height, 
-            radius
-        )
-        gmsh.model.occ.synchronize()
-        
-        # Store entity for later use
-        self.entity_dim = 3
-        self.entity_tag = cylinder
-        
-        # Mesh settings
-        gmsh.option.setNumber("Mesh.MeshSizeMin", self.mesh_size)
-        gmsh.option.setNumber("Mesh.MeshSizeMax", self.mesh_size)
-        
-        # Generate mesh
-        gmsh.model.mesh.generate(3)
-        
-        # Save mesh
-        gmsh.write(str(self.mesh_file))
-        gmsh.finalize()
-        
-        return self.mesh_file
-        
-    def generate_capsule(self, radius, length=None, aspect_ratio=None, center=(0, 0, 0), axis=(0, 0, 1), density=1.0):
+    def generate_capsule(self, radius, length=None, aspect_ratio=None, center=(0, 0, 0), axis=(0, 0, 1)):
         """
         Generate a spherical-capped cylinder (capsule) mesh and calculate properties analytically.
         
         Args:
-            radius: Radius of the capsule
-            length: Total length of the capsule (including hemisphere caps) - provide either this or aspect_ratio
+            radius: Radius of the capsule in Angstroms
+            length: Total length of the capsule in Angstroms (including hemisphere caps) - provide either this or aspect_ratio
             aspect_ratio: Aspect ratio (length/diameter) - provide either this or length
-            center: Center coordinates (x, y, z) of the capsule
+            center: Center coordinates (x, y, z) in Angstroms of the capsule
             axis: Direction axis (will be normalized)
-            density: Material density in g/cm^3
             
         Returns:
             Path to the generated mesh file
@@ -519,7 +324,7 @@ class ParametricProcessor:
         cylinder_height = length - 2 * radius
         if cylinder_height < 0:
             # In case the length is less than a sphere diameter, just create a sphere
-            return self.generate_sphere(radius, center, density)
+            return self.generate_sphere(radius, center)
         
         # Normalize axis
         axis_norm = np.array(axis) / np.linalg.norm(axis)
@@ -722,35 +527,38 @@ class ParametricProcessor:
         self.distance_function = capsule_distance
         
         # Calculate physical properties
-        self.calculate_properties(density)
+        self.calculate_properties()
+        
+        # Convert values to gmsh units for mesh generation
+        gmsh_radius = self._to_gmsh_units(radius)
+        gmsh_cylinder_height = self._to_gmsh_units(cylinder_height)
+        gmsh_center = self._to_gmsh_units(center)
         
         # Generate mesh using GMSH
         gmsh.initialize()
         gmsh.model.add(self.name)
         
         # Add hemisphere at bottom
-        radius=radius*self.unit_scale
-        center=center*self.unit_scale
         bottom_center = np.array(center) - (cylinder_height/2) * axis_norm
-        bottom_center=bottom_center*self.unit_scale
+        gmsh_bottom_center = self._to_gmsh_units(bottom_center)
         bottom_sphere = gmsh.model.occ.addSphere(
-            bottom_center[0], bottom_center[1], bottom_center[2], 
-            radius
+            gmsh_bottom_center[0], gmsh_bottom_center[1], gmsh_bottom_center[2], 
+            gmsh_radius
         )
         
         # Add cylinder in the middle
-
         cylinder = gmsh.model.occ.addCylinder(
-            bottom_center[0], bottom_center[1], bottom_center[2],
-            cylinder_height * axis_norm[0], cylinder_height * axis_norm[1], cylinder_height * axis_norm[2],
-            radius
+            gmsh_bottom_center[0], gmsh_bottom_center[1], gmsh_bottom_center[2],
+            gmsh_cylinder_height * axis_norm[0], gmsh_cylinder_height * axis_norm[1], gmsh_cylinder_height * axis_norm[2],
+            gmsh_radius
         )
+        
         # Add hemisphere at top
         top_center = np.array(center) + (cylinder_height/2) * axis_norm
-        top_center = top_center*self.unit_scale
+        gmsh_top_center = self._to_gmsh_units(top_center)
         top_sphere = gmsh.model.occ.addSphere(
-            top_center[0], top_center[1], top_center[2],
-            radius
+            gmsh_top_center[0], gmsh_top_center[1], gmsh_top_center[2],
+            gmsh_radius
         )
         
         # Fuse all components
@@ -773,16 +581,15 @@ class ParametricProcessor:
         gmsh.finalize()
         
         return self.mesh_file
-    
-    def generate_ellipsoid(self, a, b, c, center=(0, 0, 0), axis=(0, 0, 1), density=1.0):
+
+    def generate_ellipsoid(self, a, b, c, center=(0, 0, 0), axis=(0, 0, 1)):
         """
         Generate an ellipsoid mesh and calculate properties analytically.
         
         Args:
-            a, b, c: Semi-principal axes of the ellipsoid
-            center: Center coordinates (x, y, z)
+            a, b, c: Semi-principal axes of the ellipsoid in Angstroms
+            center: Center coordinates (x, y, z) in Angstroms
             axis: Direction axis for orienting the ellipsoid
-            density: Material density in g/cm^3
             
         Returns:
             Path to the generated mesh file
@@ -943,19 +750,23 @@ class ParametricProcessor:
         self.distance_function = ellipsoid_distance
         
         # Calculate physical properties
-        self.calculate_properties(density)
+        self.calculate_properties()
+        
+        # Convert values to gmsh units for mesh generation
+        gmsh_a = self._to_gmsh_units(a)
+        gmsh_b = self._to_gmsh_units(b)
+        gmsh_c = self._to_gmsh_units(c)
+        gmsh_center = self._to_gmsh_units(center)
         
         # Generate mesh using GMSH
         gmsh.initialize()
         gmsh.model.add(self.name)
-        a=a*self.unit_scale
-        b=b*self.unit_scale
-        c=c*self.unit_scale
+        
         # Create sphere of radius 1
         sphere = gmsh.model.occ.addSphere(0, 0, 0, 1)
         
         # Scale it to create ellipsoid
-        gmsh.model.occ.dilate([(3, sphere)], 0, 0, 0, a, b, c)
+        gmsh.model.occ.dilate([(3, sphere)], 0, 0, 0, gmsh_a, gmsh_b, gmsh_c)
         
         # If axis is not aligned with z, rotate the ellipsoid
         if not np.allclose(axis_norm, [0, 0, 1]):
@@ -972,7 +783,7 @@ class ParametricProcessor:
                                     angle)
         
         # Translate to center
-        gmsh.model.occ.translate([(3, sphere)], center[0], center[1], center[2])
+        gmsh.model.occ.translate([(3, sphere)], gmsh_center[0], gmsh_center[1], gmsh_center[2])
         
         gmsh.model.occ.synchronize()
         
@@ -993,4 +804,51 @@ class ParametricProcessor:
         
         return self.mesh_file
 
-    
+    def create_rigid_body_type(self, simconf=None):
+        """
+        Create a RigidBodyType directly from the generated parametric shape.
+        
+        Args:
+            simconf: SimConf object with parameters
+            
+        Returns:
+            A MeshRigidBodyType object ready for simulation
+        """
+        from .mesh_rigidbody import MeshRigidBodyType
+        
+        # Ensure we have calculated properties
+        if self.mass is None:
+            self.calculate_properties()
+        
+        # Generate potential grid
+        potential_dx = self.work_dir / f"{self.name}_potential.dx"
+        if not potential_dx.exists():
+            self.create_potential_grid(grid_file=potential_dx)
+        """
+        from .mesh_process_volume import MeshProcessor
+        rbprocess = MeshProcessor(
+                self.mesh_file,
+                density=density, 
+                simconf=simconf, 
+                unit_scale=unit_scale,
+                work_dir=self.type_dir,expected_mass=expected_mass)
+        
+        rbprocess.calculate_damping()
+        attached_particles= rbprocess.get_attached_particles()
+        # Create the rigid body type
+
+        """
+        
+        rb_type = MeshRigidBodyType(
+            name=self.name,
+            mesh_file=self.mesh_file,
+            density=self.density, 
+            simconf=simconf,
+            unit_scale=1/self.unit_scale, expected_mass=self.mass)
+
+        print(rb_type.mass,rb_type.moment_of_inertia)
+        # Override the calculated properties with our analytically-determined ones
+        rb_type.mass = self.mass
+        rb_type.moment_of_inertia = self.principal_moments
+        
+        return rb_type
