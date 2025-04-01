@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 from scipy import integrate
 from .grid import writeDx
+from .logger import logger
 
 class ParametricProcessor:
     """
@@ -80,7 +81,7 @@ class ParametricProcessor:
             "principal_moments": self.principal_moments
         }
         
-        print(prop_dict)
+        logger.info(prop_dict)
         return prop_dict
     
     def create_potential_grid(self, spacing=2.0, buffer=20.0, max_potential=100.0, 
@@ -145,7 +146,7 @@ class ParametricProcessor:
         
         # Track progress
         total_points = nx * ny * nz
-        print(f"Creating potential grid with {total_points} points...")
+        logger.info(f"Creating potential grid with {total_points} points...")
         
         # Process in batches to avoid memory issues
         batch_size = 10000
@@ -194,24 +195,24 @@ class ParametricProcessor:
                         if num_inside > 0:
                             potential_flat[i + j] = max_potential * (num_inside / num_samples)
             
-            # Print progress periodically
+            # logger.info progress periodically
             if i % (5 * batch_size) == 0:
-                print(f"Processed {i}/{len(points)} points ({i/len(points)*100:.1f}%)")
+                logger.info(f"Processed {i}/{len(points)} points ({i/len(points)*100:.1f}%)")
         
         # Reshape the flattened array back to 3D
         potential = potential_flat.reshape((nx, ny, nz))
         
         # Apply Gaussian blur to smooth the potential field
         if blur_sigma > 0:
-            print(f"Applying Gaussian blur with sigma={blur_sigma}...")
+            logger.info(f"Applying Gaussian blur with sigma={blur_sigma}...")
             from scipy import ndimage
             potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
         
         # Write DX file
-        print(f"Writing potential to {grid_file}...")
+        logger.info(f"Writing potential to {grid_file}...")
         writeDx(str(grid_file), potential, min_coords, [spacing, spacing, spacing])
         
-        print("Potential grid created successfully.")
+        logger.info("Potential grid created successfully.")
         return grid_file
 
     def _to_gmsh_units(self, value):
@@ -274,34 +275,27 @@ class ParametricProcessor:
             return dist - radius
         
         self.distance_function = sphere_distance
+
+        def is_inside(x, y, z):
+            """Return True if point (x,y,z) is inside the sphere."""
+            dx = x - center[0]
+            dy = y - center[1]
+            dz = z - center[2]
+            distance_squared = dx**2 + dy**2 + dz**2
+            return distance_squared <= radius**2
+    
+        # Define signed distance function
+        def signed_distance(x, y, z):
+            """Return signed distance from point to sphere surface.
+            Negative inside, positive outside."""
+            dx = x - center[0]
+            dy = y - center[1]
+            dz = z - center[2]
+            distance = np.sqrt(dx**2 + dy**2 + dz**2)
+            return distance - radius
         
-        # Define potential generator function
-        def generate_potential(x, y, z):
-            # Create a grid of 3D points
-            X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
-            
-            # Calculate distance to sphere center for each point
-            dx = X - center[0]
-            dy = Y - center[1]
-            dz = Z - center[2]
-            dist = np.sqrt(dx**2 + dy**2 + dz**2)
-            
-            # Calculate signed distance
-            signed_dist = dist - radius
-            
-            # Create potential (negative distances are inside)
-            max_val = 100.0  # Maximum potential value
-            scale = 2.0  # Scale factor for exponential decay
-            
-            # Potential inside is maximum, outside decays exponentially
-            potential = np.zeros_like(signed_dist)
-            potential[signed_dist <= 0] = max_val
-            potential[signed_dist > 0] = max_val * np.exp(-signed_dist[signed_dist > 0] / scale)
-            
-            return potential
-        
-        self.generate_potential = generate_potential
-        
+        self.is_inside = is_inside
+        self.signed_distance = signed_distance
         # Calculate physical properties
         self.calculate_properties()
         
@@ -383,7 +377,60 @@ class ParametricProcessor:
         
         # Center of mass is at the geometric center
         self._com_formula = lambda: np.array(center)
+
+        def is_inside(x, y, z):
+            """Return True if point (x,y,z) is inside the capsule."""
+            # Transform point to local coordinates
+            p = np.array([x, y, z]) - np.array(center)
+            
+            # Calculate height along axis (dot product)
+            h = np.dot(p, axis_norm)
+            
+            # Calculate radial distance
+            radial_vector = p - h * axis_norm
+            radial_dist = np.linalg.norm(radial_vector)
+            
+            # If within cylinder section (between the hemispheres)
+            if abs(h) <= cylinder_height/2:
+                return radial_dist <= radius
+            
+            # If beyond cylinder section, check if within hemisphere caps
+            else:
+                # Calculate distance to closest hemisphere center
+                hemisphere_center = np.array(center) + np.sign(h) * (cylinder_height/2) * axis_norm
+                dist_to_hemisphere = np.linalg.norm(np.array([x, y, z]) - hemisphere_center)
+                return dist_to_hemisphere <= radius
         
+        # Define signed distance function for potential calculation
+        def signed_distance(x, y, z):
+            """Return signed distance from point to capsule surface.
+            Negative inside, positive outside."""
+            # Transform point to local coordinates
+            p = np.array([x, y, z]) - np.array(center)
+            
+            # Calculate height along axis (dot product)
+            h = np.dot(p, axis_norm)
+            
+            # Calculate radial distance
+            radial_vector = p - h * axis_norm
+            radial_dist = np.linalg.norm(radial_vector)
+            
+            # Clamp h to cylinder segment
+            h_clamped = np.clip(h, -cylinder_height/2, cylinder_height/2)
+            
+            # Find closest point on cylinder axis
+            closest_on_axis = np.array(center) + h_clamped * axis_norm
+            
+            # Distance from point to closest point on axis
+            dist_to_axis = np.linalg.norm(np.array([x, y, z]) - closest_on_axis)
+            
+            # Signed distance
+            return dist_to_axis - radius
+        
+        # Attach functions to the instance
+        self.is_inside = is_inside
+        self.signed_distance = signed_distance
+
         # Define inertia tensor formula for capsule
         def capsule_inertia(mass):
             # Calculate mass of cylinder and hemispheres
@@ -565,7 +612,7 @@ class ParametricProcessor:
             # Signed distance
             return dist_to_axis - radius
         
-        self.distance_function = capsule_distance
+        self.distance_function = capsule_distance #may be useless here 
         
         # Calculate physical properties
         self.calculate_properties()
@@ -789,7 +836,79 @@ class ParametricProcessor:
                 return unscaled_dist - radius_dir
         
         self.distance_function = ellipsoid_distance
+        def is_inside(x, y, z):
+            """Return True if point (x,y,z) is inside the ellipsoid."""
+            # Transform point to local coordinates
+            p = np.array([x, y, z]) - np.array(center)
+            
+            # Create coordinate system with axis_norm as z
+            if abs(axis_norm[2]) < 0.9:
+                v1 = np.cross(axis_norm, [0, 0, 1])
+            else:
+                v1 = np.cross(axis_norm, [1, 0, 0])
+            v1 = v1 / np.linalg.norm(v1)
+            v2 = np.cross(axis_norm, v1)
+            
+            # Transform to local ellipsoid coordinates
+            local_x = np.dot(p, v1)
+            local_y = np.dot(p, v2)
+            local_z = np.dot(p, axis_norm)
+            
+            # Check if inside the ellipsoid using the equation x²/a² + y²/b² + z²/c² ≤ 1
+            return (local_x/a)**2 + (local_y/b)**2 + (local_z/c)**2 <= 1.0
         
+        # Define signed distance function for the ellipsoid
+        def signed_distance(x, y, z):
+            """Approximate signed distance from point to ellipsoid surface.
+            Negative inside, positive outside."""
+            # Transform point to local coordinates
+            p = np.array([x, y, z]) - np.array(center)
+            
+            # Create coordinate system with axis_norm as z
+            if abs(axis_norm[2]) < 0.9:
+                v1 = np.cross(axis_norm, [0, 0, 1])
+            else:
+                v1 = np.cross(axis_norm, [1, 0, 0])
+            v1 = v1 / np.linalg.norm(v1)
+            v2 = np.cross(axis_norm, v1)
+            
+            # Transform to local ellipsoid coordinates
+            local_x = np.dot(p, v1)
+            local_y = np.dot(p, v2)
+            local_z = np.dot(p, axis_norm)
+            
+            # For ellipsoid, scaled distance to center is (x/a)² + (y/b)² + (z/c)²
+            scaled_dist_squared = (local_x/a)**2 + (local_y/b)**2 + (local_z/c)**2
+            scaled_dist = np.sqrt(scaled_dist_squared)
+            
+            if scaled_dist < 1e-10:  # Point is at or very near center
+                return -min(a, b, c)
+            
+            # Calculate unscaled distance to point
+            distance = np.linalg.norm(p)
+            
+            # If inside ellipsoid
+            if scaled_dist <= 1.0:
+                # Approximate distance to surface by scaling
+                return -distance * (1.0 - scaled_dist)
+            else:
+                # For outside, we can approximate the surface point in the direction of the point
+                direction = np.array([local_x, local_y, local_z]) / distance
+                
+                # Scaled radius in that direction
+                r_theta = 1.0 / np.sqrt(
+                    (direction[0]/a)**2 + 
+                    (direction[1]/b)**2 + 
+                    (direction[2]/c)**2
+                )
+                
+                # Distance to surface is approximately distance to center minus radius in that direction
+                surface_dist = distance - r_theta
+                return surface_dist
+        
+        # Attach functions to the instance
+        self.is_inside = is_inside
+        self.signed_distance = signed_distance
         # Calculate physical properties
         self.calculate_properties()
         
@@ -887,7 +1006,7 @@ class ParametricProcessor:
             simconf=simconf,
             unit_scale=1/self.unit_scale, expected_mass=self.mass)
 
-        print(rb_type.mass,rb_type.moment_of_inertia)
+        logger.info(rb_type.mass,rb_type.moment_of_inertia)
         # Override the calculated properties with our analytically-determined ones
         rb_type.mass = self.mass
         rb_type.moment_of_inertia = np.sort(self.principal_moments)
