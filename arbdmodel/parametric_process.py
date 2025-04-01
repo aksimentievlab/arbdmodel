@@ -161,21 +161,22 @@ class ParametricProcessor:
             for j, point in enumerate(batch_points):
                 # Get signed distance from the shape surface
                 # Negative inside, positive outside
+
                 if hasattr(self, 'signed_distance'):
                     distance = self.signed_distance(point[0], point[1], point[2])
                     
                     # Inside the shape
-                    if distance <= 0:
-                        potential_flat[i + j] = max_potential
+                    if distance >= 0:
+                        potential_flat[i + j] = 0
                     # In the transition region
-                    elif distance < decay_distance:
+                    elif np.abs(distance) < decay_distance:
                         # Smooth decay function: max_potential * (1 - distance/decay_distance)^2
                         decay_factor = (1 - distance/decay_distance)**2
                         potential_flat[i + j] = max_potential * decay_factor
                 else:
                     # Use is_inside if signed_distance is not available
-                    if self.is_inside(point[0], point[1], point[2]):
-                        potential_flat[i + j] = max_potential
+                    if not self.is_inside(point[0], point[1], point[2]):
+                        potential_flat[i + j] = 0
                     else:
                         # If we don't have signed distance, we can approximate a transition
                         # Check if we're close to the surface by randomly sampling nearby points
@@ -194,7 +195,7 @@ class ParametricProcessor:
                         # If any nearby points are inside, apply a potential
                         if num_inside > 0:
                             potential_flat[i + j] = max_potential * (num_inside / num_samples)
-            
+
             # logger.info progress periodically
             if i % (5 * batch_size) == 0:
                 logger.info(f"Processed {i}/{len(points)} points ({i/len(points)*100:.1f}%)")
@@ -1006,7 +1007,6 @@ class ParametricProcessor:
             simconf=simconf,
             unit_scale=1/self.unit_scale, expected_mass=self.mass)
 
-        logger.info(rb_type.mass,rb_type.moment_of_inertia)
         # Override the calculated properties with our analytically-determined ones
         rb_type.mass = self.mass
         rb_type.moment_of_inertia = np.sort(self.principal_moments)
