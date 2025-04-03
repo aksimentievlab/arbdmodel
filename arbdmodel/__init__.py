@@ -4,7 +4,6 @@ from .model import PdbModel, ArbdModel
 from .engine import SimEngine, ArbdEngine, NamdEngine
 from .sim_config import SimConf, DefaultSimConf
 from .binary_manager import BinaryManager
-from .parmed_bd import ParmedArbd
 from .version import get_version
 from .logger import logger,get_resource_path,devlogger
 __version__ = get_version()
@@ -14,4 +13,4 @@ __all__ = ['Transformable', 'Parent', 'Child', 'Clone',
     'ParticleType', 'PointParticle', 'RigidBodyType', 'RigidBody', 'Group',
     'SimConf', 'DefaultSimConf', 'BinaryManager',
     'PdbModel', 'ArbdModel',
-    'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path','ParmedArbd']
+    'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path']

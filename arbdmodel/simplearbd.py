@@ -4,7 +4,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from .structure_rigidbody import StructureRigidBodyModel, SimpleArbdEngine
+from .rb_from_pdb import StructureRigidBodyModel, SimpleArbdEngine
 from .sim_config import SimConf
 from .logger import logger
 
