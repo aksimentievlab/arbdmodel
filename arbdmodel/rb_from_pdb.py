@@ -23,15 +23,14 @@ class DiffusiveRigidBodyType(RigidBodyType):
             name: Name identifier for this type
             structure_path: Path to structure file (.psf/.pdb)
             simconf: SimConf object containing configuration parameters
-            work_dir: Directory to store processed files (default: current directory)
+            work_dir: Working directory (defaults to current directory)
         """
-        # Create work directory if specified
-        if work_dir:
-            work_dir = Path(work_dir)
-            os.makedirs(work_dir, exist_ok=True)
-        else:
-            work_dir = Path.cwd() / name
-            os.makedirs(work_dir, exist_ok=True)
+        # Use current directory if work_dir is not specified
+        self.work_dir = Path.cwd()
+        
+        # Create the RB output directory within work_dir
+        rb_dir = self.work_dir / "rbs" / name
+        os.makedirs(rb_dir, exist_ok=True)
         
         if simconf is None:
             from . import DefaultSimConf
@@ -41,7 +40,7 @@ class DiffusiveRigidBodyType(RigidBodyType):
         processor = StructureProcessor(
             structure_path=structure_path,
             simconf=simconf,
-            work_dir=work_dir)
+            work_dir=rb_dir)  # Pass the rigid body specific directory
         
         # Process the structure to get all properties and grid files
         processor.process_structure()
@@ -53,8 +52,8 @@ class DiffusiveRigidBodyType(RigidBodyType):
             moment_of_inertia=processor.moment_of_inertia,
             damping_coefficient=processor.transdamp,
             rotational_damping_coefficient=processor.rotdamp,
-            potential_grids=processor.potential_grids,
-            charge_grids=processor.charge_grids,
+            potential_grids=processor.get_grid_files().get('potential_grids', []),
+            charge_grids=processor.get_grid_files().get('charge_grids', []),
             pmf_grids=[],
             **kwargs
         )
@@ -76,7 +75,7 @@ class StaticObject:
             structure_path: Path to structure file (.psf/.pdb)
             name: Name for this static object (defaults to structure filename)
             simconf: SimConf object containing configuration parameters
-            work_dir: Directory to store processed files
+            work_dir: Working directory (defaults to current directory)
             is_gigantic: Whether this is a gigantic object requiring segmentation
             threshold: Size threshold for segmentation (if is_gigantic=True)
         """
@@ -85,13 +84,12 @@ class StaticObject:
         self.is_gigantic = is_gigantic
         self.threshold = threshold
         
-        # Set up working directory
-        if work_dir:
-            self.work_dir = Path(work_dir)
-        else:
-            self.work_dir = Path.cwd() / f"static_{self.name}"
+        # Use current directory as base
+        self.work_dir = Path.cwd()
         
-        os.makedirs(self.work_dir, exist_ok=True)
+        # Create static output directory
+        static_dir = self.work_dir / "static" / self.name
+        os.makedirs(static_dir, exist_ok=True)
         
         # Default config if not provided
         if simconf is None:
@@ -138,15 +136,18 @@ class StaticObject:
         """Process the structure normally (without segmentation)"""
         logger.info(f"Processing static object: {self.name}")
         
+        # Use static directory for output
+        static_dir = self.work_dir / "static" / self.name
+        
         # Create processor and generate maps
         processor = StructureProcessor(
             structure_path=self.structure_path,
             simconf=self.simconf,
-            work_dir=self.work_dir)
+            work_dir=static_dir)  # Use the static object directory
         
         processor.process_structure()
         
-        # Collect grids from the processor
+        # Collect grid files from the processor
         grid_files = processor.get_grid_files()
         
         # Store grids
@@ -162,6 +163,9 @@ class StaticObject:
         
         logger.info(f"Processing gigantic static object: {self.name}")
         
+        # Use static directory for output
+        static_dir = self.work_dir / "static" / self.name
+        
         # Get dimensions by reading the structure file
         u = mda.Universe(str(self.structure_path))
         min_coords = u.atoms.positions.min(axis=0)
@@ -173,11 +177,11 @@ class StaticObject:
         logger.info(f"Segmenting into {nx}x{ny}x{nz} parts")
         
         # Create segment directory
-        segments_dir = self.work_dir / "segments"
+        segments_dir = static_dir / "segments"
         os.makedirs(segments_dir, exist_ok=True)
         
         # Write VMD script for segmentation
-        segment_script = self.work_dir / "segment.tcl"
+        segment_script = static_dir / "segment.tcl"
         with open(segment_script, 'w') as f:
             f.write(f"""
 # Segment structure
@@ -280,6 +284,7 @@ class StructureRigidBodyModel(ArbdModel):
         self.diffusible_objects = []
         self.static_objects = []
         self.boundary_potential = None
+        self.initial_positions = {}  # Store initial positions for each type
 
         super().__init__(
             children=[], 
@@ -290,10 +295,10 @@ class StructureRigidBodyModel(ArbdModel):
             configuration=self.simconf,
             **kwargs
         )
+        
         # Process boundary if requested
-        use_boundary=False
         if use_boundary:
-            logger.info("use boundary, getting nonbonded interactions")
+            logger.info("Creating boundary potential")
             # Create boundary potential
             from .interactions import BoundaryPotential
             
@@ -310,13 +315,12 @@ class StructureRigidBodyModel(ArbdModel):
             
             # Generate the boundary file and store it
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
-            self.boundary_potential = boundary.potential()
+            self.boundary_potential = boundary_file
             #self.add_nonbonded_interaction(self.boundary_potential)
             
 
     def add_diffusible_object(self, structure_path=None, rb_type=None, copies=1, positions=None, 
-                         orientations=None, name=None, initial_region=None, random_seed=None,
-                         work_dir=None):
+                         orientations=None, name=None, initial_region=None, random_seed=None):
         """Add a diffusible (mobile) rigid body type to the model.
         
         Args:
@@ -328,12 +332,10 @@ class StructureRigidBodyModel(ArbdModel):
             name: Optional base name for the rigid bodies
             initial_region: Optional dict with vectors defining initial region
             random_seed: Optional seed for random number generator
-            work_dir: Optional working directory for structure processing
         
         Returns:
             List of created RigidBody instances
         """
-        logger.info("use boundary, getting nonbonded interactions")
         # Process the structure to create a RigidBodyType if structure_path provided
         if structure_path is not None:
             # Create a StructureRigidBodyType from the structure files
@@ -342,17 +344,11 @@ class StructureRigidBodyModel(ArbdModel):
                 
             logger.info(f"Processing structure files for {name} from {structure_path}")
             
-            # Create work directory
-            if work_dir is None:
-                work_dir = Path.cwd() / name
-                os.makedirs(work_dir, exist_ok=True)
-            
-            # Create the RigidBodyType
+            # Create the RigidBodyType using rbs/name directory
             rb_type = DiffusiveRigidBodyType(
                 name=name,
                 structure_path=structure_path,
-                simconf=self.simconf,
-                work_dir=work_dir)
+                simconf=self.simconf)
             
             logger.info(f"Created StructureRigidBodyType for {name}")
             
@@ -454,7 +450,7 @@ class StructureRigidBodyModel(ArbdModel):
             
         return created_bodies
 
-    def add_static_object(self,structure_path, work_dir=None,is_gigantic=False, threshold=300):
+    def add_static_object(self, structure_path, is_gigantic=False, threshold=300):
         """
         Adds a static object to the simulation.
         
@@ -466,8 +462,6 @@ class StructureRigidBodyModel(ArbdModel):
         ----------
         structure_path : str
             Path to the structure file of the static object.
-        work_dir : str, optional
-            Working directory for the static object.
         is_gigantic : bool, default=False
             Flag indicating whether the structure is exceptionally large.
         threshold : int, default=300
@@ -475,26 +469,35 @@ class StructureRigidBodyModel(ArbdModel):
         
         Returns
         -------
-        None
-            The static object is added to the simulation environment.
+        StaticObject
+            The created and added static object.
+        """
+        name = Path(structure_path).stem
         
-        Note
-        -----
-        The method adds the created StaticObject to the `static_objects` list after
-        setting up all necessary non-bonded interactions.
-            """
+        # Create the static object with static/{name} output directory
+        obj = StaticObject(
+            structure_path=structure_path,
+            name=name,
+            simconf=self.simconf,
+            is_gigantic=is_gigantic,
+            threshold=threshold
+        )
+        
+        # Add potential grids to model
+        for grid_type, grid_file, scale in obj.potential_grids:
+            self.add_nonbonded_interaction(grid_type, grid_file, scale)
+            
+        # Add charge grids to model
+        for grid_type, grid_file in obj.charge_grids:
+            self.add_nonbonded_interaction(grid_type, grid_file)
+            
+        # Add electrostatic grid if available
+        if obj.elec_grid:
+            self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
 
-        obj=StaticObject(structure_path=structure_path, work_dir=work_dir,
-                         simconf=self.simconf,is_gigantic=is_gigantic,threshold=threshold)
-        elec_grid = obj.elec_grid
-        potential_grids = obj.potential_grids
-        charge_grids = obj.charge_grids
-        # First add electrostatic grid if available
-        self.add_nonbonded_interaction(elec_grid)
-        self.add_nonbonded_interaction(potential_grids)
-        self.add_nonbonded_interaction(charge_grids)
-
+        # Store the static object
         self.static_objects.append(obj)
+        return obj
     
 class SimpleArbdEngine(ArbdEngine):
     """Enhanced ARBD engine with additional functionality for structure simulations"""

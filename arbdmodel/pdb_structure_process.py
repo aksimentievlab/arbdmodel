@@ -11,8 +11,7 @@ from .grid import writeDx, loadGrid, Bound_grid
 class StructureProcessor:
     """Process molecular structure files to calculate properties and generate maps for ARBD"""
     
-    def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, 
-                 parameters_folder="parameters", work_dir=None):
+    def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, work_dir=None):
         """
         Initialize processor with structure file
         
@@ -20,31 +19,28 @@ class StructureProcessor:
             structure_path: Path to structure file (.psf/.pdb)
             simconf: SimConf object containing configuration parameters
             num_heavy_cluster: Number of heavy atom clusters for VDW maps
-            parameters_folder: Path to parameters folder
             work_dir: Working directory
         """
         self.structure_path = Path(structure_path)
         self.base_name = self.structure_path.stem
         self.num_heavy_cluster = num_heavy_cluster
-        self.parameters_folder = parameters_folder
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
+        
+        # Create working directory if it doesn't exist
+        os.makedirs(self.work_dir, exist_ok=True)
         
         if simconf is None:
             from . import DefaultSimConf
             simconf = DefaultSimConf()
             
         # Extract parameters from simconf
-        self.simconf=simconf
+        self.simconf = simconf
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
         self.vmd_path = simconf.get_binary('vmd') or 'vmd'
         self.hydro_path = simconf.get_binary('hydropro')
         self.apbs_path = simconf.get_binary('apbs') or 'apbs'
-        
-        # Create working directory if it doesn't exist
-        os.makedirs(self.work_dir, exist_ok=True)
-        os.makedirs(self.parameters_folder, exist_ok=True)
         
         # Attributes for results
         self.mass = None
@@ -177,29 +173,58 @@ $sel writepdb $prefix.aligned.pdb
 $sel writepsf $prefix.aligned.psf''')
 
         # Run alignment
-        cmd = f"{self.vmd_path} -dispdev text -args {self.base_name} < {align_tcl}"
-        subprocess.run(cmd, shell=True, check=True)
-        
-        # Verify alignment succeeded
-        self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
-        self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
-        Path(f"{self.base_name}.aligned.pdb").rename(self.aligned_pdb)
-        Path(f"{self.base_name}.aligned.psf").rename(self.aligned_psf)
-        # Read mass and inertia
-        mass_file = self.work_dir / f"{self.base_name}.mass.txt"
-        inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
-        Path(f"{self.base_name}.mass.txt").rename(mass_file)
-        Path(f"{self.base_name}.inertia.txt").rename(inertia_file)
-        if not mass_file.exists() or not inertia_file.exists():
-            raise FileNotFoundError(f"Mass or inertia file not found after alignment")
+        try:
+            # Copy input files to work directory if they're not already there
+            input_psf = self.structure_path.with_suffix('.psf')
+            input_pdb = self.structure_path.with_suffix('.pdb')
             
-        with open(mass_file) as f:
-            self.mass = float(f.readline().strip())
+            # Make sure the base name matches for both files
+            if input_psf.stem != input_pdb.stem:
+                logger.warning(f"PSF and PDB file names don't match: {input_psf.name} and {input_pdb.name}")
             
-        with open(inertia_file) as f:
-            self.moment_of_inertia = [float(x) for x in f.readline().strip().split()]
+            # Check and create symlinks if needed
+            if not (self.work_dir / input_psf.name).exists():
+                if os.path.isabs(str(input_psf)):
+                    os.symlink(input_psf, self.work_dir / input_psf.name)
+                else:
+                    relative_path = os.path.relpath(input_psf, self.work_dir)
+                    os.symlink(relative_path, self.work_dir / input_psf.name)
+                    
+            if not (self.work_dir / input_pdb.name).exists():
+                if os.path.isabs(str(input_pdb)):
+                    os.symlink(input_pdb, self.work_dir / input_pdb.name)
+                else:
+                    relative_path = os.path.relpath(input_pdb, self.work_dir)
+                    os.symlink(relative_path, self.work_dir / input_pdb.name)
             
-        logger.info(f"Structure aligned: Mass = {self.mass}, Inertia = {self.moment_of_inertia}")
+            # Run VMD
+            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} < {align_tcl}"
+            subprocess.run(cmd, shell=True, check=True)
+            
+            # Verify alignment succeeded
+            self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
+            self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
+            
+            if not self.aligned_pdb.exists() or not self.aligned_psf.exists():
+                raise FileNotFoundError(f"Alignment failed: {self.aligned_pdb} or {self.aligned_psf} not found")
+            
+            # Read mass and inertia
+            mass_file = self.work_dir / f"{self.base_name}.mass.txt"
+            inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
+            
+            if not mass_file.exists() or not inertia_file.exists():
+                raise FileNotFoundError(f"Mass or inertia file not found after alignment")
+                
+            with open(mass_file) as f:
+                self.mass = float(f.readline().strip())
+                
+            with open(inertia_file) as f:
+                self.moment_of_inertia = [float(x) for x in f.readline().strip().split()]
+                
+            logger.info(f"Structure aligned: Mass = {self.mass}, Inertia = {self.moment_of_inertia}")
+        except Exception as e:
+            logger.error(f"Error during alignment: {e}")
+            raise
         
     def calculate_hydrodynamic_properties(self):
         """Calculate hydrodynamic properties using HydroPro."""
@@ -211,17 +236,16 @@ $sel writepsf $prefix.aligned.psf''')
             
         # Initialize HydroPro runner
         hydro_runner = HydroProRunner(
-            mass=self.mass,simconf=self.simconf)
+            mass=self.mass,
+            simconf=self.simconf,
+            structure_name=self.base_name)
         
         # Write config
         hydro_runner.write_config(output_path=self.work_dir / "hydropro.dat")
         
-        # Prepare for HydroPro run
-        hydro_pdb = self.work_dir / self.aligned_pdb
-        import shutil
-        shutil.copyfile(self.aligned_pdb,"hydro.pdb")
+        # Create symlink to aligned PDB
+        hydro_pdb = self.work_dir / "hydro.pdb"
         try:
-            # Create symlink to aligned PDB
             if hydro_pdb.exists():
                 os.unlink(hydro_pdb)
             os.symlink(self.aligned_pdb, hydro_pdb)
@@ -230,19 +254,20 @@ $sel writepsf $prefix.aligned.psf''')
             cmd = f"cd {self.work_dir} && {self.hydro_path}"
             subprocess.run(cmd, shell=True, check=True)
             
-            # Parse results - handle possible filename truncation in HydroPro
-            results_file = self.work_dir / f"{self.base_name}-res.txt"
-            if not results_file.exists() and len(self.base_name) > 20:
-                short_name = self.base_name[:20]
-                results_file = self.work_dir / f"{short_name}-res.txt"
-                
+            # Parse results
+            results_file = self.work_dir / f"{self.base_name}.hydro-res.txt"
             if not results_file.exists():
-                logger.warning(f"HydroPro results file not found, checking for any -res.txt file")
-                results_files = list(self.work_dir.glob("*-res.txt"))
-                if results_files:
+                # Try with truncated name for HydroPro compatibility
+                if len(self.base_name) > 20:
+                    short_name = self.base_name[:20]
+                    results_file = self.work_dir / f"{short_name}.hydro-res.txt"
+                
+                if not results_file.exists():
+                    # Search for any -res.txt file
+                    results_files = list(self.work_dir.glob("*.hydro-res.txt"))
+                    if not results_files:
+                        raise FileNotFoundError("No HydroPro results file found")
                     results_file = results_files[0]
-                else:
-                    raise FileNotFoundError("No HydroPro results file found")
             
             # Parse damping coefficients
             self.transdamp, self.rotdamp = hydro_runner.parse_output(results_file)
@@ -266,7 +291,8 @@ $sel writepsf $prefix.aligned.psf''')
     
     def generate_charge_distribution(self, resolution=2.0):
         """Generate charge distribution using VMD."""
-        aligned_name = str(self.work_dir/f"{self.base_name}.aligned")
+        aligned_name = f"{self.base_name}.aligned"
+        aligned_path = str(self.work_dir / aligned_name)
         
         # Create TCL script for VMD
         charge_tcl = self.work_dir / "charge.tcl"
@@ -298,22 +324,20 @@ puts $ch $z_dim
 close $ch''')
         
         # Run VMD to generate charge density
-        cmd = f"{self.vmd_path} -dispdev text -args {aligned_name} < {charge_tcl}"
+        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
         subprocess.run(cmd, shell=True, check=True)
-        import os
-        print(f"current directory is {os.getcwd()}")
-        # Fix charge distribution
+        
+        # Check if charge distribution was created successfully
         charge_dx = self.work_dir / f"{aligned_name}.chargeDensity.dx"
         charge_out = self.work_dir / f"{aligned_name}.charge.dx"
         netcharge_file = self.work_dir / f"{aligned_name}.netCharge.dat"
-        
         
         if not charge_dx.exists():
             raise FileNotFoundError(f"Charge density file not found: {charge_dx}")
         
         # Fix charge distribution - fix scientific notation in file
-        temp_file1 = self.work_dir / "temp0.dx"
-        temp_file2 = self.work_dir / "temp1.dx"
+        temp_file1 = self.work_dir / "fix_charge_temp0.dx"
+        temp_file2 = self.work_dir / "fix_charge_temp1.dx"
         
         # Handle numbers without decimal point in scientific notation
         cmd_in = f"sed -r 's/^([0-9]+)e/\\1.0e/g; s/ ([0-9]+)e/ \\1.0e/g' {str(charge_dx)} > {temp_file1}"
@@ -398,6 +422,7 @@ close $ch''')
     def generate_vdw_maps(self, potResolution=1, denResolution=2):
         """Generate VDW maps using VMD."""
         aligned_name = f"{self.base_name}.aligned"
+        aligned_path = str(self.work_dir / aligned_name)
         
         # Create VDW TCL script
         vdw_tcl = self.work_dir / "vdw.tcl"
@@ -407,15 +432,15 @@ package require inorganicbuilder
 set id [mol new $prefix.psf]
 mol addfile $prefix.pdb
 
-# Create temp folders
-set params_folder "{self.parameters_folder}"
-if {{![file exists $params_folder]}} {{
-    file mkdir $params_folder
+# Create temp folder for vdw data if needed
+set vdw_folder [file dirname $prefix]/vdw
+if {{![file exists $vdw_folder]}} {{
+    file mkdir $vdw_folder
 }}
 
 # Load parameters
 global env
-set statefilename "$params_folder/vdw.spt"
+set statefilename "$vdw_folder/vdw.spt"
 set statefile [open $statefilename w]
 set psffile $env(INORGANICBUILDER_BASEDIR)/spt/parameters/prot/prot-masses.spt
 puts "loading parameters from $psffile"
@@ -510,7 +535,7 @@ for {{set i 0}} {{$i <= {self.num_heavy_cluster}}} {{incr i}} {{
 ''')
         
         # Run VMD to generate VDW maps
-        cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {aligned_name} < {vdw_tcl}"
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {aligned_path} < {vdw_tcl}"
         subprocess.run(cmd, shell=True, check=True)
         
         # Process all VDW maps
@@ -526,11 +551,12 @@ for {{set i 0}} {{$i <= {self.num_heavy_cluster}}} {{incr i}} {{
                 continue
                 
             # Bound the potential values
-
-            Bound_grid(inFile=pot_file,
+            Bound_grid(
+                inFile=pot_file,
                 outFile=pot_file,
                 lowerBound=-20,
-                upperBound=20)
+                upperBound=20
+            )
             
             # Store for later smoothing
             self.vdw_pot_dxs.append(pot_file)
@@ -569,7 +595,7 @@ quit
         # Smooth electrostatic map
         if self.elec_dx and self.elec_dx.exists():
             smoothed_elec = self.work_dir / f"{aligned_name}.elec.smoothed.dx"
-            cmd = f"{self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} < {smooth_tcl}"
+            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} < {smooth_tcl}"
             subprocess.run(cmd, shell=True, check=True)
             self.elec_smoothed_dx = smoothed_elec
             
@@ -578,12 +604,11 @@ quit
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             if pot_file.exists():
                 smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
-                cmd = f"{self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} < {smooth_tcl}"
+                cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} < {smooth_tcl}"
                 subprocess.run(cmd, shell=True, check=True)
                 self.vdw_smoothed_dxs.append(smoothed_pot)
                 
         logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
-    
     
     def get_grid_files(self):
         """Get dictionary of grid files for use in RigidBodyType."""
@@ -611,5 +636,5 @@ quit
         
         return {
             "potential_grids": potential_grids,
-            "charge_grids": charge_grids}
-        
+            "charge_grids": charge_grids
+        }
