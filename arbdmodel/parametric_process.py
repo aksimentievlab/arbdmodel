@@ -84,15 +84,14 @@ class ParametricProcessor:
         logger.info(prop_dict)
         return prop_dict
 
-    def create_potential_grid(self, spacing=2.0, buffer=20.0, max_potential=100.0, 
-                        blur_sigma=2, grid_file=None):
+    def create_potential_grid(self, spacing=2, max_potential=100.0, 
+                        blur_sigma=1, grid_file=None):
         """
         Generate a potential grid based on vectorized is_inside function.
         Points inside the shape have max_potential value, outside have zero.
         
         Args:
             spacing: Grid spacing in Angstroms
-            buffer: Additional buffer space around the shape in Angstroms
             max_potential: Potential value for points inside the shape
             blur_sigma: Standard deviation for Gaussian blur to smooth the potential
             grid_file: Output DX file path (default: {name}_potential.dx)
@@ -124,8 +123,8 @@ class ParametricProcessor:
             max_coords = np.max(sample_points, axis=0)
         
         # Add buffer
-        min_coords = min_coords - buffer
-        max_coords = max_coords + buffer
+        min_coords = min_coords*1.5
+        max_coords = max_coords*1.5
         
         # Calculate grid dimensions
         nx = int(np.ceil((max_coords[0] - min_coords[0]) / spacing))
@@ -142,17 +141,17 @@ class ParametricProcessor:
         
         # Track progress
         total_points = nx * ny * nz
-        print(f"Creating potential grid with {total_points} points...")
+        logger.info(f"Creating potential grid with {total_points} points...")
         
         # Create a binary potential grid using vectorized is_inside
         print("Calculating inside/outside mask with vectorized operation...")
-        inside_mask = self.is_inside(x,y,z)
+        inside_mask = self.is_inside(X,Y,Z)
         
         # Initialize potential grid (all zeros by default = outside)
         potential = np.zeros((nx, ny, nz))
         
         # Set values for inside points
-        potential[inside_mask] = max_potential
+        potential[self.is_inside(X,Y,Z)] = max_potential
         
         # Count inside points
         num_inside = np.sum(inside_mask)
@@ -162,7 +161,7 @@ class ParametricProcessor:
         if blur_sigma > 0:
             print(f"Applying Gaussian blur with sigma={blur_sigma}...")
             from scipy import ndimage
-            #potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
+            potential = ndimage.gaussian_filter(potential, sigma=blur_sigma)
         
         # Write DX file
         print(f"Writing potential to {grid_file}...")
@@ -334,58 +333,7 @@ class ParametricProcessor:
         # Center of mass is at the geometric center
         self._com_formula = lambda: np.array(center)
 
-        def is_inside(x, y, z):
-            """Return True if point (x,y,z) is inside the capsule."""
-            # Transform point to local coordinates
-            p = np.array([x, y, z]) - np.array(center)
-            
-            # Calculate height along axis (dot product)
-            h = np.dot(p, axis_norm)
-            
-            # Calculate radial distance
-            radial_vector = p - h * axis_norm
-            radial_dist = np.linalg.norm(radial_vector)
-            
-            # If within cylinder section (between the hemispheres)
-            if abs(h) <= cylinder_height/2:
-                return radial_dist <= radius
-            
-            # If beyond cylinder section, check if within hemisphere caps
-            else:
-                # Calculate distance to closest hemisphere center
-                hemisphere_center = np.array(center) + np.sign(h) * (cylinder_height/2) * axis_norm
-                dist_to_hemisphere = np.linalg.norm(np.array([x, y, z]) - hemisphere_center)
-                return dist_to_hemisphere <= radius
         
-        # Define signed distance function for potential calculation
-        def signed_distance(x, y, z):
-            """Return signed distance from point to capsule surface.
-            Negative inside, positive outside."""
-            # Transform point to local coordinates
-            p = np.array([x, y, z]) - np.array(center)
-            
-            # Calculate height along axis (dot product)
-            h = np.dot(p, axis_norm)
-            
-            # Calculate radial distance
-            radial_vector = p - h * axis_norm
-            radial_dist = np.linalg.norm(radial_vector)
-            
-            # Clamp h to cylinder segment
-            h_clamped = np.clip(h, -cylinder_height/2, cylinder_height/2)
-            
-            # Find closest point on cylinder axis
-            closest_on_axis = np.array(center) + h_clamped * axis_norm
-            
-            # Distance from point to closest point on axis
-            dist_to_axis = np.linalg.norm(np.array([x, y, z]) - closest_on_axis)
-            
-            # Signed distance
-            return dist_to_axis - radius
-        
-        # Attach functions to the instance
-        self.is_inside = is_inside
-        self.signed_distance = signed_distance
 
         # Define inertia tensor formula for capsule
         def capsule_inertia(mass):
@@ -539,36 +487,28 @@ class ParametricProcessor:
             return min_coords, max_coords
         
         self.bounding_box = bounding_box
-        
-        # Add distance function for potential calculation
-        def capsule_distance(x, y, z):
-            """
-            Calculate signed distance from point (x,y,z) to capsule surface.
-            Negative inside, positive outside.
-            """
-            # Transform point to local coordinate system
-            p = np.array([x, y, z]) - np.array(center)
+        def is_inside(X, Y, Z):
+            # Transform points to local coordinates
+            p = np.stack([X - self.center[0], Y - self.center[1], Z - self.center[2]], axis=-1)
             
             # Calculate height along axis (dot product)
-            h = np.dot(p, axis_norm)
+            h = np.dot(p, self.axis)
             
             # Calculate radial distance
-            radial_vector = p - h * axis_norm
-            radial_dist = np.linalg.norm(radial_vector)
+            radial_vector = p - np.multiply(h.reshape(*h.shape, 1), self.axis)
+            radial_dist = np.linalg.norm(radial_vector, axis=-1)
             
-            # Clamp h to cylinder segment
-            h_clamped = np.clip(h, -cylinder_height/2, cylinder_height/2)
+            # Conditions for inside
+            in_cylinder = (np.abs(h) <= self.cylinder_height/2) & (radial_dist <= self.radius)
+            in_hemisphere = (~(np.abs(h) <= self.cylinder_height/2)) & (np.linalg.norm(
+                p - np.multiply(np.sign(h).reshape(*h.shape, 1) * self.cylinder_height/2, self.axis), 
+                axis=-1) <= self.radius)
             
-            # Find closest point on cylinder axis
-            closest_on_axis = np.array(center) + h_clamped * axis_norm
-            
-            # Distance from point to closest point on axis
-            dist_to_axis = np.linalg.norm(np.array([x, y, z]) - closest_on_axis)
-            
-            # Signed distance
-            return dist_to_axis - radius
+            return in_cylinder | in_hemisphere
         
-        self.distance_function = capsule_distance #may be useless here 
+                     
+        # Attach functions to the instance
+        self.is_inside = is_inside
         
         # Calculate physical properties
         self.calculate_properties()
