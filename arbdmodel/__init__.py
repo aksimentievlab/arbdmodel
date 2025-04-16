@@ -38,6 +38,7 @@ from copy import copy, deepcopy
 from inspect import ismethod
 import os, sys, subprocess
 import shutil
+from string import ascii_letters
 
 from tqdm import tqdm, trange
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -883,7 +884,7 @@ class PdbModel(Transformable, Parent):
             fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
 
             ## Write coordinates
-            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:>5.5s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2d}{segname:>6s}\n"
+            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:>4.4s}{ric:1s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2d}{segname:>6s}\n"
             for p in self.particles:
                 ## http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM
                 data = p._get_psfpdb_dictionary()
@@ -907,9 +908,15 @@ class PdbModel(Transformable, Parent):
                 data['x'] = x
                 data['y'] = y
                 data['z'] = z
-                assert(data['resid'] < 1e5)
+                # assert(data['resid'] < 1e5)
                 data['charge'] = int(data['charge'])
-                data['resid'] = "{:<4d}".format(data['resid'])
+                data['ric'] = ' '
+                if data['resid'] >= 1e4:
+                    _wrap_count = (data['resid']-1)//9999
+                    data['ric'] = ascii_letters[_wrap_count-1]
+                    data['resid'] = f"{((data['resid']-1) % 9999) + 1 :>4d}"
+                else:
+                    data['resid'] = "{:>4d}".format(data['resid'])
                 fh.write( formatString.format(**data) )
 
         return
@@ -922,7 +929,7 @@ class PdbModel(Transformable, Parent):
             fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
 
             ## Write coordinates
-            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s} {resid:>5.5s}   {x:.6f} {y:.6f} {z:.6f} {charge} {radius}\n"
+            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s} {resid:>5.5s}   {x:.6f} {y:.6f} {z:.6f} {charge:.3f} {radius:.3f}\n"
             for p in self.particles:
                 data = p._get_psfpdb_dictionary()
 
