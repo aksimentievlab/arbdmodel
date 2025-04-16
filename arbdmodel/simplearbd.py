@@ -310,8 +310,7 @@ class SimpleArbdConfig:
                 name=obj_name,
                 initial_region=initial_region,
                 random_seed=42,  # Fixed seed for reproducibility
-                work_dir=work_dir
-            )
+                )
             
     def setup_static_objects(self, model: StructureRigidBodyModel):
         """

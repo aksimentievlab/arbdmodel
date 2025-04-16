@@ -1280,8 +1280,8 @@ class APBSRunner:
         
         # If still None, try binary_manager
         if binary_path is None:
-            from .sim_config import binary_manager
-            binary_path = binary_manager.get_binary_path('apbs')
+            from arbdmodel.binary_manager import BinaryManager
+            binary_path = BinaryManager.get_binary_path('apbs')
         
         # If still None, use 'apbs' and rely on PATH
         if binary_path is None:

@@ -391,7 +391,7 @@ close $ch''')
             dimensions = [float(line.strip()) for line in f.readlines()]
             
         # Initialize APBS runner
-        apbs_runner = APBSRunner(self.apbs_path)
+        apbs_runner = APBSRunner(self.simconf)
         
         # Write APBS configuration using the runner
         apbs_runner.write_config(

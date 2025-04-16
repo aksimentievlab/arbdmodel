@@ -3,6 +3,7 @@ import gmsh
 from pathlib import Path
 import os
 from scipy import integrate
+from .rb_from_mesh import MeshRigidBodyType
 from .grid import writeDx
 from .logger import logger
 
@@ -870,7 +871,6 @@ class ParametricProcessor:
         Returns:
             A MeshRigidBodyType object ready for simulation
         """
-        from .mesh_rigidbody import MeshRigidBodyType
         
         # Ensure we have calculated properties
         if self.mass is None:
