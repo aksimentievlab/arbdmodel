@@ -38,16 +38,18 @@ class SimConf:
         cutoff (float): Cutoff distance for interactions.
         pairlist_distance (float): Distance for generating pair lists.
         decomp_period (int): Period for decomposition.
-        gpu (bool): Whether to use GPU acceleration.
+        gpu (int): Whether to use GPU acceleration.
         seed (int): Random seed for reproducibility.
         restart_file (str): Path to restart file.
+
         # ARBD-specific parameters
         rigid_body_integrator (str): Type of rigid body integrator. 
         rigid_body_grid_grid_period (int): Period for rigid body grid updates.
+
         # SimpleARBD parameters
         viscosity (float): Solvent viscosity. 
         solvent_density (float): Solvent density. in g/cm^3
-        num_heavy_cluster (int): Number of heavy clusters.
+
     """
 
     def __init__(self, num_steps=None, output_period=None,
@@ -59,7 +61,7 @@ class SimConf:
                  rigid_body_integrator=None,
                  rigid_body_grid_grid_period=None,
                  ## SimpleARBD parameters
-                 viscosity=None, solvent_density=None, num_heavy_cluster=None,
+                 viscosity=None, solvent_density=None, salt=None,
                  ## Binary paths
                  arbd_path=None, namd_path=None, vmd_path=None, 
                  hydropro_path=None, apbs_path=None, gmsh_path=None, **kwargs):
@@ -87,7 +89,7 @@ class SimConf:
 
         self.viscosity = viscosity
         self.solvent_density = solvent_density
-        self.num_heavy_cluster = num_heavy_cluster
+        self.salt=salt
         
         # Set binary paths
         if arbd_path: BinaryManager.set_binary_path('arbd', arbd_path)
@@ -119,8 +121,7 @@ class SimConf:
             # Check if we found a binary and convert to string if needed
             if binary_path is not None:
                 return str(binary_path)
-            
-            
+
             # Determine if this is an essential binary
             if BinaryManager.is_binary_essential(name):
                 logger.warning(f"Essential binary '{name}' not found. Core functionality may be limited.")
@@ -274,8 +275,6 @@ class DefaultSimConf(SimConf):
         Solvent viscosity, default 0.01.
     solvent_density : float, optional
         Density of the solvent, default 1.0.
-    num_heavy_cluster : int, optional
-        Number of heavy atoms per cluster, default 3.
     **kwargs
         Additional keyword arguments to pass to SimConf.
 
@@ -295,7 +294,7 @@ class DefaultSimConf(SimConf):
                  temperature=295, pressure=1,
                  cutoff=50, pairlist_distance=None, decomp_period=40,
                  seed=None, restart_file=None, gpu=0,
-                 viscosity=0.01, solvent_density=1.0, num_heavy_cluster=3,
+                 viscosity=0.01, solvent_density=1.0, salt=0.15,
                  **kwargs):
         
         # Set default paths only for essential binaries or those that exist
@@ -335,17 +334,8 @@ class DefaultSimConf(SimConf):
                          gpu=gpu,
                          viscosity=viscosity,
                          solvent_density=solvent_density,
-                         num_heavy_cluster=num_heavy_cluster,
+                         salt=salt,
                          **{**default_paths, **kwargs})  # User-provided values override defaults
-        
-        # Store these for direct access
-        self.num_steps = num_steps
-        self.output_period = output_period
-        self.__temperature = temperature
-        self.pressure = pressure
-        self.viscosity = viscosity
-        self.solvent_density = solvent_density
-        self.num_heavy_cluster = num_heavy_cluster
 
     @property
     def temperature(self):

@@ -55,6 +55,25 @@ class DegreeOfFreedom():
         return positions
 
     def wrap_vector(self, v):
+        """
+        Adjusts a vector to account for periodic boundary conditions.
+
+        This method modifies the input vector `v` such that its components
+        are wrapped within the periodic boundaries of the simulation box.
+        It assumes that the simulation box has orthogonal dimensions (all angles are 90 degrees).
+
+        Parameters:
+            v (numpy.ndarray): A NumPy array representing the vector(s) to be wrapped.
+                               The array can have any shape, but the last dimension
+                               should correspond to the 3 spatial coordinates (x, y, z).
+
+        Returns:
+            numpy.ndarray: The wrapped vector(s) with the same shape as the input `v`.
+
+        Raises:
+            AssertionError: If the simulation box does not have orthogonal dimensions
+                            (i.e., any of the angles are not 90 degrees).
+        """
         box = self.sels[self.current_key][0].universe.dimensions
         assert(np.all( np.array(box[3:]) == 90 ))
 
@@ -67,6 +86,27 @@ class DegreeOfFreedom():
         return v
 
     def get_values(self, universe):
+        """
+        Retrieve computed values based on the current state of the universe.
+
+        This method calculates and returns a list of values derived from the 
+        positions of particles in the given universe. It uses a caching mechanism 
+        to store selections for previously processed universes, identified by 
+        their hash keys.
+
+        Args:
+            universe: An object representing the current state of the universe. 
+                      It must implement a `__hash__` method to uniquely identify 
+                      its state.
+
+        Returns:
+            list: A list containing the computed value(s) based on the positions 
+                  of the particles in the universe.
+
+        Raises:
+            AssertionError: If the result contains NaN values or if the result 
+                            list is empty.
+        """
         key = universe.__hash__()
         if key not in self.sels:
             self.sels[key] = [DegreeOfFreedom._particle_to_sel(p,universe)

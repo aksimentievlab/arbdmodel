@@ -264,6 +264,7 @@ class StructureRigidBodyModel(ArbdModel):
     
     def __init__(self, cell_vectors=None, cell_origin=None, 
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False, 
+                 num_heavy_cluster=3,
                  boundary_params=None, **kwargs):
         """Initialize structure model.
         
@@ -285,7 +286,8 @@ class StructureRigidBodyModel(ArbdModel):
         self.static_objects = []
         self.boundary_potential = None
         self.initial_positions = {}  # Store initial positions for each type
-
+        self.num_heavy_cluster = num_heavy_cluster
+        
         super().__init__(
             children=[], 
             cell_vectors=cell_vectors, 
