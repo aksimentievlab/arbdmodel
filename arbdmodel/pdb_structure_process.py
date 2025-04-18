@@ -394,7 +394,7 @@ close $ch''')
         apbs_runner = APBSRunner(self.simconf)
         
         # Write APBS configuration using the runner
-        apbs_runner.write_config(
+        apbs_runner.run_calculation(
             structure_name=aligned_name, 
             xyz_dims=dimensions,
             salt_conc=0.15,
