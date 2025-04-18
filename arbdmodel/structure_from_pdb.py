@@ -11,21 +11,19 @@ from .grid import writeDx, loadGrid, Bound_grid
 class StructureProcessor:
     """Process molecular structure files to calculate properties and generate maps for ARBD"""
     
-    def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, 
-                 parameters_folder_name="parameters", work_dir=None):
+    def __init__(self, structure_path, simconf=None, 
+                 parameters_folder="parameters", work_dir=None):
         """
         Initialize processor with structure file
         
         Args:
             structure_path: Path to structure file (.psf/.pdb)
             simconf: SimConf object containing configuration parameters
-            num_heavy_cluster: Number of heavy atom clusters for VDW maps
             parameters_folder: Path to parameters folder
             work_dir: Working directory
         """
         self.structure_path = Path(structure_path)
         self.base_name = self.structure_path.stem
-        self.num_heavy_cluster = num_heavy_cluster
         self.parameters_folder = parameters_folder
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         
@@ -350,11 +348,7 @@ close $ch''')
         
         logger.info(f"Charge distribution generated with net charge: {np.sum(grid):.6f}")
     
-    def generate_electrostatic_map(self, buffer=50):
-        """Generate electrostatic potential map using APBS."""
-        if not self.apbs_path:
-            logger.warning("APBS executable not provided, skipping electrostatic calculations")
-            return
+    def generate_electrostatic_map(self, buffer=50,lowerBound=-20, upperBound=20):
         
         aligned_name = f"{self.base_name}.aligned"
         
@@ -367,35 +361,19 @@ close $ch''')
             dimensions = [float(line.strip()) for line in f.readlines()]
             
         # Initialize APBS runner
-        apbs_runner = APBSRunner(self.apbs_path)
-        
-        # Write APBS configuration using the runner
-        apbs_runner.write_config(
+        apbs_runner = APBSRunner(simconf=self.simconf)
+
+        self.elec_dx=apbs_runner.run_calculation(
             structure_name=aligned_name, 
             xyz_dims=dimensions,
             salt_conc=0.15,
             temperature=self.temperature,
-            buffer=buffer
-        )
-        
-        # Run APBS
-        cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
-        subprocess.run(cmd, shell=True, check=True)
-        
-        # Bound the potential values
-        tmp_file = self.work_dir / f"{aligned_name}.elec.tmp.dx"
-        out_file = self.work_dir / f"{aligned_name}.elec.dx"
-        Bound_grid(
-            inFile=tmp_file,
-            outFile=out_file,
-            lowerBound=-20,
-            upperBound=20
-        )
-        
-        self.elec_dx = out_file
+            buffer=buffer)
+
         logger.info(f"Electrostatic map generated for {aligned_name}")
     
-    def generate_vdw_maps(self, potResolution=1, denResolution=2):
+    def generate_vdw_maps(self, potResolution=1, denResolution=2,num_heavy_cluster=3):
+        self.num_heavy_cluster = num_heavy_cluster
         """Generate VDW maps using VMD."""
         aligned_name = f"{self.base_name}.aligned"
         
