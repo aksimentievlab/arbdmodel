@@ -309,7 +309,7 @@ class SimpleArbdConfig:
                 copies=copies,
                 name=obj_name,
                 initial_region=initial_region,
-                random_seed=42,  # Fixed seed for reproducibility
+                #random_seed=42,  # Fixed seed for reproducibility
                 )
             
     def setup_static_objects(self, model: StructureRigidBodyModel):
