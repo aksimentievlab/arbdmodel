@@ -3,8 +3,8 @@ import numpy as np
 from pathlib import Path
 from .logger import logger
 from . import RigidBody, RigidBodyType, DefaultSimConf
-from . import ArbdModel, ArbdEngine
-from .pdb_structure_process import StructureProcessor
+from . import ArbdModel
+from .pdb_processor import PdbProcessor
 from .coords import Generate_coordinates, Generate_spanning_vectors
 
 """Structure rigid body modeling module for ARBD.
@@ -37,7 +37,7 @@ class DiffusiveRigidBodyType(RigidBodyType):
             simconf = DefaultSimConf()
 
         # Process the structure to get properties and grid maps
-        processor = StructureProcessor(
+        processor = PdbProcessor(
             structure_path=structure_path,
             simconf=simconf,
             work_dir=rb_dir)  # Pass the rigid body specific directory
@@ -67,7 +67,7 @@ class DiffusiveRigidBodyType(RigidBodyType):
 class StaticObject:
     """Class representing a static (immobile) object in the simulation"""
     
-    def __init__(self, structure_path=None, name=None, simconf=None, work_dir=None,
+    def __init__(self, structure_path=None, name=None, simconf=None, 
                  is_gigantic=False, threshold=300):
         """Initialize static object from a structure file.
         
@@ -140,7 +140,7 @@ class StaticObject:
         static_dir = self.work_dir / "static" / self.name
         
         # Create processor and generate maps
-        processor = StructureProcessor(
+        processor = PdbProcessor(
             structure_path=self.structure_path,
             simconf=self.simconf,
             work_dir=static_dir)  # Use the static object directory
@@ -239,7 +239,7 @@ exit
             
             logger.info(f"Processing segment {i+1}/{len(segments)}: {segment.stem}")
             
-            segment_processor = StructureProcessor(
+            segment_processor = PdbProcessor(
                 structure_path=segment,
                 simconf=self.simconf,
                 work_dir=segment_dir)
@@ -500,61 +500,4 @@ class StructureRigidBodyModel(ArbdModel):
         # Store the static object
         self.static_objects.append(obj)
         return obj
-    
-class SimpleArbdEngine(ArbdEngine):
-    """Enhanced ARBD engine with additional functionality for structure simulations"""
-    
-    def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
-        """Initialize SimpleArbdEngine.
-        
-        Args:
-            extra_bd_file_lines: Additional lines for BD configuration file
-            configuration: SimConf object
-            **conf_params: Additional configuration parameters
-        """
-        super().__init__(extra_bd_file_lines, configuration, **conf_params)
-        
-    def write_simulation_files(self, model, output_name, configuration=None, **conf_params):
-        """Write all simulation files.
-        
-        Args:
-            model: StructureRigidBodyModel to simulate
-            output_name: Base name for output files
-            configuration: SimConf object
-            **conf_params: Additional configuration parameters
-        """
-        # Call parent method to write standard files
-        super().write_simulation_files(model, output_name, configuration, **conf_params)
-        
-        # Additional functionality for structure rigid bodies
-        if hasattr(model, 'diffusible_objects') and model.diffusible_objects:
-            logger.info(f"Writing {len(model.diffusible_objects)} diffusible objects")
-            
-        if hasattr(model, 'static_objects') and model.static_objects:
-            logger.info(f"Writing {len(model.static_objects)} static objects")
-            
-    def run_simulation(self, model, output_name, replicas=1, gpu=0, **kwargs):
-        """Run ARBD simulation.
-        
-        Args:
-            model: StructureRigidBodyModel to simulate
-            output_name: Base name for output files
-            replicas: Number of replicas to run
-            gpu: GPU index to use
-            **kwargs: Additional arguments for simulate method
-        """
-        # Prepare output directory
-        output_dir = kwargs.get('output_directory', 'output')
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-            
-        # Run simulations
-        for i in range(replicas):
-            replica_name = f"{output_name}_{i}" if replicas > 1 else output_name
-            
-            # Override GPU index if running multiple replicas
-            if replicas > 1:
-                kwargs['gpu'] = (gpu + i) % 8  # Assuming max 8 GPUs
-                
-            # Run simulation
-            self.simulate(model, replica_name, **kwargs)
+ 

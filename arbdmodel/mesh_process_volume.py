@@ -574,7 +574,7 @@ class MeshProcessor:
         self.grid_delta = spacing * np.ones(3)
         from .grid import writeDx
         mask_array = np.zeros(self.grid_shape, dtype=float)
-        mask_array[self.inside_mask] = mask_value
+        mask_array[self.inside_mask] = 1
     
         writeDx("mask.dx", mask_array, self.grid_origin, self.grid_delta)
         logger.info(f"Grid created with {np.sum(inside_mask)} inside points out of {num_points} total points")
