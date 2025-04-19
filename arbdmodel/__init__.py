@@ -2,7 +2,7 @@ from .core_objects import Transformable, Parent, Child, Clone
 from .core_objects import ParticleType, PointParticle, RigidBodyType, RigidBody, Group
 from .model import PdbModel, ArbdModel
 from .engine import SimEngine, ArbdEngine, NamdEngine
-from .sim_config import SimConf, DefaultSimConf
+from .config import SimConf, DefaultSimConf
 from .binary_manager import BinaryManager
 from .version import get_version
 from .logger import logger,get_resource_path,devlogger

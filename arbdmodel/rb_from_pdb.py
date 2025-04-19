@@ -16,15 +16,8 @@ using a clean implementation that processes molecular structures into grid maps.
 class DiffusiveRigidBodyType(RigidBodyType):
     """RigidBodyType subclass for structure-based rigid body objects"""
     
-    def __init__(self, name, structure_path, simconf=None,
-                 work_dir=None, **kwargs):
-        """Initialize structure rigid body type from structure files.
-        Args:
-            name: Name identifier for this type
-            structure_path: Path to structure file (.psf/.pdb)
-            simconf: SimConf object containing configuration parameters
-            work_dir: Working directory (defaults to current directory)
-        """
+    def __init__(self, name, structure_path, simconf=None, **kwargs):
+
         # Use current directory if work_dir is not specified
         self.work_dir = Path.cwd()
         
@@ -38,12 +31,11 @@ class DiffusiveRigidBodyType(RigidBodyType):
 
         # Process the structure to get properties and grid maps
         processor = PdbProcessor(
-            structure_path=structure_path,
-            simconf=simconf,
+            structure_path=structure_path, simconf=simconf,
             work_dir=rb_dir)  # Pass the rigid body specific directory
         
         # Process the structure to get all properties and grid files
-        processor.process_structure()
+        processor.process_diffusive_structure()
         
         # Initialize the parent class with collected data
         super().__init__(

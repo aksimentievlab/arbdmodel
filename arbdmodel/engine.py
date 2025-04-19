@@ -8,7 +8,7 @@ import shutil
 from .core_objects import GroupSite
 from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
-from .sim_config import SimConf
+from .config import SimConf
 
 
 """ SimEngines

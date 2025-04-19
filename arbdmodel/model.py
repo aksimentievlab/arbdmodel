@@ -9,7 +9,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
 from . import Transformable, Parent, Group
-from .sim_config import SimConf
+from .config import SimConf
 from .core_objects import GroupSite
 from .engine import ArbdEngine, NamdEngine
 from .coords import calculate_dimensions_from_cell_vectors

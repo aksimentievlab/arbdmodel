@@ -9,9 +9,12 @@ from .grid import writeDx, loadGrid, Bound_grid
 #Originally SimpleARBD by Chun
 
 class PdbProcessor:
-    """Process molecular structure files to calculate properties and generate maps for ARBD"""
+    """
+    Process molecular structure files to calculate properties and generate maps for ARBD
+    Common Processor class for both diffusive and static rigidbody
+    """
     
-    def __init__(self, structure_path, simconf=None, num_heavy_cluster=3, work_dir=None):
+    def __init__(self, structure_path, simconf=None, work_dir=None):
         """
         Initialize processor with structure file
         
@@ -19,11 +22,11 @@ class PdbProcessor:
             structure_path: Path to structure file (.psf/.pdb)
             simconf: SimConf object containing configuration parameters
             num_heavy_cluster: Number of heavy atom clusters for VDW maps
-            work_dir: Working directory
+            work_dir: Working directory, should be either rbs or static (as enviromental potential)
         """
+
         self.structure_path = Path(structure_path)
         self.base_name = self.structure_path.stem
-        self.num_heavy_cluster = num_heavy_cluster
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         
         # Create working directory if it doesn't exist
@@ -38,6 +41,8 @@ class PdbProcessor:
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
+        self.num_heavy_cluster = simconf.num_heavy_cluster
+
         self.vmd_path = simconf.get_binary('vmd') or 'vmd'
         self.hydro_path = simconf.get_binary('hydropro')
         self.apbs_path = simconf.get_binary('apbs') or 'apbs'
@@ -54,7 +59,7 @@ class PdbProcessor:
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
         
-    def process_structure(self):
+    def process_diffusive_structure(self):
         """Process structure to get all properties and potential maps"""
         # Step 1: Align structure
         self.align_structure()

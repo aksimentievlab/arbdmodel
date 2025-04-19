@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 from . import ArbdEngine
 from .rb_from_pdb import StructureRigidBodyModel
-from .sim_config import SimConf
+from .config import SimConf
 from .logger import logger
 
 
