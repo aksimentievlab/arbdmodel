@@ -568,19 +568,18 @@ for {{set i 0}} {{$i <= {self.num_heavy_cluster}}} {{incr i}} {{
             self.vdw_den_dxs.append(den_file)
         
         logger.info(f"VDW maps generated for {aligned_name}")
-    
     def apply_gaussian_smoothing(self, gaussianWidth=2.5):
         """Apply Gaussian smoothing to all potential maps."""
         aligned_name = f"{self.base_name}.aligned"
         
         # Create a tcl script for VMD to do the smoothing
         smooth_tcl = self.work_dir / "smooth.tcl"
-        
-        with open(smooth_tcl, 'w') as f:
-            f.write(f'''
+        if not smooth_tcl.exists():
+            with open(smooth_tcl, 'w') as f:
+                f.write(f'''
 # Get input parameters
-lassign ${{argv}} in_file out_file
-puts "Smoothing $in_file to $out_file"
+lassign ${{argv}} in_file out_file gaussianWidth
+puts "Smoothing $in_file to $out_file with gaussian width $gaussianWidth"
 
 # Load the volumetric data
 mol new $in_file
@@ -588,7 +587,7 @@ mol new $in_file
 # Apply smoothing
 set molid [molinfo top]
 set vol [molinfo $molid get {0}]
-volutil smooth $vol -gaussiansigma {gaussianWidth}
+volutil smooth $vol -gaussiansigma $gaussianWidth
 
 # Save the result
 volutil save $vol $out_file
@@ -600,7 +599,7 @@ quit
         # Smooth electrostatic map
         if self.elec_dx and self.elec_dx.exists():
             smoothed_elec = self.work_dir / f"{aligned_name}.elec.smoothed.dx"
-            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} < {smooth_tcl}"
+            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} {gaussianWidth} < {smooth_tcl}"
             subprocess.run(cmd, shell=True, check=True)
             self.elec_smoothed_dx = smoothed_elec
             
@@ -609,12 +608,12 @@ quit
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             if pot_file.exists():
                 smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
-                cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} < {smooth_tcl}"
+                cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} {gaussianWidth} < {smooth_tcl}"
                 subprocess.run(cmd, shell=True, check=True)
                 self.vdw_smoothed_dxs.append(smoothed_pot)
                 
         logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
-    
+
     def get_grid_files(self):
         """Get dictionary of grid files for use in RigidBodyType."""
         potential_grids = []

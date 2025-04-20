@@ -162,6 +162,40 @@ def loadGrid(file, **kwargs):
     grid = np.array(data).reshape(dims)
     return grid, origin, delta
 
+def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
+    """
+    Smooth grid data using a Gaussian filter
+    
+    Parameters:
+    -----------
+    in_file : str or Path
+        Path to input DX file
+    out_file : str or Path
+        Path to output smoothed DX file
+    gaussian_sigma : float
+        Sigma parameter for Gaussian smoothing
+    """
+    if out_file is None:
+        in_file=Path(in_file)
+        out_file = in_file.with_suffix('.smooth.dx')
+
+    print(f"Smoothing {in_file} to {out_file}")
+    
+    # Load the grid data using loadGrid
+    grid, origin, delta = loadGrid(str(in_file))
+    
+    # Apply Gaussian smoothing
+    from scipy.ndimage import gaussian_filter
+    
+    # Apply the filter to the grid data
+    smoothed_grid = gaussian_filter(grid, sigma=gaussian_sigma)
+    
+    # Save the smoothed grid
+    writeDx(str(out_file), smoothed_grid, origin, delta)
+    return out_file
+
+
+
 def Bound_grid(inFile, outFile, lowerBound, upperBound):
     """Apply bounds to grid values"""
     # Fix scientific notation
@@ -181,8 +215,6 @@ def Bound_grid(inFile, outFile, lowerBound, upperBound):
 
     # Write output
     writeDx(outFile, grid, origin, [delta, delta, delta])
-
-
 
 def Create_null(grid_path='null.dx'):
     """Create null potential grid"""

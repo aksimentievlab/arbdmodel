@@ -1,4 +1,4 @@
-import os
+import os,subprocess
 import numpy as np
 from pathlib import Path
 from .logger import logger
@@ -12,7 +12,9 @@ from .coords import Generate_coordinates, Generate_spanning_vectors
 This module provides classes for structure-based rigid body modeling in the ARBD package,
 using a clean implementation that processes molecular structures into grid maps.
 """
+  
 
+    
 class DiffusiveRigidBodyType(RigidBodyType):
     """RigidBodyType subclass for structure-based rigid body objects"""
     
@@ -311,7 +313,7 @@ class StructureRigidBodyModel(ArbdModel):
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
             self.boundary_potential = boundary_file
             #self.add_nonbonded_interaction(self.boundary_potential)
-            
+        
 
     def add_diffusible_object(self, structure_path=None, rb_type=None, copies=1, positions=None, 
                          orientations=None, name=None, initial_region=None, random_seed=None):
