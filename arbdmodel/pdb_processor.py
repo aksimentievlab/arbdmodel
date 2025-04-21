@@ -699,31 +699,37 @@ quit
         return segments[0], segments[1], segments[2]
     
     
-    def _process_standard(self):
+    def process_standard(self):
         """Process the structure normally (without segmentation)"""
         logger.info(f"Processing static object: {self.name}")
         
         # Use static directory for output
-        static_dir = self.work_dir / "static" / self.name
         
         # Create processor and generate maps
-        processor = PdbProcessor(
-            structure_path=self.structure_path,
-            simconf=self.simconf,
-            work_dir=static_dir)  # Use the static object directory
+        self.align_structure()
         
-        processor.process_structure()
+        
+        # Step 3: Generate charge distribution
+        self.generate_charge_distribution()
+        
+        # Step 4: Generate electrostatic map
+        self.generate_electrostatic_map()
+        
+        # Step 5: Generate VDW maps
+        self.generate_vdw_maps()
+        
+        # Step 6: Apply Gaussian smoothing
+        self.apply_gaussian_smoothing()
         
         # Collect grid files from the processor
-        grid_files = processor.get_grid_files()
+        grid_files = self.get_grid_files()
         
         # Store grids
         self.potential_grids = grid_files.get('potential_grids', [])
         self.charge_grids = grid_files.get('charge_grids', [])
-        if hasattr(processor, 'elec_smoothed_dx') and processor.elec_smoothed_dx:
-            self.elec_grid = processor.elec_smoothed_dx
+        self.elec_grid = self.elec_smoothed_dx
     
-    def _process_gigantic(self):
+    def process_gigantic(self):
         """Process a gigantic structure by segmentation"""
         from subprocess import run
         import MDAnalysis as mda
@@ -811,7 +817,7 @@ exit
                 simconf=self.simconf,
                 work_dir=segment_dir)
             
-            segment_processor.process_structure()
+            segment_processor.process_standard()
             
             # Collect grid maps from this segment
             grid_files = segment_processor.get_grid_files()
@@ -834,7 +840,7 @@ exit
         
         self.threshold=threshold
         if is_gigantic:
-            self._process_gigantic()
+            self.process_gigantic()
         else:
-            self._process_standard()
+            self.process_standard()
     
