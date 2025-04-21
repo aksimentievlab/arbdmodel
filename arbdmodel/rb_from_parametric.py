@@ -9,9 +9,38 @@ from .logger import logger
 
 class ParametricProcessor:
     """
-    Process parametrically defined shapes to create meshes and potential grids for ARBD.
-    Generates volume meshes, calculates physical properties analytically, and creates
-    potential fields directly from the parametric definitions.
+    The ParametricProcessor class provides tools to generate analytic rigid body geometries
+    with their physical properties calculated analytically rather than through numerical integration.
+    It can create various shapes such as spheres, capsules, and ellipsoids, compute their
+    physical properties (mass, moment of inertia, etc.), and generate potential grids for use
+    in ARBD simulations.
+    Attributes:
+        name (str): Base name for generated files
+        mesh_size (float): Characteristic mesh element size
+        unit_scale (float): Conversion factor from angstroms to mesh units
+        density (float): Material density in g/cm³
+        density_amu (float): Density in amu/Å³ for mass calculations
+        work_dir (Path): Working directory for output files
+        mesh_file (Path): Path to the generated mesh file
+        parametric_function (callable): Function defining the parametric surface
+        u_range (tuple): Parameter range for u
+        v_range (tuple): Parameter range for v
+        entity_tag (int): GMSH entity tag
+        entity_dim (int): GMSH entity dimension
+        volume (float): Calculated volume
+        mass (float): Calculated mass
+        center_of_mass (array): Calculated center of mass
+        inertia_tensor (array): Calculated inertia tensor
+        principal_moments (array): Principal moments of inertia
+        
+    Methods:
+        calculate_properties(): Calculate physical properties analytically
+        create_potential_grid(): Generate a potential grid based on shape
+        _to_gmsh_units(): Convert from Angstroms to gmsh units
+        generate_sphere(): Generate a spherical mesh and properties
+        generate_capsule(): Generate a capsule mesh and properties
+        generate_ellipsoid(): Generate an ellipsoid mesh and properties
+        create_rigid_body_type(): Create a RigidBodyType from the shape
     """
     
     def __init__(self, name, mesh_size=0.5, unit_scale=1.0, density=1.0, work_dir=None, **kwargs):
