@@ -8,15 +8,27 @@ from .core_objects import RigidBodyType
 from .grid import writeDx, loadGrid, Bound_grid
 
 #Originally SimpleARBD by Chun
+class TclScriptGenerator:
+    """
+    Generator for TCL scripts used in structure processing and visualization
+    """
+    
+    def __init__(self, work_dir=None):
+        """Initialize with working directory path"""
+        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
 
-class tcl_script_generator():
-    def __init__(self,path,name=None):
-        self.path=Path(path)
-
-    def align_tcl(name="align.tcl"):
-        align_tcl = self.work_dir / "align.tcl"
-        with open(align_tcl, 'w') as fout:
-            fout.write('''lassign $argv prefix
+    def write_align_tcl(self, filename="align.tcl"):
+        """
+        Write the alignment TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        script_path = self.work_dir / filename
+        script_content = '''lassign $argv prefix
 set seltext all
 
 proc rotationIsRightHanded {R {tol 0.01}} {
@@ -46,17 +58,13 @@ while { $continue } {
     ## Fix left-handed principle axes sometimes returned by 'measure inertia'
     if { ! [rotationIsRightHanded $R] } {
         puts "This was true"
-        # puts "rotation $R is not right handed! Fixing!"
         set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
     }
 
     puts "My rotation is here: $R"
     puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
 
-    ## Apply rotation and check that it worked
     $all move $R
-
-    ## Get current moment of inertia to determine rotation to align
 
     lassign [measure inertia $sel moments] com principleAxes moments
     puts $principleAxes
@@ -72,41 +80,145 @@ while { $continue } {
     }
 }
 
-## Write transformation matrix to return to original conformation
-set ch [open $prefix.rotate-back.txt w]
-foreach line [trans_to_rotate [transtranspose $R]] {
-    puts $ch $line
+## Write output files to specified working directory
+set outfiles {
+    {rotate-back.txt "transformation matrix"}
+    {inertia.txt "moments of inertia"}
+    {mass.txt "total mass"}
+    {dimension.dat "xyz dimensions"}
+    {aligned.pdb "aligned structure"}
+    {aligned.psf "aligned topology"}
 }
+
+foreach {filename desc} $outfiles {
+    set outfile [file join [file dirname $prefix] $filename]
+    puts "Writing $desc to $outfile"
+    
+    switch $filename {
+        "rotate-back.txt" {
+            set ch [open $outfile w]
+            foreach line [trans_to_rotate [transtranspose $R]] {
+                puts $ch $line
+            }
+            close $ch
+        }
+        "inertia.txt" {
+            set ms ""
+            foreach m $moments { lappend ms [veclength $m] }
+            set ch [open $outfile w]
+            puts $ch $ms
+            close $ch
+        }
+        "mass.txt" {
+            set ch [open $outfile w]
+            puts $ch [measure sumweights $sel weight mass]
+            close $ch
+        }
+        "dimension.dat" {
+            set ch [open $outfile w]
+            set minmax [measure minmax $sel]
+            set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
+            set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
+            set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
+            puts $ch $x_dim
+            puts $ch $y_dim
+            puts $ch $z_dim
+            close $ch
+        }
+        "aligned.pdb" {
+            $sel writepdb $outfile
+        }
+        "aligned.psf" {
+            $sel writepsf $outfile
+        }
+    }
+}'''
+        
+        with open(script_path, 'w') as f:
+            f.write(script_content)
+            
+        logger.debug(f"Wrote alignment script to {script_path}")
+        return script_path
+    
+    def write_charge_density_tcl(self, filename="charge-density.tcl", resolution=2.0):
+        """
+        Write the alignment TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        charge_tcl = self.work_dir / filename
+        with open(charge_tcl, 'w') as f:
+            f.write(f'''lassign $argv prefix
+set resolution {resolution}
+set ID [mol new $prefix.psf]
+mol addfile $prefix.pdb
+set all [atomselect $ID all]
+set netCharge [measure sumweights $all weight charge]
+
+## Write out charge density
+volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
+## Write out pqr for subsequent EM calculation
+$all writepqr $prefix.pqr
+
+set ch [open $prefix.netCharge.dat w]
+puts $ch $netCharge
 close $ch
 
-## Write out moments of inertia
-set ms ""
-foreach m $moments { lappend ms [veclength $m] }
-set ch [open $prefix.inertia.txt w]
-puts $ch $ms
-close $ch
-
-## Write out mass
-set ch [open $prefix.mass.txt w]
-puts $ch [measure sumweights $sel weight mass]
-close $ch
-
-## Write out dimension
 set ch [open $prefix.dimension.dat w]
-set minmax [measure minmax $sel]
+set minmax [measure minmax $all]
 set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
 set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
 set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
 puts $ch $x_dim
 puts $ch $y_dim
 puts $ch $z_dim
-close $ch
+close $ch''')
 
-## Write out psf, pdb of transformed selection
-$sel writepdb $prefix.aligned.pdb
-$sel writepsf $prefix.aligned.psf''')
 
-    def 
+    def process_vdw_parameters(self, protein_types):
+        """
+        Process VDW parameters from protein types
+
+        Args:
+            protein_types: List of protein particle types
+
+        Returns:
+            Dictionary containing VDW parameters
+        """
+        vdw_params = {}
+        for ptype in protein_types:
+            if hasattr(ptype, 'vdw_params'):
+                params = ptype.vdw_params
+                vdw_params[ptype.name] = {
+                    'radius': params.get('radius', 1.0),
+                    'epsilon': params.get('epsilon', 1.0)
+                }
+        return vdw_params
+
+    def write_vdw_tcl(self, filename="vdw.tcl"):
+        """
+        Write the VDW TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        script_path = self.work_dir / filename
+        script_content = self.generate_vdw_script()
+        
+        with open(script_path, 'w') as f:
+            f.write(script_content)
+            
+        logger.debug(f"Wrote VDW script to {script_path}")
+        return script_path
+    
+
 
 class PdbProcessor:
     """
@@ -158,6 +270,7 @@ class PdbProcessor:
         self.elec_dx = None
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
+        self.tclgen=TclScriptGenerator(work_dir=self.work_dir)
         
     def process_diffusive_structure(self):
         """Process structure to get all properties and potential maps"""
@@ -186,6 +299,9 @@ class PdbProcessor:
         """Align structure to principal axes using VMD."""
         # Write alignment TCL script
         align_tcl = self.work_dir / "align.tcl"
+        if not align_tcl.exists():
+            align_tcl = self.tclgen.write_align_tcl()
+            logger.debug(f"Alignment script written to {align_tcl}")
         
 
         # Run alignment
@@ -311,33 +427,10 @@ class PdbProcessor:
         aligned_path = str(self.work_dir / aligned_name)
         
         # Create TCL script for VMD
-        charge_tcl = self.work_dir / "charge.tcl"
-        with open(charge_tcl, 'w') as f:
-            f.write(f'''lassign $argv prefix
-set resolution {resolution}
-set ID [mol new $prefix.psf]
-mol addfile $prefix.pdb
-set all [atomselect $ID all]
-set netCharge [measure sumweights $all weight charge]
-
-## Write out charge density
-volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
-## Write out pqr for subsequent EM calculation
-$all writepqr $prefix.pqr
-
-set ch [open $prefix.netCharge.dat w]
-puts $ch $netCharge
-close $ch
-
-set ch [open $prefix.dimension.dat w]
-set minmax [measure minmax $all]
-set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
-set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
-set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
-puts $ch $x_dim
-puts $ch $y_dim
-puts $ch $z_dim
-close $ch''')
+        charge_tcl = self.work_dir / "charge-density.tcl"
+        if not charge_tcl.exists():
+            charge_tcl = self.tclgen.write_charge_density_tcl(resolution=resolution)
+            logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
         cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
