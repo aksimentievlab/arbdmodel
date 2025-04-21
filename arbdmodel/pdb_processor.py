@@ -4,6 +4,7 @@ import numpy as np
 from pathlib import Path
 from .logger import logger
 from .engine import HydroProRunner, APBSRunner
+from .core_objects import RigidBodyType
 from .grid import writeDx, loadGrid, Bound_grid
 
 #Originally SimpleARBD by Chun
@@ -16,7 +17,7 @@ class PdbProcessor:
     
     def __init__(self, structure_path, simconf=None, work_dir=None):
         """
-        Initialize processor with structure file
+        Initialize self with structure file
         
         Args:
             structure_path: Path to structure file (.psf/.pdb)
@@ -642,3 +643,198 @@ quit
             "potential_grids": potential_grids,
             "charge_grids": charge_grids
         }
+
+    def get_rb_type(self):
+        """Get RigidBodyType for the processed structure."""
+        """Process structure to get all properties and potential maps"""
+        # Step 1: Align structure
+        self.align_structure()
+        
+        # Step 2: Calculate hydrodynamic properties
+        self.calculate_hydrodynamic_properties()
+        
+        # Step 3: Generate charge distribution
+        self.generate_charge_distribution()
+        
+        # Step 4: Generate electrostatic map
+        self.generate_electrostatic_map()
+        
+        # Step 5: Generate VDW maps
+        self.generate_vdw_maps()
+        
+        # Step 6: Apply Gaussian smoothing
+        self.apply_gaussian_smoothing()
+        
+        # Return a dictionary of grid files for use in RigidBodyType
+        rb=RigidBodyType(
+            name=self.base_name, 
+            mass=self.mass,
+            moment_of_inertia=self.moment_of_inertia,
+            damping_coefficient=self.transdamp,
+            rotational_damping_coefficient=self.rotdamp,
+            potential_grids=self.get_grid_files().get('potential_grids', []),
+            charge_grids=self.get_grid_files().get('charge_grids', []),
+            pmf_grids=[],)
+        self.aligned_pdb = self.aligned_pdb
+        self.aligned_psf = self.aligned_psf
+        
+        logger.info(f"Pdb Processor generated '{self.base_name}' as RigidBodyType successfully")
+        return rb
+    
+    def _find_segments_num(self, dimensions, threshold=None):
+        """Find number of segments needed for a gigantic object.
+        
+        Args:
+            dimensions: List of dimensions [x, y, z]
+            threshold: Size threshold for segmentation (defaults to self.threshold)
+            
+        Returns:
+            Tuple of (nx, ny, nz) segment counts
+        """
+        if threshold is None:
+            threshold = self.threshold
+            
+        in_xyz = [float(elm) for elm in dimensions]
+        segments = [np.ceil(elm / threshold) for elm in in_xyz]
+        return segments[0], segments[1], segments[2]
+    
+    
+    def _process_standard(self):
+        """Process the structure normally (without segmentation)"""
+        logger.info(f"Processing static object: {self.name}")
+        
+        # Use static directory for output
+        static_dir = self.work_dir / "static" / self.name
+        
+        # Create processor and generate maps
+        processor = PdbProcessor(
+            structure_path=self.structure_path,
+            simconf=self.simconf,
+            work_dir=static_dir)  # Use the static object directory
+        
+        processor.process_structure()
+        
+        # Collect grid files from the processor
+        grid_files = processor.get_grid_files()
+        
+        # Store grids
+        self.potential_grids = grid_files.get('potential_grids', [])
+        self.charge_grids = grid_files.get('charge_grids', [])
+        if hasattr(processor, 'elec_smoothed_dx') and processor.elec_smoothed_dx:
+            self.elec_grid = processor.elec_smoothed_dx
+    
+    def _process_gigantic(self):
+        """Process a gigantic structure by segmentation"""
+        from subprocess import run
+        import MDAnalysis as mda
+        
+        logger.info(f"Processing gigantic static object: {self.name}")
+        
+        # Use static directory for output
+        static_dir = self.work_dir / "static" / self.name
+        
+        # Get dimensions by reading the structure file
+        u = mda.Universe(str(self.structure_path))
+        min_coords = u.atoms.positions.min(axis=0)
+        max_coords = u.atoms.positions.max(axis=0)
+        dimensions = max_coords - min_coords
+        
+        # Calculate segmentation
+        nx, ny, nz = self._find_segments_num(dimensions, self.threshold)
+        logger.info(f"Segmenting into {nx}x{ny}x{nz} parts")
+        
+        # Create segment directory
+        segments_dir = static_dir / "segments"
+        os.makedirs(segments_dir, exist_ok=True)
+        
+        # Write VMD script for segmentation
+        segment_script = static_dir / "segment.tcl"
+        with open(segment_script, 'w') as f:
+            f.write(f"""
+# Segment structure
+mol new {self.structure_path}
+set all [atomselect top all]
+set mM [measure minmax $all]
+set dimAl [vecsub [lindex $mM 1] [lindex $mM 0]]
+set min_x [expr [lindex [lindex $mM 0] 0] - 1]
+set min_y [expr [lindex [lindex $mM 0] 1] - 1]
+set min_z [expr [lindex [lindex $mM 0] 2] - 1]
+set dx [expr ([lindex $dimAl 0] + 2)/{nx}]
+set dy [expr ([lindex $dimAl 1] + 2)/{ny}]
+set dz [expr ([lindex $dimAl 2] + 2)/{nz}]
+
+set count 0
+for {{set i 0}} {{$i < {nx}}} {{incr i}} {{
+  for {{set j 0}} {{$j < {ny}}} {{incr j}} {{
+    for {{set k 0}} {{$k < {nz}}} {{incr k}} {{
+      set outName {segments_dir}/segment_$count
+      set low_x [expr $min_x + $i * $dx]
+      set low_y [expr $min_y + $j * $dy]
+      set low_z [expr $min_z + $k * $dz]
+      set up_x [expr $min_x + ($i+1) * $dx]
+      set up_y [expr $min_y + ($j+1) * $dy]
+      set up_z [expr $min_z + ($k+1) * $dz]
+      set sel [atomselect top "(x > $low_x and x < $up_x) and (y > $low_y and y < $up_y) and (z > $low_z and z < $up_z)"]
+      set sel_N [$sel num]
+      if {{$sel_N > 0}} {{
+        $sel writepqr $outName.pqr
+        $sel writepsf $outName.psf
+        $sel writepdb $outName.pdb
+        set count [expr $count + 1]
+      }}
+    }}
+  }}
+}}
+exit
+""")
+        
+        # Run segmentation
+        vmd_path = self.simconf.get_binary('vmd')
+        if not vmd_path:
+            raise ValueError("VMD binary not found in configuration")
+            
+        run([vmd_path, "-dispdev", "text", "-e", str(segment_script)], check=True)
+        
+        # Process each segment
+        segments = list(segments_dir.glob("segment_*.pdb"))
+        logger.info(f"Found {len(segments)} segments to process")
+        
+        # Process each segment
+        for i, segment in enumerate(segments):
+            segment_dir = segments_dir / segment.stem
+            os.makedirs(segment_dir, exist_ok=True)
+            
+            logger.info(f"Processing segment {i+1}/{len(segments)}: {segment.stem}")
+            
+            segment_processor = PdbProcessor(
+                structure_path=segment,
+                simconf=self.simconf,
+                work_dir=segment_dir)
+            
+            segment_processor.process_structure()
+            
+            # Collect grid maps from this segment
+            grid_files = segment_processor.get_grid_files()
+            
+            # Store grids from this segment
+            self.potential_grids.extend(grid_files.get('potential_grids', []))
+            self.charge_grids.extend(grid_files.get('charge_grids', []))
+            
+            # Store the first electrostatic grid as the main one
+            if hasattr(segment_processor, 'elec_smoothed_dx') and not self.elec_grid:
+                self.elec_grid = segment_processor.elec_smoothed_dx
+        
+        logger.info(f"Completed processing gigantic static object: {self.name}")
+
+    def get_grid_from_pdb(self,is_gigantic=False, threshold=300):
+        """Process the structure file to create potential and density grids"""
+        if not self.structure_path:
+            logger.warning("No structure path provided for static object")
+            return
+        
+        self.threshold=threshold
+        if is_gigantic:
+            self._process_gigantic()
+        else:
+            self._process_standard()
+    
