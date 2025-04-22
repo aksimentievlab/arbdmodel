@@ -1391,3 +1391,291 @@ quit"""
             
         finally:
             os.chdir(original_dir)
+
+class TclScriptGenerator:
+    """
+    Generator for TCL scripts used in structure processing and visualization
+    """
+    
+    def __init__(self, work_dir=None):
+        """Initialize with working directory path"""
+        work_dir = Path(work_dir) if work_dir else Path.cwd()
+        self.work_dir=work_dir.absolute()
+
+
+    def write_align_tcl(self, filename="align.tcl"):
+        """
+        Write the alignment TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        script_path = self.work_dir / filename
+        script_content = '''lassign $argv prefix
+set seltext all
+
+proc rotationIsRightHanded {R {tol 0.01}} {
+    set x [coordtrans $R {1 0 0}]
+    set y [coordtrans $R {0 1 0}]
+    set z [coordtrans $R {0 0 1}]
+
+    set l [veclength [vecsub $z [veccross $x $y]]]
+    return [expr {$l < $tol}]
+}
+
+set ID [mol new $prefix.psf]
+mol addfile $prefix.pdb waitfor all
+set all [atomselect $ID all]
+set sel [atomselect $ID $seltext]
+
+## Center system on $sel
+$all moveby [vecinvert [measure center $sel weight mass]]
+
+set continue 1
+while { $continue } {
+    ## Get current moment of inertia to determine rotation to align
+    lassign [measure inertia $sel moments] com principleAxes
+
+    ## Convert 3x3 rotation to 4x4 vmd transformation
+    set R [trans_from_rotate $principleAxes]
+    ## Fix left-handed principle axes sometimes returned by 'measure inertia'
+    if { ! [rotationIsRightHanded $R] } {
+        puts "This was true"
+        set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
+    }
+
+    puts "My rotation is here: $R"
+    puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
+
+    $all move $R
+
+    lassign [measure inertia $sel moments] com principleAxes moments
+    puts $principleAxes
+    set goodcount 0
+    foreach x0 {{1 0 0} {0 1 0} {0 0 1}} {
+        set x [coordtrans [trans_from_rotate $principleAxes] $x0]
+        if {[veclength [vecsub $x $x0]] < 0.01} {
+            incr goodcount
+        }
+    }
+    if { $goodcount == 3 } {
+        set continue 0
+    }
+}
+
+## Write output files to specified working directory
+set outfiles {
+    {rotate-back.txt "transformation matrix"}
+    {inertia.txt "moments of inertia"}
+    {mass.txt "total mass"}
+    {dimension.dat "xyz dimensions"}
+    {aligned.pdb "aligned structure"}
+    {aligned.psf "aligned topology"}
+}
+
+foreach {filename desc} $outfiles {
+    set outfile [file join [file dirname $prefix] $filename]
+    puts "Writing $desc to $outfile"
+    
+    switch $filename {
+        "rotate-back.txt" {
+            set ch [open $outfile w]
+            foreach line [trans_to_rotate [transtranspose $R]] {
+                puts $ch $line
+            }
+            close $ch
+        }
+        "inertia.txt" {
+            set ms ""
+            foreach m $moments { lappend ms [veclength $m] }
+            set ch [open $outfile w]
+            puts $ch $ms
+            close $ch
+        }
+        "mass.txt" {
+            set ch [open $outfile w]
+            puts $ch [measure sumweights $sel weight mass]
+            close $ch
+        }
+        "dimension.dat" {
+            set ch [open $outfile w]
+            set minmax [measure minmax $sel]
+            set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
+            set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
+            set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
+            puts $ch $x_dim
+            puts $ch $y_dim
+            puts $ch $z_dim
+            close $ch
+        }
+        "aligned.pdb" {
+            $sel writepdb $outfile
+        }
+        "aligned.psf" {
+            $sel writepsf $outfile
+        }
+    }
+}'''
+        
+        with open(script_path, 'w') as f:
+            f.write(script_content)
+            
+        logger.debug(f"Wrote alignment script to {script_path}")
+        return script_path
+    
+    def write_charge_density_tcl(self, filename="charge-density.tcl", resolution=2.0):
+        """
+        Write the alignment TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        charge_tcl = self.work_dir / filename
+        with open(charge_tcl, 'w') as f:
+            f.write(f'''lassign $argv prefix
+set resolution {resolution}
+set ID [mol new $prefix.psf]
+mol addfile $prefix.pdb
+set all [atomselect $ID all]
+set netCharge [measure sumweights $all weight charge]
+
+## Write out charge density
+volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
+## Write out pqr for subsequent EM calculation
+$all writepqr $prefix.pqr
+
+set ch [open $prefix.netCharge.dat w]
+puts $ch $netCharge
+close $ch
+
+set ch [open $prefix.dimension.dat w]
+set minmax [measure minmax $all]
+set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
+set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
+set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
+puts $ch $x_dim
+puts $ch $y_dim
+puts $ch $z_dim
+close $ch''')
+
+
+    def process_vdw_parameters(self, protein_types):
+        """
+        Process VDW parameters from protein types
+
+        Args:
+            protein_types: List of protein particle types
+
+        Returns:
+            Dictionary containing VDW parameters
+        """
+        vdw_params = {}
+        for ptype in protein_types:
+            if hasattr(ptype, 'vdw_params'):
+                params = ptype.vdw_params
+                vdw_params[ptype.name] = {
+                    'radius': params.get('radius', 1.0),
+                    'epsilon': params.get('epsilon', 1.0)
+                }
+        return vdw_params
+
+    def write_vdw_tcl(self, filename="vdw.tcl"):
+        """
+        Write the VDW TCL script to file
+        
+        Args:
+            filename: Name of the output TCL script
+        
+        Returns:
+            Path to the written script
+        """
+        script_path = self.work_dir / filename
+        script_content = self.generate_vdw_script()
+        
+        with open(script_path, 'w') as f:
+            f.write(script_content)
+            
+        logger.debug(f"Wrote VDW script to {script_path}")
+        return script_path
+    
+    def generate_vdw_maps_diffusive(self, potResolution=1, denResolution=2,num_heavy_cluster=3):
+        """Generate VDW maps using VMD."""
+        aligned_name = f"{self.base_name}.aligned"
+        aligned_path = str(self.work_dir / aligned_name)
+        
+        # Create VDW TCL script
+        vdw_tcl = self.work_dir / "vdw.tcl"
+        with open(vdw_tcl, 'w') as f:
+            f.write(f'''set prefixes $argv
+set potResolution ''' + str(potResolution) + '''
+set denResolution ''' + str(denResolution) + '''
+set IDs ""
+set minRadius 0.5
+
+package require ilstools
+
+ILStools::readcharmmparams [glob ''' + self.work_dir + '''/*]
+
+set ljParms ""
+set lj_hyd ""
+
+foreach prefix $prefixes {
+    set ID [mol new $prefix.psf]
+    mol addfile $prefix.pdb
+    lappend IDs $ID
+
+    ILStools::assigncharmmparams $ID; # sets radius and occupancy to rmin and eps
+
+    set all [atomselect $ID "noh"]
+    set hyd [atomselect $ID "hydrogen"]
+    append ljParms " [lsort -unique [$all get {radius occupancy}]]"
+    append lj_hyd " [lsort -unique [$hyd get {radius occupancy}]]"
+}
+
+set ljParms [lsort -unique $ljParms]
+set lj_hyd [lsort -unique $lj_hyd]
+set ljTypes ""
+
+set ch [open tmp.dat w]
+foreach vals $ljParms {
+    lassign $vals r e
+    if {$r < $minRadius} {continue};
+
+    set count 0
+    set types ""
+    foreach ID $IDs {
+        set sel [atomselect $ID "noh and radius $r and occupancy \\"$e\\""]
+        incr count [$sel num]
+        append types " [lsort -unique [$sel get type]]"
+    }
+    set types [lsort -unique $types]
+    lappend ljTypes $types
+    puts $ch "$r $e $count"
+}
+close $ch
+
+set ch [open hyd.dat w]
+foreach vals $lj_hyd {
+    lassign $vals r e
+    if {$r < $minRadius} {continue};
+
+    set count 0
+    set types ""
+    foreach ID $IDs {
+        set sel [atomselect $ID "hydrogen and radius $r and occupancy \\"$e\\""]
+        incr count [$sel num]
+        append types " [lsort -unique [$sel get type]]"
+    }
+    set types [lsort -unique $types]
+    lappend ljTypes $types
+    puts $ch "$r $e $count"
+}
+close $ch
+puts "My LJ types are: $ljTypes"
+''')

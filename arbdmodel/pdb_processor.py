@@ -6,218 +6,8 @@ from .logger import logger
 from .engine import HydroProRunner, APBSRunner
 from .core_objects import RigidBodyType
 from .grid import writeDx, loadGrid, Bound_grid
-
+from .engine import TclScriptGenerator
 #Originally SimpleARBD by Chun
-class TclScriptGenerator:
-    """
-    Generator for TCL scripts used in structure processing and visualization
-    """
-    
-    def __init__(self, work_dir=None):
-        """Initialize with working directory path"""
-        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
-
-    def write_align_tcl(self, filename="align.tcl"):
-        """
-        Write the alignment TCL script to file
-        
-        Args:
-            filename: Name of the output TCL script
-        
-        Returns:
-            Path to the written script
-        """
-        script_path = self.work_dir / filename
-        script_content = '''lassign $argv prefix
-set seltext all
-
-proc rotationIsRightHanded {R {tol 0.01}} {
-    set x [coordtrans $R {1 0 0}]
-    set y [coordtrans $R {0 1 0}]
-    set z [coordtrans $R {0 0 1}]
-
-    set l [veclength [vecsub $z [veccross $x $y]]]
-    return [expr {$l < $tol}]
-}
-
-set ID [mol new $prefix.psf]
-mol addfile $prefix.pdb waitfor all
-set all [atomselect $ID all]
-set sel [atomselect $ID $seltext]
-
-## Center system on $sel
-$all moveby [vecinvert [measure center $sel weight mass]]
-
-set continue 1
-while { $continue } {
-    ## Get current moment of inertia to determine rotation to align
-    lassign [measure inertia $sel moments] com principleAxes
-
-    ## Convert 3x3 rotation to 4x4 vmd transformation
-    set R [trans_from_rotate $principleAxes]
-    ## Fix left-handed principle axes sometimes returned by 'measure inertia'
-    if { ! [rotationIsRightHanded $R] } {
-        puts "This was true"
-        set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
-    }
-
-    puts "My rotation is here: $R"
-    puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
-
-    $all move $R
-
-    lassign [measure inertia $sel moments] com principleAxes moments
-    puts $principleAxes
-    set goodcount 0
-    foreach x0 {{1 0 0} {0 1 0} {0 0 1}} {
-        set x [coordtrans [trans_from_rotate $principleAxes] $x0]
-        if {[veclength [vecsub $x $x0]] < 0.01} {
-            incr goodcount
-        }
-    }
-    if { $goodcount == 3 } {
-        set continue 0
-    }
-}
-
-## Write output files to specified working directory
-set outfiles {
-    {rotate-back.txt "transformation matrix"}
-    {inertia.txt "moments of inertia"}
-    {mass.txt "total mass"}
-    {dimension.dat "xyz dimensions"}
-    {aligned.pdb "aligned structure"}
-    {aligned.psf "aligned topology"}
-}
-
-foreach {filename desc} $outfiles {
-    set outfile [file join [file dirname $prefix] $filename]
-    puts "Writing $desc to $outfile"
-    
-    switch $filename {
-        "rotate-back.txt" {
-            set ch [open $outfile w]
-            foreach line [trans_to_rotate [transtranspose $R]] {
-                puts $ch $line
-            }
-            close $ch
-        }
-        "inertia.txt" {
-            set ms ""
-            foreach m $moments { lappend ms [veclength $m] }
-            set ch [open $outfile w]
-            puts $ch $ms
-            close $ch
-        }
-        "mass.txt" {
-            set ch [open $outfile w]
-            puts $ch [measure sumweights $sel weight mass]
-            close $ch
-        }
-        "dimension.dat" {
-            set ch [open $outfile w]
-            set minmax [measure minmax $sel]
-            set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
-            set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
-            set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
-            puts $ch $x_dim
-            puts $ch $y_dim
-            puts $ch $z_dim
-            close $ch
-        }
-        "aligned.pdb" {
-            $sel writepdb $outfile
-        }
-        "aligned.psf" {
-            $sel writepsf $outfile
-        }
-    }
-}'''
-        
-        with open(script_path, 'w') as f:
-            f.write(script_content)
-            
-        logger.debug(f"Wrote alignment script to {script_path}")
-        return script_path
-    
-    def write_charge_density_tcl(self, filename="charge-density.tcl", resolution=2.0):
-        """
-        Write the alignment TCL script to file
-        
-        Args:
-            filename: Name of the output TCL script
-        
-        Returns:
-            Path to the written script
-        """
-        charge_tcl = self.work_dir / filename
-        with open(charge_tcl, 'w') as f:
-            f.write(f'''lassign $argv prefix
-set resolution {resolution}
-set ID [mol new $prefix.psf]
-mol addfile $prefix.pdb
-set all [atomselect $ID all]
-set netCharge [measure sumweights $all weight charge]
-
-## Write out charge density
-volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
-## Write out pqr for subsequent EM calculation
-$all writepqr $prefix.pqr
-
-set ch [open $prefix.netCharge.dat w]
-puts $ch $netCharge
-close $ch
-
-set ch [open $prefix.dimension.dat w]
-set minmax [measure minmax $all]
-set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
-set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
-set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
-puts $ch $x_dim
-puts $ch $y_dim
-puts $ch $z_dim
-close $ch''')
-
-
-    def process_vdw_parameters(self, protein_types):
-        """
-        Process VDW parameters from protein types
-
-        Args:
-            protein_types: List of protein particle types
-
-        Returns:
-            Dictionary containing VDW parameters
-        """
-        vdw_params = {}
-        for ptype in protein_types:
-            if hasattr(ptype, 'vdw_params'):
-                params = ptype.vdw_params
-                vdw_params[ptype.name] = {
-                    'radius': params.get('radius', 1.0),
-                    'epsilon': params.get('epsilon', 1.0)
-                }
-        return vdw_params
-
-    def write_vdw_tcl(self, filename="vdw.tcl"):
-        """
-        Write the VDW TCL script to file
-        
-        Args:
-            filename: Name of the output TCL script
-        
-        Returns:
-            Path to the written script
-        """
-        script_path = self.work_dir / filename
-        script_content = self.generate_vdw_script()
-        
-        with open(script_path, 'w') as f:
-            f.write(script_content)
-            
-        logger.debug(f"Wrote VDW script to {script_path}")
-        return script_path
-    
 
 
 class PdbProcessor:
@@ -528,120 +318,7 @@ class PdbProcessor:
         self.elec_dx = out_file
         logger.info(f"Electrostatic map generated for {aligned_name}")
     
-    def generate_vdw_maps(self, potResolution=1, denResolution=2):
-        """Generate VDW maps using VMD."""
-        aligned_name = f"{self.base_name}.aligned"
-        aligned_path = str(self.work_dir / aligned_name)
-        
-        # Create VDW TCL script
-        vdw_tcl = self.work_dir / "vdw.tcl"
-        with open(vdw_tcl, 'w') as f:
-            f.write(f'''lassign $argv prefix
-package require inorganicbuilder
-set id [mol new $prefix.psf]
-mol addfile $prefix.pdb
-
-# Create temp folder for vdw data if needed
-set vdw_folder [file dirname $prefix]/vdw
-if {{![file exists $vdw_folder]}} {{
-    file mkdir $vdw_folder
-}}
-
-# Load parameters
-global env
-set statefilename "$vdw_folder/vdw.spt"
-set statefile [open $statefilename w]
-set psffile $env(INORGANICBUILDER_BASEDIR)/spt/parameters/prot/prot-masses.spt
-puts "loading parameters from $psffile"
-source $psffile
-close $statefile
-# Define selection
-set sel [atomselect top all]
-
-# Loop over heavy atom clusters
-for {{set i 0}} {{$i <= {self.num_heavy_cluster}}} {{incr i}} {{
-    # Get atom types
-    set typemap  [dict create]
-    set typemap_reverse [dict create]
-    set types [lsort -unique [$sel get type]]
-    foreach t $types {{
-        set key [subst $t]
-        set vdw_type [subst $t]
-        if {{![info exists VDW_TYPEMAP($key)]}} {{
-            puts "No match for type $key, using default vdW parameters"
-            set vdw_type "CT"
-        }} else {{
-            set vdw_type $VDW_TYPEMAP($key)
-        }}
-        dict set typemap $key $vdw_type
-        dict set typemap_reverse $vdw_type $key
-    }}
-
-    # Create VDW potential and density maps
-    set clust [expr $i % 4]
-    puts "clust=$clust"
     
-    # Map atom type to VDW cluster
-    set vdwsel [atomselect top "all"]
-    set vdwtypes [list]
-    set vdwatomtypes [list]
-    set sel_type [$vdwsel get type]
-    # Remap into VDW types
-    foreach atype $sel_type {{
-        set vdwtype [dict get $typemap $atype]
-        set vdwsplit [split $vdwtype "_"]
-        set vdwgroup [lindex $vdwsplit 0]
-        
-        # Determine cluster membership
-        if {{$i == 0}} {{
-            lappend vdwtypes "VDW"
-            lappend vdwatomtypes $vdwtype
-        }} elseif {{([string compare -length 1 $vdwgroup "C"] == 0) && ($clust == 1)}} {{
-            lappend vdwtypes "VDW"
-            lappend vdwatomtypes $vdwtype
-        }} elseif {{([string compare -length 1 $vdwgroup "N"] == 0 || [string compare -length 2 $vdwgroup "ON"] == 0 || [string compare -length 2 $vdwgroup "SN"] == 0) && ($clust == 2)}} {{
-            lappend vdwtypes "VDW"
-            lappend vdwatomtypes $vdwtype
-        }} elseif {{([string compare -length 1 $vdwgroup "O"] == 0 || [string compare -length 2 $vdwgroup "OS"] == 0 || [string compare -length 1 $vdwgroup "S"] == 0) && ($clust == 3)}} {{
-            lappend vdwtypes "VDW"
-            lappend vdwatomtypes $vdwtype
-        }} else {{
-            lappend vdwtypes "NONE"
-            lappend vdwatomtypes "NONE"
-        }}
-    }}
-    $vdwsel set user 0
-    $vdwsel set beta 1.0
-    
-    # Assign user values
-    for {{set j 0}} {{$j < [$vdwsel num]}} {{incr j}} {{
-        set vdwtype [lindex $vdwtypes $j]
-        if {{[string compare $vdwtype "VDW"] == 0}} {{
-            set atomtype [lindex $vdwatomtypes $j]
-            set radius $VDW_RADIUS($atomtype)
-            set epsilon $VDW_EPSILON($atomtype)
-            set user [expr $radius * sqrt($epsilon)]
-            $vdwsel set user $user index $j
-        }}
-    }}
-    
-    # Generate density map
-    volmap density $vdwsel -res {denResolution} -weight user -o "$prefix.vdw$i.den.dx"
-    
-    # Generate potential map
-    set pot_outfile "$prefix.vdw$i.pot.dx"
-    if {{$i == 0}} {{
-        puts "generating $pot_outfile"
-        volmap occupancy $vdwsel -res {potResolution} -o "$pot_outfile"
-    }} else {{
-        set vdwsel2 [atomselect top "user > 0"]
-        if {{[$vdwsel2 num] > 0}} {{
-            volmap occupancy $vdwsel2 -res {potResolution} -o "$pot_outfile"
-        }}
-        $vdwsel2 delete
-    }}
-}}
-''')
         
         # Run VMD to generate VDW maps
         cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {aligned_path} < {vdw_tcl}"
@@ -672,6 +349,58 @@ for {{set i 0}} {{$i <= {self.num_heavy_cluster}}} {{incr i}} {{
             self.vdw_den_dxs.append(den_file)
         
         logger.info(f"VDW maps generated for {aligned_name}")
+        
+    def clustering(self,num_heavy_cluster,hyd="hyd.dat",tmp="tmp.dat"):
+        import numpy as np
+        from scipy.cluster import vq
+
+        numClusters = num_heavy_cluster
+
+        d = np.loadtxt('tmp.dat')
+        d_hyd = np.loadtxt('hyd.dat')
+
+        ## build new dataset with 'count' (d[:,2]) entries of each value
+        d2 = [np.outer( np.ones((1,int(d[i,2]))) , d[i,:2] ) for i in range(d.shape[0])]
+        d2_hyd = [np.outer( np.ones((1,int(d_hyd[i,2]))) , d_hyd[i,:2] ) for i in range(d_hyd.shape[0])]
+
+        d2 = np.vstack( d2 )
+        d2w = vq.whiten( d2 )              # normalize features
+
+        d2_hyd = np.vstack( d2_hyd )
+        d2w_hyd = vq.whiten( d2_hyd )              # normalize features
+
+
+        ind = 0;
+        scalebase = d2w[ind,:];
+        while np.any(scalebase == 0):
+        ind = ind + 1
+        scalebase = d2w[ind,:]
+
+        scale = d2[ind,:] / d2w[ind,:]
+
+        ind = 0;
+        scalebase = d2w_hyd[ind,:];
+        while np.any(scalebase == 0):
+        ind = ind + 1
+        scalebase = d2w_hyd[ind,:]
+
+        scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
+
+        ## perform cluster analysis
+        np.random.seed(seed=42)
+        codeBook,dist = vq.kmeans(d2w , numClusters)
+        assignments, dists = vq.vq(d[:,:2], scale * codeBook)
+
+        codeBook_hyd,dist_hyd = vq.kmeans(d2w_hyd , 1)
+        assignments_hyd, dists_hyd = vq.vq(d_hyd[:,:2], scale_hyd * codeBook_hyd)
+
+        assignments_total = np.concatenate((assignments, assignments_hyd + numClusters) , axis=None)
+        codeBook_total = np.concatenate((scale*codeBook, scale_hyd*codeBook_hyd), axis=0)
+
+        print(" ".join(["%d" % a for a in assignments_total]))
+        print(" ".join(["%.3f" % c[0] for c in codeBook_total]))
+        print(" ".join(["%.3f" % c[1] for c in codeBook_total]))
+
     def apply_gaussian_smoothing(self, gaussianWidth=2.5):
         """Apply Gaussian smoothing to all potential maps."""
         aligned_name = f"{self.base_name}.aligned"
