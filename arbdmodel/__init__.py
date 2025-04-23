@@ -426,6 +426,13 @@ class Child():
         if self.parent is not None:
             self.parent._clear_types()
             
+    def __deepcopy__(self, memo):
+        """ Custom __deepcopy__ to avoide __getattr__ calls """
+        new_instance = self.__class__.__new__(self.__class__)
+        memo[id(self)] = new_instance
+        new_instance.__dict__ = deepcopy(self.__dict__, memo)
+        return new_instance
+
     # def __getstate__(self):
     #     print("Child getstate called", self)
     #     print(self.__dict__)
@@ -1131,17 +1138,22 @@ class ArbdModel(PdbModel):
         names = set([t.name for t in self.type_counts.keys()])
 
         devlogger.debug(f'Combining types {self.type_counts.keys()} and {other_model.type_counts.keys()}')
+        _type_alias = dict()
         for t1 in self.type_counts.keys():
             for t2 in other_model.type_counts.keys():
-                if t1.name == t2.name and t1.__eq__(t2, check_equal=False):
-                    i = 1
-                    new_name = f'{t2.name}{i}'
-                    while new_name in names:
-                        i += 1
+                if t1.name == t2.name:
+                    if t1 is None: continue
+                    if t1.__eq__(t2, check_equal=True):
+                        _type_alias[t2.name] = t1
+                    else:
+                        i = 1
                         new_name = f'{t2.name}{i}'
-                    devlogger.debug(f'Updating {t2.name} to {new_name}')
-                    t2.name = new_name
-                    names.add(new_name)
+                        while new_name in names:
+                            i += 1
+                            new_name = f'{t2.name}{i}'
+                        devlogger.debug(f'Updating {t2.name} to {new_name}')
+                        t2.name = new_name
+                        names.add(new_name)
                     
         ## Combine interactions
         for i, tA, tB in other_model.nonbonded_interactions:
@@ -1149,14 +1161,18 @@ class ArbdModel(PdbModel):
             if tA is not None and tA.name in _type_alias: tA = _type_alias[tA.name]
             if tB is not None and tB.name in _type_alias: tB = _type_alias[tB.name]
             self.add_nonbonded_interaction(i,tA,tB)
-                    
+
+        for b in other_model:
+            key = b.type_.name
+            if key in _type_alias:
+                b.type_ = _type_alias[key]
+
+
         # for g in other_model.children:
         #     self.update(g, copy=copy)
-        g = Group()
-        for attr in 'children position orientation bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
-            g.__setattr__(attr, other_model.__getattribute__(attr))
-        devlogger.debug(f'Updating {self} with {g.children[0].children[0]}')
-        self.update(g, copy=copy)
+        for attr in 'children bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
+            # self.__setattr__(attr, self.__getattribute__(attr) + other_model.__getattribute__(attr))
+            self.__getattribute__(attr).extend(other_model.__getattribute__(attr))
 
         self._clear_types()
         
