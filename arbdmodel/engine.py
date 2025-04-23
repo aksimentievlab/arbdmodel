@@ -1264,71 +1264,79 @@ class HydroProRunner:
             os.chdir(original_dir)
 
 class APBSRunner:
-    """Interface to APBS for electrostatics calculations"""
+    """Interface to APBS for electrostatics calculations.
     
-    def __init__(self, structure_name, xyz_dims, 
-                    buffer=50, large_system=False,dividend=2,simconf=None, binary_path=None, psize_script=None):
+    This class provides an interface to run APBS (Adaptive Poisson-Boltzmann Solver)
+    for calculating electrostatic properties of molecular systems.
+    """
+    
+    def __init__( self, structure_name, xyz_dims, buffer: float = 50, large_system: bool = False,
+        dividend: int = 2,simconf= None,binary_path= None,psize_script= None,):
         """Initialize APBS interface.
-        Args:
-            binary_path: Path to APBS executable. If None, uses path from simconf
-            psize_script: Optional path to psize script
-            simconf: SimConf object (optional)
-        """
-        # Get binary path from simconf if provided and no explicit binary_path
-        if binary_path is None and simconf is not None:
-            binary_path = simconf.get_binary('apbs')
-        
-        # If still None, try binary_manager
-        if binary_path is None:
-            from arbdmodel.binary_manager import BinaryManager
-            binary_path = BinaryManager.get_binary_path('apbs')
-        
-        # If still None, use 'apbs' and rely on PATH
-        if binary_path is None:
-            binary_path = 'apbs'
-                
-        self.binary = Path(binary_path)
-        # Check if binary exists or is in PATH
-        if not self.binary.exists() and not shutil.which(str(self.binary)):
-            raise FileNotFoundError(f"APBS binary not found at {binary_path}")
-        self.temperature = simconf.temperature
-        self.viscosity = simconf.viscosity
-        self.solvent_density = simconf.solvent_density
-        self.salt=simconf.salt
-        self.structure_name=structure_name
-        self.xyz_dims=xyz_dims
-        self.buffer=buffer
-        self.large_system = large_system
-
-        self.psize = Path(psize_script) if psize_script else None
-        
-    def write_config(self, structure_name, xyz_dims, 
-                    buffer=50, large_system='Off',dividend=2):
-        """Write APBS configuration file.
         
         Args:
             structure_name: Base name of structure files
             xyz_dims: [x, y, z] dimensions
-            salt_conc: Salt concentration in M
-            temperature: Temperature in K
             buffer: Grid buffer size in Å
-            large_system: 'On' or 'Off' for large system mode
-            dividend: grid density reduce factor for large system
+            large_system: Whether to use large system mode
+            dividend: Grid density reduction factor for large system
+            simconf: SimConf object (optional)
+            binary_path: Path to APBS executable. If None, uses path from simconf
+            psize_script: Optional path to psize script
+            
+        Raises:
+            FileNotFoundError: If APBS binary cannot be found
+            ValueError: If invalid parameters are provided
+        """
+        self.structure_name = structure_name
+        self.xyz_dims = xyz_dims
+        self.buffer = float(buffer)
+        self.large_system = bool(large_system)
+        self.dividend = int(dividend)
+        
+        if not xyz_dims or len(xyz_dims) != 3:
+            raise ValueError("xyz_dims must be a list of 3 dimensions")
+        
+        # Get binary path using priority order
+        self.binary = Path(simconf.get_binary('apbs'))
+        self.psize = Path(psize_script) if psize_script else None
+        
+        # Store simulation configuration parameters
+        if simconf is not None:
+            self.temperature = simconf.temperature
+            self.viscosity = simconf.viscosity
+            self.solvent_density = simconf.solvent_density
+            self.salt = simconf.salt
+        else:
+            # Default values if simconf not provided
+            self.temperature = 298.15  # K
+            self.viscosity = 0.89     # centipoise
+            self.solvent_density = 1.0 # g/cm^3
+            self.salt = 0.15          # M
+
+
+    def write_config(self) -> None:
+        """Write APBS configuration file.
+        
+        Creates an APBS input file with the current configuration parameters.
+        The file is named {structure_name}.apbs
+        
+        Raises:
+            IOError: If unable to write configuration file
         """
         # Calculate grid dimensions
-        xyz_cg = [str(int(dim + buffer)) for dim in xyz_dims]
-        salt_conc=self.salt
+        xyz_cg = [str(int(dim + self.buffer)) for dim in self.xyz_dims]
         
-        if large_system == 'Off':
+        if not self.large_system:
             xyz_dime = xyz_cg
-            center = 'mol 1'
         else:
             # For large systems, reduce grid density
-            xyz_dime = [str(int((dim + buffer) / dividend)) for dim in xyz_dims]
-            center = 'mol 1'
+            xyz_dime = [str(int((dim + self.buffer) / self.dividend)) for dim in self.xyz_dims]
             
+        center = 'mol 1'  # Use molecule center for both cases
+        
         config = f"""read
-mol pqr {structure_name}.pqr
+mol pqr {self.structure_name}.pqr
 end
 elec
 mg-auto
@@ -1342,8 +1350,8 @@ npbe
 bcfl sdh
 srfm smol
 chgm spl2
-ion 1 {salt_conc} 2.0
-ion -1 {salt_conc} 2.0
+ion 1 {self.salt} 2.0
+ion -1 {self.salt} 2.0
 pdie 12.0
 sdie 78.54
 sdens 10.0
@@ -1353,43 +1361,53 @@ temp {self.temperature}
 gamma 0.105
 calcenergy no
 calcforce no
-write pot dx {structure_name}.elec.tmp
+write pot dx {self.structure_name}.elec
 end
 quit"""
 
-        with open(f"{structure_name}.apbs", 'w') as f:
-            f.write(config)
+        try:
+            with open(f"{self.structure_name}.apbs", 'w') as f:
+                f.write(config)
+        except IOError as e:
+            raise IOError(f"Failed to write APBS configuration file: {e}")
             
-    def run_calculation(self, structure_name, xyz_dims, work_dir=".", 
-                       salt_conc=0.15,buffer=50):
+    def run_calculation(self, workdir=".") -> Path:
         """Run APBS calculation.
         
         Args:
-            structure_name: Base name of structure files
-            xyz_dims: [x, y, z] dimensions
-            work_dir: Working directory
-            salt_conc: Salt concentration in M
-            temperature: Temperature in K
+            workdir: Working directory for the calculation
             
         Returns:
-            Path to output potential file
-        """
-        original_dir = os.getcwd()
-        try:
-            os.chdir(work_dir)
+            Path: Path to output potential file
             
-            # Write config
-            self.write_config(structure_name, xyz_dims, salt_conc, self.temperature, buffer=buffer)
+        Raises:
+            RuntimeError: If APBS calculation fails
+            FileNotFoundError: If output file is not generated
+        """
+        workdir = Path(workdir)
+        original_dir = Path.cwd()
+        
+        try:
+            os.chdir(workdir)
+            
+            # Write configuration file
+            self.write_config()
             
             # Run APBS
-            result = subprocess.run([str(self.binary), f"{structure_name}.apbs"],
-                                 capture_output=True,
-                                 text=True, 
-                                 check=True)
+            try:
+                result = subprocess.run(
+                    [str(self.binary), f"{self.structure_name}.apbs"],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"APBS calculation failed: {e.stderr}")
             
-            output_file = Path(f"{structure_name}.elec.dx")
+            # Check for output file
+            output_file = Path(f"{self.structure_name}.elec.dx")
             if not output_file.exists():
-                raise RuntimeError("APBS failed to generate output file")
+                raise FileNotFoundError("APBS failed to generate output file")
                 
             return output_file
             

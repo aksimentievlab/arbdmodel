@@ -251,15 +251,12 @@ class PdbProcessor:
             dimensions = [float(line.strip()) for line in f.readlines()]
             
         # Initialize APBS runner
-        apbs_runner = APBSRunner(self.simconf)
+        apbs_runner = APBSRunner(structure_name=aligned_name, simconf=self.simconf,
+            xyz_dims=dimensions,
+            buffer=buffer)
         
         # Write APBS configuration using the runner
-        apbs_runner.run_calculation(
-            structure_name=aligned_name, 
-            xyz_dims=dimensions,
-            salt_conc=0.15,
-            buffer=buffer
-        )
+        apbs_runner.run_calculation(workdir=self.work_dir)
         
         # Run APBS
         cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
