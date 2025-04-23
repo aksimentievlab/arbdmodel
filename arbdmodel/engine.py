@@ -1124,7 +1124,9 @@ class HydroProRunner:
         if platform.system() != 'Windows' and not os.access(self.binary, os.X_OK):
             os.chmod(self.binary, 0o755)
             
-        self.structure_name = structure_name
+        self.structure_name = structure_name[0:10] if len(structure_name)>10 else structure_name
+
+        self.full_name =structure_name
         self.mass = mass
         self.cal_type = cal_type
         
@@ -1154,7 +1156,7 @@ class HydroProRunner:
         with open(output_path, 'w') as f:
             # Basic identification
             f.write(f"{self.structure_name}\n")                  # Name of molecule
-            f.write(f"{self.structure_name}.hydro\n")           # Base name for output files
+            f.write(f"{self.structure_name[0:10]}.hydro\n")           # Base name for output files
             f.write("hydro.pdb\n")                         
             f.write("1\n")                                  # Calculation type always 1 (bead surface model)
 
@@ -1241,24 +1243,20 @@ class HydroProRunner:
             self.write_config()
             
             # Link structure file
-            pdb_path = Path(f"{structure_name}.pdb")
+            pdb_path = Path(f"{self.full_name}.pdb")
             if not pdb_path.exists():
                 raise FileNotFoundError(f"Structure file not found: {pdb_path}")
+            
             os.symlink(pdb_path, "hydro.pdb")
-            
             # Run HydroPro
-            result = subprocess.run([str(self.binary)], 
-                                 capture_output=True, 
-                                 text=True,
-                                 check=True)
+            result = subprocess.run(str(self.binary), capture_output=True, 
+                                 text=True,check=True)
             
-            # Parse results
+
             trans_damp, rot_damp = self.parse_output(f"{structure_name}.hydro-res.txt")
             
-            return {
-                "translation_damping": trans_damp,
-                "rotation_damping": rot_damp
-            }
+            return trans_damp, rot_damp
+            
             
         finally:
             if os.path.exists("hydro.pdb"):
@@ -1268,7 +1266,8 @@ class HydroProRunner:
 class APBSRunner:
     """Interface to APBS for electrostatics calculations"""
     
-    def __init__(self,simconf=None, binary_path=None, psize_script=None):
+    def __init__(self, structure_name, xyz_dims, 
+                    buffer=50, large_system=False,dividend=2,simconf=None, binary_path=None, psize_script=None):
         """Initialize APBS interface.
         Args:
             binary_path: Path to APBS executable. If None, uses path from simconf
@@ -1295,10 +1294,15 @@ class APBSRunner:
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
+        self.salt=simconf.salt
+        self.structure_name=structure_name
+        self.xyz_dims=xyz_dims
+        self.buffer=buffer
+        self.large_system = large_system
 
         self.psize = Path(psize_script) if psize_script else None
         
-    def write_config(self, structure_name, xyz_dims, salt_conc=0.15, 
+    def write_config(self, structure_name, xyz_dims, 
                     buffer=50, large_system='Off',dividend=2):
         """Write APBS configuration file.
         
@@ -1313,13 +1317,13 @@ class APBSRunner:
         """
         # Calculate grid dimensions
         xyz_cg = [str(int(dim + buffer)) for dim in xyz_dims]
+        salt_conc=self.salt
         
         if large_system == 'Off':
             xyz_dime = xyz_cg
             center = 'mol 1'
         else:
             # For large systems, reduce grid density
-            dividend = 2
             xyz_dime = [str(int((dim + buffer) / dividend)) for dim in xyz_dims]
             center = 'mol 1'
             
@@ -1357,7 +1361,7 @@ quit"""
             f.write(config)
             
     def run_calculation(self, structure_name, xyz_dims, work_dir=".", 
-                       salt_conc=0.15, temperature=300):
+                       salt_conc=0.15,buffer=50):
         """Run APBS calculation.
         
         Args:
@@ -1375,7 +1379,7 @@ quit"""
             os.chdir(work_dir)
             
             # Write config
-            self.write_config(structure_name, xyz_dims, salt_conc, temperature)
+            self.write_config(structure_name, xyz_dims, salt_conc, self.temperature, buffer=buffer)
             
             # Run APBS
             result = subprocess.run([str(self.binary), f"{structure_name}.apbs"],
@@ -1444,13 +1448,17 @@ while { $continue } {
     ## Fix left-handed principle axes sometimes returned by 'measure inertia'
     if { ! [rotationIsRightHanded $R] } {
         puts "This was true"
+        # puts "rotation $R is not right handed! Fixing!"
         set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
     }
 
     puts "My rotation is here: $R"
     puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
 
+    ## Apply rotation and check that it worked
     $all move $R
+
+    ## Get current moment of inertia to determine rotation to align
 
     lassign [measure inertia $sel moments] com principleAxes moments
     puts $principleAxes
@@ -1466,59 +1474,28 @@ while { $continue } {
     }
 }
 
-## Write output files to specified working directory
-set outfiles {
-    {rotate-back.txt "transformation matrix"}
-    {inertia.txt "moments of inertia"}
-    {mass.txt "total mass"}
-    {dimension.dat "xyz dimensions"}
-    {aligned.pdb "aligned structure"}
-    {aligned.psf "aligned topology"}
+## Write transformation matrix to return to original conformation
+set ch [open $prefix.rotate-back.txt w]
+foreach line [trans_to_rotate [transtranspose $R]] {
+    puts $ch $line
 }
+close $ch
 
-foreach {filename desc} $outfiles {
-    set outfile [file join [file dirname $prefix] $filename]
-    puts "Writing $desc to $outfile"
-    
-    switch $filename {
-        "rotate-back.txt" {
-            set ch [open $outfile w]
-            foreach line [trans_to_rotate [transtranspose $R]] {
-                puts $ch $line
-            }
-            close $ch
-        }
-        "inertia.txt" {
-            set ms ""
-            foreach m $moments { lappend ms [veclength $m] }
-            set ch [open $outfile w]
-            puts $ch $ms
-            close $ch
-        }
-        "mass.txt" {
-            set ch [open $outfile w]
-            puts $ch [measure sumweights $sel weight mass]
-            close $ch
-        }
-        "dimension.dat" {
-            set ch [open $outfile w]
-            set minmax [measure minmax $sel]
-            set x_dim [expr [lindex [lindex $minmax 1] 0] - [lindex [lindex $minmax 0] 0]]
-            set y_dim [expr [lindex [lindex $minmax 1] 1] - [lindex [lindex $minmax 0] 1]]
-            set z_dim [expr [lindex [lindex $minmax 1] 2] - [lindex [lindex $minmax 0] 2]]
-            puts $ch $x_dim
-            puts $ch $y_dim
-            puts $ch $z_dim
-            close $ch
-        }
-        "aligned.pdb" {
-            $sel writepdb $outfile
-        }
-        "aligned.psf" {
-            $sel writepsf $outfile
-        }
-    }
-}'''
+## Write out moments of inertia
+set ms ""
+foreach m $moments { lappend ms [veclength $m] }
+set ch [open $prefix.inertia.txt w]
+puts $ch $ms
+close $ch
+
+## Write out mass
+set ch [open $prefix.mass.txt w]
+puts $ch [measure sumweights $sel weight mass]
+close $ch
+
+## Write out psf, pdb of transformed selection
+$sel writepdb $prefix.aligned.pdb
+$sel writepsf $prefix.aligned.psf'''
         
         with open(script_path, 'w') as f:
             f.write(script_content)

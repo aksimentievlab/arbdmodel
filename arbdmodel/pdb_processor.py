@@ -16,7 +16,7 @@ class PdbProcessor:
     Common Processor class for both diffusive and static rigidbody
     """
     
-    def __init__(self, structure_path, simconf=None, work_dir=None):
+    def __init__(self, structure_path, simconf=None, work_dir=None, tcl_path=None):
         """
         Initialize self with structure file
         
@@ -60,7 +60,9 @@ class PdbProcessor:
         self.elec_dx = None
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
-        self.tclgen=TclScriptGenerator(work_dir=self.work_dir)
+        if tcl_path is None:
+            tcl_path=Path.cwd().absolute()
+        self.tclgen=TclScriptGenerator(work_dir=tcl_path)
         
     def process_diffusive_structure(self):
         """Process structure to get all properties and potential maps"""
@@ -157,59 +159,18 @@ class PdbProcessor:
             return
             
         # Initialize HydroPro runner
+        
         hydro_runner = HydroProRunner(
-            mass=self.mass,
-            simconf=self.simconf,
-            structure_name=self.base_name)
-        
-        # Write config
+                mass=self.mass,
+                simconf=self.simconf,
+                structure_name=self.base_name)
+            
+            # Write config
         hydro_runner.write_config(output_path=self.work_dir / "hydropro.dat")
-        
-        # Create symlink to aligned PDB
-        hydro_pdb = self.work_dir / "hydro.pdb"
-        try:
-            if hydro_pdb.exists():
-                os.unlink(hydro_pdb)
-            os.symlink(self.aligned_pdb, hydro_pdb)
-            
-            # Run HydroPro
-            cmd = f"cd {self.work_dir} && {self.hydro_path}"
-            subprocess.run(cmd, shell=True, check=True)
-            
-            # Parse results
-            results_file = self.work_dir / f"{self.base_name}.hydro-res.txt"
-            if not results_file.exists():
-                # Try with truncated name for HydroPro compatibility
-                if len(self.base_name) > 20:
-                    short_name = self.base_name[:20]
-                    results_file = self.work_dir / f"{short_name}.hydro-res.txt"
+        self.transdamp, self.rotdamp=hydro_runner.run_calculation(self.work_dir)
                 
-                if not results_file.exists():
-                    # Search for any -res.txt file
-                    results_files = list(self.work_dir.glob("*.hydro-res.txt"))
-                    if not results_files:
-                        raise FileNotFoundError("No HydroPro results file found")
-                    results_file = results_files[0]
+        logger.info(f"Hydrodynamic properties: trans_damp={self.transdamp}, rot_damp={self.rotdamp}")
             
-            # Parse damping coefficients
-            self.transdamp, self.rotdamp = hydro_runner.parse_output(results_file)
-            
-            # Write to a damping-coeffs.txt file for reference
-            damping_file = self.work_dir / f"{self.base_name}.damping-coeffs.txt"
-            with open(damping_file, 'w') as f:
-                f.write(f"{self.transdamp[0]} {self.transdamp[1]} {self.transdamp[2]}\n")
-                f.write(f"{self.rotdamp[0]} {self.rotdamp[1]} {self.rotdamp[2]}\n")
-                
-            logger.info(f"Hydrodynamic properties: trans_damp={self.transdamp}, rot_damp={self.rotdamp}")
-            
-        except Exception as e:
-            logger.error(f"Error calculating hydrodynamic properties: {e}")
-            self.transdamp = [1.0, 1.0, 1.0]
-            self.rotdamp = [1.0, 1.0, 1.0]
-        finally:
-            # Clean up
-            if hydro_pdb.exists():
-                os.unlink(hydro_pdb)
     
     def generate_charge_distribution(self, resolution=2.0):
         """Generate charge distribution using VMD."""
@@ -217,13 +178,13 @@ class PdbProcessor:
         aligned_path = str(self.work_dir / aligned_name)
         
         # Create TCL script for VMD
-        charge_tcl = self.work_dir / "charge-density.tcl"
+        charge_tcl =  Path("charge-density.tcl")
         if not charge_tcl.exists():
             charge_tcl = self.tclgen.write_charge_density_tcl(resolution=resolution)
             logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
-        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
+        cmd = f"{self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
         subprocess.run(cmd, shell=True, check=True)
         
         # Check if charge distribution was created successfully
@@ -297,7 +258,6 @@ class PdbProcessor:
             structure_name=aligned_name, 
             xyz_dims=dimensions,
             salt_conc=0.15,
-            temperature=self.temperature,
             buffer=buffer
         )
         
@@ -349,7 +309,7 @@ class PdbProcessor:
             self.vdw_den_dxs.append(den_file)
         
         logger.info(f"VDW maps generated for {aligned_name}")
-        
+
     def clustering(self,num_heavy_cluster,hyd="hyd.dat",tmp="tmp.dat"):
         import numpy as np
         from scipy.cluster import vq
@@ -373,18 +333,18 @@ class PdbProcessor:
         ind = 0;
         scalebase = d2w[ind,:];
         while np.any(scalebase == 0):
-        ind = ind + 1
-        scalebase = d2w[ind,:]
+            ind = ind + 1
+            scalebase = d2w[ind,:]
 
-        scale = d2[ind,:] / d2w[ind,:]
+            scale = d2[ind,:] / d2w[ind,:]
 
-        ind = 0;
-        scalebase = d2w_hyd[ind,:];
+            ind = 0;
+            scalebase = d2w_hyd[ind,:];
         while np.any(scalebase == 0):
-        ind = ind + 1
-        scalebase = d2w_hyd[ind,:]
+            ind = ind + 1
+            scalebase = d2w_hyd[ind,:]
 
-        scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
+            scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
 
         ## perform cluster analysis
         np.random.seed(seed=42)

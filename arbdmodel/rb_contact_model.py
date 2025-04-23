@@ -11,7 +11,7 @@ import numpy as np
 from pathlib import Path
 from .logger import logger
 from .coords import Generate_coordinates, Generate_spanning_vectors
-from core_objects import RigidBodyType, RigidBody
+from .core_objects import RigidBodyType, RigidBody
 from .pdb_processor import PdbProcessor
   
 class RBContactModel(ArbdModel):
