@@ -2177,7 +2177,7 @@ particle {name}
 num {num}
 {dynamics}
 """.format(**particleParams))
-                if 'grid_potentials' in particleParams:
+                if 'grid_potentials' in particleParams and len(pt.grid_potentials) > 0:
                     grids = []
                     scales = []
                     boundary_conditions = []
@@ -2377,7 +2377,7 @@ rotDamping {' '.join(map(str,gamma_rot))}
         write_null_dx = False
         for pt,(num,num_rb) in model.getParticleTypesAndCounts():
             if num+num_rb == 0: continue
-            if "grid_potentials" not in pt.__dict__:
+            if "grid_potentials" not in pt.__dict__ or len(pt.grid_potentials) == 0:
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:
                     fh.write("""object 1 class gridpositions counts  2 2 2
