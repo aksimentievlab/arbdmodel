@@ -1146,6 +1146,8 @@ class ArbdModel(PdbModel):
         ## Combine interactions
         for i, tA, tB in other_model.nonbonded_interactions:
             devlogger.debug(f'Combining model interactions {i} {tA} {tB}')
+            if tA is not None and tA.name in _type_alias: tA = _type_alias[tA.name]
+            if tB is not None and tB.name in _type_alias: tB = _type_alias[tB.name]
             self.add_nonbonded_interaction(i,tA,tB)
                     
         # for g in other_model.children:
@@ -1317,13 +1319,14 @@ class ArbdModel(PdbModel):
         for cp in (False,True):
             for s,A,B in self.nonbonded_interactions:
                 if A is None or B is None:
+                    if cp is False: continue
                     if A is None and B is None:
                         return s
                     elif A is None and typeB.is_same_type(B, consider_parents=cp):
                         return s
                     elif B is None and typeA.is_same_type(A, consider_parents=cp):
                         return s
-                elif typeA.is_same_type(A,consider_parents=False) and typeB.is_same_type(B,consider_parents=cp):
+                elif typeA.is_same_type(A,consider_parents=cp) and typeB.is_same_type(B,consider_parents=cp):
                     return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
