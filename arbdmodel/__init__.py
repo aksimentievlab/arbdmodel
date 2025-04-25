@@ -2306,8 +2306,6 @@ tabulatedPotential  1
                 fh.write("inputVecangles %s\n" % self._vector_angle_filename)
             if len(exclusions) > 0:
                 fh.write("inputExcludes %s\n" % self._exclusion_filename)
-            if len(vector_angles) > 0:
-                fh.write("inputVecangles %s\n" % self._vector_angle_filename)
             if len(bond_angles) > 0:
                 fh.write("inputBondAngles %s\n" % self._bond_angle_filename)
             if len(prod_pots) > 0:
