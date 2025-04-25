@@ -527,17 +527,14 @@ class ParticleType():
         for key,val in kwargs.items():
             self.__dict__[key] = val
 
-    def is_same_type(self, other, consider_parents=True):
+    def is_same_type(self, other, consider_parent=True):
+        """ consider_parent only affects self, not other """
         assert( type(other) == type(self) )
         if self == other:
             return True
-        elif consider_parents:
+        elif consider_parent:
             if self.parent is not None and self.parent == other:
                 return True
-            elif other.parent is not None and other.parent == self:
-                return True
-            # elif other.parent is not None and self.parent is not None and other.parent == self.parent:
-            #     return True
         else:
             return False
 
@@ -1338,11 +1335,11 @@ class ArbdModel(PdbModel):
                     if cp is False: continue
                     if A is None and B is None:
                         return s
-                    elif A is None and typeB.is_same_type(B, consider_parents=cp):
+                    elif A is None and typeB.is_same_type(B, consider_parent=cp):
                         return s
-                    elif B is None and typeA.is_same_type(A, consider_parents=cp):
+                    elif B is None and typeA.is_same_type(A, consider_parent=cp):
                         return s
-                elif typeA.is_same_type(A,consider_parents=cp) and typeB.is_same_type(B,consider_parents=cp):
+                elif typeA.is_same_type(A,consider_parent=cp) and typeB.is_same_type(B,consider_parent=cp):
                     return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
