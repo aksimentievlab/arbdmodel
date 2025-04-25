@@ -62,35 +62,13 @@ class PdbProcessor:
         self.vdw_den_dxs = []
         if tcl_path is None:
             tcl_path=Path.cwd().absolute()
+        self.tcl_path=tcl_path
         self.tclgen=TclScriptGenerator(work_dir=tcl_path)
-        
-    def process_diffusive_structure(self):
-        """Process structure to get all properties and potential maps"""
-        # Step 1: Align structure
-        self.align_structure()
-        
-        # Step 2: Calculate hydrodynamic properties
-        self.calculate_hydrodynamic_properties()
-        
-        # Step 3: Generate charge distribution
-        self.generate_charge_distribution()
-        
-        # Step 4: Generate electrostatic map
-        self.generate_electrostatic_map()
-        
-        # Step 5: Generate VDW maps
-        self.generate_vdw_maps()
-        
-        # Step 6: Apply Gaussian smoothing
-        self.apply_gaussian_smoothing()
-        
-        # Return a dictionary of grid files for use in RigidBodyType
-        return self.get_grid_files()
         
     def align_structure(self):
         """Align structure to principal axes using VMD."""
         # Write alignment TCL script
-        align_tcl = self.work_dir / "align.tcl"
+        align_tcl = self.tcl_path / "align.tcl"
         if not align_tcl.exists():
             align_tcl = self.tclgen.write_align_tcl()
             logger.debug(f"Alignment script written to {align_tcl}")
@@ -128,7 +106,8 @@ class PdbProcessor:
             # Verify alignment succeeded
             self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
             self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
-            
+            self.base_name=f"{self.base_name}.aligned"  # Reasign base name to aligned pdb and psf
+
             if not self.aligned_pdb.exists() or not self.aligned_psf.exists():
                 raise FileNotFoundError(f"Alignment failed: {self.aligned_pdb} or {self.aligned_psf} not found")
             
@@ -243,7 +222,7 @@ class PdbProcessor:
         aligned_name = f"{self.base_name}.aligned"
         
         # Read system dimensions
-        dimension_file = self.work_dir / f"{aligned_name}.dimension.dat"
+        dimension_file = self.tcl_path / f"{aligned_name}.dimension.dat"
         if not dimension_file.exists():
             raise FileNotFoundError(f"Dimension file not found: {dimension_file}")
             
@@ -276,9 +255,15 @@ class PdbProcessor:
         logger.info(f"Electrostatic map generated for {aligned_name}")
     
     
-        
+    def generate_vdw_maps(self):
         # Run VMD to generate VDW maps
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {aligned_path} < {vdw_tcl}"
+        vdw_tcl = self.tcl_path / "align.tcl"
+        if not vdw_tcl.exists():
+            vdw_tcl = self.tclgen.write_vdw_tcl()
+            logger.debug(f"Alignment script written to {vdw_tcl}")
+        
+
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name}.aligned < {vdw_tcl}"
         subprocess.run(cmd, shell=True, check=True)
         
         # Process all VDW maps
@@ -286,8 +271,8 @@ class PdbProcessor:
         self.vdw_den_dxs = []
         
         for i in range(self.num_heavy_cluster + 1):
-            pot_file = self.work_dir / f"{aligned_name}.vdw{i}.pot.dx"
-            den_file = self.work_dir / f"{aligned_name}.vdw{i}.den.dx"
+            pot_file = self.work_dir / f"{self.aligned_name}.vdw{i}.pot.dx"
+            den_file = self.work_dir / f"{self.aligned_name}.vdw{i}.den.dx"
             
             if not pot_file.exists():
                 logger.warning(f"VDW potential file not found: {pot_file}")
@@ -305,7 +290,7 @@ class PdbProcessor:
             self.vdw_pot_dxs.append(pot_file)
             self.vdw_den_dxs.append(den_file)
         
-        logger.info(f"VDW maps generated for {aligned_name}")
+        logger.info(f"VDW maps generated for {self.aligned_name}")
 
     def clustering(self,num_heavy_cluster,hyd="hyd.dat",tmp="tmp.dat"):
         import numpy as np
@@ -469,7 +454,70 @@ quit
         
         logger.info(f"Pdb Processor generated '{self.base_name}' as RigidBodyType successfully")
         return rb
-    
+
+    def get_static_grids(self, is_gigantic=False):
+        """
+        Process a static structure and return its grid files.
+        Similar to get_rb_type() but for static objects.
+        
+        Args:
+            is_gigantic: Whether to process as a gigantic object
+            
+        Returns:
+            dict: Dictionary containing:
+                - potential_grids: List of (name, file, scale) tuples
+                - charge_grids: List of (name, file) tuples
+                - elec_grid: Path to electrostatic grid file
+        """
+        # Step 1: Align structure
+        self.align_structure()
+        
+        # Step 2: Generate charge distribution
+        self.generate_charge_distribution()
+        
+        # Step 3: Generate electrostatic map
+        self.generate_electrostatic_map()
+        
+        # Step 4: Generate VDW maps
+        if is_gigantic:
+            self._process_gigantic_vdw(
+                potResolution=self.pot_resolution,  # Double resolution for gigantic
+                denResolution=self.den_resolution
+            )
+        else:
+            self._process_standard_vdw(
+                potResolution=self.pot_resolution,
+                denResolution=self.den_resolution)
+        
+        # Step 5: Apply Gaussian smoothing
+        self.apply_gaussian_smoothing()
+        
+        # Step 6: Collect and return grid files
+        potential_grids = []
+        charge_grids = []
+        
+        # Add electrostatic grid
+        if hasattr(self, 'elec_smoothed_dx') and self.elec_smoothed_dx.exists():
+            potential_grids.append(("elec", str(self.elec_smoothed_dx), 0.59616195))
+            
+        # Add charge grid
+        if self.charge_dx and self.charge_dx.exists():
+            charge_grids.append(("elec", str(self.charge_dx)))
+            
+        # Add VDW grids
+        for i in range(self.num_heavy_cluster + 1):
+            vdw_key = f"vdw{i}"
+            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            
+            if pot_file.exists():
+                potential_grids.append((vdw_key, str(pot_file), 0.59616195))
+        
+        logger.info(f"Generated static grids for {self.base_name}")
+        return {
+            "potential_grids": potential_grids,
+            "charge_grids": charge_grids,
+            "elec_grid": self.elec_smoothed_dx if hasattr(self, 'elec_smoothed_dx') else None}
+
     def _find_segments_num(self, dimensions, threshold=None):
         """Find number of segments needed for a gigantic object.
         
@@ -486,150 +534,85 @@ quit
         in_xyz = [float(elm) for elm in dimensions]
         segments = [np.ceil(elm / threshold) for elm in in_xyz]
         return segments[0], segments[1], segments[2]
-    
-    
-    def process_standard(self):
-        """Process the structure normally (without segmentation)"""
-        logger.info(f"Processing static object: {self.name}")
-        
-        # Use static directory for output
-        
-        # Create processor and generate maps
-        self.align_structure()
-        
-        
-        # Step 3: Generate charge distribution
-        self.generate_charge_distribution()
-        
-        # Step 4: Generate electrostatic map
-        self.generate_electrostatic_map()
-        
-        # Step 5: Generate VDW maps
-        self.generate_vdw_maps()
-        
-        # Step 6: Apply Gaussian smoothing
-        self.apply_gaussian_smoothing()
-        
-        # Collect grid files from the processor
-        grid_files = self.get_grid_files()
-        
-        # Store grids
-        self.potential_grids = grid_files.get('potential_grids', [])
-        self.charge_grids = grid_files.get('charge_grids', [])
-        self.elec_grid = self.elec_smoothed_dx
-    
-    def process_gigantic(self):
-        """Process a gigantic structure by segmentation"""
-        from subprocess import run
-        import MDAnalysis as mda
-        
-        logger.info(f"Processing gigantic static object: {self.name}")
-        
-        # Use static directory for output
-        static_dir = self.work_dir / "static" / self.name
-        
-        # Get dimensions by reading the structure file
-        u = mda.Universe(str(self.structure_path))
-        min_coords = u.atoms.positions.min(axis=0)
-        max_coords = u.atoms.positions.max(axis=0)
-        dimensions = max_coords - min_coords
-        
-        # Calculate segmentation
-        nx, ny, nz = self._find_segments_num(dimensions, self.threshold)
-        logger.info(f"Segmenting into {nx}x{ny}x{nz} parts")
-        
-        # Create segment directory
-        segments_dir = static_dir / "segments"
-        os.makedirs(segments_dir, exist_ok=True)
-        
-        # Write VMD script for segmentation
-        segment_script = static_dir / "segment.tcl"
-        with open(segment_script, 'w') as f:
-            f.write(f"""
-# Segment structure
-mol new {self.structure_path}
-set all [atomselect top all]
-set mM [measure minmax $all]
-set dimAl [vecsub [lindex $mM 1] [lindex $mM 0]]
-set min_x [expr [lindex [lindex $mM 0] 0] - 1]
-set min_y [expr [lindex [lindex $mM 0] 1] - 1]
-set min_z [expr [lindex [lindex $mM 0] 2] - 1]
-set dx [expr ([lindex $dimAl 0] + 2)/{nx}]
-set dy [expr ([lindex $dimAl 1] + 2)/{ny}]
-set dz [expr ([lindex $dimAl 2] + 2)/{nz}]
 
-set count 0
-for {{set i 0}} {{$i < {nx}}} {{incr i}} {{
-  for {{set j 0}} {{$j < {ny}}} {{incr j}} {{
-    for {{set k 0}} {{$k < {nz}}} {{incr k}} {{
-      set outName {segments_dir}/segment_$count
-      set low_x [expr $min_x + $i * $dx]
-      set low_y [expr $min_y + $j * $dy]
-      set low_z [expr $min_z + $k * $dz]
-      set up_x [expr $min_x + ($i+1) * $dx]
-      set up_y [expr $min_y + ($j+1) * $dy]
-      set up_z [expr $min_z + ($k+1) * $dz]
-      set sel [atomselect top "(x > $low_x and x < $up_x) and (y > $low_y and y < $up_y) and (z > $low_z and z < $up_z)"]
-      set sel_N [$sel num]
-      if {{$sel_N > 0}} {{
-        $sel writepqr $outName.pqr
-        $sel writepsf $outName.psf
-        $sel writepdb $outName.pdb
-        set count [expr $count + 1]
-      }}
-    }}
-  }}
-}}
-exit
-""")
-        
-        # Run segmentation
-        vmd_path = self.simconf.get_binary('vmd')
-        if not vmd_path:
-            raise ValueError("VMD binary not found in configuration")
-            
-        run([vmd_path, "-dispdev", "text", "-e", str(segment_script)], check=True)
-        
-        # Process each segment
-        segments = list(segments_dir.glob("segment_*.pdb"))
-        logger.info(f"Found {len(segments)} segments to process")
-        
-        # Process each segment
-        for i, segment in enumerate(segments):
-            segment_dir = segments_dir / segment.stem
-            os.makedirs(segment_dir, exist_ok=True)
-            
-            logger.info(f"Processing segment {i+1}/{len(segments)}: {segment.stem}")
-            
-            segment_processor = PdbProcessor(
-                structure_path=segment,
-                simconf=self.simconf,
-                work_dir=segment_dir)
-            
-            segment_processor.process_standard()
-            
-            # Collect grid maps from this segment
-            grid_files = segment_processor.get_grid_files()
-            
-            # Store grids from this segment
-            self.potential_grids.extend(grid_files.get('potential_grids', []))
-            self.charge_grids.extend(grid_files.get('charge_grids', []))
-            
-            # Store the first electrostatic grid as the main one
-            if hasattr(segment_processor, 'elec_smoothed_dx') and not self.elec_grid:
-                self.elec_grid = segment_processor.elec_smoothed_dx
-        
-        logger.info(f"Completed processing gigantic static object: {self.name}")
+    def process_static_vdw(self, potResolution=1, denResolution=2, is_gigantic=False):
+        """Process VDW maps for static objects"""
 
-    def get_grid_from_pdb(self,is_gigantic=False, threshold=300):
-        """Process the structure file to create potential and density grids"""
-        if not self.structure_path:
-            logger.warning("No structure path provided for static object")
-            return
-        
-        self.threshold=threshold
+        # Generate maps based on size
         if is_gigantic:
-            self.process_gigantic()
+            self._process_gigantic_vdw(potResolution, denResolution)
         else:
-            self.process_standard()
-    
+            self._process_standard_vdw(potResolution, denResolution)
+
+    def _process_standard_vdw(self, potResolution, denResolution):
+        """Process standard static object VDW maps"""
+        # Generate static VDW map script
+        vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
+        
+        # Run VMD
+        cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_script}"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        # Bound the grid values
+        for i in range(self.num_heavy_cluster + 1):
+            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            if os.path.isfile(pot_file):
+                out_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.final.dx"
+                Bound_grid(pot_file, out_file, -20, 20)
+
+    def _process_gigantic_vdw(self, potResolution, denResolution):
+        """Process gigantic static object VDW maps with segmentation"""
+        # First generate VDW maps for each segment
+        for segment_idx in range(self.segment_count + 1):
+            segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
+            
+            # Generate VDW maps for this segment
+            vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
+            cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} < {vdw_script}"
+            subprocess.run(cmd, shell=True, check=True)
+
+        # Write map gluing script
+        glue_script = self.write_map_gluing_script()
+        
+        # Glue maps for each VDW cluster
+        for i in range(self.num_heavy_cluster + 1):
+            last_map = None
+            
+            # Process each segment
+            for j in range(self.segment_count + 1):
+                current_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.dx"
+                temp_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.tmp.dx"
+                
+                if j == 0:
+                    # First segment - just copy
+                    shutil.copy(current_map, temp_map)
+                    last_map = temp_map
+                else:
+                    # Glue with previous map
+                    cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {last_map} {current_map} {temp_map} < {glue_script}"
+                    subprocess.run(cmd, shell=True, check=True)
+                    last_map = temp_map
+            
+            # Create final map
+            if os.path.isfile(last_map):
+                temp_out = self.work_dir / f"{self.base_name}.vdw{i}.pot.tmp.dx"
+                final_out = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+                
+                shutil.copy(last_map, temp_out)
+                Bound_grid(temp_out, final_out, -20, 20)
+
+    def write_map_gluing_script(self):
+        """Write TCL script for gluing maps"""
+        script_path = self.work_dir / "glue_maps.tcl"
+        
+        script_content = '''set prefixes $argv
+set InMap1 [lindex $prefixes 0]
+set InMap2 [lindex $prefixes 1]
+set OutMap [lindex $prefixes 2]
+
+voltool add -i1 $InMap1 -i2 $InMap2 -union -nointerp -o $OutMap
+'''
+        with open(script_path, 'w') as f:
+            f.write(script_content)
+            
+        return script_path

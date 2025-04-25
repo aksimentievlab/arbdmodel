@@ -199,7 +199,7 @@ def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
 def Bound_grid(inFile, outFile, lowerBound, upperBound):
     """Apply bounds to grid values"""
     # Fix scientific notation
-    cmd_in = "sed -r 's/^([0-9]+)e/\1.0e/g; s/ ([0-9]+)e/ \1.0e/' " + inFile + " > bound_grid_temp0.dx"
+    cmd_in = "sed -r 's/^([0-9]+)e/\1.0e/g; s/ ([0-9]+)e/ \1.0e/' " + str(inFile) + " > bound_grid_temp0.dx"
     os.system(cmd_in)
     cmd_in = "sed -r 's/^(-[0-9]+)e/\1.0e/g; s/ (-[0-9]+)e/ \1.0e/' bound_grid_temp0.dx > bound_grid_temp1.dx"
     os.system(cmd_in)
