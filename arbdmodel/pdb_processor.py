@@ -5,7 +5,7 @@ from pathlib import Path
 from .logger import logger
 from .engine import HydroProRunner, APBSRunner
 from .core_objects import RigidBodyType
-from .grid import writeDx, loadGrid, Bound_grid
+from .grid import writeDx, loadGrid, Bound_grid,smooth_grid
 from .engine import TclScriptGenerator
 #Originally SimpleARBD by Chun
 
@@ -16,7 +16,7 @@ class PdbProcessor:
     Common Processor class for both diffusive and static rigidbody
     """
     
-    def __init__(self, structure_path, simconf=None, work_dir=None, tcl_path=None):
+    def __init__(self, structure_path, simconf=None, work_dir=None, tcl_path=None,charmm_params_dir="charmm_params",): #remember to change to None
         """
         Initialize self with structure file
         
@@ -63,7 +63,7 @@ class PdbProcessor:
         if tcl_path is None:
             tcl_path=Path.cwd().absolute()
         self.tcl_path=tcl_path
-        self.tclgen=TclScriptGenerator(work_dir=tcl_path)
+        self.tclgen=TclScriptGenerator(work_dir=tcl_path,charmm_params_dir=charmm_params_dir)
         
     def align_structure(self):
         """Align structure to principal axes using VMD."""
@@ -106,8 +106,7 @@ class PdbProcessor:
             # Verify alignment succeeded
             self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
             self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
-            self.base_name=f"{self.base_name}.aligned"  # Reasign base name to aligned pdb and psf
-
+            
             if not self.aligned_pdb.exists() or not self.aligned_psf.exists():
                 raise FileNotFoundError(f"Alignment failed: {self.aligned_pdb} or {self.aligned_psf} not found")
             
@@ -125,6 +124,8 @@ class PdbProcessor:
                 self.moment_of_inertia = [float(x) for x in f.readline().strip().split()]
                 
             logger.info(f"Structure aligned: Mass = {self.mass}, Inertia = {self.moment_of_inertia}")
+            self.base_name=f"{self.base_name}.aligned"  # Reasign base name to aligned pdb and psf
+
         except Exception as e:
             logger.error(f"Error during alignment: {e}")
             raise
@@ -153,11 +154,11 @@ class PdbProcessor:
     
     def generate_charge_distribution(self, resolution=2.0):
         """Generate charge distribution using VMD."""
-        aligned_name = f"{self.base_name}.aligned"
+        aligned_name = f"{self.base_name}"
         aligned_path = str(self.work_dir / aligned_name)
         
         # Create TCL script for VMD
-        charge_tcl =  Path("charge-density.tcl")
+        charge_tcl = self.tcl_path / "charge-density.tcl"
         if not charge_tcl.exists():
             charge_tcl = self.tclgen.write_charge_density_tcl(resolution=resolution)
             logger.debug(f"Charge density script written to {charge_tcl}")
@@ -219,13 +220,11 @@ class PdbProcessor:
             logger.warning("APBS executable not provided, skipping electrostatic calculations")
             return
         
-        aligned_name = f"{self.base_name}.aligned"
+        aligned_name = f"{self.base_name}"
         
         # Read system dimensions
-        dimension_file = self.tcl_path / f"{aligned_name}.dimension.dat"
-        if not dimension_file.exists():
-            raise FileNotFoundError(f"Dimension file not found: {dimension_file}")
-            
+        dimension_file = self.work_dir / f"{aligned_name}.dimension.dat"
+        
         with open(dimension_file, 'r') as f:
             dimensions = [float(line.strip()) for line in f.readlines()]
             
@@ -238,41 +237,32 @@ class PdbProcessor:
         apbs_runner.run_calculation(workdir=self.work_dir)
         
         # Run APBS
-        cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
-        subprocess.run(cmd, shell=True, check=True)
+        #cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
+        #subprocess.run(cmd, shell=True, check=True)
         
-        # Bound the potential values
-        tmp_file = self.work_dir / f"{aligned_name}.elec.tmp.dx"
         out_file = self.work_dir / f"{aligned_name}.elec.dx"
-        Bound_grid(
-            inFile=tmp_file,
-            outFile=out_file,
-            lowerBound=-20,
-            upperBound=20
-        )
+        Bound_grid(inFile=out_file, lowerBound=-20, upperBound=20)
         
         self.elec_dx = out_file
         logger.info(f"Electrostatic map generated for {aligned_name}")
-    
-    
-    def generate_vdw_maps(self):
-        # Run VMD to generate VDW maps
-        vdw_tcl = self.tcl_path / "align.tcl"
-        if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.write_vdw_tcl()
-            logger.debug(f"Alignment script written to {vdw_tcl}")
-        
 
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name}.aligned < {vdw_tcl}"
-        subprocess.run(cmd, shell=True, check=True)
+
+    def generate_vdw_diffusive(self,potResolution=1, denResolution=2):
+        vdw_tcl = self.tcl_path / "vdw_diffusive.tcl"
         
-        # Process all VDW maps
+        if not vdw_tcl.exists():
+            vdw_tcl = self.tclgen.generate_diffusive_tcl(potResolution=potResolution, denResolution=denResolution)
+            logger.debug(f"Clustering script written to {vdw_tcl}")
+
+        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} clustered.txt < {vdw_tcl}"
+        subprocess.run(cmd, shell=True, check=True)
+
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
         
         for i in range(self.num_heavy_cluster + 1):
-            pot_file = self.work_dir / f"{self.aligned_name}.vdw{i}.pot.dx"
-            den_file = self.work_dir / f"{self.aligned_name}.vdw{i}.den.dx"
+            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            den_file = self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
             
             if not pot_file.exists():
                 logger.warning(f"VDW potential file not found: {pot_file}")
@@ -290,16 +280,23 @@ class PdbProcessor:
             self.vdw_pot_dxs.append(pot_file)
             self.vdw_den_dxs.append(den_file)
         
-        logger.info(f"VDW maps generated for {self.aligned_name}")
+        logger.info(f"VDW maps generated for {self.base_name}")
+    
 
-    def clustering(self,num_heavy_cluster,hyd="hyd.dat",tmp="tmp.dat"):
+    def clustering(self, numClusters=3,potResolution=1, denResolution=2):
+        vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
+        if not vdw_tcl.exists():
+            vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
+            logger.debug(f"Clustering script written to {vdw_tcl}")
+
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
+        subprocess.run(cmd, shell=True, check=True)
+
         import numpy as np
         from scipy.cluster import vq
-
-        numClusters = num_heavy_cluster
-
-        d = np.loadtxt('tmp.dat')
-        d_hyd = np.loadtxt('hyd.dat')
+        lj_types_file=self.work_dir/ "LJTypes.txt"
+        d = np.loadtxt(self.work_dir/ 'tmp.dat')
+        d_hyd = np.loadtxt(self.work_dir/'hyd.dat')
 
         ## build new dataset with 'count' (d[:,2]) entries of each value
         d2 = [np.outer( np.ones((1,int(d[i,2]))) , d[i,:2] ) for i in range(d.shape[0])]
@@ -311,22 +308,21 @@ class PdbProcessor:
         d2_hyd = np.vstack( d2_hyd )
         d2w_hyd = vq.whiten( d2_hyd )              # normalize features
 
-
         ind = 0;
         scalebase = d2w[ind,:];
         while np.any(scalebase == 0):
             ind = ind + 1
             scalebase = d2w[ind,:]
 
-            scale = d2[ind,:] / d2w[ind,:]
+        scale = d2[ind,:] / d2w[ind,:]
 
-            ind = 0;
-            scalebase = d2w_hyd[ind,:];
+        ind = 0;
+        scalebase = d2w_hyd[ind,:]
         while np.any(scalebase == 0):
             ind = ind + 1
             scalebase = d2w_hyd[ind,:]
 
-            scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
+        scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
 
         ## perform cluster analysis
         np.random.seed(seed=42)
@@ -339,16 +335,55 @@ class PdbProcessor:
         assignments_total = np.concatenate((assignments, assignments_hyd + numClusters) , axis=None)
         codeBook_total = np.concatenate((scale*codeBook, scale_hyd*codeBook_hyd), axis=0)
 
+        
+        with open(lj_types_file, 'r') as f:
+            content  = f.read()
+            lj_types = []
+            current_term = ""
+            in_braces = False
+            for char in content:
+                if char == '{':
+                    in_braces = True
+                    continue
+                elif char == '}':
+                    in_braces = False
+                    if current_term:
+                        lj_types.append(current_term.strip())
+                        current_term = ""
+                    continue
+                elif char.isspace() and not in_braces:
+                    if current_term:
+                        lj_types.append(current_term.strip())
+                        current_term = ""
+                    continue
+                current_term += char
+            
+            if current_term:  # Add any remaining term
+                lj_types.append(current_term.strip())
+            
+            # Process each term to get individual types
+
+        type_array = {i: "" for i in range(len(set(assignments_total)))}
+
+        for i, t in zip(assignments_total, lj_types):
+            type_array[i] = type_array[i] + f" {t}"
+
+        with open(self.work_dir/ "clustered.txt", 'w') as f:
+            for i, (r, e) in enumerate(zip(codeBook_total[:, 0], codeBook_total[:, 1])):
+                f.write(f"{r} {e}{type_array[i]}\n")
+    
+        
+
         print(" ".join(["%d" % a for a in assignments_total]))
         print(" ".join(["%.3f" % c[0] for c in codeBook_total]))
         print(" ".join(["%.3f" % c[1] for c in codeBook_total]))
 
     def apply_gaussian_smoothing(self, gaussianWidth=2.5):
         """Apply Gaussian smoothing to all potential maps."""
-        aligned_name = f"{self.base_name}.aligned"
+        aligned_name = f"{self.base_name}"
         
         # Create a tcl script for VMD to do the smoothing
-        smooth_tcl = self.work_dir / "smooth.tcl"
+        smooth_tcl = self.tcl_path / "smooth.tcl"
         if not smooth_tcl.exists():
             with open(smooth_tcl, 'w') as f:
                 f.write(f'''
@@ -372,20 +407,21 @@ quit
 ''')
             
         # Smooth electrostatic map
-        if self.elec_dx and self.elec_dx.exists():
-            smoothed_elec = self.work_dir / f"{aligned_name}.elec.smoothed.dx"
-            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} {gaussianWidth} < {smooth_tcl}"
-            subprocess.run(cmd, shell=True, check=True)
+        if self.elec_dx and Path(self.elec_dx).exists():
+            smoothed_elec = f"{aligned_name}.elec.smoothed.dx"
+            #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} {gaussianWidth} < {smooth_tcl}"
+            #subprocess.run(cmd, shell=True, check=True)
+            self.elec_smoothed_dx= smooth_grid(in_file=self.elec_dx, gaussian_sigma=gaussianWidth,  )
             self.elec_smoothed_dx = smoothed_elec
             
         # Smooth VDW potential maps
         self.vdw_smoothed_dxs = []
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             if pot_file.exists():
-                smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
-                cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} {gaussianWidth} < {smooth_tcl}"
-                subprocess.run(cmd, shell=True, check=True)
-                self.vdw_smoothed_dxs.append(smoothed_pot)
+                #smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
+                #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} {gaussianWidth} < {smooth_tcl}"
+                #subprocess.run(cmd, shell=True, check=True)
+                self.vdw_smoothed_dxs.append(smooth_grid(in_file=pot_file, gaussian_sigma=gaussianWidth,  ))
                 
         logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
 
@@ -434,7 +470,10 @@ quit
         self.generate_electrostatic_map()
         
         # Step 5: Generate VDW maps
-        self.generate_vdw_maps()
+        
+        self.clustering()
+
+        self.generate_vdw_diffusive()
         
         # Step 6: Apply Gaussian smoothing
         self.apply_gaussian_smoothing()

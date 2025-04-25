@@ -1419,12 +1419,51 @@ class TclScriptGenerator:
     Generator for TCL scripts used in structure processing and visualization
     """
     
-    def __init__(self, work_dir=None):
+    def __init__(self, work_dir=None, charmm_params_dir=None):
         """Initialize with working directory path"""
         work_dir = Path(work_dir) if work_dir else Path.cwd()
         self.work_dir=work_dir.absolute()
+        self.params_dir=None
+        if charmm_params_dir is not None:
+            self.params_dir = Path(charmm_params_dir).absolute()
 
+        else:
+            self.params_dir=self.work_dir/"charmm_params"
 
+            import tempfile
+            with tempfile.TemporaryDirectory() as tmpdir:
+                tmpdir = Path(tmpdir)
+                
+                # Download parameters
+                logger.info("Downloading CHARMM parameters...")
+                url = "http://mackerell.umaryland.edu/download.php?filename=CHARMM_ff_params_files/toppar_c36_jul24.tgz"
+                tarfile = tmpdir / "toppar.tgz"
+                
+                try:
+                    # Use wget to download
+                    subprocess.run(["wget", "-O", str(tarfile), url], check=True)
+                    
+                    # Extract files
+                    logger.info("Extracting parameter files...")
+                    subprocess.run(["tar", "xzf", str(tarfile)], cwd=tmpdir, check=True)
+                    
+                    # Create parameters directory if it doesn't exist
+                    os.makedirs(self.params_dir, exist_ok=True)
+                    
+                    # Copy relevant files
+                    for ext in ["prm", "str"]:
+                        for f in tmpdir.glob(f"toppar/*.{ext}"):
+                            shutil.copy2(f, self.params_dir)
+                            
+                    logger.info(f"CHARMM parameters installed in {self.params_dir}")
+                    
+                except subprocess.CalledProcessError as e:
+                    logger.error(f"Error downloading/extracting parameters: {e}")
+                    raise
+                except Exception as e:
+                    logger.error(f"Unexpected error: {e}")
+                    raise
+            
     def write_align_tcl(self, filename="align.tcl"):
         """
         Write the alignment TCL script to file
@@ -1558,6 +1597,7 @@ puts $ch $x_dim
 puts $ch $y_dim
 puts $ch $z_dim
 close $ch''')
+        return charge_tcl
 
 
     def process_vdw_parameters(self, protein_types):
@@ -1599,13 +1639,10 @@ close $ch''')
         logger.debug(f"Wrote VDW script to {script_path}")
         return script_path
     
-    def generate_vdw_maps_diffusive(self, potResolution=1, denResolution=2,num_heavy_cluster=3):
+    def generate_cluster_tcl(self, potResolution=1, denResolution=2):
         """Generate VDW maps using VMD."""
-        aligned_name = f"{self.base_name}.aligned"
-        aligned_path = str(self.work_dir / aligned_name)
-        
         # Create VDW TCL script
-        vdw_tcl = self.work_dir / "vdw.tcl"
+        vdw_tcl = self.work_dir / "vdw_cluster.tcl"
         with open(vdw_tcl, 'w') as f:
             f.write(f'''set prefixes $argv
 set potResolution ''' + str(potResolution) + '''
@@ -1615,7 +1652,7 @@ set minRadius 0.5
 
 package require ilstools
 
-ILStools::readcharmmparams [glob ''' + self.work_dir + '''/*]
+ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
 
 set ljParms ""
 set lj_hyd ""
@@ -1672,5 +1709,84 @@ foreach vals $lj_hyd {
     puts $ch "$r $e $count"
 }
 close $ch
-puts "My LJ types are: $ljTypes"
+
+set ch [open LJTypes.txt w]
+puts $ch "$ljTypes"
+close $ch
 ''')
+        return vdw_tcl
+
+    def generate_diffusive_tcl(self, potResolution=1, denResolution=2):
+        vdw_tcl = self.work_dir / "vdw_diffusive.tcl"
+
+        with open(vdw_tcl, 'w') as f:
+            f.write("""# Read the cluster results file to get r, e, and type arrays
+proc readClusterResults {filename} {
+    set fp [open $filename r]
+    set newR {}
+    set newE {}
+    set typeArray(0) ""  ;# Initialize first element
+    set i 0
+    
+    while {[gets $fp line] >= 0} {
+        set fields [regexp -all -inline {\S+} $line]
+        lappend newR [lindex $fields 0]
+        lappend newE [lindex $fields 1]
+        set typeArray($i) [lrange $fields 2 end]
+        incr i
+    }
+    close $fp
+    return [list $newR $newE [array get typeArray]]
+}
+
+set prefix [lindex $argv 0]
+set clusterFile [lindex $argv 1]
+set potResolution """ + str(potResolution) + '''
+set denResolution ''' + str(denResolution) + """
+
+# Load molecule
+mol new ${prefix}.psf 
+mol addfile ${prefix}.pdb 
+
+set ID [molinfo top]
+
+# Read cluster results
+lassign [readClusterResults $clusterFile] newR newE typeArrayList
+array set typeArray $typeArrayList
+
+# Process molecule
+set all [atomselect $ID all]
+set minmax [measure minmax $all]
+lassign $minmax min max
+set min [vecsub $min {12 12 12}]
+set max [vecadd $max {12 12 12}]
+set minmaxPot "{$min} {$max}"
+
+# Loop over new LJ params
+set i 0
+foreach r $newR e $newE {
+    puts "Processing cluster $i"
+    puts "r = $r"
+    puts "e = $e"
+    puts "types = $typeArray($i)"
+    
+    # Write out density grid
+    set sel [atomselect $ID "type $typeArray($i)"]
+    puts "Creating density map for types: [$sel get type]"
+    volmap interp $sel -o ${prefix}.vdw${i}.den.dx -res $denResolution
+    $sel delete
+    
+    # Write potential grid
+    puts "Creating potential map..."
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1
+        
+    incr i
+}
+
+$all delete
+mol delete $ID
+exit
+""")
+        return vdw_tcl
+
+

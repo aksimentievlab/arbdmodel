@@ -191,28 +191,23 @@ def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
     smoothed_grid = gaussian_filter(grid, sigma=gaussian_sigma)
     
     # Save the smoothed grid
-    writeDx(str(out_file), smoothed_grid, origin, delta)
+    writeDx(str(out_file), smoothed_grid, origin, [delta]*3)
     return out_file
 
 
 
-def Bound_grid(inFile, outFile, lowerBound, upperBound):
+def Bound_grid(inFile,  lowerBound, upperBound,outFile=None):
     """Apply bounds to grid values"""
     # Fix scientific notation
-    cmd_in = "sed -r 's/^([0-9]+)e/\1.0e/g; s/ ([0-9]+)e/ \1.0e/' " + str(inFile) + " > bound_grid_temp0.dx"
-    os.system(cmd_in)
-    cmd_in = "sed -r 's/^(-[0-9]+)e/\1.0e/g; s/ (-[0-9]+)e/ \1.0e/' bound_grid_temp0.dx > bound_grid_temp1.dx"
-    os.system(cmd_in)
-
-    assert(lowerBound < upperBound)
 
     # Load data
-    grid, origin, delta = loadGrid('bound_grid_temp1.dx')
+    grid, origin, delta = loadGrid(inFile)
 
     # Apply bounds
     grid[grid > upperBound] = upperBound
     grid[grid < lowerBound] = lowerBound
-
+    if outFile is None:
+      outFile=inFile
     # Write output
     writeDx(outFile, grid, origin, [delta, delta, delta])
 
