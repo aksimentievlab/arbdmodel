@@ -600,6 +600,8 @@ quit
 
     def _process_gigantic_vdw(self, potResolution, denResolution):
         """Process gigantic static object VDW maps with segmentation"""
+        #!!!! Needs work. standard vdw works
+
         # First generate VDW maps for each segment
         for segment_idx in range(self.segment_count + 1):
             segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
