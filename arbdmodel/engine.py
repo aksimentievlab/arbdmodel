@@ -1788,5 +1788,57 @@ mol delete $ID
 exit
 """)
         return vdw_tcl
+    
+
+    def generate_static_vdw_tcl(self, potResolution=1, denResolution=2):
+        """Generate VDW maps using VMD."""
+        # Create VDW TCL script
+        vdw_tcl = self.work_dir / "vdw_static.tcl"
+        
+        with open(vdw_tcl, 'w') as f:
+            f.write(f'''set prefix [lindex $argv 0]
+set cluster_result_path [lindex $argv 1]
+
+set potResolution ''' + str(potResolution) + '''
+set ch [open  $cluster_result_path  r]
+set i 0
+set newR ""
+set newE ""
+while {[expr ![eof $ch]]} {
+    gets $ch inputData($i)
+    if {![string equal $inputData($i) ""]} {
+        puts $inputData($i)
+        lappend newR [lindex $inputData($i) 0]
+        lappend newE [lindex $inputData($i) 1]
+        incr i
+    }
+}
+close $ch
+
+package require ilstools
+ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
 
 
+set ID [mol new $prefix.psf]
+mol addfile $prefix.pdb
+set all [atomselect top all]
+set minmax [measure minmax $all]
+
+lassign $minmax min max
+set min [vecsub $min {12 12 12}]
+set max [vecadd $max {12 12 12}]
+set minmaxPot "{$min} {$max}"
+
+ILStools::assigncharmmparams $ID;
+
+set i 0
+foreach r $newR e $newE {
+    puts "My r is: $r"
+    puts "My e is: $e"
+    ## write potential grid
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1 -first 0 -last 0
+    incr i
+}
+
+''')
+        return vdw_tcl

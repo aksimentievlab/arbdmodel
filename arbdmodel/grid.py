@@ -192,7 +192,7 @@ def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
     
     # Save the smoothed grid
     writeDx(str(out_file), smoothed_grid, origin, [delta]*3)
-    return out_file
+    return Path(out_file).absolute()
 
 
 

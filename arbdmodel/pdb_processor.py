@@ -243,7 +243,7 @@ class PdbProcessor:
         out_file = self.work_dir / f"{aligned_name}.elec.dx"
         Bound_grid(inFile=out_file, lowerBound=-20, upperBound=20)
         
-        self.elec_dx = out_file
+        self.elec_dx = Path(out_file)
         logger.info(f"Electrostatic map generated for {aligned_name}")
 
 
@@ -367,12 +367,10 @@ class PdbProcessor:
 
         for i, t in zip(assignments_total, lj_types):
             type_array[i] = type_array[i] + f" {t}"
-
-        with open(self.work_dir/ "clustered.txt", 'w') as f:
+        self.clustered_path= self.work_dir/ "clustered.txt"
+        with open(self.clustered_path, 'w') as f:
             for i, (r, e) in enumerate(zip(codeBook_total[:, 0], codeBook_total[:, 1])):
                 f.write(f"{r} {e}{type_array[i]}\n")
-    
-        
 
         print(" ".join(["%d" % a for a in assignments_total]))
         print(" ".join(["%.3f" % c[0] for c in codeBook_total]))
@@ -396,11 +394,7 @@ mol new $in_file
 
 # Apply smoothing
 set molid [molinfo top]
-set vol [molinfo $molid get {0}]
-volutil smooth $vol -gaussiansigma $gaussianWidth
-
-# Save the result
-volutil save $vol $out_file
+# !!!! Check
 
 # Exit
 quit
@@ -424,6 +418,7 @@ quit
                 self.vdw_smoothed_dxs.append(smooth_grid(in_file=pot_file, gaussian_sigma=gaussianWidth,  ))
                 
         logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
+        
 
     def get_grid_files(self):
         """Get dictionary of grid files for use in RigidBodyType."""
@@ -431,7 +426,7 @@ quit
         charge_grids = []
         
         # Add electrostatic grid
-        if hasattr(self, 'elec_smoothed_dx') and self.elec_smoothed_dx and self.elec_smoothed_dx.exists():
+        if self.elec_smoothed_dx.exists():
             potential_grids.append(("elec", str(self.elec_smoothed_dx), 0.59616195))
         
         # Add charge grid
@@ -479,6 +474,7 @@ quit
         self.apply_gaussian_smoothing()
         
         # Return a dictionary of grid files for use in RigidBodyType
+        """
         rb=RigidBodyType(
             name=self.base_name, 
             mass=self.mass,
@@ -488,13 +484,15 @@ quit
             potential_grids=self.get_grid_files().get('potential_grids', []),
             charge_grids=self.get_grid_files().get('charge_grids', []),
             pmf_grids=[],)
+        """
+        
         self.aligned_pdb = self.aligned_pdb
         self.aligned_psf = self.aligned_psf
         
         logger.info(f"Pdb Processor generated '{self.base_name}' as RigidBodyType successfully")
         return rb
 
-    def get_static_grids(self, is_gigantic=False):
+    def get_static_grids(self, is_gigantic=False, potResolution=1, denResolution=2):
         """
         Process a static structure and return its grid files.
         Similar to get_rb_type() but for static objects.
@@ -518,15 +516,16 @@ quit
         self.generate_electrostatic_map()
         
         # Step 4: Generate VDW maps
+        
         if is_gigantic:
             self._process_gigantic_vdw(
-                potResolution=self.pot_resolution,  # Double resolution for gigantic
-                denResolution=self.den_resolution
+                potResolution=potResolution,  # Double resolution for gigantic
+                denResolution=denResolution
             )
         else:
             self._process_standard_vdw(
-                potResolution=self.pot_resolution,
-                denResolution=self.den_resolution)
+                potResolution=potResolution,
+                denResolution=denResolution)
         
         # Step 5: Apply Gaussian smoothing
         self.apply_gaussian_smoothing()
@@ -586,10 +585,10 @@ quit
     def _process_standard_vdw(self, potResolution, denResolution):
         """Process standard static object VDW maps"""
         # Generate static VDW map script
-        vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
+        vdw_script = self.tclgen.generate_static_vdw_tcl()
         
         # Run VMD
-        cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_script}"
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} clustered.txt < {vdw_script}"
         subprocess.run(cmd, shell=True, check=True)
         
         # Bound the grid values
@@ -607,7 +606,7 @@ quit
             
             # Generate VDW maps for this segment
             vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
-            cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} < {vdw_script}"
+            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} clustered.txt < {vdw_script}"
             subprocess.run(cmd, shell=True, check=True)
 
         # Write map gluing script
