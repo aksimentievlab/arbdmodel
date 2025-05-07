@@ -1910,7 +1910,7 @@ class ArbdEngine(SimEngine):
                 elif len(restraint) == 2:
                     item.append(restraint[0])
                     item.extend(restraint[1])
-                elif len(restraint) == 5:
+                elif len(restraint) == 4:
                     item.extend(restraint)
                 fh.write("RESTRAINT %d %f %f %f %f\n" % tuple(item))
 
