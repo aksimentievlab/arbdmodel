@@ -1448,6 +1448,15 @@ class ArbdModel(PdbModel):
 
         return sorted( self.type_counts.items(), key=lambda x: x[0] )
 
+    def assign_index_to_types(self):
+        i_skipped = 0
+        for i,(t,(n,rb)) in enumerate(self.getParticleTypesAndCounts()):
+            if n+rb == 0:
+                i_skipped += 1
+                continue
+            t.type_idx = i-i_skipped
+
+
     def _particleTypePairIter(self):
         typesAndCounts = self.getParticleTypesAndCounts()
         i_skipped = 0
