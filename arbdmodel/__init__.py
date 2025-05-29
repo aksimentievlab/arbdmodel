@@ -1267,8 +1267,8 @@ class ArbdModel(PdbModel):
 
         restart_file = None
 
+        _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
         if target_universe is not None:
-            _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
                     potential.get_target_distribution(target_universe, trajectory=target_trajectory)
