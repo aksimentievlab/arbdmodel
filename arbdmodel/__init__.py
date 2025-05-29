@@ -1171,6 +1171,10 @@ class ArbdModel(PdbModel):
             # self.__setattr__(attr, self.__getattribute__(attr) + other_model.__getattribute__(attr))
             self.__getattribute__(attr).extend(other_model.__getattribute__(attr))
 
+        for obj in other_model.children:
+            if obj.parent is other_model:
+                obj.parent = self
+
         self._clear_types()
         
         ## Combine configurations
