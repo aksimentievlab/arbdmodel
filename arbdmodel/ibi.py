@@ -333,7 +333,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         assert(vol.sum() > 0)
         likelihood = counts / (nframes*vol)
         ## don't normalize over num values in dofs just yet
-
+        bins = bins[:len(likelihood)]
         self.__dists[key] = (bins,likelihood) # record for later
         return bins, likelihood
 
@@ -346,7 +346,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 if np.sum(vals) == 0:
                     raise Exception
                 Path(f).parent.mkdir(parents=True, exist_ok=True)
-                np.savetxt(f,np.array((bins[:-1],vals/np.sum(vals),vals)).T)
+                np.savetxt(f,np.arrray((bins,vals/np.sum(vals),vals)).T)
             bins, vals, counts = np.loadtxt(f).T
             if np.sum(counts) == 0:
                 raise Exception
@@ -372,7 +372,6 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
             bins, vals = self._extract_distribution( universe, trajectory=trajectory, box=box )
-            bins = bins[:len(vals)]
             Path(f).parent.mkdir(parents=True, exist_ok=True)
             np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
         else:
@@ -465,8 +464,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             rho_cg = rho_aa     # allows a common smoothing command below
         else:
             bins, rho_cg = self._extract_distribution( universe, box=box )
-            assert( np.abs(len(rho_cg) - len(bins)) < 2 )
-            bins = bins[:len(rho_cg)]
+            assert( np.abs(len(rho_cg) - len(bins)) < 1 )
             rho_cg = rho_cg/np.sum(rho_cg)
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
 
