@@ -1247,7 +1247,7 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
+    def run_IBI(self, iterations, directory = '.', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
         try:
             assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
         except:
@@ -1271,7 +1271,7 @@ class ArbdModel(PdbModel):
         if target_universe is not None:
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
-                    potential.get_target_distribution(target_universe, trajectory=target_trajectory)
+                    potential.get_target_distribution(target_universe, trajectory=target_trajectory, directory=directory)
 
         def _load_cg_u(iteration):
             name = f'ibi-{iteration:03d}'
@@ -1287,7 +1287,7 @@ class ArbdModel(PdbModel):
             cg_u = _load_cg_u(first_iteration-1)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False, directory=directory)
 
         for p in _potentials:
             p.iteration = first_iteration
@@ -1309,7 +1309,7 @@ class ArbdModel(PdbModel):
                                  timestep = ts0/100,
                                  num_steps = 10000, output_period=1000 )
 
-                restart_file = f'{directory}/output/ibi-min.restart'
+                restart_file = f'output/ibi-min.restart'
 
             name = f'ibi-{i:03d}'
             engine.simulate( self,
@@ -1317,7 +1317,7 @@ class ArbdModel(PdbModel):
                              restart_file = restart_file,
                              replicas = replicas )
 
-            restart_file = f'{directory}/output/{name}{".0" if replicas > 1 else ""}.restart'
+            restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
             cg_u = _load_cg_u(i)
 
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
