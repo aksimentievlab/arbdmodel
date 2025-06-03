@@ -504,6 +504,12 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         ## Apply boundary force outside where target density is well-defined
         oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
+        if oobf is None:
+            oobf = 2 * np.max(np.abs( np.diff(u[first:last+1]) / (bins[first+1]-bins[first]) ))
+            if self.out_of_bounds_force == 'max_force':
+                logger.warning(f'IBI out-of-bounds force for {self} was set to max_force, but max_force was unspecified; defaulting to twice the largest value found in valid range ({oobf:%.2f}) and setting the value permanently.')
+                self.out_of_bounds_force = oobf
+
         if first > 0:
             u[:first] = u[first] + np.abs(bins[:first]-bins[first])*oobf
         if last < len(u)-2:
