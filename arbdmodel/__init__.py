@@ -527,14 +527,14 @@ class ParticleType():
         for key,val in kwargs.items():
             self.__dict__[key] = val
 
-    def is_same_type(self, other, consider_parent=True):
-        """ consider_parent only affects self, not other """
+    def is_same_type(self, other, consider_parent_generations=-1):
+        """ consider_parent_generations only affects self, not other; negative values will search all generations """
         assert( type(other) == type(self) )
         if self == other:
             return True
-        elif consider_parent:
-            if self.parent is not None and self.parent == other:
-                return True
+        elif consider_parent_generations != 0:
+            if self.parent is not None:
+               return self.parent.is_same_type(other, consider_parent_generations= consider_parent_generations-1)
         else:
             return False
 
@@ -1340,7 +1340,12 @@ class ArbdModel(PdbModel):
             else: return B,A
         typeA,typeB = __order_types(typeA,typeB)
 
-        for cp in (False,True):
+        def __get_generations(t):
+            if t.parent: return 1+__get_generations(t.parent)
+            return 0
+        num_gens = max([__get_generations(t) for t in (typeA,typeB)])
+
+        for gens in range(num_gens+1):
             for s,A,B in self.nonbonded_interactions:
                 A,B = __order_types(A,B)
                 if A is None or B is None:
@@ -1348,12 +1353,12 @@ class ArbdModel(PdbModel):
                     if A is None and B is None:
                         return s
                     elif A is None:
-                        if typeA.is_same_type(B, consider_parent=cp) or typeB.is_same_type(B, consider_parent=cp):
+                        if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
                             return s
                     elif B is None:
-                        if typeA.is_same_type(A, consider_parent=cp) or typeB.is_same_type(A, consider_parent=cp):
+                        if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
                             return s
-                elif typeA.is_same_type(A,consider_parent=cp) and typeB.is_same_type(B,consider_parent=cp):
+                elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
                     return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
