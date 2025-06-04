@@ -1333,16 +1333,26 @@ class ArbdModel(PdbModel):
         self.add(group)
         
     def _get_nonbonded_interaction(self, typeA, typeB):
+        def __order_types(A,B):
+            if A is None: return B,A
+            elif B is None: return A,B
+            elif A < B: return A,B
+            else: return B,A
+        typeA,typeB = __order_types(typeA,typeB)
+
         for cp in (False,True):
             for s,A,B in self.nonbonded_interactions:
+                A,B = __order_types(A,B)
                 if A is None or B is None:
                     if cp is False: continue
                     if A is None and B is None:
                         return s
-                    elif A is None and typeB.is_same_type(B, consider_parent=cp):
-                        return s
-                    elif B is None and typeA.is_same_type(A, consider_parent=cp):
-                        return s
+                    elif A is None:
+                        if typeA.is_same_type(B, consider_parent=cp) or typeB.is_same_type(B, consider_parent=cp):
+                            return s
+                    elif B is None:
+                        if typeA.is_same_type(A, consider_parent=cp) or typeB.is_same_type(A, consider_parent=cp):
+                            return s
                 elif typeA.is_same_type(A,consider_parent=cp) and typeB.is_same_type(B,consider_parent=cp):
                     return s
         
