@@ -1345,21 +1345,22 @@ class ArbdModel(PdbModel):
             return 0
         num_gens = max([__get_generations(t) for t in (typeA,typeB)])
 
-        for gens in range(num_gens+1):
-            for s,A,B in self.nonbonded_interactions:
-                A,B = __order_types(A,B)
-                if A is None or B is None:
-                    if cp is False: continue
-                    if A is None and B is None:
+        for consider_wild in (False,True):
+            for gens in range(num_gens+1):
+                for s,A,B in self.nonbonded_interactions:
+                    A,B = __order_types(A,B)
+                    if A is None or B is None:
+                        if not consider_wild: continue
+                        if A is None and B is None:
+                            return s
+                        elif A is None:
+                            if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
+                                return s
+                        elif B is None:
+                            if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
+                                return s
+                    elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
                         return s
-                    elif A is None:
-                        if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
-                            return s
-                    elif B is None:
-                        if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
-                            return s
-                elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
-                    return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
         # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
