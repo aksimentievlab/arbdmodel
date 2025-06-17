@@ -1,0 +1,12 @@
+gendocs
+Sphinx
+MyST-Parser
+furo
+sphinx-copybutton
+sphinx-autobuild
+MDAnalysis
+numpy
+scipy
+mdanalysis>=2.0.0
+appdirs>=1.4
+pandas>=1.0.0

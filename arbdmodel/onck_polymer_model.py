@@ -197,7 +197,7 @@ __ref2 = Citation(
     volume=120,
     number = 25,
     pages = 'e2221804120',
-    year=2023,
+    year = 2023,
     doi = '10.1073/pnas.2221804120'
 )
 
@@ -240,10 +240,10 @@ class OnckNonbonded(AbstractPotential):
     """
 
     """ Nonbonded interaction for 1BPA and 1BPA-1.1 """
-    def __init__(self, debye_length=12.7, resolution=0.1, range_=(0,None)):
+    def __init__(self, debye_length=10/1.27, resolution=0.01, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length
-        self.max_force = 50
+        self.max_force = 200
 
     def potential(self, r, types):
         """ Electrostatics """
@@ -272,21 +272,41 @@ class OnckNonbonded(AbstractPotential):
             r6 = (_r_m/r)**6
             r8 = (_r_m/r)**8
 
+            if ('is_FG' in typeA.__dict__ and 'is_BS' in typeB.__dict__) or \
+               ('is_FG' in typeB.__dict__ and 'is_BS' in typeA.__dict__):
+                raise           # don't use this path!
+                eps = 3.2863289 # units "13.75 kJ" kcal
+
+            logger.info(f'Writing potential with CP for {key = }, {eps = }')
             u_lj = eps * (3*r8 - 4*r6)
         except:
-            sigma = 6.0
-            r6 = (sigma/r)**6
-            r8 = (sigma/r)**8
 
             alpha = 0.27
             epsilon_hp = 3.1070746 # units "13 kJ/N_A" kcal_mol
             epsilon_rep = 2.3900574 # units "10 kJ/N_A" kcal_mol
 
-            epsilon = epsilon_hp*np.sqrt( (typeA.epsilon*typeB.epsilon)**alpha )
+            if ('is_FG' in typeA.__dict__ and 'is_BS' in typeB.__dict__) or \
+               ('is_FG' in typeB.__dict__ and 'is_BS' in typeA.__dict__):
+                """ We assigned a specific interaction strength eps_BS,FG (rather than eps_ij) between binding site regions on Kap95 and any FG-motif residue """
+                epsilon = 3.2863289 # units "13.75 kJ" kcal
+                sigma = 6.0
+            else:
+                if 'nts' in typeA.__dict__ or 'nts' in typeB.__dict__:
+                    epsilon = 0.1
+                    sigma = 16
+                else:
+                    epsilon = epsilon_hp*np.sqrt( (typeA.epsilon*typeB.epsilon)**alpha )
+                    sigma = 6.0
+                    if ('is_folded' in typeA.__dict__ or 'is_folded' in typeB.__dict__):
+                        epsilon = epsilon_rep
+
+            r6 = (sigma/r)**6
+            r8 = (sigma/r)**8
 
             u_lj = (epsilon_rep-epsilon) * r8
             s = r<=sigma
             u_lj[s] = epsilon_rep*r8[s] - epsilon*(4*r6[s]-1)/3
+            u_lj = u_lj - u_lj[r>25][0]
             u_lj[r>25] = 0
 
         u = u_elec + u_lj
@@ -502,7 +522,7 @@ class OnckModel(PolymerModel):
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """
-        nonbonded = OnckNonbonded(debye_length)
+        self.nonbonded = nonbonded = OnckNonbonded(debye_length)
         for t in all_types:
             self._add_nonbonded_interaction(nonbonded, t)
 

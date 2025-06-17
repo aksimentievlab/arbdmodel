@@ -160,13 +160,22 @@ class AbstractPotential(metaclass=ABCMeta):
         np.savetxt(filename, np.array([r,u]).T)
 
     def __hash__(self):
-        return hash((self.range_, self.resolution, self.max_force, self.max_potential, self.zero))
+        try:    fname = self.filename(None)
+        except: fname = self.filename(('',''))
+        return hash((fname, self.range_, self.resolution, self.max_force, self.max_potential, self.zero))
 
     def __eq__(self, other):
         for a in ("range_", "resolution", "max_force", "max_potential", "zero"):
             if getattr(self,a) != getattr(other,a):
                 return False
-        return type(self).__name__ == type(other).__name__
+        if (type(self).__name__ != type(other).__name__):
+            return False
+        try:    fname1 = self.filename(None)
+        except: fname1 = self.filename(('',''))
+        try:    fname2 = self.filename(None)
+        except: fname2 = self.filename(('',''))
+        return  fname1 == fname2
+
 
     ## Want the same objects after copy operations
     def __copy__(self):

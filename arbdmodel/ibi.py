@@ -353,6 +353,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
     """
     def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
         self.name = name
+        if degrees_of_freedom is None: degrees_of_freedom = []
         self.degrees_of_freedom = degrees_of_freedom
         self.smooth = smooth
         self.iteration = iteration
@@ -378,10 +379,10 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         ## self.filename_prefix="IBIpotentials/"
 
-    def filename(self, types=None, iteration=None, smoothed=True):
+    def filename(self, types=None, iteration=None, smoothed=True, directory='.'):
         if iteration is None:
             iteration = self.iteration
-        return f"{self.filename_prefix}-{iteration:03d}{'' if smoothed else '-raw'}.dat"
+        return f"{directory}/{self.filename_prefix}-{iteration:03d}{'' if smoothed else '-raw'}.dat"
 
     def __str__(self):
         return self.filename()
@@ -441,20 +442,20 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         assert(vol.sum() > 0)
         likelihood = counts / (nframes*vol)
         ## don't normalize over num values in dofs just yet
-
+        bins = bins[:len(likelihood)]
         self.__dists[key] = (bins,likelihood) # record for later
         return bins, likelihood
 
-    def get_target_distribution(self, universe=None, trajectory=None, recalculate=False):
+    def get_target_distribution(self, universe=None, trajectory=None, recalculate=False, directory='.'):
         if self.__target is None:
-            f = self.filename_prefix + '.target.dat'
+            f = f'{directory}/{self.filename_prefix}.target.dat'
             if (not Path(f).exists()) or recalculate:
                 if universe is None: raise Exception
                 bins, vals = self._extract_distribution( universe, trajectory=trajectory )
                 if np.sum(vals) == 0:
                     raise Exception
                 Path(f).parent.mkdir(parents=True, exist_ok=True)
-                np.savetxt(f,np.array((bins[:-1],vals/np.sum(vals),vals)).T)
+                np.savetxt(f,np.arrray((bins,vals/np.sum(vals),vals)).T)
             bins, vals, counts = np.loadtxt(f).T
             if np.sum(counts) == 0:
                 raise Exception
@@ -474,13 +475,12 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         return self.__target
 
-    def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False):
-        f = self.filename(smoothed=False).replace('.dat','.cg.dat')
+    def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False, directory='.'):
+        f = self.filename(smoothed=False,directory=directory).replace('.dat','.cg.dat')
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
             bins, vals = self._extract_distribution( universe, trajectory=trajectory, box=box )
-            bins = bins[:len(vals)]
             Path(f).parent.mkdir(parents=True, exist_ok=True)
             np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
         else:
@@ -491,17 +491,17 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 self.__dists[key] = (bins, counts)
         return bins, vals
 
-    def read_cg_potential(self, iteration=None):
+    def read_cg_potential(self, iteration=None, directory=directory):
         if iteration is None: iteration = self.iteration-1
         if iteration == 0:
             bins = self.bins[:-1]
             pot = np.zeros(bins.shape)
         else:
             try:
-                f = self.filename(iteration=iteration, smoothed=True)
+                f = self.filename(iteration=iteration, smoothed=True, directory=directory)
                 bins, pot = np.loadtxt(f).T
             except:
-                f = self.filename(iteration=iteration, smoothed=False)
+                f = self.filename(iteration=iteration, smoothed=False, directory=directory)
                 bins, pot = np.loadtxt(f).T
         return bins,pot
 
@@ -542,7 +542,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         if total_after < 0.9 * total_before:
             raise ValueError('Removed too much density from the distribution ({100*total_after/total_before:%02d})')
 
-    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None):
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None, directory='.'):
         if scaling_factor is None:
             try:    scaling_factor = self.learning_rate(self.iteration)
             except: scaling_factor = self.learning_rate
@@ -552,7 +552,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             mode = 'wrap' if self.periodic else 'nearest'
         )
 
-        bins_aa, rho_aa = self.get_target_distribution()
+        bins_aa, rho_aa = self.get_target_distribution(directory=directory)
         rho_aa = rho_aa / np.sum(rho_aa)
 
         if tol is None:
@@ -573,8 +573,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             rho_cg = rho_aa     # allows a common smoothing command below
         else:
             bins, rho_cg = self._extract_distribution( universe, box=box )
-            assert( np.abs(len(rho_cg) - len(bins)) < 2 )
-            bins = bins[:len(rho_cg)]
+            assert( np.abs(len(rho_cg) - len(bins)) < 1 )
             rho_cg = rho_cg/np.sum(rho_cg)
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
 
@@ -583,7 +582,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 # self._clean_edges(bins_aa, rho_cg, tol)
 
 
-            r0,u0 = self.read_cg_potential() # iteration-2?
+            r0,u0 = self.read_cg_potential(directory=directory) # iteration-2?
             rho_cg,rho_aa = [savgol( rho, **savgol_opts ) for rho in [rho_cg,rho_aa]]
             rho_aa[rho_aa < tol] = tol
             rho_cg[rho_cg < tol] = tol
@@ -598,11 +597,11 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             except: alpha = self.learning_rate
             u = u0 + alpha * du
 
-        f = self.filename(smoothed=False)
+        f = self.filename(smoothed=False, directory=directory)
         Path(f).parent.mkdir(parents=True, exist_ok=True)
         np.savetxt(f,np.array((bins,u)).T)
 
-        f = self.filename(smoothed=True)
+        f = self.filename(smoothed=True, directory=directory)
 
         ## Only apply savgol filter in region where target density is well-defined
         valid = np.where(rho_aa > tol)[0]
@@ -612,6 +611,12 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         ## Apply boundary force outside where target density is well-defined
         oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
+        if oobf is None:
+            oobf = 2 * np.max(np.abs( np.diff(u[first:last+1]) / (bins[first+1]-bins[first]) ))
+            if self.out_of_bounds_force == 'max_force':
+                logger.warning(f'IBI out-of-bounds force for {self} was set to max_force, but max_force was unspecified; defaulting to twice the largest value found in valid range ({oobf:%.2f}) and setting the value permanently.')
+                self.out_of_bounds_force = oobf
+
         if first > 0:
             u[:first] = u[first] + np.abs(bins[:first]-bins[first])*oobf
         if last < len(u)-2:

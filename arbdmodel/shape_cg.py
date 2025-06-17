@@ -150,6 +150,28 @@ def get_particle_assignments(fine_sites, coarse_sites, max_distance=20):
     return assignments
 
 
+def _get_distances( tree1, tree2, max_distance=20 ):
+    """ Returns closest distance of each site in tree1 to sites in tree2 """
+
+    t1 = tree1 # KDTree( sites1 )
+    t2 = tree2 # KDTree( sites2 )
+
+    coo = t1.sparse_distance_matrix( t2, output_type='coo_matrix', max_distance=max_distance )
+
+    csr = coo.tocsr()
+
+    result = []
+    for i in range(csr.shape[0]):
+        sl = slice(csr.indptr[i], csr.indptr[i+1])
+        if len(csr.data[sl]) == 0:
+            # raise Exception("Some fine particles too far from coarse sites to assign")
+            result.append(np.inf)
+        else:
+            # idx = np.argmin(csr.data[sl])
+            result.append( np.min(csr.data[sl]) )
+    return np.array(result)
+
+
 class ShapeCGNonbonded(AbstractPotential):
     """Nonbonded potential for shape-based coarse grained models.
     
