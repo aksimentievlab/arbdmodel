@@ -355,10 +355,13 @@ class ArbdModel(PdbModel):
         # for g in other_model.children:
         #     self.update(g, copy=copy)
         g = Group()
-        for attr in 'children position orientation bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
-            g.__setattr__(attr, other_model.__getattribute__(attr))
-        devlogger.debug(f'Updating {self} with {g.children[0].children[0]}')
-        self.update(g, copy=copy)
+        for attr in 'children bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
+            # self.__setattr__(attr, self.__getattribute__(attr) + other_model.__getattribute__(attr))
+            self.__getattribute__(attr).extend(other_model.__getattribute__(attr))
+
+        for obj in other_model.children:
+            if obj.parent is other_model:
+                obj.parent = self
 
         self._clear_types()
         
@@ -432,7 +435,7 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def run_IBI(self, iterations, directory = './', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
+    def run_IBI(self, iterations, directory = '.', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
         """
         Run Iterative Boltzmann Inversion (IBI) to optimize coarse-grained potentials.
         
@@ -491,11 +494,11 @@ class ArbdModel(PdbModel):
 
         restart_file = None
 
+        _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
         if target_universe is not None:
-            _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
-                    potential.get_target_distribution(target_universe, trajectory=target_trajectory)
+                    potential.get_target_distribution(target_universe, trajectory=target_trajectory, directory=directory)
 
         def _load_cg_u(iteration):
             name = f'ibi-{iteration:03d}'
@@ -511,7 +514,7 @@ class ArbdModel(PdbModel):
             cg_u = _load_cg_u(first_iteration-1)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False,directory=directory)
 
         for p in _potentials:
             p.iteration = first_iteration
@@ -533,7 +536,7 @@ class ArbdModel(PdbModel):
                                  timestep = ts0/100,
                                  num_steps = 10000, output_period=1000 )
 
-                restart_file = f'{directory}/output/ibi-min.restart'
+                restart_file = f'output/ibi-min.restart'
 
             name = f'ibi-{i:03d}'
             engine.simulate( self,
@@ -541,12 +544,12 @@ class ArbdModel(PdbModel):
                              restart_file = restart_file,
                              replicas = replicas )
 
-            restart_file = f'{directory}/output/{name}{".0" if replicas > 1 else ""}.restart'
+            restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
             cg_u = _load_cg_u(i)
 
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Extracting CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False,directory=directory)
                     p.iteration += 1
         
     def update(self, group , copy=False):
@@ -557,17 +560,34 @@ class ArbdModel(PdbModel):
         self.add(group)
         
     def _get_nonbonded_interaction(self, typeA, typeB):
-        for cp in (False,True):
-            for s,A,B in self.nonbonded_interactions:
-                if A is None or B is None:
-                    if A is None and B is None:
+        def __order_types(A,B):
+            if A is None: return B,A
+            elif B is None: return A,B
+            elif A < B: return A,B
+            else: return B,A
+        typeA,typeB = __order_types(typeA,typeB)
+
+        def __get_generations(t):
+            if t.parent: return 1+__get_generations(t.parent)
+            return 0
+        num_gens = max([__get_generations(t) for t in (typeA,typeB)])
+
+        for consider_wild in (False,True):
+            for gens in range(num_gens+1):
+                for s,A,B in self.nonbonded_interactions:
+                    A,B = __order_types(A,B)
+                    if A is None or B is None:
+                        if not consider_wild: continue
+                        if A is None and B is None:
+                            return s
+                        elif A is None:
+                            if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
+                                return s
+                        elif B is None:
+                            if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
+                                return s
+                    elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
                         return s
-                    elif A is None and typeB.is_same_type(B, consider_parents=cp):
-                        return s
-                    elif B is None and typeA.is_same_type(A, consider_parents=cp):
-                        return s
-                elif typeA.is_same_type(A,consider_parents=False) and typeB.is_same_type(B,consider_parents=cp):
-                    return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
         # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
@@ -674,6 +694,14 @@ class ArbdModel(PdbModel):
             self._updateParticleOrder()
 
         return sorted( self.type_counts.items(), key=lambda x: x[0] )
+    
+    def assign_index_to_types(self):
+        i_skipped = 0
+        for i,(t,(n,rb)) in enumerate(self.getParticleTypesAndCounts()):
+            if n+rb == 0:
+                i_skipped += 1
+                continue
+            t.type_idx = i-i_skipped
 
     def _particleTypePairIter(self):
         typesAndCounts = self.getParticleTypesAndCounts()

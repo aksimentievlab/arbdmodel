@@ -569,7 +569,7 @@ class ParticleType():
         for key,val in kwargs.items():
             self.__dict__[key] = val
 
-    def is_same_type(self, other, consider_parents=True):
+    def is_same_type(self, other, consider_parent_generations=-1):
         """
         Checks if this object is of the same type as another object.
         
@@ -596,13 +596,9 @@ class ParticleType():
         assert( type(other) == type(self) )
         if self == other:
             return True
-        elif consider_parents:
-            if self.parent is not None and self.parent == other:
-                return True
-            elif other.parent is not None and other.parent == self:
-                return True
-            # elif other.parent is not None and self.parent is not None and other.parent == self.parent:
-            #     return True
+        elif consider_parent_generations != 0:
+            if self.parent is not None:
+               return self.parent.is_same_type(other, consider_parent_generations= consider_parent_generations-1)
         else:
             return False
 
