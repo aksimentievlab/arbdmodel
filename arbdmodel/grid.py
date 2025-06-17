@@ -1,24 +1,106 @@
-import numpy as np
+from __future__ import absolute_import, print_function
+import numpy as np 
+from scipy import signal
+import os,sys
+from .logger import logger
 import unittest
+import numpy as np
+from pathlib import Path
+
+
+def writeDx(outfile, data, origin, delta, fmt="%.12f"):
+  """Write 3D grid data to an OpenDX format file.
+  Write 3D grid data to an OpenDX format file.
+  
+  OpenDX is a visualization software format that can be used to visualize 
+  volumetric data.
+  
+  Parameters
+  ----------
+  outfile : str or file-like object
+    The path to the output file or a file-like object.
+  data : numpy.ndarray
+    3D array containing the grid data to be written.
+  origin : list or tuple
+    The (x, y, z) coordinates of the origin of the grid.
+  delta : list or tuple
+    The grid spacing in the (x, y, z) directions.
+  fmt : str, optional
+    Format string for the data values. Default is "%.12f".
+    
+  Note
+  -----
+  The output file follows the OpenDX format specification:
+  http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
+  
+  The data is written in a way that is compatible with visualization software
+  that accepts OpenDX format.
+  
+  Raises
+  ------
+  AssertionError
+    If data is not a 3D array or if origin or delta do not have length 3.
+  """
+  
+  shape = np.shape(data)
+  num = np.prod(shape)
+  assert( len(shape) == 3 )
+  assert( len(origin) == 3 )
+  assert( len(delta) == 3 )
+  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
+                     ox=origin[0], oy=origin[1], oz=origin[2],
+                     dx=delta[0], dy=delta[1], dz=delta[2],
+                     num=num
+                   )
+  data = data.flatten(order='C')
+  header = """# OpenDX density file
+# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
+object 1 class gridpositions counts  {nx} {ny} {nz}
+origin {ox} {oy} {oz}
+delta  {dx} 0.000000 0.000000
+delta  0.000000 {dy} 0.000000
+delta  0.000000 0.000000 {dz}
+object 2 class gridconnections counts  {nx} {ny} {nz}
+object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
+  len(data)
+
+  if num == 3*(num//3):
+    footer = ""
+  else:
+    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
+    footer += "\n"
+
+  footer += """attribute "dep" string "positions"
+object "density" class field 
+component "positions" value 1
+component "connections" value 2
+component "data" value 3
+"""
+  with open(outfile,"w") as file:
+    np.savetxt( file, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
+              fmt=fmt, header=header, comments='', footer=footer )
+
 
 def add_smaller_grid( grid, smaller_grid ):
     slices = get_slice_enclosing_smaller_grid( grid, smaller_grid )
     grid.grid[slices] = grid.grid[slices] + smaller_grid.grid
 
-
 def average_grids(grids, mask='nan'):
     """
     Compute the average of multiple grids.
 
-    :param grids: The input grids to average.
-    :type grids: list of ndarrays
-    :param mask: The mask type to use for averaging. If 'nan', only non-NaN values are considered. Default is 'nan'.
-    :type mask: str
-    :return: The average grid.
-    :rtype: ndarray
-    :raises NotImplementedError: If the mask option is not implemented.
+    Parameters
+    ----------
+      param grids: The input grids to average.
+      type grids: list of ndarrays
+      param mask: The mask type to use for averaging. If 'nan', only non-NaN values are considered. Default is 'nan'.
+      type mask: str
+      return: The average grid.
+      rtype: ndarray
+      raises NotImplementedError: If the mask option is not implemented.
 
     Example:
+    ----------
         >>> grid1 = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         >>> grid2 = np.array([[2, 4, 6], [8, 10, 12], [14, 16, 18]])
         >>> averaged_grid = average_grids([grid1, grid2], mask='nan')
@@ -45,6 +127,97 @@ def average_grids(grids, mask='nan'):
     average[counts == 0] = np.nan
     return average
 
+def loadGrid(file, **kwargs):
+    """Load grid data from DX file"""
+    # Read DX file header to get dimensions and metadata
+    with open(file, 'r') as f:
+        lines = f.readlines()
+    
+    # Parse header
+    for line in lines:
+        if 'counts' in line:
+            dims = [int(x) for x in line.split()[-3:]]
+            break
+            
+    for line in lines:
+        if 'origin' in line:
+            origin = [float(x) for x in line.split()[-3:]]
+            break
+            
+    for line in lines:
+        if 'delta' in line:
+            delta = float(line.split()[1])
+            break
+            
+    # Read data values
+    data = []
+    for line in lines:
+        try:
+            values = [float(x) for x in line.split()]
+            data.extend(values)
+        except ValueError:
+            continue
+            
+    # Reshape into 3D array
+    grid = np.array(data).reshape(dims)
+    return grid, origin, delta
+
+def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
+    """
+    Smooth grid data using a Gaussian filter
+    
+    Parameters:
+    -----------
+    in_file : str or Path
+        Path to input DX file
+    out_file : str or Path
+        Path to output smoothed DX file
+    gaussian_sigma : float
+        Sigma parameter for Gaussian smoothing
+    """
+    if out_file is None:
+        in_file=Path(in_file)
+        out_file = in_file.with_suffix('.smooth.dx')
+
+    print(f"Smoothing {in_file} to {out_file}")
+    
+    # Load the grid data using loadGrid
+    grid, origin, delta = loadGrid(str(in_file))
+    
+    # Apply Gaussian smoothing
+    from scipy.ndimage import gaussian_filter
+    
+    # Apply the filter to the grid data
+    smoothed_grid = gaussian_filter(grid, sigma=gaussian_sigma)
+    
+    # Save the smoothed grid
+    writeDx(str(out_file), smoothed_grid, origin, [delta]*3)
+    return Path(out_file).absolute()
+
+
+
+def Bound_grid(inFile,  lowerBound, upperBound,outFile=None):
+    """Apply bounds to grid values"""
+    # Fix scientific notation
+
+    # Load data
+    grid, origin, delta = loadGrid(inFile)
+
+    # Apply bounds
+    grid[grid > upperBound] = upperBound
+    grid[grid < lowerBound] = lowerBound
+    if outFile is None:
+      outFile=inFile
+    # Write output
+    writeDx(outFile, grid, origin, [delta, delta, delta])
+
+def Create_null(grid_path='null.dx'):
+    """Create null potential grid"""
+    zeros = np.zeros([2,2,2])
+    origin = -1500*np.array((1,1,1))
+    delta = [3000, 3000, 3000]
+    writeDx(grid_path, zeros, origin, delta)
+
 class TestAverageGrids(unittest.TestCase):
     def test_average_grids(self):
         grid1 = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])
@@ -68,7 +241,7 @@ def neighborhood_average(grid, neighborhood = 1, fill_value='mirror'):
     Returns:
         ndarray: The grid with the neighborhood average computed.
 
-    Notes:
+    Note:
         - Currently, only the 'mirror' fill value option is implemented.
         - This function requires the 'average_grids' function from an external source.
 
@@ -153,8 +326,41 @@ def neighborhood_average(grid, neighborhood = 1, fill_value='mirror'):
     return result
   
 def replace_false_with_distance(boolean_grid, sampling):
-    import ndimage
-    return ndimage.morphology.distance_transform_edt( boolean_grid, sampling=[Dxy,Dxy,Dz] )
+    """
+    Calculate the Euclidean distance transform of a boolean grid.
+
+    This function takes a boolean grid and replaces each False value with the 
+    Euclidean distance to the closest True value, while keeping True values as 0.
+
+    Parameters
+    ----------
+    boolean_grid : ndarray
+      Boolean grid where True represents obstacles/objects and False represents 
+      free space. Each False value will be replaced by the distance to the closest True.
+      
+    sampling : float or sequence of floats, optional
+      Spacing of elements along each dimension. If a sequence, must be the same 
+      length as the boolean_grid dimensions. If a single value, this is used for all dimensions.
+
+    Returns
+    -------
+    ndarray
+      The Euclidean distance transform of the boolean grid with the same shape as the input.
+      At each position where boolean_grid is True, the output is 0. At each position where 
+      boolean_grid is False, the output is the distance to the closest True value.
+
+    Examples
+    --------
+    >>> grid = np.array([[True, False, False], 
+    ...                   [False, False, False], 
+    ...                   [False, False, True]])
+    >>> replace_false_with_distance(grid, sampling=1.0)
+    array([[0.        , 1.        , 2.        ],
+         [1.        , 1.41421356, 1.        ],
+         [2.        , 1.        , 0.        ]])
+    """
+    from scipy.ndimage import distance_transform_edt
+    return distance_transform_edt( boolean_grid, sampling=sampling )
 
   
 def fill_nans(grid, neighborhood=1, max_iterations=np.inf, mask=None):
@@ -170,7 +376,7 @@ def fill_nans(grid, neighborhood=1, max_iterations=np.inf, mask=None):
     Returns:
         ndarray: The grid with NaN values filled using neighborhood averaging.
 
-    Notes:
+    Note:
         - This function requires the 'skimage' package, specifically the 'find_boundaries' function from 'skimage.segmentation'.
 
     Example:
@@ -212,7 +418,7 @@ def convolve_kernel_truncate( array, kernel ):
         AssertionError: If the dimensions of the array and kernel do not match.
         AssertionError: If any dimension of the array is smaller than the corresponding dimension of the kernel.
 
-    Notes:
+    Note:
         - This function assumes that the kernel has odd dimensions along each dimension.
         - If any dimension of the kernel has an even number of elements, a warning message is printed to stderr indicating that the output may be shifted.
 
@@ -334,6 +540,33 @@ def gaussian_kernel(voxels=5, sig=1., ndim=3):
 
 
 def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2):
+  """
+  Generate a potential energy field that depends only on the z-coordinate, creating a slab-like potential.
+
+  Parameters
+  ----------
+  force_constant : float
+    The strength of the potential (energy per unit distance^exponent).
+  center : list or tuple
+    The (x, y, z) coordinates of the center of the potential.
+  dimensions : list or tuple
+    The (x, y, z) dimensions of the grid in length units.
+  resolution : float or list or tuple
+    The grid spacing in length units. If a single value is provided, it's used for all dimensions.
+  exponent : int, optional
+    The exponent determining the shape of the potential. Default is 2 (harmonic potential).
+
+  Returns
+  -------
+  numpy.ndarray
+    A 3D array representing the potential energy field, where the energy depends only
+    on the distance from the z-center raised to the specified exponent.
+
+  Note
+  -----
+  The potential U at each point is calculated as:
+  U = (force_constant/exponent) * |z - center_z|^exponent
+  """
   try:
     resolution[0]
   except:
@@ -347,6 +580,29 @@ def slab_potential_z(force_constant, center, dimensions, resolution, exponent=2)
   return U
 
 def constant_force(force, dimensions, resolution, origin=None):
+  """
+  Generate a constant force field over a 3D grid.
+
+  Args
+  ----------
+  force : float or list
+    The force vector [fx, fy, fz] to apply. If a scalar is provided, 
+    it's interpreted as [0, 0, scalar].
+  dimensions : list
+    The physical dimensions [dx, dy, dz] of the grid in length units.
+  resolution : float or list
+    The resolution of each voxel [rx, ry, rz]. If a scalar is provided, 
+    it's used for all three dimensions.
+  origin : list, optional
+    The coordinates of the grid origin [ox, oy, oz]. If not provided, 
+    defaults to [-dx/2, -dy/2, -dz/2].
+
+  Returns
+  -------
+  numpy.ndarray
+    A 3D array representing the potential field U = fx*X + fy*Y + fz*Z, 
+    where X, Y, Z are the coordinate grids.
+  """
   try:
     force[0]
   except:
@@ -368,6 +624,36 @@ def constant_force(force, dimensions, resolution, origin=None):
   return U
 
 def spherical_confinement(force_constant, radius, dimensions,  resolution, center=(0,0,0), exponent=2):
+  """
+  Creates a spherical confinement potential field in 3D space.
+  The potential is zero inside the sphere (R <= radius) and follows a power law 
+  (force_constant/exponent) * (R-radius)^exponent outside the sphere (R > radius).
+
+  Args
+  ----------
+  force_constant : float
+    The force constant that determines the strength of the confinement potential.
+  radius : float
+    Radius of the spherical confinement in the same units as dimensions and resolution.
+  dimensions : list or tuple
+    The dimensions of the 3D space [x_dim, y_dim, z_dim].
+  resolution : float or list or tuple
+    The spatial resolution of the grid. If a single value is provided, it will be used 
+    for all three dimensions. Otherwise, provide [x_res, y_res, z_res].
+  center : tuple, optional
+    The center coordinates of the sphere (x, y, z), default is (0, 0, 0).
+  exponent : int, optional
+    The exponent in the power law of the potential, default is 2.
+
+  Returns
+  -------
+  U : numpy.ndarray
+    3D array containing the potential energy values at each grid point.
+
+  Note
+  -----
+  The function seems to have an unused 'force' variable that might be part of incomplete code.
+  """
   try:
     force[0]
   except:
@@ -388,51 +674,79 @@ def spherical_confinement(force_constant, radius, dimensions,  resolution, cente
   U[~sl] = 0
   return U
 
-  
-def writeDx(outfile, data, origin, delta, fmt="%.12f"):
-  shape = np.shape(data)
-  num = np.prod(shape)
-  assert( len(shape) == 3 )
-  assert( len(origin) == 3 )
-  assert( len(delta) == 3 )
-  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
-                     ox=origin[0], oy=origin[1], oz=origin[2],
-                     dx=delta[0], dy=delta[1], dz=delta[2],
-                     num=num
-                   )
-  data = data.flatten(order='C')
-  header = """# OpenDX density file
-# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
-object 1 class gridpositions counts  {nx} {ny} {nz}
-origin {ox} {oy} {oz}
-delta  {dx} 0.000000 0.000000
-delta  0.000000 {dy} 0.000000
-delta  0.000000 0.000000 {dz}
-object 2 class gridconnections counts  {nx} {ny} {nz}
-object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
-  len(data)
+def write_confine_dx(radius=100 ):  #Might merge with spherical confinement? 
+    """
+    Create and write a spherical confinement potential to a DX file.
 
-  if num == 3*(num//3):
-    footer = ""
-  else:
-    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
-    footer += "\n"
+    This function generates a spherical confinement potential with a harmonic potential
+    outside the specified radius and a linear potential beyond radius + 25Å. The potential
+    is written to a DX file named 'confine-{radius}.dx'.
 
-  footer += """attribute "dep" string "positions"
-object "density" class field 
-component "positions" value 1
-component "connections" value 2
-component "data" value 3
-"""
-  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
-              fmt=fmt,
-              header=header, comments='', footer=footer )
+    Args
+    ----------
+    radius : float, default=100
+    Radius of the spherical confinement in Angstroms. The potential is zero within
+    this radius and increases harmonically outside it.
+
+    Returns
+    -------
+    None
+    The function returns nothing but writes the potential to a DX file.
+    If the file already exists, the function returns without doing anything.
+
+    Note
+    -----
+    - The grid extends from -radius-50 to +radius+50 in all dimensions
+    - Grid spacing is 2Å in all dimensions
+    - The spring constant k is set to 1 kcal/mol/Å²
+    - The potential transitions from harmonic to linear at radius + 25Å
+    """
+
+    outfile=f'confine-{radius}.dx'
+    if Path(outfile).exists(): return
+
+    k = 1                           # Spring constant [kcal/mol/AA^2]
+    # radius=800
+
+    x0 = y0 = -radius - 50
+    x1 = y1 = -x0
+    z0,z1 = x0,x1
+
+    dx = dy = dz = 2
+
+    assert( x1 > x0 )
+    assert( y1 > y0 )
+    assert( z1 > z0 )
+
+    """ Create grid axes """
+    x,y,z = [np.arange( a-res/2, b+res/2, res )
+             for a,b,res in zip((x0,y0,z0),(x1,y1,z1),(dx,dy,dz))]
+    # x = np.arange( -100, 100, dx ) # alternatively, be explicit
+
+    # assert( x[0] == -x[-1] )
+
+    X,Y,Z = np.meshgrid(x,y,z,indexing='ij')      # create meshgrid for making potential
+    R = np.sqrt(X**2 + Y**2 + Z**2)
 
 
+    """ Create the potential, adding 0.5 k deltaX**2 for each half plane """
+    pot = np.zeros( X.shape )
+
+
+    ids = R > radius
+    pot[ids] = 0.5*k*(R[ids]-radius)**2
+
+    ids = R > radius + 25
+    pot[ids] = 0.5*k*25**2 + 0.5*k*25**2*(R[ids]-radius-25) # switch to linear potential
+
+    """ Write the dx file """
+    writeDx(outfile, pot,
+             delta=(dx,dy,dz),
+             origin=(x[0],y[0],z[0]))
 
 ## Utility functions
 
-def create_bounding_grid( *grids ):
+def _create_bounding_grid( *grids ):
     """ Construct a grid bigger than all the (GridDataFormats) grids provided in the arguments; note that the inputs must be orthonormal and have exactly overlapping voxels """
     def _create_bounding_grid( grid1, grid2 ):
       assert( len(grid1.grid.shape) == 3 )
@@ -458,6 +772,39 @@ def create_bounding_grid( *grids ):
     return g1
 
 def get_slice_enclosing_smaller_grid( grid, smaller_grid ):
+    """
+    Calculates the slices necessary to extract a portion of a larger grid that encloses a smaller grid.
+    This function computes the slice indices needed to extract a subgrid from a larger grid
+    that corresponds to the region covered by a smaller grid. The function assumes that both
+    grids are orthonormal and have the same grid spacing (delta).
+
+    Args
+    ----------
+    grid : Grid
+      The larger grid object containing a 3D array and grid metadata.
+      Must have attributes: grid (3D numpy array), origin (3D coordinates), and delta (grid spacing).
+    smaller_grid : Grid
+      The smaller grid object that is fully contained within the larger grid.
+      Must have the same attributes as grid.
+
+    Returns
+    -------
+    list of slice
+      A list of three slice objects, one for each dimension, that can be used to extract
+      the portion of the larger grid that corresponds to the smaller grid.
+
+    Raises
+    ------
+    AssertionError
+      If grids are not 3D, if grid spacings are not identical, if smaller_grid is not
+      contained within grid, if grids are not aligned on grid points, or if smaller_grid
+      extends beyond the boundaries of grid.
+
+    Note
+    -----
+    The function assumes that both grids are aligned such that the origin of smaller_grid
+    falls exactly on a grid point of the larger grid.
+    """
     
     ## Check grids are orthonormal
     assert( len(grid.grid.shape) == 3 )

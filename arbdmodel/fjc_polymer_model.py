@@ -2,12 +2,12 @@
 ## Test with `python -m arbdmodel.fjc_polymer_model`
 
 import numpy as np
-import sys
 
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
+from .logger import logger
 
 
 """Define particle types"""
@@ -16,15 +16,6 @@ type_ = ParticleType("X",
                      mass=120
 )
 
-# ## Bonded potentials
-# class FjcNonbonded(AbstractPotential):
-#     """ This potential should apply zero force; however, it is required for the arbd engine """
-#     def __init__(self, resolution=0.1, range_=(0,1)):
-#         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
-
-#     def potential(self, r, types):
-#         u = np.zeros(r.shape)
-#         return u
 
 class FjcBeadsFromPolymer(PolymerBeads):
 

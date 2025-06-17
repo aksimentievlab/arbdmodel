@@ -2,13 +2,12 @@
 ## Test with `python -m arbdmodel.kh_polymer_model`
 
 import numpy as np
-import sys
 
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from .logger import logger, get_resource_path
+from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-from .kh_polymer_model_pair_epsilon import epsilon_mj
 
 """Define particle types"""
 _types = dict(
@@ -121,8 +120,59 @@ for k,t in list(_types.items()):
     ## Add types for IDPs
     _types[k+'IDP'] = ParticleType(t.name+'IDP', mass=t.mass, charge=t.charge, sigma=t.sigma, is_idp=True, resname=t.resname)
 
+
+data= np.loadtxt(get_resource_path("kh_pairwise_epsilon.csv"), dtype=str)
+epsilon_mj = dict()
+for n1,n2,v in data:
+    v = float(v)
+    epsilon_mj[(n1,n2)] = v
+    epsilon_mj[(n2,n1)] = v
+    epsilon_mj[(n1+'IDP',n2)]=v
+    epsilon_mj[(n2,n1+'IDP')]=v
+    epsilon_mj[(n2+'IDP',n1)]=v
+    epsilon_mj[(n1,n2+'IDP')]=v
+    epsilon_mj[(n2+'IDP',n1+'IDP')]=v
+    epsilon_mj[(n1+'IDP',n2+'IDP')]=v
+
+
     
 class KhNonbonded(AbstractPotential):
+    """
+    A class implementing the Kim-Hummer nonbonded potential energy model for protein interactions.
+    This model combines electrostatic interactions with a modified Lennard-Jones potential
+    that accounts for hydrophobic effects using the KH (Kim-Hummer) scaling approach.
+    The potential is particularly useful for modeling interactions between intrinsically
+    disordered proteins (IDPs) and folded proteins.
+
+    Parameters
+    ----------
+    debye_length : float, optional
+        The Debye screening length in Angstroms, default is 10Å
+    resolution : float, optional
+        The spatial resolution for potential calculations, default is 0.1Å
+    range_ : tuple, optional
+        The range of distances (min, max) over which to compute the potential,
+        default is (0, None) where None means no upper limit
+
+    Attributes
+    ----------
+    debye_length : float
+        The Debye screening length in Angstroms
+    max_force : float
+        Maximum allowed force from this potential, set to 50
+
+    Methods
+    -------
+    potential(r, types)
+        Calculates the nonbonded potential energy between two atom types at distance r.
+        Combines electrostatic interactions with a modified Lennard-Jones potential.
+        
+    References
+    ----------
+    Kim, Y. C., & Hummer, G. (2008). Coarse-grained models for simulations of 
+    multiprotein complexes: application to ubiquitin binding. Journal of molecular 
+    biology, 375(5), 1416-1433.
+    """
     def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = debye_length

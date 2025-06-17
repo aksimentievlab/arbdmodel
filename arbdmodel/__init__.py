@@ -1,35 +1,12 @@
-# -*- coding: utf-8 -*-
-
-## Set up loggers
-import logging
-def _get_username():
-    import sys
-    try:
-        return sys.environ['USER']
-    except:
-        return None
-
-logging.basicConfig(format='%(name)s: %(levelname)s: %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-_ch = logging.StreamHandler()
-_ch.setFormatter(logging.Formatter('%(name)s: %(levelname)s: %(message)s'))
-logger.addHandler(_ch)
-logger.propagate = False
-
-devlogger = logging.getLogger(__name__+'.dev')
-# devlogger.setLevel(logging.DEBUG)
-if _get_username() not in ('cmaffeo2',):
-    devlogger.addHandler(logging.NullHandler())
-
-## Import packages
-from pathlib import Path
-from glob import glob
-import MDAnalysis as mda
-from abc import abstractmethod, ABCMeta
-
+from .core_objects import Transformable, Parent, Child, Clone
+from .core_objects import ParticleType, PointParticle, RigidBodyType, RigidBody, Group
+from .model import PdbModel, ArbdModel
+from .engine import SimEngine, ArbdEngine, NamdEngine
+from .config import SimConf, DefaultSimConf
+from .binary_manager import BinaryManager
 from .version import get_version
-__version__ = get_version() 
+from .logger import logger,get_resource_path,devlogger
+__version__ = get_version()
 
 from .interactions import NullPotential
 

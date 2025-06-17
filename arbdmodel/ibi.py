@@ -2,7 +2,8 @@ from abc import ABCMeta
 from scipy.signal import savgol_filter as savgol
 import numpy as np
 from pathlib import Path
-from . import ArbdModel, logger
+from . import ArbdModel
+from . import logger
 from .interactions import AbstractPotential
 
 from tqdm import tqdm,trange
@@ -54,6 +55,25 @@ class DegreeOfFreedom():
         return positions
 
     def wrap_vector(self, v):
+        """
+        Adjusts a vector to account for periodic boundary conditions.
+
+        This method modifies the input vector `v` such that its components
+        are wrapped within the periodic boundaries of the simulation box.
+        It assumes that the simulation box has orthogonal dimensions (all angles are 90 degrees).
+
+        Parameters:
+            v (numpy.ndarray): A NumPy array representing the vector(s) to be wrapped.
+                               The array can have any shape, but the last dimension
+                               should correspond to the 3 spatial coordinates (x, y, z).
+
+        Returns:
+            numpy.ndarray: The wrapped vector(s) with the same shape as the input `v`.
+
+        Raises:
+            AssertionError: If the simulation box does not have orthogonal dimensions
+                            (i.e., any of the angles are not 90 degrees).
+        """
         box = self.sels[self.current_key][0].universe.dimensions
         assert(np.all( np.array(box[3:]) == 90 ))
 
@@ -66,6 +86,27 @@ class DegreeOfFreedom():
         return v
 
     def get_values(self, universe):
+        """
+        Retrieve computed values based on the current state of the universe.
+
+        This method calculates and returns a list of values derived from the 
+        positions of particles in the given universe. It uses a caching mechanism 
+        to store selections for previously processed universes, identified by 
+        their hash keys.
+
+        Args:
+            universe: An object representing the current state of the universe. 
+                      It must implement a `__hash__` method to uniquely identify 
+                      its state.
+
+        Returns:
+            list: A list containing the computed value(s) based on the positions 
+                  of the particles in the universe.
+
+        Raises:
+            AssertionError: If the result contains NaN values or if the result 
+                            list is empty.
+        """
         key = universe.__hash__()
         if key not in self.sels:
             self.sels[key] = [DegreeOfFreedom._particle_to_sel(p,universe)
@@ -242,7 +283,75 @@ class PairDistributionDof():
         return (4.0/3)*np.pi*(bins[1:]**3-bins[:-1]**3)
 
 class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
-    def __init__(self, name, degrees_of_freedom=None, range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
+    """
+    A class that implements the Iterative Boltzmann Inversion method for generating potentials.
+
+    This abstract class provides the foundation for creating IBI potentials that are derived
+    from target distributions. IBI is a method to derive effective pair potentials from radial
+    distribution functions in molecular systems.
+
+    Parameters
+    ----------
+    name : str
+        Name of the potential, used for file naming.
+    degrees_of_freedom : list
+        List of degrees of freedom to consider in the potential.
+    range_ : tuple, optional
+        Range of distances to consider (min, max), default is (0, 30).
+    resolution : float, optional
+        Resolution of the binning for the distribution, default is 0.1.
+    max_force : float, optional
+        Maximum force allowed in the potential.
+    max_potential : float, optional
+        Maximum potential value allowed.
+    out_of_bounds_force : str or float, optional
+        Force to apply outside the well-defined density region, default is 'max_force'.
+    zero : str, optional
+        Method to set the zero point of the potential, default is 'last'.
+    smooth : int or None, optional
+        Window size for Savitzky-Golay filter, if None will be calculated automatically.
+    learning_rate : float or callable, optional
+        Learning rate for potential updates, default is 0.9.
+    iteration : int, optional
+        Current iteration number, default is 1.
+    filename_prefix : str, optional
+        Path prefix for saving potentials, default is 'IBIPotentials/'.
+
+    Attributes
+    ----------
+    bins : numpy.ndarray
+        Bin edges for the distribution.
+    potential : numpy.ndarray
+        Current potential values.
+
+    Methods
+    -------
+    potential(r)
+        Abstract method to calculate potential at distance r.
+    filename(types=None, iteration=None, smoothed=True)
+        Generate filename for the potential.
+    write_file()
+        Write the potential to a file.
+    get_target_distribution(universe=None, trajectory=None, recalculate=False)
+        Get or calculate the target distribution.
+    get_cg_distribution(universe, trajectory=None, box=None, recalculate=False)
+        Get or calculate the coarse-grained distribution.
+    read_cg_potential(iteration=None)
+        Read a potential from a file.
+    write_cg_potential(universe=None, scaling_factor=None, temperature=295, tol=None, clean_edges=True, box=None)
+        Calculate and save the potential based on distributions.
+
+    Notes
+    -----
+    IBI is an iterative method that refines potentials to match target distributions.
+    The process involves:
+    1. Starting with an initial guess (usually Boltzmann inversion of the target)
+    2. Running simulations with the current potential
+    3. Comparing resulting distributions with the target
+    4. Updating the potential based on the difference
+    5. Repeating until convergence
+    """
+    def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
         self.name = name
         if degrees_of_freedom is None: degrees_of_freedom = []
         self.degrees_of_freedom = degrees_of_freedom
