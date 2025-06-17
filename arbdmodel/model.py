@@ -16,6 +16,44 @@ from .coords import calculate_dimensions_from_cell_vectors
 
 
 class PdbModel(Transformable, Parent):
+    """
+    A molecular model class that represents a system of particles and rigid bodies.
+    
+    This class extends both Transformable and Parent to provide a complete molecular
+    modeling framework. It manages particles, rigid bodies, and their interactions,
+    and can write PDB format files for visualization and analysis.
+    
+    Parameters
+    ----------
+    children : list, optional
+        List of child objects (particles, groups, etc.) to include in the model.
+        Default is None.
+    dimensions : array-like, optional
+        Box dimensions [x, y, z] for the simulation system. Default is None.
+    remove_duplicate_bonded_terms : bool, optional
+        Whether to remove duplicate bonded interaction terms. Default is False.
+        
+    Attributes
+    ----------
+    dimensions : array-like
+        The simulation box dimensions.
+    particles : list
+        List of non-rigid particles in the model.
+    rigid_bodies : list
+        List of rigid body objects in the model.
+    cacheInvalid : bool
+        Flag indicating whether cached data needs to be updated.
+        
+    Methods
+    -------
+    write_pdb(filename, beta_from_fixed=False)
+        Write the model structure to a PDB format file.
+        
+    Examples
+    --------
+    >>> model = PdbModel(dimensions=[100, 100, 100])
+    >>> model.write_pdb("output.pdb")
+    """
 
     def __init__(self, children=None, dimensions=None, remove_duplicate_bonded_terms=False):
         Transformable.__init__(self,(0,0,0))
@@ -658,6 +696,21 @@ class ArbdModel(PdbModel):
         raise(NotImplementedError)
 
     def simulate(self, output_name, **kwargs):
+        """
+        Simulate the model using the specified engine.
+        
+        This method prepares the simulation configuration and delegates the actual
+        simulation to the engine. It supports various simulation parameters through
+        keyword arguments.
+
+        Parameters
+        ----------
+        output_name : str
+            The base name for the simulation output files.
+        **kwargs : dict, optional
+            Additional keyword arguments for the simulation configuration.
+        """
+        
         ## split kwargs
         sim_kws = ['output_directory', 'directory', 'log_file', 'binary', 'num_procs', 'dry_run', 'configuration', 'replicas']
         sim_kwargs = {kw:kwargs[kw] for kw in sim_kws if kw in kwargs}

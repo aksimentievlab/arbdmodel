@@ -92,14 +92,48 @@ def _minimizeRmsd(coordsB, coordsA, weights=None):
     return q, comB, comA
 
 def quaternion_to_matrix(q):
+    """
+    Convert a quaternion to a rotation matrix.
+    
+    This function converts a quaternion representation of a rotation into a 3x3 
+    rotation matrix. The quaternion is automatically normalized before conversion.
+    
+    Parameters
+    ----------
+    q : array_like
+        A quaternion represented as a 4-element array [q0, q1, q2, q3], where q0 
+        is the scalar (real) part and q1, q2, q3 are the vector (imaginary) parts.
+        
+    Returns
+    -------
+    numpy.ndarray
+        A 3x3 rotation matrix corresponding to the input quaternion.
+        
+    Notes
+    -----
+    The quaternion convention used here is (q0, q1, q2, q3) where q0 is the scalar
+    part. The quaternion is normalized internally to ensure it represents a valid
+    rotation.
+    
+    The Wikipedia article referenced employed a less common convention for quaternions:
+    http://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Rotation_matrix_.E2.86.94_quaternion
+    Alternative notation would be:
+    q1,q2,q3,q4 = q
+    R = [[1-2*(q2*q2 + q3*q3),    2*(q1*q2 - q3*q4),    2*(q1*q3 + q2*q4)],
+         [  2*(q1*q2 + q3*q4),  1-2*(q1*q1 + q3*q3),    2*(q2*q3 - q1*q4)],
+         [  2*(q1*q3 - q2*q4),    2*(q1*q4 + q2*q3),  1-2*(q2*q2 + q1*q1)]]
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> q = [1, 0, 0, 0]  # Identity quaternion
+    >>> R = quaternion_to_matrix(q)
+    >>> print(R)
+    [[1. 0. 0.]
+     [0. 1. 0.]
+     [0. 0. 1.]]
+    """
     assert(len(q) == 4)
-
-    ## It looks like the wikipedia article I used employed a less common convention for q (see below
-    ## http://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Rotation_matrix_.E2.86.94_quaternion
-    # q1,q2,q3,q4 = q
-    # R = [[1-2*(q2*q2 + q3*q3),    2*(q1*q2 - q3*q4),    2*(q1*q3 + q2*q4)],
-    #      [  2*(q1*q2 + q3*q4),  1-2*(q1*q1 + q3*q3),    2*(q2*q3 - q1*q4)],
-    #      [  2*(q1*q3 - q2*q4),    2*(q1*q4 + q2*q3),  1-2*(q2*q2 + q1*q1)]]
 
     q = q / np.linalg.norm(q)
     q0,q1,q2,q3 = q

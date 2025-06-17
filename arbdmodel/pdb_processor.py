@@ -7,6 +7,7 @@ from .engine import HydroProRunner, APBSRunner
 from .core_objects import RigidBodyType
 from .grid import writeDx, loadGrid, Bound_grid,smooth_grid
 from .engine import TclScriptGenerator
+import shutil
 #Originally SimpleARBD by Chun
 
 
@@ -580,9 +581,9 @@ quit
         if is_gigantic:
             self._process_gigantic_vdw(potResolution, denResolution)
         else:
-            self._process_standard_vdw(potResolution, denResolution)
+            self._process_standard_vdw()
 
-    def _process_standard_vdw(self, potResolution, denResolution):
+    def _process_standard_vdw(self):
         """Process standard static object VDW maps"""
         # Generate static VDW map script
         vdw_script = self.tclgen.generate_static_vdw_tcl()

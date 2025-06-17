@@ -65,7 +65,23 @@ class Location():
         return "<Location {}.{}[{:.2f},{:d}]>".format( self.parent.name, self.type_, self.contour_position, self.on_fwd_strand)
         
 class Connection():
-    """ Class for connecting two elements """
+    """
+    Class for connecting two elements
+    
+    This class represents a connection between two elements, where each element is a Location object.
+    It provides methods for managing connections, including finding the other end of a connection
+    and deleting the connection.
+
+    Attributes:
+        A (Location): The first Location object in the connection.
+        B (Location): The second Location object in the connection.
+        type_ (str): The type of connection.
+        
+    Methods:
+        other(location): Returns the other Location object in the connection.
+        delete(): Deletes the connection.
+    """
+    
     def __init__(self, A, B, type_ = None):
         assert( isinstance(A,Location) )
         assert( isinstance(B,Location) )
@@ -436,6 +452,18 @@ class PolymerSection(ConnectableElement):
         
 
     def contour_to_orientation(self,s):
+        """
+        Convert a contour position to an orientation matrix.
+        
+        This method calculates the orientation of the polymer at a given contour position.
+        It handles both linear and spline-based orientations.
+
+        Returns
+        -------
+        orientation : array-like
+            Orientation matrix at the given contour position.   
+        """
+        
         assert( isinstance(s,float) or isinstance(s,int) or len(s) == 1 )   # TODO make vectorized version
 
         if self.quaternion_spline_params is None:
@@ -466,6 +494,20 @@ class PolymerSection(ConnectableElement):
         return orientation
 
     def get_contour_sorted_connections_and_locations(self,type_):
+        """
+        Get connections and locations sorted by contour position.
+        
+        This method retrieves all connections and locations of a specified type and
+        sorts them based on their contour positions.
+
+        Parameters
+        ----------
+        type_ : str
+            The type of connection to retrieve.
+
+        Returns
+        """
+
         sort_fn = lambda c: c[1].contour_position
         cl = self.get_connections_and_locations(type_)
         return sorted(cl, key=sort_fn)
@@ -488,6 +530,21 @@ class PolymerSection(ConnectableElement):
             yield c
 
 class PolymerGroup():
+    """
+    Class for managing a group of polymers.
+    
+    This class represents a group of polymers, which can be used to represent a
+    complex system of polymers. It provides methods for managing the polymers,
+    including finding connections and locations.
+
+    Attributes:
+        polymers (list): A list of PolymerSection objects.
+        grid_potentials (list): A list of grid potentials.
+        
+    Methods:
+        get_connections(type_=None, exclude=()): Find all connections in model, without double-counting.
+    """
+    
     def __init__(self, polymers=[],
                  **kwargs):
 
