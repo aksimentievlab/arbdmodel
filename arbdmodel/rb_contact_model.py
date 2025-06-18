@@ -21,7 +21,7 @@ class RBContactModel(ArbdModel):
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False, 
                  num_heavy_cluster=3,
                  boundary_params=None, **kwargs):
-        """Initialize structure model.
+        """Initialize structure model Former SimpleARBD.
         
         Args:
             diffusible_objects: List of RBContact instances for diffusible objects
