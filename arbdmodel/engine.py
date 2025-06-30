@@ -400,7 +400,7 @@ class ArbdEngine(SimEngine):
 
     def _write_bond_file( self, model, filename ):
         self._bond_filename = filename
-        for b in list( set( [b for i,j,b,ex in model.get_bonds()] ) ):
+        for b in model._get_bond_potentials():
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
@@ -415,6 +415,19 @@ class ArbdEngine(SimEngine):
                     fh.write("BOND REPLACE %d %d %s\n" % item)
                 else:
                     fh.write("BOND ADD %d %d %s\n" % item)
+
+            for i,j,b,ax,ex in model.get_bondXY():
+                try:
+                    bfile = b.filename()
+                except:
+                    bfile = str(b)
+                if len(ax) != 3:
+                    raise ValueError('BondXY interactions must have a three-element axis')
+                item = (i.idx, j.idx, bfile, *ax )
+                if ex:
+                    fh.write("BONDXY REPLACE %d %d %s %f %f %f\n" % item)
+                else:
+                    fh.write("BONDXY ADD %d %d %s %f %f %f\n" % item)
 
     def _write_angle_file( self, model, filename ):
         self._angle_filename = filename
@@ -741,6 +754,7 @@ tabulatedPotential  1
             bonds = model.get_bonds()
             angles = model.get_angles()
             dihedrals = model.get_dihedrals()
+            bondXY = model.get_bondXY()
             vector_angles = model.get_vector_angles()
             exclusions = model.get_exclusions()
             bond_angles = model.get_bond_angles()
@@ -748,7 +762,7 @@ tabulatedPotential  1
             # group_sites = model.get_group_sites()
             group_sites = model.group_sites
 
-            if len(bonds) > 0:
+            if len(bonds)+len(bondXY)+len(bond_angles) > 0:
                 for b in model._get_bond_potentials():
                     try:
                         bfile = b.filename()
@@ -790,7 +804,7 @@ tabulatedPotential  1
 
             if len(restraints) > 0:
                 fh.write("inputRestraints %s\n" % self._restraint_filename)
-            if len(bonds) > 0:
+            if len(bonds)+len(bondXY) > 0:
                 fh.write("inputBonds %s\n" % self._bond_filename)
             if len(angles) > 0:
                 fh.write("inputAngles %s\n" % self._angle_filename)

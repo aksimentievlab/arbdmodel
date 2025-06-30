@@ -99,6 +99,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.bondXY = []
         self.vector_angles = []
         self.impropers = []
         self.exclusions = []
@@ -178,6 +179,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.bondXY = []
         self.vector_angles = []
         self.impropers = []
         self.exclusions = []
@@ -217,6 +219,12 @@ class Parent():
         # beads = [b for b in self]
         # for b in (i,j,k,l): assert(b in beads)
         self.dihedrals.append( (i,j,k,l, dihedral) )
+
+    def add_bondXY(self, i,j, bond, axis, exclude=False):
+        assert( i is not j )
+        try:    hash(axis)
+        except: axis = tuple(axis)
+        self.bondXY.append( (i,j, bond, axis, exclude) )
 
     def add_vector_angle(self, i,j,k,l, potential):
         assert( len(set((i,j,k,l))) == 4 )
@@ -275,7 +283,6 @@ class Parent():
         else:
             return ret
 
-
     def get_angles(self):
         ret = copy(self.angles)
         for c in self.children:
@@ -289,6 +296,15 @@ class Parent():
         ret = copy(self.dihedrals)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_dihedrals() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(tuple(ret)))
+        else:
+            return ret
+
+    def get_bondXY(self):
+        ret = copy(self.bondXY)
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.get_bondXY() )
         if self.remove_duplicate_bonded_terms:
             return list(set(tuple(ret)))
         else:
@@ -350,8 +366,9 @@ class Parent():
 
     def _get_bond_potentials(self):
         bonds =  [b for i,j,b,ex in self.get_bonds()]
+        bondXY =  [b for i,j,b,ax,ex in self.get_bondXY()]
         bondangles1 = [b[1] for i,j,k,l,b in self.get_bond_angles()]
-        return list(set( tuple(bonds+bondangles1) ))
+        return list(set( tuple(bonds+bondXY+bondangles1) ))
 
     def _get_angle_potentials(self):
         angles =  [b for i,j,k,b in self.get_angles()]

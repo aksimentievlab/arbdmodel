@@ -354,8 +354,7 @@ class ArbdModel(PdbModel):
                     
         # for g in other_model.children:
         #     self.update(g, copy=copy)
-        g = Group()
-        for attr in 'children bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
+        for attr in 'children bonds angles dihedrals bondXY impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
             # self.__setattr__(attr, self.__getattribute__(attr) + other_model.__getattribute__(attr))
             self.__getattribute__(attr).extend(other_model.__getattribute__(attr))
 
