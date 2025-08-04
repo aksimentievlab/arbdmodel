@@ -525,7 +525,7 @@ class WLCSKPotential(HarmonicBondedPotential, metaclass=ABCMeta):
         ## Note, we're leveraging the HarmonicBondedPotential base class and set k to lp here, but it isn't proper
         HarmonicBondedPotential.__init__(self, d, lp, **kwargs)
         self.d = d          # separation
-        self.lp = lp            # persistence length
+        self.k = self.lp = lp            # persistence length
         self.kT = kT
 
     def filename(self,types=None):
@@ -534,6 +534,10 @@ class WLCSKPotential(HarmonicBondedPotential, metaclass=ABCMeta):
                                        self.d, self.lp)
 
     def __hash__(self):
+        try: self.k             # Preferably do not commit (needed to load some pkl model)
+        except: self.k = self.lp
+        try: self.filename_prefix ## also
+        except: self.filename_prefix = self.prefix
         return hash((self.d, self.lp, self.kT, HarmonicBondedPotential.__hash__(self)))
 
     def __eq__(self, other):
