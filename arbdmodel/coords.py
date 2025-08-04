@@ -261,6 +261,17 @@ def quaternion_slerp(q1,q2,t):
     q1_inv = quaternion_inverse(q1)
     return quaternion_product( q1, quaternion_exp( quaternion_product( q1_inv, q2 ), t ) )
 
+def average_quaternions(quats):
+    qs = list(quats)
+    if len(qs) == 1: return qs[0]
+    while len(qs) > 1:
+        if len(qs) % 2 == 1:
+            qs[-2] = quaternion_slerp(qs[-2],qa[-1],0.5) # probably better if random
+            qs = qs[:-1]
+        qs = [quaternion_slerp(q1,q2,0.5) for q1,q2 in zip(qs[::2],qs[1::2])]
+    return qs[0]
+
+
 def rotationAboutAxis(axis,angle, normalizeAxis=True):
     if normalizeAxis: axis = axis / np.linalg.norm(axis)
     angle = angle * 0.5 * np.pi/180
