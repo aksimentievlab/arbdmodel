@@ -389,6 +389,8 @@ class ArbdEngine(SimEngine):
                     item.append(restraint[0])
                     if isinstance(i, GroupSite):
                         item.extend(i.get_center())
+                    elif isinstance(i, RigidBody):
+                        raise NotImplementedError
                     else:
                         item.extend(i.get_collapsed_position())
                 elif len(restraint) == 2:

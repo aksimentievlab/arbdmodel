@@ -270,8 +270,9 @@ class Parent():
 
     def get_restraints(self):
         ret = []
-        for c in self.children +  self.group_sites:
+        for c in self.children + self.group_sites:
             ret.extend( c.get_restraints() )
+
         return ret
 
     def get_bonds(self):
@@ -1017,7 +1018,10 @@ class RigidBody(PointParticle):
         self.restraints.append( restraint )
 
     def get_restraints(self):
-        return [(self,r) for r in self.restraints]
+        ret = [(self,r) for r in self.restraints]
+        for p in self.attached_particles:
+            ret.extend( p.get_restraints() )
+        return ret
 
     def duplicate(self):
         new = deepcopy(self)
