@@ -107,6 +107,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.bondXY = []
         self.vector_angles = []
         self.impropers = []
         self.exclusions = []
@@ -148,6 +149,7 @@ class Parent():
         self.bonds = []
         self.angles = []
         self.dihedrals = []
+        self.bondXY = []
         self.vector_angles = []
         self.impropers = []
         self.exclusions = []
@@ -187,6 +189,12 @@ class Parent():
         # beads = [b for b in self]
         # for b in (i,j,k,l): assert(b in beads)
         self.dihedrals.append( (i,j,k,l, dihedral) )
+
+    def add_bondXY(self, i,j, bond, axis, exclude=False):
+        assert( i is not j )
+        try:    hash(axis)
+        except: axis = tuple(axis)
+        self.bondXY.append( (i,j, bond, axis, exclude) )
 
     def add_vector_angle(self, i,j,k,l, potential):
         assert( len(set((i,j,k,l))) == 4 )
@@ -232,8 +240,9 @@ class Parent():
 
     def get_restraints(self):
         ret = []
-        for c in self.children +  self.group_sites:
+        for c in self.children + self.group_sites:
             ret.extend( c.get_restraints() )
+
         return ret
 
     def get_bonds(self):
@@ -244,7 +253,6 @@ class Parent():
             return list(set(tuple(ret)))
         else:
             return ret
-
 
     def get_angles(self):
         ret = copy(self.angles)
@@ -259,6 +267,15 @@ class Parent():
         ret = copy(self.dihedrals)
         for c in self.children:
             if isinstance(c,Parent): ret.extend( c.get_dihedrals() )
+        if self.remove_duplicate_bonded_terms:
+            return list(set(tuple(ret)))
+        else:
+            return ret
+
+    def get_bondXY(self):
+        ret = copy(self.bondXY)
+        for c in self.children:
+            if isinstance(c,Parent): ret.extend( c.get_bondXY() )
         if self.remove_duplicate_bonded_terms:
             return list(set(tuple(ret)))
         else:
@@ -320,8 +337,9 @@ class Parent():
 
     def _get_bond_potentials(self):
         bonds =  [b for i,j,b,ex in self.get_bonds()]
+        bondXY =  [b for i,j,b,ax,ex in self.get_bondXY()]
         bondangles1 = [b[1] for i,j,k,l,b in self.get_bond_angles()]
-        return list(set( tuple(bonds+bondangles1) ))
+        return list(set( tuple(bonds+bondXY+bondangles1) ))
 
     def _get_angle_potentials(self):
         angles =  [b for i,j,k,b in self.get_angles()]
@@ -782,7 +800,10 @@ class RigidBody(PointParticle):
         self.restraints.append( restraint )
 
     def get_restraints(self):
-        return [(self,r) for r in self.restraints]
+        ret = [(self,r) for r in self.restraints]
+        for p in self.attached_particles:
+            ret.extend( p.get_restraints() )
+        return ret
 
     def duplicate(self):
         new = deepcopy(self)
@@ -900,7 +921,6 @@ class PdbModel(Transformable, Parent):
                 data['z'] = z
                 # assert(data['resid'] < 1e5)
                 data['charge'] = int(data['charge'])
-
                 data['ric'] = ' '
                 if data['resid'] >= 1e4:
                     _wrap_count = (data['resid']-1)//9999
@@ -1154,7 +1174,7 @@ class ArbdModel(PdbModel):
 
         # for g in other_model.children:
         #     self.update(g, copy=copy)
-        for attr in 'children bonds angles dihedrals impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
+        for attr in 'children bonds angles dihedrals bondXY impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
             # self.__setattr__(attr, self.__getattribute__(attr) + other_model.__getattribute__(attr))
             self.__getattribute__(attr).extend(other_model.__getattribute__(attr))
 
@@ -1332,21 +1352,22 @@ class ArbdModel(PdbModel):
             return 0
         num_gens = max([__get_generations(t) for t in (typeA,typeB)])
 
-        for gens in range(num_gens+1):
-            for s,A,B in self.nonbonded_interactions:
-                A,B = __order_types(A,B)
-                if A is None or B is None:
-                    if cp is False: continue
-                    if A is None and B is None:
+        for consider_wild in (False,True):
+            for gens in range(num_gens+1):
+                for s,A,B in self.nonbonded_interactions:
+                    A,B = __order_types(A,B)
+                    if A is None or B is None:
+                        if not consider_wild: continue
+                        if A is None and B is None:
+                            return s
+                        elif A is None:
+                            if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
+                                return s
+                        elif B is None:
+                            if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
+                                return s
+                    elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
                         return s
-                    elif A is None:
-                        if typeA.is_same_type(B, consider_parent_generations=gens) or typeB.is_same_type(B, consider_parent_generations=gens):
-                            return s
-                    elif B is None:
-                        if typeA.is_same_type(A, consider_parent_generations=gens) or typeB.is_same_type(A, consider_parent_generations=gens):
-                            return s
-                elif typeA.is_same_type(A, consider_parent_generations=gens) and typeB.is_same_type(B, consider_parent_generations=gens):
-                    return s
         
         # raise Exception("No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
         # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
@@ -1461,6 +1482,7 @@ class ArbdModel(PdbModel):
                 i_skipped += 1
                 continue
             t.type_idx = i-i_skipped
+
 
     def _particleTypePairIter(self):
         typesAndCounts = self.getParticleTypesAndCounts()
@@ -1919,6 +1941,8 @@ class ArbdEngine(SimEngine):
                     item.append(restraint[0])
                     if isinstance(i, ArbdModel._GroupSite):
                         item.extend(i.get_center())
+                    elif isinstance(i, RigidBody):
+                        raise NotImplementedError
                     else:
                         item.extend(i.get_collapsed_position())
                 elif len(restraint) == 2:
@@ -1930,7 +1954,7 @@ class ArbdEngine(SimEngine):
 
     def _write_bond_file( self, model, filename ):
         self._bond_filename = filename
-        for b in list( set( [b for i,j,b,ex in model.get_bonds()] ) ):
+        for b in model._get_bond_potentials():
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
@@ -1945,6 +1969,19 @@ class ArbdEngine(SimEngine):
                     fh.write("BOND REPLACE %d %d %s\n" % item)
                 else:
                     fh.write("BOND ADD %d %d %s\n" % item)
+
+            for i,j,b,ax,ex in model.get_bondXY():
+                try:
+                    bfile = b.filename()
+                except:
+                    bfile = str(b)
+                if len(ax) != 3:
+                    raise ValueError('BondXY interactions must have a three-element axis')
+                item = (i.idx, j.idx, bfile, *ax )
+                if ex:
+                    fh.write("BONDXY REPLACE %d %d %s %f %f %f\n" % item)
+                else:
+                    fh.write("BONDXY ADD %d %d %s %f %f %f\n" % item)
 
     def _write_angle_file( self, model, filename ):
         self._angle_filename = filename
@@ -2047,7 +2084,11 @@ class ArbdEngine(SimEngine):
         if len(model.group_sites) > 0:
             with open(self._group_sites_filename,'w') as fh:
                 for i,g in enumerate(model.group_sites):
-                    assert( i+len(model.particles) == g.idx )
+                    expected_idx = i + len(model.particles)
+                    for rb in model.rigid_bodies:
+                           expected_idx += len(rb.attached_particles)
+#                    assert( i+len(model.particles) == g.idx )
+                    assert(expected_idx == g.idx)
                     ids = " ".join([str(int(p.idx)) for p in g.particles])
                     fh.write("GROUP %s\n" % ids)
 
@@ -2258,6 +2299,7 @@ tabulatedPotential  1
             bonds = model.get_bonds()
             angles = model.get_angles()
             dihedrals = model.get_dihedrals()
+            bondXY = model.get_bondXY()
             vector_angles = model.get_vector_angles()
             exclusions = model.get_exclusions()
             bond_angles = model.get_bond_angles()
@@ -2265,7 +2307,7 @@ tabulatedPotential  1
             # group_sites = model.get_group_sites()
             group_sites = model.group_sites
 
-            if len(bonds) > 0:
+            if len(bonds)+len(bondXY)+len(bond_angles) > 0:
                 for b in model._get_bond_potentials():
                     try:
                         bfile = b.filename()
@@ -2307,7 +2349,7 @@ tabulatedPotential  1
 
             if len(restraints) > 0:
                 fh.write("inputRestraints %s\n" % self._restraint_filename)
-            if len(bonds) > 0:
+            if len(bonds)+len(bondXY) > 0:
                 fh.write("inputBonds %s\n" % self._bond_filename)
             if len(angles) > 0:
                 fh.write("inputAngles %s\n" % self._angle_filename)
