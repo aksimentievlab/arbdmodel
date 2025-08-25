@@ -1,10 +1,8 @@
 ## Test with `python -m arbdmodel.calvados3_polymer_model`
 
 import numpy as np
-import sys
-import pandas as pd
 ## Local imports
-from . import logger, ParticleType, PointParticle, get_resource_path
+from . import logger, ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
 

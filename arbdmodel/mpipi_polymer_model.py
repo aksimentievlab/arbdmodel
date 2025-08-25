@@ -9,6 +9,7 @@ from . import ParticleType, PointParticle
 
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
+pd.read_csv(get_resource_path("mpipi_parameters.csv"))
 
 """Define particle types"""
 _types = dict(
