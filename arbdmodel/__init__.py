@@ -5,7 +5,7 @@ from .engine import SimEngine, ArbdEngine, NamdEngine
 from .config import SimConf, DefaultSimConf
 from .binary_manager import BinaryManager
 from .version import get_version
-<<<<<<< HEAD
+
 from .logger import logger,get_resource_path,devlogger
 __version__ = get_version()
 
@@ -14,7 +14,7 @@ __all__ = ['ParticleType', 'PointParticle', 'RigidBodyType', 'RigidBody', 'Group
     'SimConf', 'DefaultSimConf', 'BinaryManager',
     'PdbModel', 'ArbdModel',
     'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path','logger']
-=======
+
 __version__ = get_version() 
 
 from .interactions import NullPotential
