@@ -574,7 +574,7 @@ class PolymerGroup():
         return ret
     
     def extend(self, other, copy=True, include_strands=False):
-        assert( isinstance(other, PolymerSection) )
+        assert( isinstance(other, PolymerSectionModel) )
         if copy:
             for s in other.polymers:
                 self.polymers.append(deepcopy(s))
@@ -608,10 +608,10 @@ class PolymerGroup():
         if include_ssdna:
             polymers = self.polymers
         else:
-            polymers = list(filter(lambda s: isinstance(s,PolymerSection), 
+            polymers = list(filter(lambda s: isinstance(s,DoubleStrandedPolymerSection), 
                                    self.polymers))
         centers = [s.get_center() for s in polymers]
-        weights = [s.num_monomers*2 if isinstance(s,PolymerSection) else s.num_monomers for s in polymers]
+        weights = [s.num_monomers*2 if isinstance(s,DoubleStrandedPolymerSection) else s.num_monomers for s in polymers]
         # centers,weights = [np.array(a) for a in (centers,weights)]
         return np.average( centers, axis=0, weights=weights)
 
@@ -633,7 +633,7 @@ class PolymerGroup():
             raise ValueError("Grid file {} does not exist".format(grid_file))
         if not grid_file.is_absolute():
             grid_file = Path.cwd() / grid_file
-        self.grid_potentials.append((grid_file,scale,per_monomer))
+        self.grid_potentials.append((grid_file,scale,per_,pmp,er))
 
     def vmd_tube_tcl(self, file_name="drawTubes.tcl", radius=5):
         with open(file_name, 'w') as tclFile:
@@ -738,9 +738,8 @@ class PolymerBeads(Group, metaclass=ABCMeta):
         self.clear_all()
 
     @abstractmethod
-    def _generate_ith_bead_group(self, index, position, orientation, type_=None):
+    def _generate_ith_bead_group(self, index, position, orientation):
         """ Normally a bead, but sometimes a group of beads """
-        
         bead = PointParticle(type_, position,
                              resid = index+1)
         pass
