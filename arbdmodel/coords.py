@@ -187,7 +187,8 @@ def quaternion_from_matrix( R ):
             q[3] = (R[0,1] - R[1,0]) / s
             if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 0],0)):
                 q[0] = 1
-    assert( q[0] >= 0 )
+    if not (q[0] >= 0):
+        raise ValueError(f'Invalid quaternion calculating from matrix {R}')
     return q
 
 def __quaternion_from_matrix__deprecated( R ):
@@ -266,7 +267,7 @@ def average_quaternions(quats):
     if len(qs) == 1: return qs[0]
     while len(qs) > 1:
         if len(qs) % 2 == 1:
-            qs[-2] = quaternion_slerp(qs[-2],qa[-1],0.5) # probably better if random
+            qs[-2] = quaternion_slerp(qs[-2],qs[-1],0.5) # probably better if random
             qs = qs[:-1]
         qs = [quaternion_slerp(q1,q2,0.5) for q1,q2 in zip(qs[::2],qs[1::2])]
     return qs[0]

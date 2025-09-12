@@ -570,7 +570,6 @@ class ArbdModel(PdbModel):
             if t.parent: return 1+__get_generations(t.parent)
             return 0
         num_gens = max([__get_generations(t) for t in (typeA,typeB)])
-
         for consider_wild in (False,True):
             for gens in range(num_gens+1):
                 for s,A,B in self.nonbonded_interactions:

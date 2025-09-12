@@ -92,6 +92,8 @@ class Parent():
     def __init__(self, children=None, remove_duplicate_bonded_terms=False):
         self.children = []
         if children is not None:
+            if not any(isinstance(children, _cls) for _cls in (tuple,list)):
+                raise ValueError(f'Arddmodel.Parent(children,...): children is not a list or tuple; did you pass a list?')
             for x in children:
                 self.add(x)
         
