@@ -77,7 +77,7 @@ class AbstractPotential(metaclass=ABCMeta):
         u[:-1][left] = u[right]
 
     def filename(self, types=None):
-        raise NotImplementedError('Inherited potential objects should overload this function')
+        raise NotImplementedError(f'{self.__class__}: Inherited potential objects should overload this function')
 
     def _cap_potential(self, r, u):
         self.__remove_nans(u)
@@ -161,7 +161,9 @@ class AbstractPotential(metaclass=ABCMeta):
 
     def __hash__(self):
         try:    fname = self.filename(None)
-        except: fname = self.filename(('',''))
+        except:
+            try: fname = self.filename(('',''))
+            except: fname=None
         return hash((fname, self.range_, self.resolution, self.max_force, self.max_potential, self.zero))
 
     def __eq__(self, other):
@@ -171,9 +173,13 @@ class AbstractPotential(metaclass=ABCMeta):
         if (type(self).__name__ != type(other).__name__):
             return False
         try:    fname1 = self.filename(None)
-        except: fname1 = self.filename(('',''))
-        try:    fname2 = self.filename(None)
-        except: fname2 = self.filename(('',''))
+        except:
+            try: fname1 = self.filename(('',''))
+            except: fname1=None
+        try:    fname2 = other.filename(None)
+        except:
+            try: fname2 = other.filename(('',''))
+            except: fname2=None
         return  fname1 == fname2
 
 
