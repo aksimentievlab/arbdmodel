@@ -1,10 +1,18 @@
 from abc import ABCMeta
+
+from scipy.ndimage import label, distance_transform_edt
+from scipy.spatial import KDTree
 from scipy.signal import savgol_filter as savgol
+from scipy.interpolate import RBFInterpolator
+from .util import savgol_filter_nd as savgol_nd
+
 import numpy as np
 from pathlib import Path
 from . import ArbdModel
 from . import logger
 from .interactions import AbstractPotential
+
+from gridData import Grid
 
 from tqdm import tqdm,trange
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -14,6 +22,10 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 simulations with Iterative Boltmann Inversion. """
 
 
+class DegreeOfFreedomGroup():
+    """ Streamline calculation of IBI degrees of freedom by consolidating functions """
+    ...
+
 class DegreeOfFreedom():
     """ Base class for representing a degree of freedom in the system.
 
@@ -22,7 +34,7 @@ class DegreeOfFreedom():
  pairs of particle types (with exclusions!).
 
     Derived classes should calculate a value for the DoF from particle
-  coordinates.  """
+  coordinates. """
 
 
     def __init__(self,*particles):
@@ -113,7 +125,9 @@ class DegreeOfFreedom():
                               for p in self.particles]
         positions = DegreeOfFreedom._sel_list_to_positions( self.sels[key] )
         self.current_key = key
-        result = [self._get_value(positions)]
+        ## previously:
+        # result = [self._get_value(positions)]
+        result = self._get_value(positions)
         assert( np.all( ~np.isnan(result) ) )
         assert( len(result) > 0 )
         self.current_key = None
@@ -122,6 +136,23 @@ class DegreeOfFreedom():
     def compute_volume(self, bins):
         return np.diff(bins)
 
+class ThreeDimensionalDensityDoF(DegreeOfFreedom):
+
+    def __init__(self, *particles):
+        # def __init__(self, origin, delta, num, *particles):
+        # self.origin = origin    # 3d ndarray
+        # self.delta = delta      # 3d ndarray
+        # self.num = num          # 3d ndarray
+        # self.center = self.origin + 0.5*self.delta*self.num
+        DegreeOfFreedom.__init__(self, *particles)
+        
+    def _get_value(self, positions):
+        return positions
+
+    def compute_volume(self, bins):
+        assert(len(bins) == 3)
+        return np.prod([a[1]-a[0] for a in bins])
+    
 class RadiusDof(DegreeOfFreedom):
     def _get_value(self, positions):
         for p in positions:
@@ -367,7 +398,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         # self.smooth = 15 if smooth is None else smooth
         self.learning_rate = learning_rate
 
-        self.__target = None
+        self._target = None
         self.bins = np.arange( self.range_[0],
                                self.range_[1]+self.resolution,
                                self.resolution )
@@ -408,6 +439,25 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 return False
         return True
 
+    def bin_dof_data(self, bins, vals, counts):
+        """ Function to bin position data from DoFs into 3D counts """
+        if sum(np.array(counts.shape) > 1) > 1:
+            _tmp, _ = np.histogramdd(vals, bins=bins, density=False)
+        else:
+            _tmp, _ = np.histogramdd(vals, bins=[bins], density=False)
+        counts += _tmp
+
+        # """ Function to bin data from DoFs into 1D counts """
+        # inds = np.digitize(vals, bins) - 1
+        # # if (inds < 0).sum() > 0: (inds >= len(counts)).sum() > 0:
+        # #     logger.warn(f'inds contains {(inds < 0).sum()} elements < 0 and {(inds >= len(counts)).sum()} elements >= len(counts) ({len(counts)}) of {inds.size} total elements')
+        # inds = inds[(inds<len(counts)) & (inds>=0)]
+        # counts = counts + np.bincount(inds, minlength=len(counts))
+
+    def symmetrize(self, bins, counts):
+        """ Implement for subclasses as needed """
+        pass
+        
     def _extract_distribution(self, universe, trajectory = None, box = None):
         if trajectory is not None:
             key = (universe, trajectory).__hash__()
@@ -420,72 +470,115 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             return self.__dists[key]
         # devlogger.info(f"{self}._extract_distribution( u.{key} ): calculating")
         bins = self.bins
-        counts = np.zeros( [len(bins)-1] )
+        try:
+            counts = np.zeros( [len(a)-1 for a in bins] )
+        except:
+            counts = np.zeros( [len(bins)-1] )
         nframes = 0
         with logging_redirect_tqdm(loggers=[logger]):
+            vals = []
+            nvals = 0
             for t in tqdm(trajectory, desc=f"Extracting distribution {self}"):
                 # if (t.frame % 100) == 0: logger.info(f'Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}')
                 if box is not None:
                     universe.dimensions = box
-                vals = np.stack([dof.get_values(universe) for dof in self.degrees_of_freedom])
-                inds = np.digitize(vals, bins) - 1
-                # if (inds < 0).sum() > 0: (inds >= len(counts)).sum() > 0:
-                #     logger.warn(f'inds contains {(inds < 0).sum()} elements < 0 and {(inds >= len(counts)).sum()} elements >= len(counts) ({len(counts)}) of {inds.size} total elements')
-                inds = inds[(inds<len(counts)) & (inds>=0)]
-                counts = counts + np.bincount(inds, minlength=len(counts))
+                _v = np.vstack([dof.get_values(universe) for dof in self.degrees_of_freedom])
+                vals.append(_v)
+                nvals += len(_v)
+                if nvals > 10000000:
+                    assert( vals[0].shape[1] == len(bins) )
+                    self.bin_dof_data(bins, np.vstack(vals), counts)
+                    vals = []
+                    nvals = 0
                 nframes += 1
+            if nvals > 0:
+                assert( vals[0].shape[1] == len(bins) )
+                self.bin_dof_data(bins, np.vstack(vals), counts)
+                vals = []
+                nvals = 0
+                
         if np.sum(counts) == 0:
             raise ValueError(f'Extracting distribution for "{self.filename()}" failed because no values were found in the range {self.range_}; consider specifying a larger range_ parameter when creating the {self.__class__.__name__}')
         assert(nframes > 0)
 
+        self.symmetrize(bins,counts)
+        
         vol = self.degrees_of_freedom[0].compute_volume(bins)
         assert(vol.sum() > 0)
         likelihood = counts / (nframes*vol)
         ## don't normalize over num values in dofs just yet
-        bins = bins[:len(likelihood)]
+        # raise NotImplementedError("Why trim bins here?")
+        # bins = bins[:len(likelihood)]
         self.__dists[key] = (bins,likelihood) # record for later
         return bins, likelihood
 
+    def _save_distribution(self, filename, bins, vals):
+        f = filename
+        if np.sum(vals) == 0:
+            raise Exception
+        n_bin_arrs = len(bins)
+        try: len(bins[0])
+        except: n_bin_arrs = 1
+        if n_bin_arrs > 1:
+            bin_dict = {f'bins_{i}':b for i,b in enumerate(bins)}
+        else:
+            bin_dict = {'bins_0':bins}
+        Path(f).parent.mkdir(parents=True, exist_ok=True)
+        counts = vals
+        vals = vals / np.sum(vals)
+        np.savez(f,n_bin_arrs=n_bin_arrs, **bin_dict, vals=vals, counts=counts, allow_pickle=False)
+        return bins,vals,counts
+
+    def _load_distribution(self, filename):
+        f = filename
+        _data = np.load(f, allow_pickle=False)
+        n_bin_arrs, vals, counts = [_data[key] for key in ('n_bin_arrs', 'vals', 'counts')]
+        bins = [_data[f'bins_{i}'] for i in range(n_bin_arrs)]
+        if n_bin_arrs == 1: bins = bins[0]
+        return bins,vals,counts
+    
     def get_target_distribution(self, universe=None, trajectory=None, recalculate=False, directory='.'):
-        if self.__target is None:
-            f = f'{directory}/{self.filename_prefix}.target.dat'
+        if self._target is None:
+            f = f'{directory}/{self.filename_prefix}.target.npz'
             if (not Path(f).exists()) or recalculate:
                 if universe is None: raise Exception
                 bins, vals = self._extract_distribution( universe, trajectory=trajectory )
-                if np.sum(vals) == 0:
-                    raise Exception
-                Path(f).parent.mkdir(parents=True, exist_ok=True)
-                np.savetxt(f,np.arrray((bins,vals/np.sum(vals),vals)).T)
-            bins, vals, counts = np.loadtxt(f).T
+                bins,vals,counts = self._save_distribution(f, bins, vals)
+            else:
+                bins,vals,counts = self._load_distribution(f)
             if np.sum(counts) == 0:
                 raise Exception
-            self.__target = (bins,vals)
-        if self.smooth is None:
-            bins,vals = self.__target
-            ## Set smooth to ~1/2 stddev
-            _mean = np.average( bins, weights=vals )
-            _var = np.average( (bins-_mean)**2 , weights=vals )
-            _dr = (bins[1]-bins[0])
-            self.smooth = (int(np.round(np.sqrt(_var)/(2*_dr))+1)//2)*2+1
-            if self.smooth < 5:
-                logger.warning(f'{f}: Smoothing ({self.smooth} points) suggested by 1/2 of stddev ({np.sqrt(_var):02f}) is too low: setting smooth to 5')
-                self.smooth = 5
-            else:
-                logger.info(f'{f}: Smoothing {self.smooth} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
+            self._target = (bins,vals)
 
-        return self.__target
+        if self.smooth is None:
+            self.set_smooth_from_target_distribution()
+
+        return self._target
+
+    def set_smooth_from_target_distribution(self):
+        bins, vals = self._target
+        bins = 0.5*(bins[:-1] + bins[1:])
+        ## Set smooth to ~1/2 stddev
+        _mean = np.average( bins, weights=vals )
+        _var = np.average( (bins-_mean)**2 , weights=vals )
+        _dr = (bins[1]-bins[0])
+        self.smooth = (int(np.round(np.sqrt(_var)/(2*_dr))+1)//2)*2+1
+        if self.smooth < 5:
+            logger.warning(f'Smoothing ({self.smooth} points) suggested by 1/2 of stddev ({np.sqrt(_var):02f}) is too low: setting smooth to 5')
+            self.smooth = 5
+        else:
+            logger.info(f'Smoothing {self.smooth} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
 
     def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False, directory='.'):
-        f = self.filename(smoothed=False,directory=directory).replace('.dat','.cg.dat')
+        f = self.filename(smoothed=False,directory=directory)[:-3] + '.npz'
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
             bins, vals = self._extract_distribution( universe, trajectory=trajectory, box=box )
-            Path(f).parent.mkdir(parents=True, exist_ok=True)
-            np.savetxt(f,np.array((bins,vals/np.sum(vals),vals)).T)
+            bins, vals, counts = self._save_distribution(f, bins, vals)
         else:
             logger.info(f"get_cg_distribution(): reading from '{f}'")
-            bins, vals, counts = np.loadtxt(f).T
+            bins, vals, counts = self._load_distribution(f)
             key = universe.__hash__()
             if key not in self.__dists:
                 self.__dists[key] = (bins, counts)
@@ -494,7 +587,8 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
     def read_cg_potential(self, iteration=None, directory='.'):
         if iteration is None: iteration = self.iteration-1
         if iteration == 0:
-            bins = self.bins[:-1]
+            bins = self.bins
+            bins = 0.5*(bins[:-1] + bins[1:])
             pot = np.zeros(bins.shape)
         else:
             try:
@@ -505,43 +599,77 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 bins, pot = np.loadtxt(f).T
         return bins,pot
 
+    # def _clean_edges(self, bins, rho, tol):
 
-    def _apply_max_force(self, bins, u, rho, tol, savgol_opts):
-        if self.max_force is not None:
-            valid = np.where(rho > tol)[0]
-            first = valid[0]
-            last = valid[-1]
-            if first > 0:
-                u[:first] = u[first] + np.abs(bins[:first]-bins[first])*self.max_force
-            if last < len(u)-2:
-                u[last+1:] = u[last] + np.abs(bins[last+1:]-bins[last])*self.max_force
-        return u
+    #     """ Removes values to the left of the rightmost spot left of
+    #     the peak where rho dips below tol, and vice versa """
+
+    #     total_before = np.sum(rho)
+    #     peak_i = np.where(np.abs(rho) == np.max(np.abs(rho)))[0][0]
+    #     is_left  = (bins < bins[peak_i])
+    #     is_small = (rho <= tol)
+    #     try:
+    #         first_i = np.where(is_left & is_small)[0][-1]
+    #     except:
+    #         first_i = 0
+    #     try:
+    #         last_i = np.where((~is_left) & is_small)[0][0]
+    #     except:
+    #         last_i = len(rho)
+
+    #     rho[:first_i] = 0
+    #     rho[last_i:] = 0
+
+    #     total_after = np.sum(rho)
+    #     if total_after < 0.9 * total_before:
+    #         raise ValueError('Removed too much density from the distribution ({100*total_after/total_before:%02d})')
 
     def _clean_edges(self, bins, rho, tol):
-
-        """ Removes values to the left of the rightmost spot left of
-        the peak where rho dips below tol, and vice versa """
-
+        """ Removes values outside the largest island of density """
         total_before = np.sum(rho)
-        peak_i = np.where(np.abs(rho) == np.max(np.abs(rho)))[0][0]
-        is_left  = (bins < bins[peak_i])
-        is_small = (rho <= tol)
-        try:
-            first_i = np.where(is_left & is_small)[0][-1]
-        except:
-            first_i = 0
-        try:
-            last_i = np.where((~is_left) & is_small)[0][0]
-        except:
-            last_i = len(rho)
+        struc = np.ones( [3 for b in bins], dtype=int )
+        l,num_l = label( rho > tol, structure=struc )
+        _u,_counts = np.unique(l,return_counts=True)
+        _counts[_u == 0] = 0    # ensure we don't select (rho < tol) as largest island
+        valid = (l == np.argmax(_counts))
+        
+        logger.info(f'_clean_edges: Removing {100*rho[~valid].sum() / rho.sum():.1f}% of density')
+        logger.info(tol)
+        # import ipdb; ipdb.set_trace()
 
-        rho[:first_i] = 0
-        rho[last_i:] = 0
+        # rho[~valid] = 0
+        # rho[~valid] = tol
 
         total_after = np.sum(rho)
         if total_after < 0.9 * total_before:
-            raise ValueError('Removed too much density from the distribution ({100*total_after/total_before:%02d})')
+            raise ValueError(f'Removed too much density from the distribution ({100*total_after/total_before:02f})')
 
+    def apply_out_of_bounds_force(self, u, valid):
+        ## Apply boundary force outside where target density is well-defined
+        oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
+
+        bins = self.bins
+        delta = [_b[1]-_b[0] for _b in bins]
+        if oobf is None:
+            oobf = 2 * max(
+                np.max(np.abs( np.diff(u,axis=i) / _d ))
+                for i,_d in enumerate(delta))
+            if self.out_of_bounds_force == 'max_force':
+                logger.warning(f'IBI out-of-bounds force for {self} was set to max_force, but max_force was unspecified; defaulting to twice the largest value found in valid range ({oobf:.2f}) and setting the value permanently.')
+                self.out_of_bounds_force = oobf
+
+        valid_voxel_coords = np.argwhere(valid)
+        if valid_voxel_coords.size < 3*valid.size:
+            # raise Exception('Obsolete: use `ndimage.morphology.distance_transform_edt( boolean_grid, sampling=[Dxy,Dxy,Dz] )`')
+            logger.info('Building OOBF KDtree')
+            tree = KDTree([r * delta for r in valid_voxel_coords])
+            invalid_voxel_coords = np.argwhere(~valid)
+            logger.info('Filling invalid potential values from OOBF KDtree')
+            for r in invalid_voxel_coords:
+                dist,idx = tree.query(r*delta)
+                u[tuple(r)] = u[tuple(valid_voxel_coords[idx])] + oobf*dist
+            logger.info('Done filling invalid potential values from OOBF KDtree')
+        
     def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None, directory='.'):
         if scaling_factor is None:
             try:    scaling_factor = self.learning_rate(self.iteration)
@@ -553,13 +681,14 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         )
 
         bins_aa, rho_aa = self.get_target_distribution(directory=directory)
+        bins_aa = 0.5*(bins_aa[:-1] + bins_aa[1:])
         rho_aa = rho_aa / np.sum(rho_aa)
 
         if tol is None:
             tol = max(1e-5, 1e-3 * np.max(rho_aa)) # likely there is room for improvement here
 
         if universe is None:
-            bins = self.bins[:-1]
+            bins = 0.5*(self.bins[:-1] + self.bins[1:])
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
 
             if clean_edges:
@@ -573,6 +702,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             rho_cg = rho_aa     # allows a common smoothing command below
         else:
             bins, rho_cg = self._extract_distribution( universe, box=box )
+            bins = 0.5*(bins[:-1] + bins[1:])
             assert( np.abs(len(rho_cg) - len(bins)) < 1 )
             rho_cg = rho_cg/np.sum(rho_cg)
             assert( np.all(np.isclose(bins - bins_aa, 0)) )
@@ -609,19 +739,21 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         last = valid[-1]
         u[first:last+1] = savgol( u[first:last+1], **savgol_opts )
 
-        ## Apply boundary force outside where target density is well-defined
-        oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
-        if oobf is None:
-            oobf = 2 * np.max(np.abs( np.diff(u[first:last+1]) / (bins[first+1]-bins[first]) ))
-            if self.out_of_bounds_force == 'max_force':
-                logger.warning(f'IBI out-of-bounds force for {self} was set to max_force, but max_force was unspecified; defaulting to twice the largest value found in valid range ({oobf:%.2f}) and setting the value permanently.')
-                self.out_of_bounds_force = oobf
+        # ## Apply boundary force outside where target density is well-defined
+        # oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
+        # if oobf is None:
+        #     oobf = 2 * np.max(np.abs( np.diff(u[first:last+1]) / (bins[first+1]-bins[first]) ))
+        #     if self.out_of_bounds_force == 'max_force':
+        #         logger.warning(f'IBI out-of-bounds force for {self} was set to max_force, but max_force was unspecified; defaulting to twice the largest value found in valid range ({oobf:%.2f}) and setting the value permanently.')
+        #         self.out_of_bounds_force = oobf
 
-        if first > 0:
-            u[:first] = u[first] + np.abs(bins[:first]-bins[first])*oobf
-        if last < len(u)-2:
-            u[last+1:] = u[last] + np.abs(bins[last+1:]-bins[last])*oobf
+        # if first > 0:
+        #     u[:first] = u[first] + np.abs(bins[:first]-bins[first])*oobf
+        # if last < len(u)-2:
+        #     u[last+1:] = u[last] + np.abs(bins[last+1:]-bins[last])*oobf
 
+        self.apply_out_of_bounds_force(u,valid)
+            
         u = self._cap_potential(bins, u)
         np.savetxt(f,np.array((bins,u)).T)
         return bins,u
@@ -659,3 +791,235 @@ class IBINonbonded(AbstractIBIpotential):
         if filename is None:
             filename = self.filename(types=types)
         assert( filename == self.filename(types=types) )
+
+    
+class IBIGrid(AbstractIBIpotential):
+    """ Grid potential """
+
+    def __init__(self, name, origin, delta, num_voxels, degrees_of_freedom=[], max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.35, iteration=1, filename_prefix="IBIPotentials/", write_density=False):
+        range_ = (0,1)
+        resolution = 1
+        AbstractIBIpotential.__init__(self, name, degrees_of_freedom, range_, resolution, max_force, max_potential, out_of_bounds_force, zero, smooth, learning_rate, iteration, filename_prefix)
+        self.origin = origin
+        self.delta = delta        
+        self.num_voxels = num_voxels
+        self.type_ = 'IBIGrid'
+        self.bins = [np.arange(n)*d+o for n,d,o in zip(num_voxels,delta,origin)]
+        self.write_density = write_density
+        
+    def write_file(self, filename=None, types=None):
+        if filename is None:
+            filename = self.filename(types=types)
+        assert( filename == self.filename(types=types) )
+
+    def set_smooth_from_target_distribution(self):
+        bins,vals = self._target
+
+        self.smooth = []
+        for i,_b in enumerate(bins):
+            _v = vals.sum( axis = tuple(j for j in range(len(bins)) if j != i) )
+            _b = 0.5*(_b[:-1] + _b[1:])
+            ## Set smooth to ~1/2 stddev
+            _mean = np.average( _b, weights=_v  )
+            _var = np.average( (_b-_mean)**2 , weights=_v )
+            _dr = (_b[1]-_b[0])
+            s = int(np.round(np.sqrt(_var)/(2*_dr))+1)//2*2+1
+            if s < 5:
+                logger.warning(f'Smoothing along axis {i} ({s} points) suggested by 1/2 of stddev ({np.sqrt(_var):02f}) is too low: setting smooth to 5')
+                s = 5
+            else:
+                logger.info(f'Smoothing {s} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
+            self.smooth.append(s)
+
+    def __remove_nans(self, u):
+        points = np.stack( np.meshgrid(*[b[:-1] for b in self.bins],indexing='ij' ),axis=-1).reshape(-1,3)
+        assert( len(points) == u.size )
+        nans=np.isnan(u.flat)
+        if nans.sum() > 0:
+            u[nans] = RBFInterpolator(points[~nans], u.flat[~nans], smoothing=0.5, neighbors=27)(points[nans])
+
+    def _cap_potential(self, r, u):
+        self.__remove_nans(u)
+
+        if self.zero == 'min':
+            u = u - np.min(u)
+        elif self.zero == 'last':
+            _m = np.array([u[tuple(slice(idx,idx+1) if sl_i == i else slice(None) for i in range(len(u.shape)))].mean() for idx in (0,-2) for sl_i in range(len(u.shape))]).mean()
+            u = u - _m
+        else:
+            raise ValueError('Unrecognized option for "zero" argument')
+        
+        max_force = self.max_force
+        if max_force is not None:
+            raise NotImplementedError
+            # assert(max_force > 0)
+            # f = np.diff(u)/np.diff(r)
+            # f[f>max_force] = max_force
+            # f[f<-max_force] = -max_force
+            # u[0] = 0
+            # u[1:] = np.cumsum(f*np.diff(r))
+
+        if self.max_potential is not None:
+            sl = u > self.max_potential
+            u[sl] = self.max_potential
+
+        if self.zero == 'min':
+            u = u - np.min(u)
+        elif self.zero == 'last':
+            _m = np.array([u[tuple(slice(idx,idx+1) if sl_i == i else slice(None) for i in range(len(u.shape)))].mean() for idx in (0,-2) for sl_i in range(len(u.shape))]).mean()
+            u = u - _m
+        else:
+            raise ValueError('Unrecognized option for "zero" argument')
+        return u
+
+    def filename(self, types=None, iteration=None, smoothed=True, directory='.'):
+        return super().filename(types, iteration, smoothed, directory)[:-4]+'.dx'
+
+    def read_cg_potential(self, iteration=None, directory='.'):
+        if iteration is None: iteration = self.iteration-1
+        if iteration == 0:
+            pot = np.zeros( np.prod([len(a)-1 for a in bins]) )
+            raise NotImplementedError
+            bins = [a[:-1] for a in bins]
+        else:
+            try:
+                f = self.filename(iteration=iteration, smoothed=True, directory=directory)
+                g = Grid(f)
+            except:
+                f = self.filename(iteration=iteration, smoothed=False, directory=directory)
+                g = Grid(f)
+            pot = g.grid
+            bins = [a[:-1] for a in g.edges] 
+        return bins,pot
+
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None, directory='.'):
+        if scaling_factor is None:
+            try:    scaling_factor = self.learning_rate(self.iteration)
+            except: scaling_factor = self.learning_rate
+
+        smooth_opts = dict(
+            window_length=[1+(s//2)*2 for s in self.smooth],
+            polyorder = 3,
+            mode = 'wrap' if self.periodic else 'nearest'
+        )
+
+        bins_aa, rho_aa = self.get_target_distribution(directory=directory)
+        f = self.filename(smoothed=False, directory=directory)
+        if self.iteration == 1:
+            writeDx( f+'.target.dx', rho_aa, self.origin, self.delta, fmt='%.6f')
+
+        rho_aa = rho_aa / np.sum(rho_aa)
+        
+        if tol is None:
+            tol = max(10**(-5*len(bins_aa)), 10**(-3*len(bins_aa))*np.max(rho_aa)) # likely there is room for improvement here
+
+        if universe is None:
+            # raise NotImplementedError('Unsure about trimming bins')
+            # bins = self.bins[:-1]
+            bins = self.bins
+            assert( all(np.all(np.isclose(b1 - b2, 0)) for b1,b2 in zip(bins,bins_aa)) )
+
+            if clean_edges:
+               self._clean_edges(bins_aa, rho_aa, tol)
+
+            if np.prod(smooth_opts['window_length']) > 1:
+                rho_aa = savgol_nd( rho_aa, **smooth_opts )
+            rho_aa[rho_aa < tol] = tol
+
+            ## units "295 k K" kcal_mol
+            u = - scaling_factor * 0.58622592 * (temperature/295) * np.log(rho_aa)
+            rho_cg = rho_aa     # allows a common smoothing command below
+        else:
+            bins, rho_cg = self._extract_distribution( universe, box=box )
+            # assert( np.abs(len(rho_cg) - len(bins)) < 1 )
+            if self.write_density:
+                writeDx( f+'.cgden.raw.dx', rho_cg, self.origin, self.delta, fmt='%.6f')
+            rho_cg = rho_cg/np.sum(rho_cg)
+            assert( all(np.all(np.isclose(b1 - b2, 0)) for b1,b2 in zip(bins,bins_aa)) )
+
+            if clean_edges:
+                self._clean_edges(bins_aa, rho_aa, tol)
+                # self._clean_edges(bins_aa, rho_cg, tol)
+
+            r0,u0 = self.read_cg_potential(directory=directory)
+            if np.prod(smooth_opts['window_length']) > 1:
+                rho_cg,rho_aa = [savgol_nd( rho, **smooth_opts ) for rho in [rho_cg,rho_aa]]
+            rho_aa[rho_aa < tol] = tol
+            rho_cg[rho_cg < tol] = tol
+            
+            if self.iteration == 1:
+                writeDx( f+'.target.dx', rho_aa, self.origin, self.delta, fmt='%.6f')
+            if self.write_density:
+                writeDx( f+'.cgden.dx', rho_aa, self.origin, self.delta, fmt='%.6f')
+
+            ratio = rho_cg/rho_aa
+            ## units "295 k K" "kcal_mol"
+            du = np.log( ratio )
+            du = du * 0.58622592 * (temperature/295)
+            du = du * (rho_aa/rho_aa.max())**0.25 # penalize learning for values where target density is very low
+
+            try:    alpha = self.learning_rate(self.iteration)
+            except: alpha = self.learning_rate
+            u = u0 + alpha * du
+
+        f = self.filename(smoothed=False, directory=directory)
+        Path(f).parent.mkdir(parents=True, exist_ok=True)
+        writeDx( f, u, self.origin, self.delta, fmt='%.6f')
+
+        f = self.filename(smoothed=True, directory=directory)
+
+        ## Apply savgol filter in region where target density is well-defined
+        valid = (rho_aa > tol)
+        if np.prod(smooth_opts['window_length']) > 1:
+            u[valid] = savgol_nd( u, **smooth_opts )[valid]
+
+        self.apply_out_of_bounds_force(u,valid)
+
+        u = self._cap_potential(bins, u)
+        writeDx( f, u, self.origin, self.delta, fmt='%.6f')
+
+def writeDx(outfile, data, origin, delta, fmt="%.12f"):
+  shape = np.shape(data)
+  num = np.prod(shape)
+  assert( len(shape) == 3 )
+  assert( len(origin) == 3 )
+  assert( len(delta) == 3 )
+  try:
+    assert( len(delta[0]) == 3 )
+    dx,dy,dz = [" ".join(map(str,v)) for v in delta]
+  except:
+    dx = " ".join(map(str,[delta[0], 0, 0]))
+    dy = " ".join(map(str,[0, delta[1], 0]))
+    dz = " ".join(map(str,[0, 0, delta[2]]))
+  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
+                     ox=origin[0], oy=origin[1], oz=origin[2],
+                     dx=dx, dy=dy, dz=dz,
+                     num=num
+                   )
+  data = data.flatten(order='C')
+  header = """# OpenDX density file
+# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
+object 1 class gridpositions counts  {nx} {ny} {nz}
+origin {ox} {oy} {oz}
+delta  {dx}
+delta  {dy}
+delta  {dz}
+object 2 class gridconnections counts  {nx} {ny} {nz}
+object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
+  len(data)
+
+  if num == 3*(num//3):
+    footer = ""
+  else:
+    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
+    footer += "\n"
+
+  footer += """attribute "dep" string "positions"
+object "density" class field 
+component "positions" value 1
+component "connections" value 2
+component "data" value 3
+"""
+  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
+              fmt=fmt,
+              header=header, comments='', footer=footer )

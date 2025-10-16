@@ -372,10 +372,11 @@ class ArbdModel(PdbModel):
         """ Convenience routine that adds degrees of freedom to
         corresponding IBI potentials """
 
-        from .ibi import BondDof, AngleDof, DihedralDof, PairDistributionDof
+        from .ibi import BondDof, AngleDof, DihedralDof, PairDistributionDof, ThreeDimensionalDensityDoF
 
         self.bonded_ibi_potentials = set()
         self.nonbonded_ibi_potentials = set()
+        self.grid_ibi_potentials = set()
 
         for get_fn, parts_pot_fn, cls in (
                 (self.get_bonds,     lambda x: (x[:2],x[2]), BondDof),
@@ -403,7 +404,7 @@ class ArbdModel(PdbModel):
             t = p.type_
             if t not in type_to_particles: type_to_particles[t] = []
             type_to_particles[t].append(p)
-        type_to_particles[None] = [p for p in self]
+        # type_to_particles[None] = [p for p in self]
 
         already_handled = set()
         for pot, tA, tB in self.nonbonded_interactions:
@@ -423,13 +424,24 @@ class ArbdModel(PdbModel):
                 return (b1 or b2)
 
             ex = list(filter(_cond, all_exclusions))
+            if tA is None or tB is None:
+                raise NotImplementedError
             dof = PairDistributionDof( type_to_particles[tA], type_to_particles[tB], exclusions=ex,
                                        range_=pot.range_, resolution=pot.resolution)
-
             pot.degrees_of_freedom.append( dof )
 
             if pot not in self.nonbonded_ibi_potentials:
                 self.nonbonded_ibi_potentials.add( pot )
+
+        for t in set([p.type_ for p in self]):
+            for entry in t.grid_potentials:
+                pot = entry[0]
+                try:    pot.degrees_of_freedom
+                except: continue
+                dof = ThreeDimensionalDensityDoF( *type_to_particles[t] )
+                pot.degrees_of_freedom.append( dof )
+                if pot not in self.grid_ibi_potentials:
+                    self.grid_ibi_potentials.add( pot )
 
     def load_target_IBI_distributions(self):
         raise NotImplementedError
@@ -475,7 +487,7 @@ class ArbdModel(PdbModel):
         defined in the model. Use assign_IBI_degrees_of_freedom() before calling this method.
         """
         try:
-            assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) > 0 )
+            assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) + len(self.grid_ibi_potentials) > 0 )
         except:
             raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
         logger.info(f'Running {iterations} IBI iterations with {len(self.bonded_ibi_potentials)} bonded and {len(self.nonbonded_ibi_potentials)} nonbonded IBI potentials')
@@ -493,11 +505,24 @@ class ArbdModel(PdbModel):
 
         restart_file = None
 
-        _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)
+        _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)+list(self.grid_ibi_potentials)
         if target_universe is not None:
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
+                    # import cProfile, pstats, io
+                    # from pstats import SortKey
+                    # pr = cProfile.Profile()
+                    # pr.enable()
+
                     potential.get_target_distribution(target_universe, trajectory=target_trajectory, directory=directory)
+
+                    # pr.disable()
+                    # s = io.StringIO()
+                    # sortby = SortKey.CUMULATIVE
+                    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+                    # ps.print_stats()
+                    # print(s.getvalue())
+                    # import ipdb; ipdb.set_trace()
 
         def _load_cg_u(iteration):
             name = f'ibi-{iteration:03d}'
@@ -524,8 +549,21 @@ class ArbdModel(PdbModel):
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Writing CG potentials'):
                     # if 'IBIPotentials/intrabond-1' in p.filename(): import ipdb; ipdb.set_trace()
+                    # import cProfile, pstats, io
+                    # from pstats import SortKey
+                    # pr = cProfile.Profile()
+                    # pr.enable()
+
                     try:    p.write_cg_potential(cg_u, tol=p.tol, box=box)
                     except: p.write_cg_potential(cg_u, box=box)
+
+                    # pr.disable()
+                    # s = io.StringIO()
+                    # sortby = SortKey.CUMULATIVE
+                    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+                    # ps.print_stats()
+                    # print(s.getvalue())
+                    # import ipdb; ipdb.set_trace()
 
             if i == 1 and run_minimization:
                 logger.info(f'Running brief simulation with small timestep')
