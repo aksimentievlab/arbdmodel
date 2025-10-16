@@ -361,21 +361,29 @@ class ArbdEngine(SimEngine):
         model._nonbonded_interaction_files = [] # clear old nb files
 
         x = np.arange(0, configuration.cutoff)
+        _null_interaction = None
         for i,j,t1,t2 in model._particleTypePairIter():
             interaction = model._get_nonbonded_interaction(t1,t2)
-            if interaction is None: interaction = NullPotential()
             try:
                 f = interaction.filename(types=(t1,t2))
             except:
                 f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
                 logger.debug(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
+            if interaction is None:
+                if _null_interaction is None:
+                    _null_interaction = NullPotential()
+                    f = _null_interaction.filename(types=(t1,t2))
+                    _null_interaction.range_ = [0, configuration.cutoff]
+                    _null_interaction.write_file(f,(t1,t2))
+                interaction = _null_interaction
+                f = _null_interaction.filename(types=(t1,t2))
 
             devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
-            old_range = interaction.range_
             if not isinstance(interaction,NullPotential):
+                old_range = interaction.range_
                 interaction.range_ = [0, configuration.cutoff]
-            interaction.write_file(f, (t1, t2))
-            interaction.range_ = old_range 
+                interaction.write_file(f, (t1, t2))
+                interaction.range_ = old_range
 
             model._nonbonded_interaction_files.append(f)
         devlogger.debug(f'model._nonbonded_interaction_files: {model._nonbonded_interaction_files}')
@@ -696,6 +704,8 @@ num {num}
                             logger.warning(f'Failed to unpack {pt}.grid_potentials, presumably due to lack of specified boundary condition... using "dirichlet"')
                             g,s = vals
                             bc = 'dirichlet'
+                        try: g = g.filename()
+                        except: pass # expect a string
                         grids.append( _fix_path(g) )
                         scales.append(str(s))
                         boundary_conditions.append(bc)
