@@ -6,10 +6,9 @@ import sys
 
 ## Local imports
 from .logger import devlogger, logger, get_resource_path
-from .core_objects import ParticleType, PointParticle
+from .core_objects import ParticleType, PointParticle, Citation
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-from .version import Citation
 
 """Define particle types"""
 _types = dict(

@@ -5,6 +5,36 @@ from copy import copy, deepcopy
 from .logger import logger, get_resource_path,devlogger
 
 
+class Citation():
+    def __init__(self, author=None, title=None, journal=None, volume=None, number=None, pages=None, year=None, doi=None):
+        self.author = author
+        self.title = title
+        self.journal = journal
+        self.volume = volume
+        self.number = number
+        self.pages = pages
+        self.year = year
+        self.doi = doi
+
+    def display(self):
+        msg = ''
+        if self.author: msg = f'{self.author}. '
+        if self.title: msg = f'{msg}{self.title}. '
+        if self.journal: msg = f'{msg}{self.journal} '
+        if self.volume:
+            msg = f'{msg} {self.volume}{"," if any((self.number, self.pages, self.year)) else "."} '
+            if self.number:
+                msg = f'{msg}({self.number}){"" if any((self.pages,self.year)) else "."} '
+            if self.pages: msg = f'{msg}{self.pages}{"" if self.year else "."} '
+        if self.year: msg = f'{msg}({self.year}). '
+        if self.doi:
+            if self.doi[:4] == 'http':
+                msg = f'{msg}{self.doi}'
+            else:
+                msg = f'{msg}https://doi.org/{self.doi}'
+        return msg
+
+
 ## Abstract classes
 class Transformable():
     """
