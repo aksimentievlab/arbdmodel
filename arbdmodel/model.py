@@ -228,7 +228,7 @@ class ArbdModel(PdbModel):
     Advanced model class for ARBD simulations with improved cell vector handling.
     """
     def __init__(self, children, cell_vectors=None, cell_origin=None, dimensions=None,
-                 remove_duplicate_bonded_terms=True, buffer_factor=1.2,
+                 remove_duplicate_bonded_terms=True, buffer_factor=1.2, skip_type_recount=False,
                  configuration=None, dummy_types=tuple(), **conf_params):
         """
         Initialize ArbdModel with improved cell vector and dimension handling.
@@ -290,6 +290,7 @@ class ArbdModel(PdbModel):
         self._nonbonded_interaction_files = []  # This could be made more robust
 
         self.cacheUpToDate = False
+        self.skip_type_recount = skip_type_recount
 
         self.group_sites = []
 
@@ -720,7 +721,9 @@ class ArbdModel(PdbModel):
             self.nonbonded_interactions.append( [nonbonded_potential, typeB, typeA] )
 
     def prepare_for_simulation(self):
-        ...
+        if not self.skip_type_recount:
+            self.type_counts = None # force recount
+        self.getParticleTypesAndCounts()
     
     def getParticleTypesAndCounts(self):
         """ Includes rigid body-attached particles """
