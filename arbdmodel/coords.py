@@ -394,6 +394,10 @@ def calculate_dimensions_from_cell_vectors(cell_vectors, cell_origin=None, buffe
     
     # Convert to numpy arrays for easier manipulation
     vectors = [np.array(v) for v in cell_vectors]
+
+    # Check that vectors are orthogonal and aliged with x,y,z axis
+    if not all( v[i] == np.linalg.norm(v) for i,v in vectors ):
+        raise NotImplementedError('Cell vectors not aligned along x, y and z axes are not yet supported')
     
     # Calculate maximum extent along each dimension
     dimensions = [0, 0, 0]

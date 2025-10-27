@@ -252,9 +252,6 @@ class ArbdModel(PdbModel):
         # Default dimensions if neither dimensions nor cell vectors provided
         if dimensions is None:
             dimensions = (1000, 1000, 1000)
-            
-        # Set default cell vectors if not provided
-        if cell_vectors is None:
             cell_vectors = [
                 [dimensions[0], 0, 0],
                 [0, dimensions[1], 0],
@@ -263,7 +260,10 @@ class ArbdModel(PdbModel):
             
         # Set default cell origin if not provided
         if cell_origin is None:
-            cell_origin = [0, 0, 0]
+            if dimensions is not None:
+                cell_origin = [-0.5 * d for d in dimensions]
+            else:
+                cell_origin = [0, 0, 0]
             
         # Initialize parent class
         PdbModel.__init__(self, children, dimensions, remove_duplicate_bonded_terms)
