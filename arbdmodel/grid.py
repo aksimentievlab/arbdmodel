@@ -620,7 +620,7 @@ def constant_force(force, dimensions, resolution, origin=None):
   x,y,z = [(np.arange(n)+0.5)*r+o for n,r,o in zip(n_voxels, resolution, origin)]
   X,Y,Z = np.meshgrid(x,y,z,indexing='ij')
   
-  U = force[0]*X + force[1]*Y + force[2] * Z
+  U = -(force[0]*X + force[1]*Y + force[2] * Z)
   return U
 
 def spherical_confinement(force_constant, radius, dimensions,  resolution, center=(0,0,0), exponent=2):
