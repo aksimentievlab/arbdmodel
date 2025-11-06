@@ -390,7 +390,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
     4. Updating the potential based on the difference
     5. Repeating until convergence
     """
-    def __init__(self, name, degrees_of_freedom=None, range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
+    def __init__(self, name, degrees_of_freedom=None, range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, root_directory='.', filename_prefix='IBIPotentials/'):
         self.name = name
         if degrees_of_freedom is None: degrees_of_freedom = []
         self.degrees_of_freedom = degrees_of_freedom
@@ -399,6 +399,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         AbstractPotential.__init__(self, range_, resolution, max_force, max_potential, zero)
 
+        self.root_directory = root_directory
         self.filename_prefix = filename_prefix + self.name
         self.max_potential = max_potential
         self.out_of_bounds_force = out_of_bounds_force
@@ -418,10 +419,23 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
         ## self.filename_prefix="IBIpotentials/"
 
-    def filename(self, types=None, iteration=None, smoothed=True, directory='.'):
+    def filename(self, types=None, iteration=None, smoothed=True):
         if iteration is None:
             iteration = self.iteration
-        return f"{directory}/{self.filename_prefix}-{iteration:03d}{'' if smoothed else '-raw'}.dat"
+        return f"{self.root_directory}/{self.filename_prefix}-{iteration:03d}{'' if smoothed else '-raw'}.dat"
+
+    @property
+    def root_directory(self):
+        return self.__root_directory
+    @root_directory.setter
+    def root_directory(self, value:str):
+        self.__root_directory = value
+    @property
+    def directory(self):
+        return self.root_directory
+    @directory.setter
+    def directory(self, value:str):
+        self.root_directory = value
 
     def __str__(self):
         return self.filename()
@@ -431,7 +445,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
 
     def __hash__(self):
         assert(self.type_ != "None")
-        return hash((self.name, self.range_, self.resolution, self.max_force, self.max_potential, self.out_of_bounds_force, self.filename_prefix, self.periodic))
+        return hash((self.name, self.range_, self.resolution, self.max_force, self.max_potential, self.out_of_bounds_force, self.directory, self.filename_prefix, self.periodic))
 
     def __eq__(self, other):
         # def _get_attr_mangle(obj,a):
@@ -441,7 +455,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         #         v = obj.__dict__[f'_AbstractPotential__{a}']
         #     return v
 
-        for a in ("name", "range_", "resolution", "max_force", "max_potential", "filename_prefix", "periodic"):
+        for a in ("name", "range_", "resolution", "max_force", "max_potential", "directory", "filename_prefix", "periodic"):
             # if _get_attr_mangle(self,a) != _get_attr_mangle(other,a):
             if getattr(self,a) != getattr(other,a):
                 return False
@@ -558,9 +572,9 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         if n_bin_arrs == 1: bins = bins[0]
         return bins,vals,counts
     
-    def get_target_distribution(self, universe=None, trajectory=None, recalculate=False, directory='.'):
+    def get_target_distribution(self, universe=None, trajectory=None, recalculate=False):
         if self._target is None:
-            f = f'{directory}/{self.filename_prefix}.target.npz'
+            f = f'{self.directory}/{self.filename_prefix}.target.npz'
             if (not Path(f).exists()) or recalculate:
                 if universe is None: raise Exception
                 bins, vals = self._extract_distribution( universe, trajectory=trajectory )
@@ -590,8 +604,8 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         else:
             logger.info(f'Smoothing {self.smooth} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
 
-    def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False, directory='.'):
-        f = self.filename(smoothed=False,directory=directory)[:-4] + '.npz'
+    def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False):
+        f = self.filename(smoothed=False)[:-4] + '.npz'
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
@@ -605,19 +619,20 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 self.__dists[key] = (bins, counts)
         return bins, vals
 
-    def read_cg_potential(self, iteration=None, directory='.'):
+    def read_cg_potential(self, iteration=None, smoothed=None):
         if iteration is None: iteration = self.iteration-1
         if iteration == 0:
             bins = self.bins
             bins = 0.5*(bins[:-1] + bins[1:])
             pot = np.zeros(bins.shape)
-        else:
+        elif smoothed in (True,False):
+            f = self.filename(iteration=iteration, smoothed=smoothed)
+            bins,pot = np.loadtxt(f).T
+        elif smoothed is None:
             try:
-                f = self.filename(iteration=iteration, smoothed=True, directory=directory)
-                bins, pot = np.loadtxt(f).T
+                bins,pot = self.read_cg_potential(iteration=iteration, smoothed=True)
             except:
-                f = self.filename(iteration=iteration, smoothed=False, directory=directory)
-                bins, pot = np.loadtxt(f).T
+                bins,pot = self.read_cg_potential(iteration=iteration, smoothed=False)
         return bins,pot
 
     # def _clean_edges(self, bins, rho, tol):
@@ -698,7 +713,40 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 u[tuple(r)] = u[tuple(valid_voxel_coords[idx])] + oobf*dist
             logger.info('Done filling invalid potential values from OOBF KDtree')
         
-    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None, directory='.'):
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None):
+        """
+        Compute and write the coarse-grained potential using Iterative Boltzmann Inversion (IBI).
+
+        This method updates the coarse-grained potential based on the difference between the target
+        and coarse-grained distribution. It saves both raw and smoothed versions of
+        the potential.
+
+        Parameters
+        ----------
+        universe : object, optional
+            Coarse-grained universe object containing distribution data.
+        temperature : float, default=295
+            Temperature in Kelvin for potential energy conversion.
+        tol : float, optional
+            Minimum threshold for target and coarse-grained distributions.
+        clean_edges : bool, default=True
+            If True, smooths edges of the potential.
+        box : array-like, optional
+            Simulation box dimensions. If unset, defaults to universe dimensions.
+
+        Returns
+        -------
+        bins : numpy.ndarray
+            Binned distances (radial or angular).
+        u : numpy.ndarray
+            Updated coarse-grained potential.
+
+        Notes
+        -----
+        - Supports both radial and angular potential updates.
+        - Two files are saved: raw and smoothed potentials.
+        """
+
         if scaling_factor is None:
             try:    scaling_factor = self.learning_rate(self.iteration)
             except: scaling_factor = self.learning_rate
@@ -708,7 +756,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             mode = 'wrap' if self.periodic else 'nearest'
         )
 
-        bins_aa, rho_aa = self.get_target_distribution(directory=directory)
+        bins_aa, rho_aa = self.get_target_distribution()
         bins_aa = 0.5*(bins_aa[:-1] + bins_aa[1:])
         rho_aa = rho_aa / np.sum(rho_aa)
 
@@ -739,8 +787,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 self._clean_edges(bins_aa, rho_aa, tol)
                 # self._clean_edges(bins_aa, rho_cg, tol)
 
-
-            r0,u0 = self.read_cg_potential(directory=directory) # iteration-2?
+            r0,u0 = self.read_cg_potential() # iteration-2?
             rho_cg,rho_aa = [savgol( rho, **savgol_opts ) for rho in [rho_cg,rho_aa]]
             rho_aa[rho_aa < tol] = tol
             rho_cg[rho_cg < tol] = tol
@@ -755,11 +802,11 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             except: alpha = self.learning_rate
             u = u0 + alpha * du
 
-        f = self.filename(smoothed=False, directory=directory)
+        f = self.filename(smoothed=False)
         Path(f).parent.mkdir(parents=True, exist_ok=True)
         np.savetxt(f,np.array((bins,u)).T)
 
-        f = self.filename(smoothed=True, directory=directory)
+        f = self.filename(smoothed=True)
 
         ## Only apply savgol filter in region where target density is well-defined
         valid = (rho_aa > tol)
@@ -901,10 +948,10 @@ class IBIGrid(AbstractIBIpotential):
             raise ValueError('Unrecognized option for "zero" argument')
         return u
 
-    def filename(self, types=None, iteration=None, smoothed=True, directory='.'):
-        return super().filename(types, iteration, smoothed, directory)[:-4]+'.dx'
+    def filename(self, types=None, iteration=None, smoothed=True):
+        return super().filename(types, iteration, smoothed)[:-4]+'.dx'
 
-    def read_cg_potential(self, iteration=None, directory='.'):
+    def read_cg_potential(self, iteration=None):
         if iteration is None: iteration = self.iteration-1
         if iteration == 0:
             pot = np.zeros( np.prod([len(a)-1 for a in bins]) )
@@ -912,16 +959,16 @@ class IBIGrid(AbstractIBIpotential):
             bins = [a[:-1] for a in bins]
         else:
             try:
-                f = self.filename(iteration=iteration, smoothed=True, directory=directory)
+                f = self.filename(iteration=iteration, smoothed=True)
                 g = Grid(f)
             except:
-                f = self.filename(iteration=iteration, smoothed=False, directory=directory)
+                f = self.filename(iteration=iteration, smoothed=False)
                 g = Grid(f)
             pot = g.grid
             bins = [a[:-1] for a in g.edges] 
         return bins,pot
 
-    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None, directory='.'):
+    def write_cg_potential(self, universe=None, scaling_factor = None, temperature = 295, tol = None, clean_edges=True, box=None):
         if scaling_factor is None:
             try:    scaling_factor = self.learning_rate(self.iteration)
             except: scaling_factor = self.learning_rate
@@ -932,8 +979,8 @@ class IBIGrid(AbstractIBIpotential):
             mode = 'wrap' if self.periodic else 'nearest'
         )
 
-        bins_aa, rho_aa = self.get_target_distribution(directory=directory)
-        f = self.filename(smoothed=False, directory=directory)
+        bins_aa, rho_aa = self.get_target_distribution()
+        f = self.filename(smoothed=False)
         if self.iteration == 1:
             writeDx( f+'.target.dx', rho_aa, self.origin, self.delta, fmt='%.6f')
 
@@ -970,7 +1017,7 @@ class IBIGrid(AbstractIBIpotential):
                 self._clean_edges(bins_aa, rho_aa, tol)
                 # self._clean_edges(bins_aa, rho_cg, tol)
 
-            r0,u0 = self.read_cg_potential(directory=directory)
+            r0,u0 = self.read_cg_potential()
             if np.prod(smooth_opts['window_length']) > 1:
                 rho_cg,rho_aa = [savgol_nd( rho, **smooth_opts ) for rho in [rho_cg,rho_aa]]
             rho_aa[rho_aa < tol] = tol
@@ -991,11 +1038,11 @@ class IBIGrid(AbstractIBIpotential):
             except: alpha = self.learning_rate
             u = u0 + alpha * du
 
-        f = self.filename(smoothed=False, directory=directory)
+        f = self.filename(smoothed=False)
         Path(f).parent.mkdir(parents=True, exist_ok=True)
         writeDx( f, u, self.origin, self.delta, fmt='%.6f')
 
-        f = self.filename(smoothed=True, directory=directory)
+        f = self.filename(smoothed=True)
 
         ## Apply savgol filter in region where target density is well-defined
         valid = (rho_aa > tol)

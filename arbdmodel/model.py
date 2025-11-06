@@ -508,6 +508,14 @@ class ArbdModel(PdbModel):
         restart_file = None
 
         _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)+list(self.grid_ibi_potentials)
+
+        ## Set potential root_directory to be inside directory if it's relative
+        if directory != '.': raise NotImplementedError('Running IBI in another directory not yet supported')
+        # note: this can most readily be solved with contextmanager in util.py
+
+        for p in _potentials:
+            p.root_directory = directory
+
         if target_universe is not None:
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for potential in tqdm(_potentials, desc='Calculating target distributions'):
@@ -516,7 +524,7 @@ class ArbdModel(PdbModel):
                     # pr = cProfile.Profile()
                     # pr.enable()
 
-                    potential.get_target_distribution(target_universe, trajectory=target_trajectory, directory=directory)
+                    potential.get_target_distribution(target_universe, trajectory=target_trajectory)
 
                     # pr.disable()
                     # s = io.StringIO()
@@ -540,7 +548,7 @@ class ArbdModel(PdbModel):
             cg_u = _load_cg_u(first_iteration-1)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False,directory=directory)
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
 
         for p in _potentials:
             p.iteration = first_iteration
