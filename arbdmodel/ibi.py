@@ -9,6 +9,7 @@ from .util import savgol_filter_nd as savgol_nd
 import numpy as np
 from pathlib import Path
 from . import ArbdModel
+from .core_objects import GroupSite
 from . import logger
 from .interactions import AbstractPotential
 
@@ -42,13 +43,14 @@ class DegreeOfFreedom():
         # self.ids = [p.idx for p in particles]
         self.sels = dict()
         self.current_key = None
+        self.list_values = False # Some DoFs may return a list of values and require special handling
 
     def _particle_to_sel(particle, universe):
 
         """ Recursive function to convert particle or group_site to
         selection or list of selections """
 
-        if isinstance(particle, ArbdModel._GroupSite):
+        if isinstance(particle, GroupSite):
             return [DegreeOfFreedom._particle_to_sel(p,universe)
                     for p in particle.particles]
         else:
@@ -250,10 +252,11 @@ class PairDistributionDof():
         self.sel_A             = dict()
         self.sel_B             = dict()
         self.exclusions_mask   = dict()
+        self.list_values = True # This DoF returns a list of values and requires special handling
 
     def _particles_to_sel(particles, universe):
         for particle in particles:
-            if isinstance(particle, ArbdModel._GroupSite):
+            if isinstance(particle, GroupSite):
                 raise NotImplementedError
 
         sel_string = f'index {" ".join([str(p.idx) for p in particles])}'
