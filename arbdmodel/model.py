@@ -435,7 +435,8 @@ class ArbdModel(PdbModel):
                 self.nonbonded_ibi_potentials.add( pot )
 
         for t in set([p.type_ for p in self]):
-            for entry in t.grid_potentials:
+            grid_potentials = getattr(t, 'grid_potentials', [])
+            for entry in grid_potentials:
                 pot = entry[0]
                 try:    pot.degrees_of_freedom
                 except: continue
