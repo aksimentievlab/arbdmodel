@@ -411,13 +411,33 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         self.bins = np.arange( self.range_[0],
                                self.range_[1]+self.resolution,
                                self.resolution )
-        self.potential = np.zeros( len(self.bins)-1 )
         self.__dists = {}
 
-    def potential(self, r):
-        raise NotImplementedError
+    def potential(self, r=None, types=None):
+        """
+        Return the pair potential obtained using the Iterative Boltzmann Inversion (IBI) method.
 
-        ## self.filename_prefix="IBIpotentials/"
+        This method extends the abstract base class implementation of `AbstractPotential.potential()`
+        to return a previously computed IBI potential.
+
+        Parameters
+        ----------
+        r : array-like, optional
+            Distance or angle values (in Å or degrees).
+            If not provided, the method will attempt to use the default spacing.
+
+        types : list or tuple of str, optional
+            Included for compatibility with parent Interaction class. Unused.
+
+        Returns
+        -------
+        potential : numpy.ndarray
+            Array of potential energy values corresponding to the input distances `r`.
+        """
+
+        r0,u0 = self.read_cg_potential()
+        u = interp1d(r0, u0, fill_value='extrapolate')(r)
+        return u
 
     def filename(self, types=None, iteration=None, smoothed=True):
         if iteration is None:

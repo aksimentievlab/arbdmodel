@@ -448,6 +448,19 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
+    def _get_IBI_universe(self, iteration, directory='.'):
+        name = f'ibi-{iteration:03d}'
+        psf = '{}/{}.psf'.format(directory,name)
+        globstring=f'{directory}/output/{name}.*dcd'
+        dcds = [f for f in glob(globstring) if 'momentum' not in f]
+        if len(dcds) == 0: raise ValueError(f'Expected to find dcds at {globstring}')
+        cg_u = mda.Universe(psf,*dcds)
+        return cg_u
+
+    @property
+    def IBI_potentials(self):
+        return list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)+list(self.grid_ibi_potentials)
+
     def run_IBI(self, iterations, directory = '.', engine = None, replicas = 1, run_minimization = True, first_iteration=1, target_universe = None, target_trajectory = None):
         """
         Run Iterative Boltzmann Inversion (IBI) to optimize coarse-grained potentials.
@@ -489,7 +502,7 @@ class ArbdModel(PdbModel):
         defined in the model. Use assign_IBI_degrees_of_freedom() before calling this method.
         """
         try:
-            assert( len(self.bonded_ibi_potentials) + len(self.nonbonded_ibi_potentials) + len(self.grid_ibi_potentials) > 0 )
+            assert( len(self.IBI_potentials) > 0 )
         except:
             raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
         logger.info(f'Running {iterations} IBI iterations with {len(self.bonded_ibi_potentials)} bonded and {len(self.nonbonded_ibi_potentials)} nonbonded IBI potentials')
@@ -507,7 +520,7 @@ class ArbdModel(PdbModel):
 
         restart_file = None
 
-        _potentials = list(self.bonded_ibi_potentials)+list(self.nonbonded_ibi_potentials)+list(self.grid_ibi_potentials)
+        _potentials = self.IBI_potentials
 
         ## Set potential root_directory to be inside directory if it's relative
         if directory != '.': raise NotImplementedError('Running IBI in another directory not yet supported')
@@ -534,18 +547,9 @@ class ArbdModel(PdbModel):
                     # print(s.getvalue())
                     # import ipdb; ipdb.set_trace()
 
-        def _load_cg_u(iteration):
-            name = f'ibi-{iteration:03d}'
-            psf = '{}/{}.psf'.format(directory,name)
-            globstring=f'{directory}/output/{name}.*dcd'
-            dcds = [f for f in glob(globstring) if 'momentum' not in f]
-            if len(dcds) == 0: raise ValueError(f'Expected to find dcds at {globstring}')
-            cg_u = mda.Universe(psf,*dcds)
-            return cg_u
-
         cg_u = None
         if first_iteration > 1:
-            cg_u = _load_cg_u(first_iteration-1)
+            cg_u = self._get_IBI_universe(first_iteration-1)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
                     p.get_cg_distribution(cg_u, box=box, recalculate=False)
@@ -592,13 +596,30 @@ class ArbdModel(PdbModel):
                              replicas = replicas )
 
             restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
-            cg_u = _load_cg_u(i)
+            cg_u = self._get_IBI_universe(i)
 
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Extracting CG distributions'):
-                    p.get_cg_distribution(cg_u, box=box, recalculate=False,directory=directory)
+                    p.get_cg_distribution(cg_u, box=box, recalculate=False)
                     p.iteration += 1
-        
+
+    def get_IBI_data(self, iteration, universe=None):
+        """ Returns list of tuples containing, the potential object, CG distribution bin centers, CG distribution values, tabulated potential coordinates, and tabulated potential values (in kcal/mol) for the provided iteration """
+        ret_list = []
+        if universe is None: universe = self._get_IBI_universe(iteration)
+        for p in self.IBI_potentials:
+            old_iteration = p.iteration
+            try:
+                p.iteration=iteration
+                bins,dist =  p.get_cg_distribution(universe)
+                bin_centers = bins[:-1] + 0.5*(bins[1]-bins[0])
+                rmin,rmax = p.range_
+                r = np.arange(rmin, rmax+p.resolution, p.resolution)
+                ret_list.append( (p, bin_centers, dist, r, p.potential(r)) )
+            finally:
+                p.iteration = old_iteration
+        return ret_list
+
     def update(self, group , copy=False):
         assert( isinstance(group, Group) )
         if copy:
