@@ -591,7 +591,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             logger.info(f'Smoothing {self.smooth} points as suggested by 1/2 of stddev ({np.sqrt(_var):02f}) 5')
 
     def get_cg_distribution(self, universe, trajectory=None, box=None, recalculate=False, directory='.'):
-        f = self.filename(smoothed=False,directory=directory)[:-3] + '.npz'
+        f = self.filename(smoothed=False,directory=directory)[:-4] + '.npz'
 
         if (not Path(f).exists()) or recalculate:
             logger.info(f"get_cg_distribution(): writing to '{f}'")
