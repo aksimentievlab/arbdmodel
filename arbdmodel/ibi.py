@@ -3,7 +3,7 @@ from abc import ABCMeta
 from scipy.ndimage import label, distance_transform_edt
 from scipy.spatial import KDTree
 from scipy.signal import savgol_filter as savgol
-from scipy.interpolate import RBFInterpolator
+from scipy.interpolate import RBFInterpolator, interp1d
 from .util import savgol_filter_nd as savgol_nd
 
 import numpy as np
@@ -132,7 +132,11 @@ class DegreeOfFreedom():
         # result = [self._get_value(positions)]
         result = self._get_value(positions)
         assert( np.all( ~np.isnan(result) ) )
-        assert( len(result) > 0 )
+        try: assert( len(result) > 0 )
+        except:
+            assert( result == float(result) )
+            result = [result]
+
         self.current_key = None
         return result
 
@@ -463,6 +467,20 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         pass
         
     def _extract_distribution(self, universe, trajectory = None, box = None):
+
+        try: self.degrees_of_freedom[0]
+        except:
+            msg = f'IBI potential "{self}" had no assigned degrees of freedom, so there is nothing to extract'
+            logger.warning(msg)
+            return self.bins, np.zeros(self.bins.shape)
+
+        ## Some DoFs return a list of values, and these need to be handled with special logic
+        dof_returns_list = set(dof.list_values for dof in self.degrees_of_freedom)
+        if len(dof_returns_list) > 1:
+            raise ValueError(f'IBI potential "{self}" has incompatible degrees of freedom associated with it')
+        dof_returns_list = dof_returns_list.pop()
+        _combine_vals = (lambda v: np.concatenate(v, axis=-1)) if dof_returns_list else (lambda v: np.vstack(v))
+
         if trajectory is not None:
             key = (universe, trajectory).__hash__()
         else:
@@ -482,22 +500,21 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         with logging_redirect_tqdm(loggers=[logger]):
             vals = []
             nvals = 0
-            for t in tqdm(trajectory, desc=f"Extracting distribution {self}"):
+
+            for t in tqdm(trajectory, desc=f"Extracting distribution {self}", position=0, leave=True):
                 # if (t.frame % 100) == 0: logger.info(f'Calculating distribution associated with {self} {t.frame}/{len(universe.trajectory)-1}')
                 if box is not None:
                     universe.dimensions = box
-                _v = np.vstack([dof.get_values(universe) for dof in self.degrees_of_freedom])
+                _v = _combine_vals([dof.get_values(universe) for dof in self.degrees_of_freedom])
                 vals.append(_v)
                 nvals += len(_v)
                 if nvals > 10000000:
-                    assert( vals[0].shape[1] == len(bins) )
-                    self.bin_dof_data(bins, np.vstack(vals), counts)
+                    self.bin_dof_data(bins, _combine_vals(vals), counts)
                     vals = []
                     nvals = 0
                 nframes += 1
             if nvals > 0:
-                assert( vals[0].shape[1] == len(bins) )
-                self.bin_dof_data(bins, np.vstack(vals), counts)
+                self.bin_dof_data(bins, _combine_vals(vals), counts)
                 vals = []
                 nvals = 0
                 
@@ -631,7 +648,10 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
     def _clean_edges(self, bins, rho, tol):
         """ Removes values outside the largest island of density """
         total_before = np.sum(rho)
-        struc = np.ones( [3 for b in bins], dtype=int )
+        if len(bins.shape) > 1:
+            struc = np.ones( [3 for b in bins], dtype=int )
+        else:
+            struc = [1,1,1] # np.ones( [3], dtype=int )
         l,num_l = label( rho > tol, structure=struc )
         _u,_counts = np.unique(l,return_counts=True)
         _counts[_u == 0] = 0    # ensure we don't select (rho < tol) as largest island
@@ -653,7 +673,11 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         oobf = self.max_force if self.out_of_bounds_force == 'max_force' else self.out_of_bounds_force
 
         bins = self.bins
-        delta = [_b[1]-_b[0] for _b in bins]
+        if len(bins.shape) > 1:
+            delta = [_b[1]-_b[0] for _b in bins]
+        else:
+            delta = [bins[1] - bins[0]]
+
         if oobf is None:
             oobf = 2 * max(
                 np.max(np.abs( np.diff(u,axis=i) / _d ))
@@ -738,9 +762,10 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         f = self.filename(smoothed=True, directory=directory)
 
         ## Only apply savgol filter in region where target density is well-defined
-        valid = np.where(rho_aa > tol)[0]
-        first = valid[0]
-        last = valid[-1]
+        valid = (rho_aa > tol)
+        valid_ids = np.where(rho_aa > tol)[0]
+        first = valid_ids[0]
+        last = valid_ids[-1]
         u[first:last+1] = savgol( u[first:last+1], **savgol_opts )
 
         # ## Apply boundary force outside where target density is well-defined
