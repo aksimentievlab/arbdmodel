@@ -1,7 +1,8 @@
+""" Set up loggers """
 
-## Set up loggers
 import logging
 from pathlib import Path
+from contextlib import contextmanager
 
 def _get_username():
     import sys
@@ -22,6 +23,21 @@ devlogger = logging.getLogger(__name__+'.dev')
 # devlogger.setLevel(logging.DEBUG)
 if _get_username() not in ('cmaffeo2',):
     devlogger.addHandler(logging.NullHandler())
+
+_log_stack = []
+@contextmanager
+def set_log_level(level=logging.WARNING):
+    prev_level = logger.level
+    _log_stack.append(prev_level)
+    try:
+        logger.setLevel(level)
+        yield level
+    finally:
+        if _log_stack:
+            restore_level = _log_stack.pop()
+            logger.setLevel(restore_level)
+        else:
+            raise RuntimeError("seg_log_level stack underflow!")
 
 _RESOURCE_DIR = Path(__file__).parent / 'resources'
 def get_resource_path(relative_path):

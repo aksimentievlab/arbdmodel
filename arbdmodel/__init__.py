@@ -5,14 +5,16 @@ from .engine import SimEngine, ArbdEngine, NamdEngine
 from .config import SimConf, DefaultSimConf
 from .binary_manager import BinaryManager
 from .version import get_version
-
-from .logger import logger,get_resource_path,devlogger
 __version__ = get_version()
+
+from .logger import logger,get_resource_path,devlogger, set_log_level
+
 
 # Make everything available at package level
 __all__ = ['ParticleType', 'PointParticle', 'RigidBodyType', 'RigidBody', 'Group',
     'SimConf', 'DefaultSimConf', 'BinaryManager',
     'PdbModel', 'ArbdModel',
-    'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path','logger']
+    'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path',
+    'logger', 'set_log_level']
 
-__version__ = get_version() 
+__version__ = get_version()
