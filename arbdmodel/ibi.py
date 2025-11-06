@@ -12,6 +12,7 @@ from . import ArbdModel
 from .core_objects import GroupSite
 from . import logger
 from .interactions import AbstractPotential
+from .grid import writeDx
 
 from gridData import Grid
 
@@ -980,49 +981,3 @@ class IBIGrid(AbstractIBIpotential):
 
         u = self._cap_potential(bins, u)
         writeDx( f, u, self.origin, self.delta, fmt='%.6f')
-
-def writeDx(outfile, data, origin, delta, fmt="%.12f"):
-  shape = np.shape(data)
-  num = np.prod(shape)
-  assert( len(shape) == 3 )
-  assert( len(origin) == 3 )
-  assert( len(delta) == 3 )
-  try:
-    assert( len(delta[0]) == 3 )
-    dx,dy,dz = [" ".join(map(str,v)) for v in delta]
-  except:
-    dx = " ".join(map(str,[delta[0], 0, 0]))
-    dy = " ".join(map(str,[0, delta[1], 0]))
-    dz = " ".join(map(str,[0, 0, delta[2]]))
-  headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
-                     ox=origin[0], oy=origin[1], oz=origin[2],
-                     dx=dx, dy=dy, dz=dz,
-                     num=num
-                   )
-  data = data.flatten(order='C')
-  header = """# OpenDX density file
-# File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
-object 1 class gridpositions counts  {nx} {ny} {nz}
-origin {ox} {oy} {oz}
-delta  {dx}
-delta  {dy}
-delta  {dz}
-object 2 class gridconnections counts  {nx} {ny} {nz}
-object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
-  len(data)
-
-  if num == 3*(num//3):
-    footer = ""
-  else:
-    footer = " ".join([fmt % x for x in data[3*(num//3):]]) # last line of data
-    footer += "\n"
-
-  footer += """attribute "dep" string "positions"
-object "density" class field 
-component "positions" value 1
-component "connections" value 2
-component "data" value 3
-"""
-  np.savetxt( outfile, np.reshape(data[:3*(num//3)], (num//3,3), order='C'), 
-              fmt=fmt,
-              header=header, comments='', footer=footer )
