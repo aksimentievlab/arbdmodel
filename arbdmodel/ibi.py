@@ -390,7 +390,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
     4. Updating the potential based on the difference
     5. Repeating until convergence
     """
-    def __init__(self, name, degrees_of_freedom=[], range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
+    def __init__(self, name, degrees_of_freedom=None, range_=(0,30), resolution=0.1, max_force=None, max_potential=None, out_of_bounds_force='max_force', zero='last', smooth=None, learning_rate=0.9, iteration=1, filename_prefix='IBIPotentials/'):
         self.name = name
         if degrees_of_freedom is None: degrees_of_freedom = []
         self.degrees_of_freedom = degrees_of_freedom
