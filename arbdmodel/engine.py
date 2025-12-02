@@ -5,7 +5,7 @@ import os, sys, subprocess
 import platform
 from abc import abstractmethod, ABCMeta
 import shutil
-from .core_objects import GroupSite
+from .core_objects import GroupSite, RigidBody
 from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
 from .config import SimConf
