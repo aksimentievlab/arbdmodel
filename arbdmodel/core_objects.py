@@ -102,6 +102,78 @@ class Transformable():
         # print("applyOrientation returning", self.name, obj)
         return obj
 
+class BondedTerm():
+    def __init__(self, particles, potential, switch_schedule=None):
+        if len(particles) != len(set(particles)):
+            raise ValueError('BondedTerm particles included duplicates')
+
+        self.particles = particles
+        self.potential = potential
+
+        if switch_schedule is None: switch_schedule = []
+        if len(switch_schedule) > 0 and not isinstance(potential,SwitchPotential):
+            raise ValueError("Bonded term's potential is not switchable")
+        self.switch_schedule = switch_schedule
+
+    def add_switch_step(self, step, value):
+        if  not isinstance(self.potential,SwitchPotential):
+            raise ValueError("Bonded term's potential is not switchable")
+
+        if step < 0:
+            raise ValueError(f'Potential switching step should be non-negative')
+
+        if len(self.switch_schedule) > 0 and self.switch_schedule[-1][0] >= step:
+            raise ValueError(f'Potential switching step mut occur later than previous step')
+
+        if step != int(step):
+            raise ValueError('Potential switching step must be an integer')
+
+        if value != float(value) or value < 0 or value > 1:
+            raise ValueError('Potential switching value must be number between zero and one')
+
+        self.switch_schedule.append((step,value))
+
+    _warn = True
+    def __iter__(self):
+        if self.__class__._warn:
+            devlogger.warning('Expanding bonded term for backward compatibility will be deprecated')
+            self.__class__._warn = False
+
+        for p in self.particles: yield p
+        yield self.potential
+        try: yield self.axis
+        except: pass
+        try: yield self.exclusion_flag
+        except: pass
+        yield self.switch_schedule
+
+    def __getitem__(self, index):
+        return list(self)[index]
+
+
+class BondTerm(BondedTerm):
+    def __init__(self, p1, p2, potential, exclusion_flag=False, switch_schedule=None):
+        BondedTerm.__init__(self, (p1,p2), potential, switch_schedule)
+        self.exclusion_flag = exclusion_flag
+class AngleTerm(BondedTerm):
+    def __init__(self, p1, p2, p3, potential, switch_schedule=None):
+        BondedTerm.__init__(self, (p1,p2,p3), potential, switch_schedule)
+class DihedralTerm(BondedTerm):
+    def __init__(self, p1, p2, p3, p4, potential, switch_schedule=None):
+        BondedTerm.__init__(self, (p1,p2,p3,p4), potential, switch_schedule)
+class BondXYTerm(BondTerm):
+    def __init__(self, p1, p2, potential, axis, exclusion_flag=False, switch_schedule=None):
+        BondTerm.__init__(self, (p1,p2), potential, exclusion_flag, switch_schedule)
+        try:    hash(axis)
+        except: axis = tuple(axis)
+        self.axis = axis
+
+class BondXYTerm(DihedralTerm):
+    def __init__(self, p1, p2, p3, p4, potential, exclusion_flag=False, switch_schedule=None):
+        DihedralTerm.__init__(self, (p1,p2,p3,p4), potential, switch_schedule)
+        self.exclusion_flag = exclusion_flag
+
+
 class Parent():
     """
     The Parent class implements a hierarchical tree structure for organizing objects in a simulation.
@@ -233,43 +305,28 @@ class Parent():
             raise NotImplementedError('')
         return center
 
-    def add_bond(self, i,j, bond, exclude=False):
-        assert( i is not j )
-        ## TODO: how to handle duplicating and cloning bonds
+    def add_bond(self, i,j, bond, exclude=False, switch_schedule=None):
         # beads = [b for b in self]
         # for b in (i,j): assert(b in beads)
-        self.bonds.append( (i,j, bond, exclude) )
+        self.bonds.append( BondTerm(i,j, bond, exclude, switch_schedule) )
 
-    def add_angle(self, i,j,k, angle):
-        assert( len(set((i,j,k))) == 3 )
-        # beads = [b for b in self]
-        # for b in (i,j,k): assert(b in beads)
-        self.angles.append( (i,j,k, angle) )
+    def add_angle(self, i,j,k, angle, switch_schedule=None):
+        self.angles.append( AngleTerm(i,j,k, angle, switch_schedule) )
 
-    def add_dihedral(self, i,j,k,l, dihedral):
-        assert( len(set((i,j,k,l))) == 4 )
+    def add_dihedral(self, i,j,k,l, dihedral, switch_schedule=None):
+        self.dihedrals.append( DihedralTerm(i,j,k,l, dihedral, switch_schedule) )
 
-        # beads = [b for b in self]
-        # for b in (i,j,k,l): assert(b in beads)
-        self.dihedrals.append( (i,j,k,l, dihedral) )
-
-    def add_bondXY(self, i,j, bond, axis, exclude=False):
+    def add_bondXY(self, i,j, bond, axis, exclude=False, switch_schedule=None):
         assert( i is not j )
         try:    hash(axis)
         except: axis = tuple(axis)
-        self.bondXY.append( (i,j, bond, axis, exclude) )
+        self.bondXY.append( BondXYTerm(i,j, bond, axis, exclude, switch_schedule) )
 
-    def add_vector_angle(self, i,j,k,l, potential):
-        assert( len(set((i,j,k,l))) == 4 )
+    def add_vector_angle(self, i,j,k,l, potential, switch_schedule=None):
+        self.vector_angles.append( DihedralTerm(i,j,k,l, potential, switch_schedule) )
 
-        # beads = [b for b in self]
-        # for b in (i,j,k,l): assert(b in beads)
-        self.vector_angles.append( (i,j,k,l, potential) )
-
-    def add_improper(self, i,j,k,l, dihedral):
-        # beads = [b for b in self]
-        # for b in (i,j,k,l): assert(b in beads)
-        self.impropers.append( (i,j,k,l, dihedral) )
+    def add_improper(self, i,j,k,l, dihedral, switch_schedule=None):
+        self.impropers.append( DihedralTerm(i,j,k,l, dihedral, switch_schedule) )
 
     def add_exclusion(self, i,j):
         ## TODO: how to handle duplicating and cloning bonds
@@ -278,28 +335,15 @@ class Parent():
         # for b in (i,j): assert(b in beads)
         self.exclusions.append( (i,j) )
 
-    def add_vector_angle(self, i,j,k,l, potential):
-        assert( len(set((i,j,k,l))) >= 3 )
-        self.vector_angles.append( (i,j,k,l, potential) )
-
-    def add_bond_angle(self, i,j,k,l, bond_angle, exclude=False):
-        assert( len(set((i,j,k,l))) == 4 )
-        ## TODO: how to handle duplicating and cloning bonds
-        # beads = [b for b in self]
-        # for b in (i,j): assert(b in beads)
-        self.bond_angles.append( (i,j,k,l, bond_angle) )
+    def add_bond_angle(self, i,j,k,l, bond_angle, exclude=False, switch_schedule=None):
+        self.bond_angles.append( BondAngle(i,j,k,l, bond_angle, exclude, switch_schedule) )
 
     def add_product_potential(self, potential_list):
-        """ potential_list: list of tuples of form (particle_i, particle_j,..., TabulatedPotential) """
+        """ potential_list: list or tuple of BondedTerm objects; only basic bonded terms are supported  """
         if len(potential_list) < 2: raise ValueError("Too few potentials")
-        for elem in potential_list:
-            beads = elem[:-1]
-            pot = elem[-1]
-            if len(beads) < 2: raise ValueError("Too few particles specified in product_potential")
-            if len(beads) > 4: raise ValueError("Too many particles specified in product_potential")
+        if len(potential_list) > 4: raise ValueError("Too many potentials")
 
         self.product_potentials.append(potential_list)
-        ## TODO: how to handle duplicating and cloning bonds
 
     def get_restraints(self):
         ret = []
@@ -399,15 +443,15 @@ class Parent():
             return ret
 
     def _get_bond_potentials(self):
-        bonds =  [b for i,j,b,ex in self.get_bonds()]
-        bondXY =  [b for i,j,b,ax,ex in self.get_bondXY()]
-        bondangles1 = [b[1] for i,j,k,l,b in self.get_bond_angles()]
+        bonds =  [b for i,j,b,ex,sw in self.get_bonds()]
+        bondXY =  [b for i,j,b,ax,ex,sw in self.get_bondXY()]
+        bondangles1 = [b[1] for i,j,k,l,b,sw in self.get_bond_angles()]
         return list(set( tuple(bonds+bondXY+bondangles1) ))
 
     def _get_angle_potentials(self):
-        angles =  [b for i,j,k,b in self.get_angles()]
-        bondangles1 = [b[0] for i,j,k,l,b in self.get_bond_angles()]
-        bondangles2 = [b[2] for i,j,k,l,b in self.get_bond_angles()]
+        angles =  [b for i,j,k,b,sw in self.get_angles()]
+        bondangles1 = [b[0] for i,j,k,l,b,sw in self.get_bond_angles()]
+        bondangles2 = [b[2] for i,j,k,l,b,sw in self.get_bond_angles()]
         return list(set( tuple(angles+bondangles1+bondangles2) ))
 
 
@@ -655,12 +699,13 @@ class ParticleType():
                           "orientation",
                           "children",
                           "name",
+                          "switch_type",
                           "parent", "excludedAttributes",
     )
 
     def __init__(self, name, charge=0, mass=None, diffusivity=None,
                  damping_coefficient=None, parent=None,
-                 rigid_body_potentials=tuple(), **kwargs):
+                 rigid_body_potentials=tuple(), switch_type = None, **kwargs):
 
         """ Parent type is used to fall back on for nonbonded
         interactions if this type is not specifically referenced """
@@ -682,6 +727,7 @@ class ParticleType():
         if diffusivity is not None: self.diffusivity = diffusivity
         self.parent = parent
         self.rigid_body_potentials = rigid_body_potentials
+        self.switch_type = switch_type
         devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
         
         for key in ParticleType.excludedAttributes:
@@ -893,7 +939,7 @@ class PointParticle(Transformable, Child):
         restraints (list): List of restraints applied to this particle.
         rigid (bool): Flag indicating whether the particle is rigid, default is False.
     """
-    def __init__(self, type_, position, name="A", **kwargs):
+    def __init__(self, type_, position, name="A", switch_schedule=None, **kwargs):
         parent = None
         if 'parent' in kwargs:
             parent = kwargs['parent']
@@ -903,6 +949,7 @@ class PointParticle(Transformable, Child):
         self.type_    = type_                
         self.idx     = None
         self.name = name
+        self.switch_schedule = [] if switch_schedule is None else switch_schedule
         self.counter = 0
         self.restraints = []
         self.rigid = False
@@ -988,6 +1035,21 @@ class PointParticle(Transformable, Child):
         """
         new = deepcopy(self)
         return new
+
+    def add_switch_step(self, step, value):
+        if step < 0:
+            raise ValueError(f'Particle type switching step should be non-negative')
+
+        if len(self.switch_schedule) > 0 and self.switch_schedule[-1][0] >= step:
+            raise ValueError(f'Particle type switching step mut occur later than previous step')
+
+        if step != int(step):
+            raise ValueError('Particle type switching step must be an integer')
+
+        if value != float(value) or value < 0 or value > 1:
+            raise ValueError('Particle type switching value must be number between zero and one')
+
+        self.switch_schedule.append((step,value))
 
     def __getattr__(self, name):
         """

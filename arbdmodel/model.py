@@ -193,7 +193,7 @@ class PdbModel(Transformable, Parent):
             bonds = self.get_bonds()
             fh.write("{:>8d} !NBOND\n".format(len(bonds)))
             counter = 0
-            for p1,p2,b,ex in bonds:
+            for p1,p2,b,ex,sw in bonds:
                 fh.write( "{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1) )
                 counter += 1
                 if counter == 4:
@@ -207,7 +207,7 @@ class PdbModel(Transformable, Parent):
             angles = self.get_angles()
             fh.write("{:>8d} !NTHETA\n".format(len(angles)))
             counter = 0
-            for p1,p2,p3,a in angles:
+            for p1,p2,p3,a,sw in angles:
                 fh.write( "{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1) )
                 counter += 1
                 if counter == 3:
@@ -221,7 +221,7 @@ class PdbModel(Transformable, Parent):
             dihedrals = self.get_dihedrals()
             fh.write("{:>8d} !NPHI\n".format(len(dihedrals)))
             counter = 0
-            for p1,p2,p3,p4,a in dihedrals:
+            for p1,p2,p3,p4,a,sw in dihedrals:
                 fh.write( "{:>8d}{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1,p4.idx+1) )
                 counter += 1
                 if counter == 2:
@@ -235,7 +235,7 @@ class PdbModel(Transformable, Parent):
             impropers = self.get_impropers()
             fh.write("{:>8d} !NIMPHI\n".format(len(impropers)))
             counter = 0
-            for p1,p2,p3,p4,a in impropers:
+            for p1,p2,p3,p4,a,sw in impropers:
                 fh.write( "{:>8d}{:>8d}{:>8d}{:>8d}".format(p1.idx+1,p2.idx+1,p3.idx+1,p4.idx+1) )
                 counter += 1
                 if counter == 2:
@@ -714,7 +714,7 @@ class ArbdModel(PdbModel):
     def _countParticleTypes(self):
         ## TODO: check for modifications to particle that require
         ## automatic generation of new particle type
-        type_counts = dict()    # type is key, value is 2-element list of regular particle counts and attached particles
+        type_counts = dict()    # type is key, value is 3-element list of regular particle counts, attached particles, and particles (regular or attached) that switch to the type
 
         parts, self.rigid_bodies = [],[]
         for p in self:
@@ -728,7 +728,13 @@ class ArbdModel(PdbModel):
             if t in type_counts:
                 type_counts[t][0] += 1
             else:
-                type_counts[t] = [1,0]
+                type_counts[t] = [1,0,0]
+            t2 = t.switch_type
+            if t2 is not None and len(p.switch_schedule) > 0:
+                if t2 in type_counts:
+                    type_counts[t2][2] += 1
+                else:
+                    type_counts[t2] = [0,0,1]
 
         parts = [p for rb in self if rb.rigid for p in rb.attached_particles]
         for p in parts:
@@ -736,8 +742,14 @@ class ArbdModel(PdbModel):
             if t in type_counts:
                 type_counts[t][1] += 1
             else:
-                type_counts[t] = [0,1]
-        
+                type_counts[t] = [0,1,0]
+            t2 = t.switch_type
+            if t2 is not None and len(p.switch_schedule) > 0:
+                if t2 in type_counts:
+                    type_counts[t2][2] += 1
+                else:
+                    type_counts[t2] = [0,0,1]
+
         if len(self.dummy_types) != 0:
             raise("Dummy types have been deprecated")
         # for t in self.dummy_types:
@@ -746,10 +758,9 @@ class ArbdModel(PdbModel):
 
         for i,tA,tB in self.nonbonded_interactions:
             if tA is not None and tA not in type_counts:
-                type_counts[tA] = [0,0]
+                type_counts[tA] = [0,0,0]
             if tB is not None and tB not in type_counts:
-                type_counts[tB] = [0,0]
-
+                type_counts[tB] = [0,0,0]
 
         self.type_counts = type_counts
 
@@ -818,8 +829,8 @@ class ArbdModel(PdbModel):
     
     def assign_index_to_types(self):
         i_skipped = 0
-        for i,(t,(n,rb)) in enumerate(self.getParticleTypesAndCounts()):
-            if n+rb == 0:
+        for i,(t,(n,rb,sw)) in enumerate(self.getParticleTypesAndCounts()):
+            if n+rb+sw == 0:
                 i_skipped += 1
                 continue
             t.type_idx = i-i_skipped
@@ -828,14 +839,14 @@ class ArbdModel(PdbModel):
         typesAndCounts = self.getParticleTypesAndCounts()
         i_skipped = 0
         for i in range(len(typesAndCounts)):
-            t1,(n1,rb1) = typesAndCounts[i]
-            if n1+rb1 == 0:
+            t1,(n1,rb1,sw1) = typesAndCounts[i]
+            if n1+rb1+sw1 == 0:
                 i_skipped += 1
                 continue
             j_skipped = 0
             for j in range(i,len(typesAndCounts)):
-                t2,(n2,rb2) = typesAndCounts[j]
-                if n2+rb2 == 0:
+                t2,(n2,rb2,sw2) = typesAndCounts[j]
+                if n2+rb2+sw2 == 0:
                     j_skipped += 1
                     continue
                 yield( [i-i_skipped,j-i_skipped-j_skipped,t1,t2] )

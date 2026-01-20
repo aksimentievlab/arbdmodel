@@ -431,6 +431,43 @@ class NullPotential(AbstractPotential):
     def filename(self, types=None):
         return f"{self.filename_prefix}nullpot.dat"
 
+class SwitchPot(AbstractPotential):
+    def __init__(self, p1, p2, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
+
+        # for attr in ('range_','resolution'):
+        #     for p in (p1,p1):
+        #         if getattr(p,attr) != getattr(self,attr):
+        #             logger
+
+        if p1 is None: p1 = NullPotential()
+        if p2 is None: p2 = NullPotential()
+
+        self.potential1 = p1
+        self.potential2 = p2
+        # self.fname = f"{p1.filename()}&{p2.filename()}"
+
+    def filename(self, types=None):
+        return f"{self.potential1.filename(types)}&{self.potential2.filename(types)}"
+
+    def write_file(self, filename=None, types=None):
+        f1 = f2 = None
+        if filename is not None:
+            f1,f2 = filename.split('&')
+        self.potential1.write_file(f1,types)
+        self.potential2.write_file(f2,types)
+
+    def potential(self, r, types):
+        raise NotImplementedError('SwitchPotential.potential() should not be called directly')
+
+    def __hash__(self):
+        return hash((hash(self.potential1),hash(self.potential2)))
+
+    def __eq__(self,other):
+        if isinstance(other, SwitchPotential): return False
+        return (self.potential1 == other.potential1) and (self.potential2 == other.potential2)
+
 ## Bonded potentials            
 class HarmonicBondedPotential(AbstractPotential):
     def __init__(self, k, r0, filename_prefix='./potentials/', *args, **kwargs):
@@ -524,7 +561,6 @@ class HarmonicDihedral(HarmonicBondedPotential):
     @property
     def periodic(self):
         return True
-
 
 class HarmonicVectorAngle(HarmonicBondedPotential):
     def __init__(self, *args, **kwargs):
