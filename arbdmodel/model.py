@@ -336,23 +336,34 @@ class ArbdModel(PdbModel):
         names = set([t.name for t in self.type_counts.keys()])
 
         devlogger.debug(f'Combining types {self.type_counts.keys()} and {other_model.type_counts.keys()}')
+        ## Code to create new type name to circumvent issues due to matching types that are not equal
+        _equivalent_types = dict()
         for t1 in self.type_counts.keys():
             for t2 in other_model.type_counts.keys():
-                if t1.name == t2.name and t1.__eq__(t2, check_equal=False):
-                    i = 1
-                    new_name = f'{t2.name}{i}'
-                    while new_name in names:
-                        i += 1
-                        new_name = f'{t2.name}{i}'
-                    devlogger.debug(f'Updating {t2.name} to {new_name}')
-                    t2.name = new_name
-                    names.add(new_name)
+                if t1.name == t2.name and t1.__eq__(t2, check_equal=False) and t2 is not t1:
+                    _equivalent_types[t2.name] = t1
+
+        for t2 in other_model.type_counts.keys():
+            if t2.parent is not None:
+                key = t2.parent.name
+                if key in _equivalent_types:
+                    t2.parent = _equivalent_types[key]
                     
         ## Combine interactions
         for i, tA, tB in other_model.nonbonded_interactions:
+            if tA.name in _equivalent_types:
+                tA = _equivalent_types[tA.name]
+            if tB.name in _equivalent_types:
+                tB = _equivalent_types[tB.name]
             devlogger.debug(f'Combining model interactions {i} {tA} {tB}')
             self.add_nonbonded_interaction(i,tA,tB)
-                    
+
+        if len(_equivalent_types) > 0:
+            for p in other_model:
+                key = p.type_.name
+                if key in _equivalent_types:
+                    p.type_ = _equivalent_types[key]
+
         # for g in other_model.children:
         #     self.update(g, copy=copy)
         for attr in 'children bonds angles dihedrals bondXY impropers exclusions vector_angles bond_angles product_potentials group_sites'.split():
