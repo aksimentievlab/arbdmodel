@@ -797,7 +797,6 @@ class ArbdModel(PdbModel):
                 if n2+rb2 == 0:
                     j_skipped += 1
                     continue
-                if n2 == 0: continue
                 yield( [i-i_skipped,j-i_skipped-j_skipped,t1,t2] )
 
     def dimensions_from_structure( self, padding_factor=1.5, isotropic=False ):
