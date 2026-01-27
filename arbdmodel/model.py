@@ -351,9 +351,9 @@ class ArbdModel(PdbModel):
                     
         ## Combine interactions
         for i, tA, tB in other_model.nonbonded_interactions:
-            if tA.name in _equivalent_types:
+            if tA is not None and tA.name in _equivalent_types:
                 tA = _equivalent_types[tA.name]
-            if tB.name in _equivalent_types:
+            if tB is not None and tB.name in _equivalent_types:
                 tB = _equivalent_types[tB.name]
             devlogger.debug(f'Combining model interactions {i} {tA} {tB}')
             self.add_nonbonded_interaction(i,tA,tB)
