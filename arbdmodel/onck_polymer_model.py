@@ -8,7 +8,7 @@ import sys
 from .logger import devlogger, logger, get_resource_path
 from .core_objects import ParticleType, PointParticle, Citation
 from .polymer import PolymerBeads, PolymerModel
-from .interactions import AbstractPotential, HarmonicBond
+from .interactions import AbstractPotential, HarmonicBond, TabulatedPotential
 
 """Define particle types"""
 _types = dict(
@@ -415,7 +415,7 @@ class OnckBeads(PolymerBeads):
             filename = 'onck_model_potentials/bend_O{}{}.txt'.format(
                 t2, 'P' if t3 == 'P' else 'Y' )
             self.add_angle( i=b1, j=b2, k=b3,
-                          angle = get_resource_path(filename) )
+                          angle = TabulatedPotential( get_resource_path(filename) ) )
             self.add_exclusion( i=b1, j=b3 )
         elif len(ids) == 4:
             ## Four consecutive monomers
@@ -424,7 +424,7 @@ class OnckBeads(PolymerBeads):
 
             filename = 'onck_model_potentials/dih_{}{}.txt'.format(t2,t3)
             self.add_dihedral( i=b1, j=b2, k=b3, l=b4,
-                               dihedral = get_resource_path(filename) )
+                               dihedral = TabulatedPotential( get_resource_path(filename) ) )
             self.add_exclusion( i=b1, j=b4 )
         else:
             raise Exception('Programming error!')

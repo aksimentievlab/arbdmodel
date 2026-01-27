@@ -4,6 +4,8 @@ import scipy
 import numpy as np
 from shutil import copyfile
 from .grid import writeDx
+from pathlib import Path
+
 """ Module providing classes used to describe potentials in ARBD """
 
 
@@ -210,19 +212,32 @@ class HalfHarmonic(AbstractPotential):
         u[r > r0] = np.zeros( np.shape(u[r > r0]) )
         return u
 
-class TabulatedNonbonded(AbstractPotential):
-    def __init__(self, tableFile, *args, **kwargs):
+class TabulatedPotential(AbstractPotential):
+    def __init__(self, tableFile, filename_prefix='./potentials/', *args, **kwargs):
+        """ Convenience class that copies a supplied tabulated potential to a (typically local) destination. """
         self.tableFile = tableFile
-        AbstractPotential.__init__(self,*args,**kwargs)
-
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, *args, **kwargs)
         ## TODO: check that tableFile exists and is regular file
 
     def potential(self, r, types):
         raise NotImplementedError('This should probably not be implemented')
+
+    def filename(self, types=None):
+        return f"{self.filename_prefix}{Path(self.tableFile).name}"
         
-    def write_file(self, filename, types):
-        if filename != self.tableFile:
+    def write_file(self, filename=None, types=None):
+        if filename is None:
+            filename = self.filename(types)
+
+        # if filename != self.tableFile:
+        if not Path(filename).exists():
             copyfile(self.tableFile, filename)
+
+class TabulatedNonbonded(TabulatedPotential):
+    def __init__(self, *args, **kwargs):
+        logger.warning('TabulatedNonbonded class is to be deprecated in favor of TabulatedPotential; please update your scripts')
+        self.super().__init__(*args,**kwargs)
 
 class BoundaryPotential(AbstractPotential):
     """Boundary potential for confining simulations."""
