@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 from copy import copy, deepcopy
 from glob import glob
 import MDAnalysis as mda
@@ -459,12 +460,15 @@ class ArbdModel(PdbModel):
     def load_target_IBI_distributions(self):
         raise NotImplementedError
 
-    def _get_IBI_universe(self, iteration, directory='.'):
+    def _get_IBI_universe(self, iteration, directory='.', replicas=1):
         name = f'ibi-{iteration:03d}'
         psf = '{}/{}.psf'.format(directory,name)
-        globstring=f'{directory}/output/{name}.*dcd'
-        dcds = [f for f in glob(globstring) if 'momentum' not in f]
-        if len(dcds) == 0: raise ValueError(f'Expected to find dcds at {globstring}')
+        if replicas == 1:
+            dcds = [f'{directory}/output/{name}.dcd']
+        else:
+            dcds = [f'{directory}/output/{name}.{i}.dcd' for i in range(replicas)]
+        dcds = [d for d in dcds if Path(d).exists()]
+        if len(dcds) == 0: raise ValueError(f'Expected to find dcds with prefix {directory}/output/{name}')
         cg_u = mda.Universe(psf,*dcds)
         return cg_u
 
@@ -560,7 +564,7 @@ class ArbdModel(PdbModel):
 
         cg_u = None
         if first_iteration > 1:
-            cg_u = self._get_IBI_universe(first_iteration-1)
+            cg_u = self._get_IBI_universe(first_iteration-1, replicas=replicas)
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Calculating initial CG distributions'):
                     p.get_cg_distribution(cg_u, box=box, recalculate=False)
@@ -607,17 +611,17 @@ class ArbdModel(PdbModel):
                              replicas = replicas )
 
             restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
-            cg_u = self._get_IBI_universe(i)
+            cg_u = self._get_IBI_universe(i, replicas=replicas)
 
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
                 for p in tqdm(_potentials, desc='Extracting CG distributions'):
                     p.get_cg_distribution(cg_u, box=box, recalculate=False)
                     p.iteration += 1
 
-    def get_IBI_data(self, iteration, universe=None):
+    def get_IBI_data(self, iteration, universe=None, replicas=1):
         """ Returns list of tuples containing, the potential object, CG distribution bin centers, CG distribution values, tabulated potential coordinates, and tabulated potential values (in kcal/mol) for the provided iteration """
         ret_list = []
-        if universe is None: universe = self._get_IBI_universe(iteration)
+        if universe is None: universe = self._get_IBI_universe(iteration, replicas=replicas)
         for p in self.IBI_potentials:
             old_iteration = p.iteration
             try:
