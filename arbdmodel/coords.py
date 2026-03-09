@@ -143,52 +143,58 @@ def quaternion_to_matrix(q):
 
     return np.array(R)
 
-def quaternion_from_matrix( R ):
-    R=R.T
-    q = np.empty(4)
-    if R[2,2] < 0:
-        if R[0,0] > R[1,1]:
-            trace = 1.0 + R[0,0] - R[1,1] - R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[1,2] < R[2,1]: s = -s
-            q[0] = (R[1,2] - R[2,1]) / s
-            q[1] = 0.25 * s
-            q[2] = (R[0,1] + R[1,0]) / s
-            q[3] = (R[2,0] + R[0,2]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 1],0)):
-                q[1] = 1
-        else:
-            trace = 1.0 - R[0,0] + R[1,1] - R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[2,0] < R[0,2]: s = -s
-            q[0] = (R[2,0] - R[0,2]) / s
-            q[1] = (R[0,1] + R[1,0]) / s
-            q[2] = 0.25 * s
-            q[3] = (R[1,2] + R[2,1]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 2],0)):
-                q[2] = 1
-    else:
-        if R[0,0] < -R[1,1]:
-            trace = 1.0 - R[0,0] - R[1,1] + R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[0,1] < R[1,0]: s = -s
-            q[0] = (R[0,1] - R[1,0]) / s
-            q[1] = (R[2,0] + R[0,2]) / s
-            q[2] = (R[1,2] + R[2,1]) / s
-            q[3] = 0.25 * s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 3],0)):
-                q[3] = 1
-        else:
-            trace = 1.0 + R[0,0] + R[1,1] + R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            q[0] = 0.25 * s
-            q[1] = (R[1,2] - R[2,1]) / s
-            q[2] = (R[2,0] - R[0,2]) / s
-            q[3] = (R[0,1] - R[1,0]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 0],0)):
-                q[0] = 1
-    if not (q[0] >= 0):
-        raise ValueError(f'Invalid quaternion calculating from matrix {R}')
+def quaternion_from_matrix(R):
+    """
+    Convert N rotation matrices (N,3,3) to quaternions (N,4) in
+    (w,x,y,z) order using Vectorized SciPy/Eigen-style max-diagonal
+    algorithm.
+    """
+    R = np.asarray(R)
+    dim = len(R.shape)
+    if dim == 2: R = R.reshape(1,*R.shape)
+
+    ## We use an unusual convention for R, and rather than change
+    ## the code everywhere we can simply take the transpose here
+    R = np.transpose(R,(0,2,1))
+
+    N = R.shape[0]
+    r00 = R[:,0,0]; r01 = R[:,0,1]; r02 = R[:,0,2]
+    r10 = R[:,1,0]; r11 = R[:,1,1]; r12 = R[:,1,2]
+    r20 = R[:,2,0]; r21 = R[:,2,1]; r22 = R[:,2,2]
+
+    K = np.empty((N,4,4))
+
+    K[:,0,0] = r00 - r11 - r22
+    K[:,0,1] = r10 + r01
+    K[:,0,2] = r20 + r02
+    K[:,0,3] = r12 - r21
+
+    K[:,1,0] = K[:,0,1]
+    K[:,1,1] = -r00 + r11 - r22
+    K[:,1,2] = r21 + r12
+    K[:,1,3] = r20 - r02
+
+    K[:,2,0] = K[:,0,2]
+    K[:,2,1] = K[:,1,2]
+    K[:,2,2] = -r00 - r11 + r22
+    K[:,2,3] = r01 - r10
+
+    K[:,3,0] = K[:,0,3]
+    K[:,3,1] = K[:,1,3]
+    K[:,3,2] = K[:,2,3]
+    K[:,3,3] = r00 + r11 + r22
+
+    K /= 3.0
+
+    ## Batched symmetric eigendecomposition
+    eigvals, eigvecs = np.linalg.eigh(K)
+
+    ## Largest eigenvalue eigenvector
+    idx = np.argmax(eigvals, axis=1)
+    q = eigvecs[np.arange(N), :, idx]
+    q = np.roll(q,1,axis=1)            # use (w,x,y,z) convention
+
+    if dim == 2: q = q[0]
     return q
 
 def __quaternion_from_matrix__deprecated( R ):
@@ -259,6 +265,7 @@ def quaternion_slerp(q1,q2,t):
     assert(len(q1) == 4)
     assert(len(q2) == 4)
     assert(t >= 0 and t <= 1)
+    if np.all(np.isclose(q1,q2)): return q1
     q1_inv = quaternion_inverse(q1)
     return quaternion_product( q1, quaternion_exp( quaternion_product( q1_inv, q2 ), t ) )
 
