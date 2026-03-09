@@ -75,7 +75,7 @@ class PdbModel(Transformable, Parent):
             fh.write("CRYST1{:>9.3f}{:>9.3f}{:>9.3f}  90.00  90.00  90.00 P 1           1\n".format( *self.dimensions ))
 
             ## Write coordinates
-            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:>5.5s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2d}{segname:>6s}\n"
+            formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:<5.5s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2s}{segname:>6s}\n"
             for p in self.particles:
                 ## http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM
                 data = p._get_psfpdb_dictionary()
@@ -92,16 +92,17 @@ class PdbModel(Transformable, Parent):
 
                 pos = p.get_collapsed_position()
                 dig = [max(int(np.log10(np.abs(x)+1e-6)//1),0)+1 for x in pos]
-                for d in dig: assert( d <= 7 )
-                # assert( np.all(dig <= 7) )
-                fs = ["{: %d.%df}" % (8,7-d) for d in dig]
+                for d in dig:
+                    if d > 7: raise NotImplementedError('arbdmodel is unable to write a PDB with such large dimensions; consider whether shifting your object or scaling dimensions can be used as a workaround')
+                fs = ["{: >%d.%df}" % (8,7-d) for d in dig]
                 x,y,z = [f.format(x) for f,x in zip(fs,pos)] 
                 data['x'] = x
                 data['y'] = y
                 data['z'] = z
                 assert(data['resid'] < 1e5)
-                data['charge'] = int(data['charge'])
-                data['resid'] = "{:<4d}".format(data['resid'])
+                # data['charge'] = str(int(data['charge']))
+                data['charge'] = '' # filling this field causes issues with some versions of MDAnalysis reader
+                data['resid'] = "{: >4d}".format(data['resid'])
                 fh.write( formatString.format(**data) )
 
         return
