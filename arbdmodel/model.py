@@ -514,13 +514,18 @@ class ArbdModel(PdbModel):
             
         Notes
         -----
-        The method requires bonded_ibi_potentials and nonbonded_ibi_potentials to be 
-        defined in the model. Use assign_IBI_degrees_of_freedom() before calling this method.
+        This method only acts on potentials included in self.IBI_potentials and
+        will call self.assign_IBI_degrees_of_freedom() to include all IBI
+        potentials in the list if it is empty. Manual management is required to
+        restrict IBI optimization to only select potentials. For example, bonded
+        potentials are often optimized prior to nonbonded interactions.
+
         """
         try:
             assert( len(self.IBI_potentials) > 0 )
         except:
-            raise ValueError('Model does not appear to contain IBI potentials; perhaps you forgot to run self.assign_IBI_degrees_of_freedom()')
+            logger.info('Model does not appear to contain IBI potentials; calling assign_IBI_degrees_of_freedom()')
+            self.assign_IBI_degrees_of_freedom()
         logger.info(f'Running {iterations} IBI iterations with {len(self.bonded_ibi_potentials)} bonded and {len(self.nonbonded_ibi_potentials)} nonbonded IBI potentials')
 
         if engine is None:
