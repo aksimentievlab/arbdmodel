@@ -2,6 +2,7 @@
 import numpy as np
 from inspect import ismethod
 from copy import copy, deepcopy
+from pathlib import Path
 from .logger import logger, get_resource_path,devlogger
 
 
@@ -883,7 +884,7 @@ class PointParticle(Transformable, Child):
         or create a new derived type if it doesn't.
         """
         t0 = self.type_
-        name = f'{t0.name}_g_{gridfile.replace(".dx","")}_s_{scale}'
+        name = f'{t0.name}_g_{Path(gridfile).stem}_s_{scale}'
         if t0.parent is not None:
             t = copy(t0)
             t.name = name
