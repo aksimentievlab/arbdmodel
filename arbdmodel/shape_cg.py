@@ -519,13 +519,13 @@ class ShapeCGModel(ArbdModel):
             debye_length = self.concentration_to_debye_length(150)
 
         prot_nb = ShapeCGNonbonded(debye_length=debye_length)
-        old_interactions = self.nbSchemes
-        self.nbSchemes = []
+        old_interactions = self.nonbonded_interactions
+        self.nonbonded_interactions = []
 
         # Add protein-protein interactions
         for i, prot_t1 in enumerate(prot_types):
             for j, prot_t2 in enumerate(prot_types[i:], i):
-                self.useNonbondedScheme(prot_nb, typeA=prot_t1, typeB=prot_t2)
+                self.add_nonbonded_interaction(prot_nb, typeA=prot_t1, typeB=prot_t2)
             
             # Add protein-nucleic acid interactions if present
             try:
@@ -534,12 +534,12 @@ class ShapeCGModel(ArbdModel):
                         continue
                     t.charge = -1 * t.nts
                     t.sigma = nt_sigma
-                    self.useNonbondedScheme(prot_nb, typeA=t, typeB=prot_t1)
+                    self.add_nonbonded_interaction(prot_nb, typeA=t, typeB=prot_t1)
             except AttributeError:
                 pass
                 
         # Restore previous interactions
-        self.nbSchemes = self.nbSchemes + old_interactions
+        self.nonbonded_interactions = self.nonbonded_interactions + old_interactions
         
     def get_protein_types(self, protein_counts, num_CG_sites=None):
         """Get all protein types for the given protein counts.
@@ -723,7 +723,7 @@ class ShapeCGModel(ArbdModel):
             t.grid = [(confinement_file, 1)]
             
         # Add confinement to all nonbonded scheme particle types
-        for s, t1, t2 in self.nbSchemes:
+        for s, t1, t2 in self.nonbonded_interactions:
             for t in (t1, t2):
                 t.grid = [(confinement_file, 1)]
                 
@@ -760,7 +760,7 @@ class ShapeCGModel(ArbdModel):
             t.sigma = 2 * t.sigma
             t.grid = [(f'../confine-{radius}.dx', 1)]
 
-        for s, t1, t2 in self.nbSchemes:
+        for s, t1, t2 in self.nonbonded_interactions:
             for t in (t1, t2):
                 try:
                     t.modified
