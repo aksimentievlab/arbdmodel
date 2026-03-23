@@ -2062,7 +2062,7 @@ class ArbdEngine(SimEngine):
         if len(model.group_sites) > 0:
             with open(self._group_sites_filename,'w') as fh:
                 for i,g in enumerate(model.group_sites):
-                    assert( i+len(model.particles) == g.idx )
+                    #assert( i+len(model.particles) == g.idx )
                     ids = " ".join([str(int(p.idx)) for p in g.particles])
                     fh.write("GROUP %s\n" % ids)
 

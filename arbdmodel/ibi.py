@@ -382,7 +382,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                 self.__dists[key] = (bins, counts)
         return bins, vals
 
-    def read_cg_potential(self, iteration=None, directory=directory):
+    def read_cg_potential(self, iteration=None, directory='.'):
         if iteration is None: iteration = self.iteration-1
         if iteration == 0:
             bins = self.bins[:-1]

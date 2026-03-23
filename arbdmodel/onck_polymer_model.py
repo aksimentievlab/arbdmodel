@@ -277,7 +277,11 @@ class OnckNonbonded(AbstractPotential):
             u_lj = (epsilon_rep-epsilon) * r8
             s = r<=sigma
             u_lj[s] = epsilon_rep*r8[s] - epsilon*(4*r6[s]-1)/3
-            u_lj = u_lj - u_lj[r>25][0]
+
+            try: u_lj = u_lj - u_lj[r>25][0]                
+            except:
+                if r[-1] < 25: logger.warning(f'{self}.range_ unusually short ({r[-1]}) for Onck model; proceed with caution')
+
             u_lj[r>25] = 0
 
         u = u_elec + u_lj
@@ -322,7 +326,7 @@ class OnckBeads(PolymerBeads):
     def _generate_ith_bead_group(self, i, r, o):
         s = self.sequence[i]
         return PointParticle(self.types_dict[s], r,
-                             name = s,
+                             name = self.types_dict[s].name,
                              resid = i+1)
 
     def _join_adjacent_bead_groups(self, ids):
