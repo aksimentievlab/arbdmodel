@@ -425,21 +425,91 @@ class Parent():
     #         if isinstance(c,Parent): 
     #             ret = ret + c.remove_duplicate_item(dict_key, existing)
     #     return ret
-        
 
-    def __iter__(self):
-        ## TODO: decide if this is the nicest way to do it!
-        """Depth-first iteration through tree"""
-        # devlogger.info(f'{self}.__iter__(): 0th child {None if len(self.children) == 0 else self.children[0]}')
+    def __tree_call_depth(self, function, post_function=None, start_depth=0, end_depth=None, function_args=None, function_kwargs=None, _root_call=True, *args, **kwargs):
+        """
+        Return a generator that returns the result of `function`
+        applied to each element of the tree, traversed in a
+        depth-first manner. After all children of a node have been
+        processed, optionally apply `post_function` to each element.
+        """
+        if function_args is not None: args = function_args
+        if function_kwargs is not None: kwargs = function_kwargs
+
+        ## Gather distance from root and leaves if needed
+        if _root_call and not (start_depth == 0 and end_depth is None):
+            self._tree_depth = 0
+            def assign_depth(x):
+                if isinstance(x, Child):
+                    x._tree_depth = x.parent._tree_depth+1 if x.parent is not None else 0
+                devlogger.debug(f'assigned depth {x._tree_depth} to {x}')
+            def assign_depth_from_end(x):
+                if isinstance(x, Parent):
+                    x._tree_depth_end = min([0]+[c._tree_depth_end for c in x.children]) + 1
+                else:
+                    x._tree_depth_end = 0
+                devlogger.debug(f'assigned end depth {x._tree_depth_end} to {x}')
+            for result in self.__tree_call_depth(assign_depth, assign_depth_from_end, _root_call = False):
+                pass
+
+        ## Create temporary function to check if current item is in specified range
+        if not (start_depth == 0 and end_depth is None):
+            def _is_in_range(item):
+                depth = item._tree_depth
+                depth_from_end = item._tree_depth_end
+                in_range = ((start_depth >= 0 and depth >= start_depth) or \
+                            (start_depth < 0 and depth_from_end < -start_depth))
+                if in_range and end_depth is not None:
+                    in_range = ((end_depth >= 0 and depth < end_depth) or \
+                                (end_depth < 0 and depth_from_end >= -end_depth))
+                devlogger.debug(f'  {item = }, {start_depth = }, {end_depth = }, {depth = }, {depth_from_end = }, {in_range = }')
+                return in_range
+        else:
+            def _is_in_range(item):
+                return True
+
+        ## Traverse tree
+        if _is_in_range(self): yield function(self,*args,**kwargs)
         for x in self.children:
             if isinstance(x,Parent):
                 if isinstance(x,Clone) and not isinstance(x.get_original_recursively(),Parent):
-                    yield x
+                    if not _is_in_range(x): continue
+                    yield function(x,*args,**kwargs)
+                    if post_function is not None:
+                        post_function(x)
                 else:
-                    for y in x:
-                        yield y
+                    for result in x.__tree_call_depth(function, post_function, start_depth, end_depth, function_args=None, function_kwargs=None, _root_call=False, *args, **kwargs):
+                        yield result
+                    if post_function is not None:
+                        post_function(x)
             else:
-                yield x    
+                if not _is_in_range(x): continue
+                yield function(x,*args,**kwargs)
+                if post_function is not None:
+                    post_function(x,*args,**kwargs)
+
+        if post_function is not None and  _is_in_range(self):
+            post_function(self,*args,**kwargs)
+
+    def clear_bonds(self):
+        def fn(x): x.bonds = []
+        for x in self.__tree_call_depth(fn, end_depth=-1): pass
+
+    def clear_angles(self):
+        def fn(x): x.angles = []
+        for x in self.__tree_call_depth(fn, end_depth=-1): pass
+
+    def clear_dihedrals(self):
+        def fn(x): x.dihedrals = []
+        for x in self.__tree_call_depth(fn, end_depth=-1): pass
+
+    def clear_restraints(self):
+        def fn(x): x.restraints = []
+        for x in self.__tree_call_depth(fn, end_depth=-1): pass
+
+    def __iter__(self):
+        fn = lambda x: x
+        return self.__tree_call_depth(fn, start_depth=-1)
 
     def __len__(self):
         l = 0
