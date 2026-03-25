@@ -68,7 +68,6 @@ class FjcModel(PolymerModel):
         PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group, **kwargs)
 
         """ Update type diffusion coefficients """
-        logger.warning("Diffusion coefficient arbitrarily set to 100 AA**2/ns in FjcModel")
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """
