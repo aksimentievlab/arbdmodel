@@ -76,6 +76,27 @@ class PdbModel(Transformable, Parent):
 
             ## Write coordinates
             formatString = "ATOM {idx:>6.6s} {name:^4.4s} {resname:3.3s} {chain:1.1s}{resid:<5.5s}   {x:8.8s}{y:8.8s}{z:8.8s}{occupancy:6.2f}{beta:6.2f}  {charge:2s}{segname:>6s}\n"
+
+            _used_chains = set()
+            last_data = None
+            current_chain = None
+            def _get_chain_id(c):
+                nonlocal _used_chains
+                def _next(c):
+                    if c >= 'Z': return '0'
+                    elif c < 'A' and c >= '9': return 'A'
+                    return chr(ord(c)+1)
+                def _valid(c):
+                    return (c >= 'A' and c <= 'Z') or (c >= '0' and c <= '9')
+
+                c = c.upper()
+                while (c in _used_chains) or not _valid(c):
+                    c = _next(c)
+                _used_chains.add(c)
+                if len(_used_chains) >= 36:
+                    _used_chains = {c}
+                return c
+
             for p in self.particles:
                 ## http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM
                 data = p._get_psfpdb_dictionary()
@@ -99,11 +120,21 @@ class PdbModel(Transformable, Parent):
                 data['x'] = x
                 data['y'] = y
                 data['z'] = z
-                assert(data['resid'] < 1e5)
+                if data['resid'] > 9999:
+                    data['resid'] = ((data['resid']-1) % 9999)+1
                 # data['charge'] = str(int(data['charge']))
                 data['charge'] = '' # filling this field causes issues with some versions of MDAnalysis reader
                 data['resid'] = "{: >4d}".format(data['resid'])
+
+                if last_data is None or data['resid'] < last_data['resid'] or data['chain'] != last_data['chain']:
+                    logger.info(last_data)
+                    logger.info(data)
+                    _chain = _get_chain_id(data['chain'])
+                _old_chain = data['chain']
+                data['chain'] = _chain
                 fh.write( formatString.format(**data) )
+                data['chain'] = _old_chain
+                last_data = data
 
         return
 
