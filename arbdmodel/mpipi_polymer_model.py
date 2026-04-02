@@ -9,7 +9,7 @@ from . import ParticleType, PointParticle
 
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
-pd.read_csv(get_resource_path("mpipi_parameters.csv"))
+
 
 """Define particle types"""
 _types = dict(
@@ -134,19 +134,36 @@ _types = dict(
                      freq=0.011
                  )
 )
-
+epsilon_dict = {}
+sigma_dict={}
+resnames=[]
 for k,t in list(_types.items()):
     t.resname = t.name
+    resnames.append(t.resname)
     t.is_idp = False
-    
-    ## Add types for IDPs
+df=pd.read_csv(get_resource_path("mpipi_params/mpipi_protein_resname.csv"))
+df.index=df["MPIPI"]
+df.fillna(0,inplace=True)
+
+for i in resnames:
+    for j in resnames:
+        eps_i_name=f"{i}_eps"
+        sigma_i_name=f"{i}_sigma"
+        eps_j_name=f"{j}_eps"
+        sigma_j_name=f"{j}_sigma"
+        if df[i][eps_j_name]!=0:
+            epsilon_dict[(i,j)] = df[i][eps_j_name]
+            sigma_dict[(i,j)] = df[i][sigma_j_name]
+            epsilon_dict[(j,i)] = df[i][eps_j_name]
+            sigma_dict[(j,i)] = df[i][sigma_j_name]
+
 
     
 class MpipiNonbonded(AbstractPotential):
-    def __init__(self, debye_length=10, resolution=0.1, range_=(0,None)):
+    def __init__(self, debye_length=7.95, resolution=0.1, range_=(0,35)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
-        self.debye_length = debye_length
-        self.max_force = 50
+        self.debye_length = 7.95 #in paper
+        self.max_force = 100
 
     def potential(self, r, types):
         """ Electrostatics """
@@ -159,6 +176,28 @@ class MpipiNonbonded(AbstractPotential):
         A =  332.06371
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
         
+        vij=1
+        muij=2
+
+        if typeA.resname=="ILE":
+            if typeB.resname=="ILE":
+                muij=11
+            elif typeB.resname=="VAL":
+                muij=4
+        if typeB.resname=="ILE":
+            if  typeA.resname=="VAL": muij=4
+            elif typeB.resname=="ILE": muij=11
+
+        eps_ij=epsilon_dict[(typeA.resname,typeB.resname)]
+        sigma_ij=sigma_dict[(typeA.resname,typeB.resname)]
+        Rij=3*sigma_ij
+
+        #alpha=2*(3**(2*muij))*((2*vij+1/(2*vij*(3**(2*muij)-1))))**(2*vij+1)
+        alpha=2*vij*((Rij/sigma_ij)**(2*muij))*((2*vij+1)/(2*vij*(((Rij/sigma_ij)**(2*muij))-1)))**(2*vij+1)
+        sasa_scaling =1
+        u_wang=sasa_scaling*eps_ij*alpha*((sigma_ij/r)**(2*muij)-1)*((Rij/r)**(2*muij)-1)**(2*vij)
+
+
         """ Mpipi scale model """
         """
         A_is_idp = B_is_idp = False
@@ -261,7 +300,7 @@ Please cite all appropriate articles!""")
 
 
         if 'timestep' not in kwargs: kwargs['timestep'] = 10e-6
-        if 'cutoff' not in kwargs: kwargs['cutoff'] = max(4*debye_length,20)
+        if 'cutoff' not in kwargs: kwargs['cutoff'] = 35
 
         if 'decomp_period' not in kwargs:
             kwargs['decomp_period'] = 1000
