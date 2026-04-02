@@ -647,7 +647,7 @@ class ArbdModel(PdbModel):
                              restart_file = restart_file,
                              replicas = replicas )
 
-            restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
+            # restart_file = f'output/{name}{".0" if replicas > 1 else ""}.restart'
             cg_u = self._get_IBI_universe(i, replicas=replicas)
 
             with logging_redirect_tqdm(loggers=[logger,devlogger]):
