@@ -102,6 +102,33 @@ class Transformable():
         # print("applyOrientation returning", self.name, obj)
         return obj
 
+
+class NonbondedTermList(list):
+    def append(self, item):
+        if isinstance(item,NonbondedTerm):
+            list.append(self,item)
+        else:
+            list.append(self,NonbondedTerm(*item))
+
+class NonbondedTerm():
+    def __init__(self, potential, type1=None, type2=None):
+        self.potential = potential
+        self.type1 = type1
+        self.type2 = type2
+
+    _warn = True
+    def __iter__(self):
+        if self.__class__._warn:
+            devlogger.warning('Expanding nonbonded term for backward compatibility will be deprecated')
+            self.__class__._warn = False
+
+        yield self.potential
+        yield self.type1
+        yield self.type2
+
+    def __getitem__(self, index):
+        return list(self)[index]
+
 class Parent():
     """
     The Parent class implements a hierarchical tree structure for organizing objects in a simulation.
