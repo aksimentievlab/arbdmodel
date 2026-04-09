@@ -168,10 +168,31 @@ class BondXYTerm(BondTerm):
         except: axis = tuple(axis)
         self.axis = axis
 
-class BondXYTerm(DihedralTerm):
-    def __init__(self, p1, p2, p3, p4, potential, exclusion_flag=False, switch_schedule=None):
-        DihedralTerm.__init__(self, (p1,p2,p3,p4), potential, switch_schedule)
-        self.exclusion_flag = exclusion_flag
+class NonbondedTermList(list):
+    def append(self, item):
+        if isinstance(item,NonbondedTerm):
+            list.append(self,item)
+        else:
+            list.append(self,NonbondedTerm(*item))
+
+class NonbondedTerm():
+    def __init__(self, potential, type1=None, type2=None):
+        self.potential = potential
+        self.type1 = type1
+        self.type2 = type2
+
+    _warn = True
+    def __iter__(self):
+        if self.__class__._warn:
+            devlogger.warning('Expanding nonbonded term for backward compatibility will be deprecated')
+            self.__class__._warn = False
+
+        yield self.potential
+        yield self.type1
+        yield self.type2
+
+    def __getitem__(self, index):
+        return list(self)[index]
 
 
 class Parent():

@@ -11,7 +11,7 @@ from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
 from . import Transformable, Parent, Group
 from .config import SimConf
-from .core_objects import GroupSite
+from .core_objects import GroupSite, NonbondedTerm, NonbondedTermList
 from .engine import ArbdEngine, NamdEngine
 from .coords import calculate_dimensions_from_cell_vectors
 
@@ -319,7 +319,7 @@ class ArbdModel(PdbModel):
         if len(self.dummy_types) != 0:
             raise("Dummy types have been deprecated")
         
-        self.nonbonded_interactions = []
+        self.nonbonded_interactions = NonbondedTermList()
         self._nonbonded_interaction_files = []  # This could be made more robust
 
         self.cacheUpToDate = False
@@ -712,6 +712,7 @@ class ArbdModel(PdbModel):
         # print("WARNING: No nonbonded scheme found for %s and %s" % (typeA.name, typeB.name))
 
     def _countParticleTypes(self):
+        ## Routine counts particles types, but also ensures duplicates don't exist
         ## TODO: check for modifications to particle that require
         ## automatic generation of new particle type
         type_counts = dict()    # type is key, value is 3-element list of regular particle counts, attached particles, and particles (regular or attached) that switch to the type
@@ -723,44 +724,63 @@ class ArbdModel(PdbModel):
             else:
                 parts.append(p)
 
-        for p in parts:
-            t = p.type_
+        _name_dict = dict()
+        def _get_type(obj,i,attr='type_'):
+            nonlocal _name_dict
+            nonlocal type_counts
+            t = getattr(obj,attr)
+            if t in type_counts:
+                tmp = list(type_counts.keys())
+                t0 = tmp[tmp.index(t)] # this is ugly and caused by ParticleType actually being mutable
+                if id(t) != id(t0):
+                    logger.warning(f"Multiple ParticleType objects sharing name '{t.name}' found in model (particle index {_name_dict[t.name][0]} and {i}): replacing new type with old")
+                    setattr(obj,attr,t0)
+                    t = t0
+            return t
+
+        i=0
+        for i,p in enumerate(parts):
+            t = _get_type(p,i)
             if t in type_counts:
                 type_counts[t][0] += 1
             else:
+                _name_dict[t.name] = (i,p)
                 type_counts[t] = [1,0,0]
             t2 = t.switch_type
             if t2 is not None and len(p.switch_schedule) > 0:
+                t2 = _get_type(t,i,'switch_type')
                 if t2 in type_counts:
                     type_counts[t2][2] += 1
                 else:
+                    _name_dict[t2.name] = (i,t)
                     type_counts[t2] = [0,0,1]
 
         parts = [p for rb in self if rb.rigid for p in rb.attached_particles]
-        for p in parts:
-            t = p.type_
+        for i,p in enumerate(parts,i+1):
+            t = _get_type(p,i)
             if t in type_counts:
                 type_counts[t][1] += 1
             else:
+                _name_dict[t.name] = (i,p)
                 type_counts[t] = [0,1,0]
             t2 = t.switch_type
             if t2 is not None and len(p.switch_schedule) > 0:
+                t2 = _get_type(t,i,'switch_type')
                 if t2 in type_counts:
                     type_counts[t2][2] += 1
                 else:
+                    _name_dict[t2.name] = (i,t)
                     type_counts[t2] = [0,0,1]
 
         if len(self.dummy_types) != 0:
             raise("Dummy types have been deprecated")
-        # for t in self.dummy_types:
-        #     if t not in type_counts:
-        #         type_counts[t] = 0
 
-        for i,tA,tB in self.nonbonded_interactions:
-            if tA is not None and tA not in type_counts:
-                type_counts[tA] = [0,0,0]
-            if tB is not None and tB not in type_counts:
-                type_counts[tB] = [0,0,0]
+        for i,entry in enumerate(self.nonbonded_interactions,i+1):
+            for attr in ('type1', 'type2'):
+                t = _get_type(entry,i,attr)
+                if t is not None and t not in type_counts:
+                    _name_dict[t.name] = (i,p)
+                    type_counts[t] = [0,0,0]
 
         self.type_counts = type_counts
 
@@ -776,6 +796,10 @@ class ArbdModel(PdbModel):
         self.rigid_body_index=rbti
         devlogger.debug(f'{self}: Counting types: {type_counts}')
         devlogger.debug(f'{self}: Counting rb types: {rbtc}')
+
+        for i,t in enumerate(self.type_counts.keys(),i+1):
+            while t.parent is not None:
+                t = _get_type(t,i,'parent')
         
     def _updateParticleOrder(self):
         ## Create ordered list
@@ -803,15 +827,30 @@ class ArbdModel(PdbModel):
             
         # self.initialCoords = np.array([p.initialPosition for p in self.particles])
 
+    @property
+    def nonbonded_interactions(self):
+        try:
+            return self.__nonbonded_interactions
+        except:
+            ## Support for legacy models that have been unpickled
+            self.nonbonded_interactions = [NonbondedTerm(*item) for item in self.__dict__['nonbonded_interactions']]
+            return self.nonbonded_interactions
+
+    @nonbonded_interactions.setter
+    def nonbonded_interactions(self,value):
+        newlist = NonbondedTermList()
+        for item in value: newlist.append(item)
+        self.__nonbonded_interactions = newlist
+
     def useNonbondedScheme(self, nbScheme, typeA=None, typeB=None):
         """ deprecated """
         logger.warning('useNonbondedScheme is deprecated! Please update your code to use `add_nonbonded_interaction`')
         self.add_nonbonded_interaction(nbScheme, typeA, typeB)
 
     def add_nonbonded_interaction(self, nonbonded_potential, typeA=None, typeB=None):
-        self.nonbonded_interactions.append( [nonbonded_potential, typeA, typeB] )
+        self.nonbonded_interactions.append( NonbondedTerm(nonbonded_potential, typeA, typeB) )
         if typeA != typeB:
-            self.nonbonded_interactions.append( [nonbonded_potential, typeB, typeA] )
+            self.nonbonded_interactions.append( NonbondedTerm(nonbonded_potential, typeB, typeA) )
 
     def prepare_for_simulation(self):
         if not self.skip_type_recount:
