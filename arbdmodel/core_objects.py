@@ -467,7 +467,7 @@ class Parent():
         if _root_call and not (start_depth == 0 and end_depth is None):
             self._tree_depth = 0
             def assign_depth(x):
-                if isinstance(x, Child):
+                if x is not self:
                     x._tree_depth = x.parent._tree_depth+1 if x.parent is not None else 0
                 devlogger.debug(f'assigned depth {x._tree_depth} to {x}')
             def assign_depth_from_end(x):
