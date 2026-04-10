@@ -143,12 +143,16 @@ def loadGrid(file, **kwargs):
         if 'origin' in line:
             origin = [float(x) for x in line.split()[-3:]]
             break
-            
+
+    delta = []
+    _count = 0
     for line in lines:
-        if 'delta' in line:
-            delta = float(line.split()[1])
-            break
-            
+        if _count >= 3 :break
+        if line.startswith('delta'):
+          delta.append( np.array([float(x) for x in line.split()[1:]]) )
+        elif _count > 0: break
+    delta = np.array(delta)
+
     # Read data values
     data = []
     for line in lines:
