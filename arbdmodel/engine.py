@@ -777,8 +777,11 @@ num {num}
                         except: keyword,s = (item,1)
                         fh.write(f"rigidBodyPotential {keyword}\n")
                         if s != 1: raise NotImplementedError('Instead scale rigid body potential')
-                if pt.switch_type is not None:
-                    fh.write(f'switchType {pt.switch_type.name}\n')
+
+                try: _sw_t = pt.switch_type
+                except: _sw_t = None
+                if _sw_t is not None:
+                    fh.write(f'switchType {_sw_t.name}\n')
 
             ## Write coordinates and interactions
             fh.write("""

@@ -746,7 +746,8 @@ class ArbdModel(PdbModel):
             else:
                 _name_dict[t.name] = (i,p)
                 type_counts[t] = [1,0,0]
-            t2 = t.switch_type
+            try: t2 = t.switch_type
+            except: t2 = None   # support legacy models
             if t2 is not None and len(p.switch_schedule) > 0:
                 t2 = _get_type(t,i,'switch_type')
                 if t2 in type_counts:
@@ -763,7 +764,8 @@ class ArbdModel(PdbModel):
             else:
                 _name_dict[t.name] = (i,p)
                 type_counts[t] = [0,1,0]
-            t2 = t.switch_type
+            try: t2 = t.switch_type
+            except: t2 = None
             if t2 is not None and len(p.switch_schedule) > 0:
                 t2 = _get_type(t,i,'switch_type')
                 if t2 in type_counts:
