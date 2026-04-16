@@ -152,25 +152,32 @@ for i in resnames:
         eps_j_name=f"{j}_eps"
         sigma_j_name=f"{j}_sigma"
         if df[i][eps_j_name]!=0:
-            epsilon_dict[(i,j)] = df[i][eps_j_name]
-            sigma_dict[(i,j)] = df[i][sigma_j_name]
-            epsilon_dict[(j,i)] = df[i][eps_j_name]
-            sigma_dict[(j,i)] = df[i][sigma_j_name]
+            epsilon_dict[(i,j)] = df[i][eps_j_name]/4.184 # convert from kJ/mol to kcal/mol
+            sigma_dict[(i,j)] = df[i][sigma_j_name]*10 # convert from nm to angstroms
+            epsilon_dict[(j,i)] = df[i][eps_j_name]/4.184 # convert from kJ/mol to kcal/mol
+            sigma_dict[(j,i)] = df[i][sigma_j_name]*10 # convert from nm to angstroms
 
 
     
 class MpipiNonbonded(AbstractPotential):
     def __init__(self, debye_length=7.95, resolution=0.1, range_=(0,35)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
-        self.debye_length = 7.95 #in paper
+        self.debye_length = 7.95 # fixed per paper (795 pm, 0.15 m NaCl); user-supplied value intentionally ignored
         self.max_force = 100
 
     def potential(self, r, types):
         """ Electrostatics """
         typeA, typeB = types
-        ld = self.debye_length 
-        q1 = typeA.charge*0.75
-        q2 = typeB.charge*0.75
+        ld = self.debye_length
+        if typeA.resname=="HIS":
+            q1=typeA.charge*0.375
+        else:
+            q1 = typeA.charge*0.75
+
+        if typeB.resname=="HIS":
+            q2=typeB.charge*0.375
+        else: 
+            q2 = typeB.charge*0.75
         D = 80                  # dielectric of water
         ## units "e**2 / (4 * pi * epsilon0 AA)" kcal_mol
         A =  332.06371
@@ -186,7 +193,7 @@ class MpipiNonbonded(AbstractPotential):
                 muij=4
         if typeB.resname=="ILE":
             if  typeA.resname=="VAL": muij=4
-            elif typeB.resname=="ILE": muij=11
+            elif typeA.resname=="ILE": muij=11
 
         eps_ij=epsilon_dict[(typeA.resname,typeB.resname)]
         sigma_ij=sigma_dict[(typeA.resname,typeB.resname)]
@@ -237,7 +244,7 @@ class MpipiBeads(PolymerBeads):
 
     def __init__(self, polymer, sequence=None,
                  spring_constant = 19.19,
-                 rest_length = 3.8, **kwargs):
+                 rest_length = 3.81, **kwargs):
 
         if sequence is None:
             raise NotImplementedError
