@@ -934,6 +934,6 @@ class ParametricProcessor:
         # Override the calculated properties with our analytically-determined ones
         rb_type.mass = self.mass
         rb_type.moment_of_inertia = np.sort(self.principal_moments)
-        rb_type.potential_grids=[potential_dx]
+        rb_type.potential_grids = [("shape", str(potential_dx), 1.0)]
         
         return rb_type

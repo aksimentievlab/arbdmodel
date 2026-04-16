@@ -17,7 +17,15 @@ class PdbProcessor:
     Common Processor class for both diffusive and static rigidbody
     """
     
-    def __init__(self, structure_path, simconf=None, work_dir=None, tcl_path=None,charmm_params_dir="charmm_params",): #remember to change to None
+    def __init__(
+        self,
+        structure_path,
+        simconf=None,
+        work_dir=None,
+        tcl_path=None,
+        charmm_params_dir="charmm_params",
+        **kwargs,
+    ):  # remember to change to None
         """
         Initialize self with structure file
         
@@ -28,8 +36,13 @@ class PdbProcessor:
             work_dir: Working directory, should be either rbs or static (as enviromental potential)
         """
 
+        if work_dir is None and "output_dir" in kwargs:
+            work_dir = kwargs.pop("output_dir")
+        name_override = kwargs.pop("name", None)
+        num_heavy_cluster = kwargs.pop("num_heavy_cluster", None)
+
         self.structure_path = Path(structure_path)
-        self.base_name = self.structure_path.stem
+        self.base_name = name_override or self.structure_path.stem
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
         
         # Create working directory if it doesn't exist
@@ -44,7 +57,12 @@ class PdbProcessor:
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
-        self.num_heavy_cluster = simconf.num_heavy_cluster
+
+        self.num_heavy_cluster = int(num_heavy_cluster) if num_heavy_cluster is not None else simconf.num_heavy_cluster
+        if self.num_heavy_cluster is None:
+            logger.warning("Number of heavy cluster not provided, using default value of 3")
+            self.num_heavy_cluster = 3
+        self.threshold = 300
 
         self.vmd_path = simconf.get_binary('vmd') or 'vmd'
         self.hydro_path = simconf.get_binary('hydropro')
@@ -59,6 +77,7 @@ class PdbProcessor:
         self.aligned_psf = None
         self.charge_dx = None
         self.elec_dx = None
+        self.elec_smoothed_dx = None
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
         if tcl_path is None:
@@ -284,7 +303,9 @@ class PdbProcessor:
         logger.info(f"VDW maps generated for {self.base_name}")
     
 
-    def clustering(self, numClusters=3,potResolution=1, denResolution=2):
+    def clustering(self, numClusters=None, potResolution=1, denResolution=2):
+        if numClusters is None:
+            numClusters = self.num_heavy_cluster
         vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
         if not vdw_tcl.exists():
             vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
@@ -296,45 +317,60 @@ class PdbProcessor:
         import numpy as np
         from scipy.cluster import vq
         lj_types_file=self.work_dir/ "LJTypes.txt"
-        d = np.loadtxt(self.work_dir/ 'tmp.dat')
-        d_hyd = np.loadtxt(self.work_dir/'hyd.dat')
+        d = np.loadtxt(self.work_dir / "tmp.dat", ndmin=2)
+        d_hyd = np.loadtxt(self.work_dir / "hyd.dat", ndmin=2)
 
-        ## build new dataset with 'count' (d[:,2]) entries of each value
-        d2 = [np.outer( np.ones((1,int(d[i,2]))) , d[i,:2] ) for i in range(d.shape[0])]
-        d2_hyd = [np.outer( np.ones((1,int(d_hyd[i,2]))) , d_hyd[i,:2] ) for i in range(d_hyd.shape[0])]
+        def _expand_by_count(data):
+            expanded = []
+            for row in data:
+                count = int(row[2]) if row.shape[0] > 2 else 1
+                if count <= 0:
+                    continue
+                expanded.append(np.repeat(row[:2][None, :], count, axis=0))
+            if not expanded:
+                return np.empty((0, 2))
+            return np.vstack(expanded)
 
-        d2 = np.vstack( d2 )
-        d2w = vq.whiten( d2 )              # normalize features
+        def _cluster_points(points, weighted_points, n_clusters):
+            if points.shape[0] == 0 or n_clusters == 0:
+                return np.empty((0,), dtype=int), np.empty((0, 2))
+            if points.shape[0] == 1:
+                return np.array([0], dtype=int), points.copy()
 
-        d2_hyd = np.vstack( d2_hyd )
-        d2w_hyd = vq.whiten( d2_hyd )              # normalize features
+            data = weighted_points if weighted_points.shape[0] > 0 else points
+            means = np.mean(data, axis=0)
+            scales = np.std(data, axis=0)
+            scales[scales == 0] = 1.0
+            normalized = (data - means) / scales
 
-        ind = 0;
-        scalebase = d2w[ind,:];
-        while np.any(scalebase == 0):
-            ind = ind + 1
-            scalebase = d2w[ind,:]
+            cluster_count = min(n_clusters, data.shape[0])
+            codebook, _ = vq.kmeans(normalized, cluster_count)
+            codebook = codebook * scales + means
+            assignments, _ = vq.vq(points, codebook)
+            return assignments, codebook
 
-        scale = d2[ind,:] / d2w[ind,:]
+        heavy_points = d[:, :2] if d.size > 0 else np.empty((0, 2))
+        hyd_points = d_hyd[:, :2] if d_hyd.size > 0 else np.empty((0, 2))
+        heavy_weighted = _expand_by_count(d)
+        hyd_weighted = _expand_by_count(d_hyd)
 
-        ind = 0;
-        scalebase = d2w_hyd[ind,:]
-        while np.any(scalebase == 0):
-            ind = ind + 1
-            scalebase = d2w_hyd[ind,:]
+        if heavy_points.shape[0] == 0 and hyd_points.shape[0] == 0:
+            raise ValueError(
+                "No LJ type data was generated for clustering (tmp.dat and hyd.dat are empty). "
+                "Check structure atom typing and VDW map preparation."
+            )
 
-        scale_hyd = d2_hyd[ind,:] / d2w_hyd[ind,:]
-
-        ## perform cluster analysis
         np.random.seed(seed=42)
-        codeBook,dist = vq.kmeans(d2w , numClusters)
-        assignments, dists = vq.vq(d[:,:2], scale * codeBook)
+        heavy_clusters = min(numClusters, heavy_points.shape[0])
+        assignments, codeBook = _cluster_points(heavy_points, heavy_weighted, heavy_clusters)
+        assignments_hyd, codeBook_hyd = _cluster_points(hyd_points, hyd_weighted, 1 if hyd_points.shape[0] > 0 else 0)
 
-        codeBook_hyd,dist_hyd = vq.kmeans(d2w_hyd , 1)
-        assignments_hyd, dists_hyd = vq.vq(d_hyd[:,:2], scale_hyd * codeBook_hyd)
-
-        assignments_total = np.concatenate((assignments, assignments_hyd + numClusters) , axis=None)
-        codeBook_total = np.concatenate((scale*codeBook, scale_hyd*codeBook_hyd), axis=0)
+        if assignments_hyd.size > 0:
+            assignments_total = np.concatenate((assignments, assignments_hyd + heavy_clusters), axis=None)
+            codeBook_total = np.concatenate((codeBook, codeBook_hyd), axis=0)
+        else:
+            assignments_total = assignments
+            codeBook_total = codeBook
 
         
         with open(lj_types_file, 'r') as f:
@@ -403,11 +439,9 @@ quit
             
         # Smooth electrostatic map
         if self.elec_dx and Path(self.elec_dx).exists():
-            smoothed_elec = f"{aligned_name}.elec.smoothed.dx"
             #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} {gaussianWidth} < {smooth_tcl}"
             #subprocess.run(cmd, shell=True, check=True)
-            self.elec_smoothed_dx= smooth_grid(in_file=self.elec_dx, gaussian_sigma=gaussianWidth,  )
-            self.elec_smoothed_dx = smoothed_elec
+            self.elec_smoothed_dx = Path(smooth_grid(in_file=self.elec_dx, gaussian_sigma=gaussianWidth))
             
         # Smooth VDW potential maps
         self.vdw_smoothed_dxs = []
@@ -416,7 +450,7 @@ quit
                 #smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
                 #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} {gaussianWidth} < {smooth_tcl}"
                 #subprocess.run(cmd, shell=True, check=True)
-                self.vdw_smoothed_dxs.append(smooth_grid(in_file=pot_file, gaussian_sigma=gaussianWidth,  ))
+                self.vdw_smoothed_dxs.append(Path(smooth_grid(in_file=pot_file, gaussian_sigma=gaussianWidth)))
                 
         logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
         
@@ -427,7 +461,7 @@ quit
         charge_grids = []
         
         # Add electrostatic grid
-        if self.elec_smoothed_dx.exists():
+        if self.elec_smoothed_dx and Path(self.elec_smoothed_dx).exists():
             potential_grids.append(("elec", str(self.elec_smoothed_dx), 0.59616195))
         
         # Add charge grid
@@ -467,7 +501,7 @@ quit
         
         # Step 5: Generate VDW maps
         
-        self.clustering()
+        self.clustering(numClusters=self.num_heavy_cluster)
 
         self.generate_vdw_diffusive()
         
@@ -475,8 +509,7 @@ quit
         self.apply_gaussian_smoothing()
         
         # Return a dictionary of grid files for use in RigidBodyType
-        """
-        rb=RigidBodyType(
+        rb = RigidBodyType(
             name=self.base_name, 
             mass=self.mass,
             moment_of_inertia=self.moment_of_inertia,
@@ -484,8 +517,8 @@ quit
             rotational_damping_coefficient=self.rotdamp,
             potential_grids=self.get_grid_files().get('potential_grids', []),
             charge_grids=self.get_grid_files().get('charge_grids', []),
-            pmf_grids=[],)
-        """
+            pmf_grids=[],
+        )
         
         self.aligned_pdb = self.aligned_pdb
         self.aligned_psf = self.aligned_psf
@@ -517,13 +550,19 @@ quit
         self.generate_electrostatic_map()
         
         # Step 4: Generate VDW maps
+        self.clustering(numClusters=self.num_heavy_cluster, potResolution=potResolution, denResolution=denResolution)
         
-        if is_gigantic:
+        if is_gigantic and hasattr(self, "segment_count"):
             self._process_gigantic_vdw(
                 potResolution=potResolution,  # Double resolution for gigantic
                 denResolution=denResolution
             )
         else:
+            if is_gigantic:
+                logger.warning(
+                    "Gigantic static VDW requested without segmentation metadata; "
+                    "falling back to standard static VDW generation."
+                )
             self._process_standard_vdw(
                 potResolution=potResolution,
                 denResolution=denResolution)
@@ -532,30 +571,15 @@ quit
         self.apply_gaussian_smoothing()
         
         # Step 6: Collect and return grid files
-        potential_grids = []
-        charge_grids = []
-        
-        # Add electrostatic grid
-        if hasattr(self, 'elec_smoothed_dx') and self.elec_smoothed_dx.exists():
-            potential_grids.append(("elec", str(self.elec_smoothed_dx), 0.59616195))
-            
-        # Add charge grid
-        if self.charge_dx and self.charge_dx.exists():
-            charge_grids.append(("elec", str(self.charge_dx)))
-            
-        # Add VDW grids
-        for i in range(self.num_heavy_cluster + 1):
-            vdw_key = f"vdw{i}"
-            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
-            
-            if pot_file.exists():
-                potential_grids.append((vdw_key, str(pot_file), 0.59616195))
+        grid_files = self.get_grid_files()
+        potential_grids = grid_files.get("potential_grids", [])
+        charge_grids = [item for item in grid_files.get("charge_grids", []) if item[0] == "elec"]
         
         logger.info(f"Generated static grids for {self.base_name}")
         return {
             "potential_grids": potential_grids,
             "charge_grids": charge_grids,
-            "elec_grid": self.elec_smoothed_dx if hasattr(self, 'elec_smoothed_dx') else None}
+            "elec_grid": self.elec_smoothed_dx}
 
     def _find_segments_num(self, dimensions, threshold=None):
         """Find number of segments needed for a gigantic object.
@@ -581,9 +605,9 @@ quit
         if is_gigantic:
             self._process_gigantic_vdw(potResolution, denResolution)
         else:
-            self._process_standard_vdw()
+            self._process_standard_vdw(potResolution=potResolution, denResolution=denResolution)
 
-    def _process_standard_vdw(self):
+    def _process_standard_vdw(self, potResolution=1, denResolution=2):
         """Process standard static object VDW maps"""
         # Generate static VDW map script
         vdw_script = self.tclgen.generate_static_vdw_tcl()
@@ -592,12 +616,18 @@ quit
         cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} clustered.txt < {vdw_script}"
         subprocess.run(cmd, shell=True, check=True)
         
+        self.vdw_pot_dxs = []
+        self.vdw_den_dxs = []
+
         # Bound the grid values
         for i in range(self.num_heavy_cluster + 1):
             pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
             if os.path.isfile(pot_file):
-                out_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.final.dx"
-                Bound_grid(pot_file, out_file, -20, 20)
+                Bound_grid(pot_file, pot_file, -20, 20)
+                self.vdw_pot_dxs.append(pot_file)
+            den_file = self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
+            if os.path.isfile(den_file):
+                self.vdw_den_dxs.append(den_file)
 
     def _process_gigantic_vdw(self, potResolution, denResolution):
         """Process gigantic static object VDW maps with segmentation"""
@@ -657,3 +687,29 @@ voltool add -i1 $InMap1 -i2 $InMap2 -union -nointerp -o $OutMap
             f.write(script_content)
             
         return script_path
+
+    def process_diffusive_structure(self):
+        """SimpleARBD-compatible entrypoint for diffusible objects."""
+        return self.get_rb_type()
+
+    def process_structure(self, is_gigantic=False, potResolution=1, denResolution=2, threshold=300):
+        """SimpleARBD-compatible entrypoint for static-like processing."""
+        self.threshold = threshold
+        grid_files = self.get_static_grids(
+            is_gigantic=is_gigantic,
+            potResolution=potResolution,
+            denResolution=denResolution,
+        )
+        self.potential_grids = grid_files.get("potential_grids", [])
+        self.charge_grids = grid_files.get("charge_grids", [])
+        self.elec_grid = grid_files.get("elec_grid")
+        return grid_files
+
+    def get_grid_from_pdb(self, is_gigantic=False, threshold=300, potResolution=1, denResolution=2):
+        """Compatibility wrapper matching legacy SimpleARBD call sites."""
+        return self.process_structure(
+            is_gigantic=is_gigantic,
+            potResolution=potResolution,
+            denResolution=denResolution,
+            threshold=threshold,
+        )

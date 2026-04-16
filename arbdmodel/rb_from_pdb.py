@@ -61,8 +61,8 @@ class DiffusiveRigidBodyType(RigidBodyType):
 class StaticObject:
     """Class representing a static (immobile) object in the simulation"""
     
-    def __init__(self, structure_path=None, name=None, simconf=None, 
-                 is_gigantic=False, threshold=300):
+    def __init__(self, structure_path=None, name=None, simconf=None,
+                 is_gigantic=False, threshold=300, work_dir=None):
         """Initialize static object from a structure file.
         
         Args:
@@ -78,12 +78,12 @@ class StaticObject:
         self.is_gigantic = is_gigantic
         self.threshold = threshold
         
-        # Use current directory as base
-        self.work_dir = Path.cwd()
-        
-        # Create static output directory
-        static_dir = self.work_dir / "static" / self.name
-        os.makedirs(static_dir, exist_ok=True)
+        # Use provided work directory, else default to ./static/<name>
+        if work_dir is None:
+            self.work_dir = Path.cwd() / "static" / self.name
+        else:
+            self.work_dir = Path(work_dir)
+        os.makedirs(self.work_dir, exist_ok=True)
         
         # Default config if not provided
         if simconf is None:
@@ -130,19 +130,16 @@ class StaticObject:
         """Process the structure normally (without segmentation)"""
         logger.info(f"Processing static object: {self.name}")
         
-        # Use static directory for output
-        static_dir = self.work_dir / "static" / self.name
-        
         # Create processor and generate maps
         processor = PdbProcessor(
             structure_path=self.structure_path,
             simconf=self.simconf,
-            work_dir=static_dir)  # Use the static object directory
+            work_dir=self.work_dir)
         
-        processor.process_structure()
-        
-        # Collect grid files from the processor
-        grid_files = processor.get_grid_files()
+        grid_files = processor.get_grid_from_pdb(
+            is_gigantic=False,
+            threshold=self.threshold,
+        )
         
         # Store grids
         self.potential_grids = grid_files.get('potential_grids', [])
@@ -158,7 +155,7 @@ class StaticObject:
         logger.info(f"Processing gigantic static object: {self.name}")
         
         # Use static directory for output
-        static_dir = self.work_dir / "static" / self.name
+        static_dir = self.work_dir
         
         # Get dimensions by reading the structure file
         u = mda.Universe(str(self.structure_path))
@@ -238,10 +235,10 @@ exit
                 simconf=self.simconf,
                 work_dir=segment_dir)
             
-            segment_processor.process_structure()
-            
-            # Collect grid maps from this segment
-            grid_files = segment_processor.get_grid_files()
+            grid_files = segment_processor.get_grid_from_pdb(
+                is_gigantic=False,
+                threshold=self.threshold,
+            )
             
             # Store grids from this segment
             self.potential_grids.extend(grid_files.get('potential_grids', []))
@@ -446,13 +443,12 @@ class StructureRigidBodyModel(ArbdModel):
             
         return created_bodies
 
-    def add_static_object(self, structure_path, is_gigantic=False, threshold=300):
+    def add_static_object(self, structure_path, is_gigantic=False, threshold=300, work_dir=None):
         """
         Adds a static object to the simulation.
         
-        This method creates a StaticObject from the specified structure file, extracts its
-        electrostatic and potential/charge grids, and adds them to the simulation as
-        non-bonded interactions.
+        This method creates a StaticObject from the specified structure file and stores
+        its electrostatic and potential/charge grids for engine-side static-field usage.
         
         Parameters
         ----------
@@ -470,26 +466,17 @@ class StructureRigidBodyModel(ArbdModel):
         """
         name = Path(structure_path).stem
         
+        static_dir = Path(work_dir) if work_dir else self.work_dir / "static" / name
+
         # Create the static object with static/{name} output directory
         obj = StaticObject(
             structure_path=structure_path,
             name=name,
             simconf=self.simconf,
             is_gigantic=is_gigantic,
-            threshold=threshold
+            threshold=threshold,
+            work_dir=static_dir,
         )
-        
-        # Add potential grids to model
-        for grid_type, grid_file, scale in obj.potential_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file, scale)
-            
-        # Add charge grids to model
-        for grid_type, grid_file in obj.charge_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file)
-            
-        # Add electrostatic grid if available
-        if obj.elec_grid:
-            self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
 
         # Store the static object
         self.static_objects.append(obj)

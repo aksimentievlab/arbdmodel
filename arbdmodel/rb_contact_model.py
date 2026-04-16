@@ -102,16 +102,15 @@ class RBContactModel(ArbdModel):
             # Create the RigidBodyType using rbs/name directory
         rb_dir = self.work_dir / "rbs" / name
         os.makedirs(rb_dir, exist_ok=True)
-        processor=PdbProcessor(
+        processor = PdbProcessor(
             structure_path=structure_path,
-            output_dir=rb_dir,
+            work_dir=rb_dir,
             name=name,
             simconf=self.simconf,
-            num_heavy_cluster=self.num_heavy_cluster)
+            num_heavy_cluster=self.num_heavy_cluster,
+        )
         
-        processor.process_diffusive_structure()
-        
-        rb_type = processor.get_rb_type()
+        rb_type = processor.process_diffusive_structure()
             
         logger.info(f"Created RBType for {name}")
             
@@ -207,13 +206,12 @@ class RBContactModel(ArbdModel):
             
         return created_bodies
 
-    def add_static_object(self, structure_path, is_gigantic=False, threshold=300):
+    def add_static_object(self, structure_path, is_gigantic=False, threshold=300, work_dir=None):
         """
         Adds a static object to the simulation.
         
-        This method creates a StaticObject from the specified structure file, extracts its
-        electrostatic and potential/charge grids, and adds them to the simulation as
-        non-bonded interactions.
+        This method processes the specified static structure and keeps its
+        electrostatic and potential/charge grids for static-field usage.
         
         Parameters
         ----------
@@ -230,18 +228,20 @@ class RBContactModel(ArbdModel):
             The created and added static object.
         """
         name = Path(structure_path).stem
-        os.makedirs(self.work_dir / "static" / name, exist_ok=True)
+        static_dir = Path(work_dir) if work_dir else self.work_dir / "static" / name
+        os.makedirs(static_dir, exist_ok=True)
         
         # Create the static object with static/{name} output directory
         obj = PdbProcessor(
             structure_path=structure_path,
-            output_dir=self.work_dir / "static" / name,
+            work_dir=static_dir,
             name=name,
             simconf=self.simconf,
-            num_heavy_cluster=self.num_heavy_cluster)
+            num_heavy_cluster=self.num_heavy_cluster,
+        )
         
         obj.get_grid_from_pdb(is_gigantic=is_gigantic, threshold=threshold)
-
+        """
         # Add potential grids to model
         for grid_type, grid_file, scale in obj.potential_grids:
             self.add_nonbonded_interaction(grid_type, grid_file, scale)
@@ -253,7 +253,7 @@ class RBContactModel(ArbdModel):
         # Add electrostatic grid if available
         if obj.elec_grid:
             self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
-
+        """
         # Store the static object
         self.static_objects.append(obj)
         return obj
