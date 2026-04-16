@@ -37,7 +37,7 @@ class DiffusiveRigidBodyType(RigidBodyType):
             work_dir=rb_dir)  # Pass the rigid body specific directory
         
         # Process the structure to get all properties and grid files
-        processor.process_diffusive_structure()
+        processor.get_rb_type()
         
         # Initialize the parent class with collected data
         super().__init__(
