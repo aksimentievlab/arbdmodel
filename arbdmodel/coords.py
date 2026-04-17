@@ -397,8 +397,9 @@ def calculate_dimensions_from_cell_vectors(cell_vectors, cell_origin=None, buffe
         raise ValueError("Expected 3 cell basis vectors, got {}".format(len(cell_vectors)))
 
     vectors = [np.array(v, dtype=float) for v in cell_vectors]
+    print(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
 
-    is_orthogonal = all(v[i] == np.linalg.norm(v) for i, v in enumerate(vectors))
+    is_orthogonal = all(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
     if not is_orthogonal:
         # For non-orthogonal cells use the axis-aligned bounding box so the
         # periodic volume fully contains the cell.  ARBD only supports

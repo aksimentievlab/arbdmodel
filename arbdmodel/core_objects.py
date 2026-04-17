@@ -1100,7 +1100,7 @@ class RigidBody(PointParticle):
         Child.__init__(self, parent=parent)
         Transformable.__init__(self,position, orientation)
 
-        if type(type_) != RigidBodyType:
+        if not isinstance(type_, RigidBodyType):
             raise ValueError(f'Attempted to create a RigidBody object from an invalid type {type_}')
 
         self.type_    = type_                

@@ -7,10 +7,23 @@ import tempfile
 from .logger import logger
 from .engine import HydroProRunner, APBSRunner
 from .core_objects import RigidBodyType
-from .grid import writeDx, loadGrid, Bound_grid,smooth_grid
+from .grid import writeDx, loadGrid, Bound_grid
 from .engine import TclScriptGenerator
 import shutil
 #Originally SimpleARBD by Chun
+
+
+def _default_charmm_params_dir() -> Path:
+    """Shared location for CHARMM toppar files so each PdbProcessor work_dir does not re-download."""
+    env = os.environ.get("ARBD_CHARMM_PARAMS")
+    if env:
+        return Path(env).expanduser().resolve()
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    if xdg:
+        base = Path(xdg)
+    else:
+        base = Path.home() / ".cache"
+    return (base / "arbdmodel" / "charmm_toppar_c36_feb26").resolve()
 
 
 class PdbProcessor:
@@ -38,6 +51,8 @@ class PdbProcessor:
             simconf: SimConf object containing configuration parameters
             num_heavy_cluster: Number of heavy atom clusters for VDW maps
             work_dir: Working directory, should be either rbs or static (as enviromental potential)
+            charmm_params_dir: Directory with CHARMM .prm/.str/.rtf. If None, uses env
+                ARBD_CHARMM_PARAMS or ~/.cache/arbdmodel/charmm_toppar_c36_feb26 (shared across runs).
         """
 
         if work_dir is None and "output_dir" in kwargs:
@@ -81,11 +96,15 @@ class PdbProcessor:
         self.aligned_psf = None
         self.charge_dx = None
         self.elec_dx = None
-        self.elec_smoothed_dx = None
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
+        self.clustered_path = self.work_dir / "clustered.txt"
+        self._lj_type_records = None
         self.tcl_path = Path(tcl_path).absolute() if tcl_path is not None else Path.cwd().absolute()
-        self.charmm_params_dir = Path(charmm_params_dir).absolute() if charmm_params_dir is not None else (self.work_dir / "charmm_params")
+        if charmm_params_dir is not None:
+            self.charmm_params_dir = Path(charmm_params_dir).expanduser().resolve()
+        else:
+            self.charmm_params_dir = _default_charmm_params_dir()
         self._ensure_charmm_params(self.charmm_params_dir)
         self.tclgen = TclScriptGenerator(work_dir=self.tcl_path, charmm_params_dir=self.charmm_params_dir)
 
@@ -99,7 +118,7 @@ class PdbProcessor:
         return False
 
     def _ensure_charmm_params(self, params_dir: Path):
-        """Download/extract CHARMM parameters only when missing."""
+        """Populate params_dir with .prm/.str/.rtf from the official toppar tarball if missing."""
         if self._has_charmm_params(params_dir):
             logger.info(f"Using existing CHARMM parameters in {params_dir}")
             return
@@ -116,12 +135,12 @@ class PdbProcessor:
         else:
             logger.info(f"Using existing CHARMM archive at {tar_path}")
 
+        copied = 0
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
             with tarfile.open(tar_path, "r:gz") as tf:
                 tf.extractall(tmpdir_path)
 
-            copied = 0
             for suffix in ("*.prm", "*.str", "*.rtf"):
                 for src in tmpdir_path.rglob(suffix):
                     dst = params_dir / src.name
@@ -168,17 +187,14 @@ class PdbProcessor:
                     relative_path = os.path.relpath(input_pdb, self.work_dir)
                     os.symlink(relative_path, self.work_dir / input_pdb.name)
             
-            # Run VMD
-            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} < {align_tcl}"
-            subprocess.run(cmd, shell=True, check=True)
-            
             # Verify alignment succeeded
             self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
             self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
             
-            if not self.aligned_pdb.exists() or not self.aligned_psf.exists():
-                raise FileNotFoundError(f"Alignment failed: {self.aligned_pdb} or {self.aligned_psf} not found")
             
+            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} < {align_tcl}"
+            subprocess.run(cmd, shell=True, check=True)
+
             # Read mass and inertia
             mass_file = self.work_dir / f"{self.base_name}.mass.txt"
             inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
@@ -316,14 +332,99 @@ class PdbProcessor:
         logger.info(f"Electrostatic map generated for {aligned_name}")
 
 
-    def generate_vdw_diffusive(self,potResolution=1, denResolution=2):
+    def _read_lj_types(self, lj_types_file):
+        with open(lj_types_file, "r") as f:
+            content = f.read()
+
+        lj_types = []
+        current_term = ""
+        in_braces = False
+        for char in content:
+            if char == "{":
+                in_braces = True
+                continue
+            if char == "}":
+                in_braces = False
+                if current_term:
+                    lj_types.append(current_term.strip())
+                    current_term = ""
+                continue
+            if char.isspace() and not in_braces:
+                if current_term:
+                    lj_types.append(current_term.strip())
+                    current_term = ""
+                continue
+            current_term += char
+        if current_term:
+            lj_types.append(current_term.strip())
+        return lj_types
+
+    def collect_lj_type_records(self, potResolution=1, denResolution=2):
+        """Collect per-processor LJ statistics for model-level pooled clustering."""
+        vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
+        if not vdw_tcl.exists():
+            vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
+            logger.debug(f"Clustering script written to {vdw_tcl}")
+
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
+        logger.info(f"Running clustering command: {cmd}")
+        subprocess.run(cmd, shell=True, check=True)
+
+        tmp_file = self.work_dir / "tmp.dat"
+        hyd_file = self.work_dir / "hyd.dat"
+        lj_types_file = self.work_dir / "LJTypes.txt"
+
+        heavy_rows = np.loadtxt(tmp_file, ndmin=2) if tmp_file.exists() and tmp_file.stat().st_size > 0 else np.empty((0, 3))
+        hyd_rows = np.loadtxt(hyd_file, ndmin=2) if hyd_file.exists() and hyd_file.stat().st_size > 0 else np.empty((0, 3))
+        lj_types = self._read_lj_types(lj_types_file) if lj_types_file.exists() else []
+
+        records = []
+        all_rows = []
+        for row in heavy_rows:
+            all_rows.append(("heavy", row))
+        for row in hyd_rows:
+            all_rows.append(("hydrogen", row))
+
+        if len(all_rows) != len(lj_types):
+            raise ValueError(
+                f"LJ type record count mismatch for {self.base_name}: "
+                f"{len(all_rows)} rows vs {len(lj_types)} type blocks."
+            )
+
+        for idx, ((group, row), atom_types) in enumerate(zip(all_rows, lj_types)):
+            records.append(
+                {
+                    "source": self.base_name,
+                    "group": group,
+                    "radius": float(row[0]),
+                    "epsilon": float(row[1]),
+                    "count": int(row[2]) if row.shape[0] > 2 else 1,
+                    "types": atom_types.strip(),
+                    "index": idx,
+                }
+            )
+        self._lj_type_records = records
+        return records
+
+    @property
+    def lj_type_records(self):
+        """Cached LJ records used for model-level pooled clustering."""
+        if self._lj_type_records is None:
+            self._lj_type_records = self.collect_lj_type_records()
+        return self._lj_type_records
+
+    def generate_vdw_diffusive(self, cluster_file=None, potResolution=1, denResolution=2):
         vdw_tcl = self.tcl_path / "vdw_diffusive.tcl"
         
         if not vdw_tcl.exists():
             vdw_tcl = self.tclgen.generate_diffusive_tcl(potResolution=potResolution, denResolution=denResolution)
             logger.debug(f"Clustering script written to {vdw_tcl}")
 
-        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} clustered.txt < {vdw_tcl}"
+        cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
+        if not cluster_path.exists():
+            raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
+
+        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_tcl}"
         subprocess.run(cmd, shell=True, check=True)
 
         self.vdw_pot_dxs = []
@@ -352,212 +453,52 @@ class PdbProcessor:
         logger.info(f"VDW maps generated for {self.base_name}")
     
 
-    def clustering(self, numClusters=None, potResolution=1, denResolution=2):
-        if numClusters is None:
-            numClusters = self.num_heavy_cluster
-        vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
-        if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
-            logger.debug(f"Clustering script written to {vdw_tcl}")
-
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
-        logger.info(f"Running clustering command: {cmd}")
-        subprocess.run(cmd, shell=True, check=True)
-
-        import numpy as np
-        from scipy.cluster import vq
-        lj_types_file=self.work_dir/ "LJTypes.txt"
-        d = np.loadtxt(self.work_dir / "tmp.dat", ndmin=2)
-        d_hyd = np.loadtxt(self.work_dir / "hyd.dat", ndmin=2)
-
-        def _expand_by_count(data):
-            expanded = []
-            for row in data:
-                count = int(row[2]) if row.shape[0] > 2 else 1
-                if count <= 0:
-                    continue
-                expanded.append(np.repeat(row[:2][None, :], count, axis=0))
-            if not expanded:
-                return np.empty((0, 2))
-            return np.vstack(expanded)
-
-        def _cluster_points(points, weighted_points, n_clusters):
-            if points.shape[0] == 0 or n_clusters == 0:
-                return np.empty((0,), dtype=int), np.empty((0, 2))
-            if points.shape[0] == 1:
-                return np.array([0], dtype=int), points.copy()
-
-            data = weighted_points if weighted_points.shape[0] > 0 else points
-            means = np.mean(data, axis=0)
-            scales = np.std(data, axis=0)
-            scales[scales == 0] = 1.0
-            normalized = (data - means) / scales
-
-            cluster_count = min(n_clusters, data.shape[0])
-            codebook, _ = vq.kmeans(normalized, cluster_count)
-            codebook = codebook * scales + means
-            assignments, _ = vq.vq(points, codebook)
-            return assignments, codebook
-
-        heavy_points = d[:, :2] if d.size > 0 else np.empty((0, 2))
-        hyd_points = d_hyd[:, :2] if d_hyd.size > 0 else np.empty((0, 2))
-        heavy_weighted = _expand_by_count(d)
-        hyd_weighted = _expand_by_count(d_hyd)
-
-        if heavy_points.shape[0] == 0 and hyd_points.shape[0] == 0:
-            raise ValueError(
-                "No LJ type data was generated for clustering (tmp.dat and hyd.dat are empty). "
-                "Check structure atom typing and VDW map preparation."
-            )
-
-        np.random.seed(seed=42)
-        heavy_clusters = min(numClusters, heavy_points.shape[0])
-        assignments, codeBook = _cluster_points(heavy_points, heavy_weighted, heavy_clusters)
-        assignments_hyd, codeBook_hyd = _cluster_points(hyd_points, hyd_weighted, 1 if hyd_points.shape[0] > 0 else 0)
-
-        if assignments_hyd.size > 0:
-            assignments_total = np.concatenate((assignments, assignments_hyd + heavy_clusters), axis=None)
-            codeBook_total = np.concatenate((codeBook, codeBook_hyd), axis=0)
-        else:
-            assignments_total = assignments
-            codeBook_total = codeBook
-
-        
-        with open(lj_types_file, 'r') as f:
-            content  = f.read()
-            lj_types = []
-            current_term = ""
-            in_braces = False
-            for char in content:
-                if char == '{':
-                    in_braces = True
-                    continue
-                elif char == '}':
-                    in_braces = False
-                    if current_term:
-                        lj_types.append(current_term.strip())
-                        current_term = ""
-                    continue
-                elif char.isspace() and not in_braces:
-                    if current_term:
-                        lj_types.append(current_term.strip())
-                        current_term = ""
-                    continue
-                current_term += char
-            
-            if current_term:  # Add any remaining term
-                lj_types.append(current_term.strip())
-            
-            # Process each term to get individual types
-
-        type_array = {i: "" for i in range(len(set(assignments_total)))}
-
-        for i, t in zip(assignments_total, lj_types):
-            type_array[i] = type_array[i] + f" {t}"
-        self.clustered_path= self.work_dir/ "clustered.txt"
-        with open(self.clustered_path, 'w') as f:
-            for i, (r, e) in enumerate(zip(codeBook_total[:, 0], codeBook_total[:, 1])):
-                f.write(f"{r} {e}{type_array[i]}\n")
-
-        print(" ".join(["%d" % a for a in assignments_total]))
-        print(" ".join(["%.3f" % c[0] for c in codeBook_total]))
-        print(" ".join(["%.3f" % c[1] for c in codeBook_total]))
-
-    def apply_gaussian_smoothing(self, gaussianWidth=2.5):
-        """Apply Gaussian smoothing to all potential maps."""
-        aligned_name = f"{self.base_name}"
-        
-        # Create a tcl script for VMD to do the smoothing
-        smooth_tcl = self.tcl_path / "smooth.tcl"
-        if not smooth_tcl.exists():
-            with open(smooth_tcl, 'w') as f:
-                f.write(f'''
-# Get input parameters
-lassign ${{argv}} in_file out_file gaussianWidth
-puts "Smoothing $in_file to $out_file with gaussian width $gaussianWidth"
-
-# Load the volumetric data
-mol new $in_file
-
-# Apply smoothing
-set molid [molinfo top]
-# !!!! Check
-
-# Exit
-quit
-''')
-            
-        # Smooth electrostatic map
-        if self.elec_dx and Path(self.elec_dx).exists():
-            #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.elec_dx} {smoothed_elec} {gaussianWidth} < {smooth_tcl}"
-            #subprocess.run(cmd, shell=True, check=True)
-            self.elec_smoothed_dx = Path(smooth_grid(in_file=self.elec_dx, gaussian_sigma=gaussianWidth))
-            
-        # Smooth VDW potential maps
-        self.vdw_smoothed_dxs = []
-        for i, pot_file in enumerate(self.vdw_pot_dxs):
-            if pot_file.exists():
-                #smoothed_pot = self.work_dir / f"{aligned_name}.vdw{i}.pot.smoothed.dx"
-                #cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {pot_file} {smoothed_pot} {gaussianWidth} < {smooth_tcl}"
-                #subprocess.run(cmd, shell=True, check=True)
-                self.vdw_smoothed_dxs.append(Path(smooth_grid(in_file=pot_file, gaussian_sigma=gaussianWidth)))
-                
-        logger.info(f"Applied Gaussian smoothing to potential maps (width={gaussianWidth})")
-        
-
     def get_grid_files(self):
-        """Get dictionary of grid files for use in RigidBodyType."""
+        """Get dictionary of grid files for use in RigidBodyType (raw paths; smoothing is applied in rb_from_pdb)."""
         potential_grids = []
         charge_grids = []
-        
-        # Add electrostatic grid
-        if self.elec_smoothed_dx and Path(self.elec_smoothed_dx).exists():
-            potential_grids.append(("elec", str(self.elec_smoothed_dx), 0.59616195))
-        
-        # Add charge grid
+
+        if self.elec_dx and Path(self.elec_dx).exists():
+            potential_grids.append(("elec", str(self.elec_dx), 0.59616195))
+
         if self.charge_dx and self.charge_dx.exists():
             charge_grids.append(("elec", str(self.charge_dx)))
-        
-        # Add VDW grids
-        for i, pot_file in enumerate(self.vdw_smoothed_dxs):
+
+        for i, pot_file in enumerate(self.vdw_pot_dxs):
             vdw_key = f"vdw{i}"
             if pot_file.exists():
                 potential_grids.append((vdw_key, str(pot_file), 0.59616195))
-                
+
         for i, den_file in enumerate(self.vdw_den_dxs):
             vdw_key = f"vdw{i}"
             if den_file.exists():
                 charge_grids.append((vdw_key, str(den_file)))
-        
+
         return {
             "potential_grids": potential_grids,
-            "charge_grids": charge_grids
+            "charge_grids": charge_grids,
         }
+
+    def preprocess_diffusive_structure(self):
+        """Process structure fields that do not depend on pooled LJ clustering."""
+        # Step 1: Align structure
+        self.align_structure()
+        # Step 2: Calculate hydrodynamic properties
+        self.calculate_hydrodynamic_properties()
+        # Step 3: Generate charge distribution
+        self.generate_charge_distribution()
+        # Step 4: Generate electrostatic map
+        self.generate_electrostatic_map()
 
     def get_rb_type(self):
         """Get RigidBodyType for the processed structure."""
-        """Process structure to get all properties and potential maps"""
-        # Step 1: Align structure
-        self.align_structure()
-        
-        # Step 2: Calculate hydrodynamic properties
-        self.calculate_hydrodynamic_properties()
-        
-        # Step 3: Generate charge distribution
-        self.generate_charge_distribution()
-        
-        # Step 4: Generate electrostatic map
-        self.generate_electrostatic_map()
-        
-        # Step 5: Generate VDW maps
-        
-        self.clustering(numClusters=self.num_heavy_cluster)
+        self.preprocess_diffusive_structure()
+        if self.clustered_path.exists():
+            self.generate_vdw_diffusive(cluster_file=self.clustered_path)
+        else:
+            self.vdw_pot_dxs = []
+            self.vdw_den_dxs = []
 
-        self.generate_vdw_diffusive()
-        
-        # Step 6: Apply Gaussian smoothing
-        self.apply_gaussian_smoothing()
-        
         # Return a dictionary of grid files for use in RigidBodyType
         rb = RigidBodyType(
             name=self.base_name, 
@@ -576,36 +517,66 @@ quit
         logger.info(f"Pdb Processor generated '{self.base_name}' as RigidBodyType successfully")
         return rb
 
-    def get_static_grids(self, is_gigantic=False, potResolution=1, denResolution=2):
+    def get_rb_type_metadata_only(self):
+        """Build rigid-body metadata before pooled LJ clustering."""
+        self.preprocess_diffusive_structure()
+
+        rb = RigidBodyType(
+            name=self.base_name,
+            mass=self.mass,
+            moment_of_inertia=self.moment_of_inertia,
+            damping_coefficient=self.transdamp,
+            rotational_damping_coefficient=self.rotdamp,
+            potential_grids=self.get_grid_files().get('potential_grids', []),
+            charge_grids=self.get_grid_files().get('charge_grids', []),
+            pmf_grids=[],
+        )
+        logger.info(f"Pdb Processor generated metadata-only RB type for '{self.base_name}'")
+        return rb
+
+    def update_rb_type_grids(self, rb_type):
+        """Refresh a RigidBodyType with current generated grid files."""
+        grid_files = self.get_grid_files()
+        rb_type.potential_grids = grid_files.get("potential_grids", [])
+        rb_type.charge_grids = grid_files.get("charge_grids", [])
+
+    def get_static_grids(self, is_gigantic=False, potResolution=1, denResolution=2, cluster_file=None):
         """
         Process a static structure and return its grid files.
         Similar to get_rb_type() but for static objects.
         
         Args:
             is_gigantic: Whether to process as a gigantic object
-            
+            cluster_file: Shared clustered assignment file from pooled model-level clustering (required).
+
         Returns:
             dict: Dictionary containing:
                 - potential_grids: List of (name, file, scale) tuples
                 - charge_grids: List of (name, file) tuples
-                - elec_grid: Path to electrostatic grid file
+                - elec_grid: Path to electrostatic grid file (raw, unsmoothed)
         """
+        if cluster_file is None:
+            raise ValueError(
+                "cluster_file is required for static grids — call RBContactModel.build_vdw_maps() first "
+                "so a pooled cluster file exists."
+            )
+        self.clustered_path = Path(cluster_file)
+
         # Step 1: Align structure
         self.align_structure()
-        
+
         # Step 2: Generate charge distribution
         self.generate_charge_distribution()
-        
+
         # Step 3: Generate electrostatic map
         self.generate_electrostatic_map()
-        
+
         # Step 4: Generate VDW maps
-        self.clustering(numClusters=self.num_heavy_cluster, potResolution=potResolution, denResolution=denResolution)
-        
         if is_gigantic and hasattr(self, "segment_count"):
             self._process_gigantic_vdw(
-                potResolution=potResolution,  # Double resolution for gigantic
-                denResolution=denResolution
+                potResolution=potResolution,
+                denResolution=denResolution,
+                cluster_file=self.clustered_path,
             )
         else:
             if is_gigantic:
@@ -615,21 +586,25 @@ quit
                 )
             self._process_standard_vdw(
                 potResolution=potResolution,
-                denResolution=denResolution)
-        
-        # Step 5: Apply Gaussian smoothing
-        self.apply_gaussian_smoothing()
-        
-        # Step 6: Collect and return grid files
+                denResolution=denResolution,
+                cluster_file=self.clustered_path,
+            )
+
         grid_files = self.get_grid_files()
-        potential_grids = grid_files.get("potential_grids", [])
-        charge_grids = [item for item in grid_files.get("charge_grids", []) if item[0] == "elec"]
-        
-        logger.info(f"Generated static grids for {self.base_name}")
+        elec_grid = None
+        if self.elec_dx and Path(self.elec_dx).exists():
+            elec_grid = str(Path(self.elec_dx).resolve())
+
+        self.aligned_pdb = self.aligned_pdb
+        self.aligned_psf = self.aligned_psf
+
+        logger.info(f"Pdb Processor generated static grids for '{self.base_name}' successfully")
         return {
-            "potential_grids": potential_grids,
-            "charge_grids": charge_grids,
-            "elec_grid": self.elec_smoothed_dx}
+            "potential_grids": grid_files.get("potential_grids", []),
+            "charge_grids": grid_files.get("charge_grids", []),
+            "elec_grid": elec_grid,
+        }
+
 
     def _find_segments_num(self, dimensions, threshold=None):
         """Find number of segments needed for a gigantic object.
@@ -657,13 +632,16 @@ quit
         else:
             self._process_standard_vdw(potResolution=potResolution, denResolution=denResolution)
 
-    def _process_standard_vdw(self, potResolution=1, denResolution=2):
+    def _process_standard_vdw(self, potResolution=1, denResolution=2, cluster_file=None):
         """Process standard static object VDW maps"""
         # Generate static VDW map script
         vdw_script = self.tclgen.generate_static_vdw_tcl()
+        cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
+        if not cluster_path.exists():
+            raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
         
         # Run VMD
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} clustered.txt < {vdw_script}"
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_script}"
         subprocess.run(cmd, shell=True, check=True)
         
         self.vdw_pot_dxs = []
@@ -673,15 +651,18 @@ quit
         for i in range(self.num_heavy_cluster + 1):
             pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
             if os.path.isfile(pot_file):
-                Bound_grid(pot_file, pot_file, -20, 20)
+                Bound_grid(inFile=pot_file, lowerBound=-20, upperBound=20)
                 self.vdw_pot_dxs.append(pot_file)
             den_file = self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
             if os.path.isfile(den_file):
                 self.vdw_den_dxs.append(den_file)
 
-    def _process_gigantic_vdw(self, potResolution, denResolution):
+    def _process_gigantic_vdw(self, potResolution, denResolution, cluster_file=None):
         """Process gigantic static object VDW maps with segmentation"""
         #!!!! Needs work. standard vdw works
+        cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
+        if not cluster_path.exists():
+            raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
         # First generate VDW maps for each segment
         for segment_idx in range(self.segment_count + 1):
@@ -689,7 +670,7 @@ quit
             
             # Generate VDW maps for this segment
             vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
-            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} clustered.txt < {vdw_script}"
+            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} {cluster_path} < {vdw_script}"
             subprocess.run(cmd, shell=True, check=True)
 
         # Write map gluing script
@@ -720,7 +701,7 @@ quit
                 final_out = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
                 
                 shutil.copy(last_map, temp_out)
-                Bound_grid(temp_out, final_out, -20, 20)
+                Bound_grid(inFile=temp_out, outFile=final_out, lowerBound=-20, upperBound=20)
 
     def write_map_gluing_script(self):
         """Write TCL script for gluing maps"""
@@ -742,24 +723,26 @@ voltool add -i1 $InMap1 -i2 $InMap2 -union -nointerp -o $OutMap
         """SimpleARBD-compatible entrypoint for diffusible objects."""
         return self.get_rb_type()
 
-    def process_structure(self, is_gigantic=False, potResolution=1, denResolution=2, threshold=300):
+    def process_structure(self, is_gigantic=False, potResolution=1, denResolution=2, threshold=300, cluster_file=None):
         """SimpleARBD-compatible entrypoint for static-like processing."""
         self.threshold = threshold
         grid_files = self.get_static_grids(
             is_gigantic=is_gigantic,
             potResolution=potResolution,
             denResolution=denResolution,
+            cluster_file=cluster_file,
         )
         self.potential_grids = grid_files.get("potential_grids", [])
         self.charge_grids = grid_files.get("charge_grids", [])
         self.elec_grid = grid_files.get("elec_grid")
         return grid_files
 
-    def get_grid_from_pdb(self, is_gigantic=False, threshold=300, potResolution=1, denResolution=2):
+    def get_grid_from_pdb(self, is_gigantic=False, threshold=300, potResolution=1, denResolution=2, cluster_file=None):
         """Compatibility wrapper matching legacy SimpleARBD call sites."""
         return self.process_structure(
             is_gigantic=is_gigantic,
             potResolution=potResolution,
             denResolution=denResolution,
             threshold=threshold,
+            cluster_file=cluster_file,
         )
