@@ -32,29 +32,29 @@ class DiffusiveRigidBodyType(RigidBodyType):
             simconf = DefaultSimConf()
 
         # Process the structure to get properties and grid maps
-        processor = PdbProcessor(
+        self.processor = PdbProcessor(
             structure_path=structure_path, simconf=simconf,
             work_dir=rb_dir)  # Pass the rigid body specific directory
         
         # Process the structure to get all properties and grid files
-        processor.get_rb_type()
+        self.processor.get_rb_type()
         
         # Initialize the parent class with collected data
         super().__init__(
             name=name, 
-            mass=processor.mass,
-            moment_of_inertia=processor.moment_of_inertia,
-            damping_coefficient=processor.transdamp,
-            rotational_damping_coefficient=processor.rotdamp,
-            potential_grids=processor.get_grid_files().get('potential_grids', []),
-            charge_grids=processor.get_grid_files().get('charge_grids', []),
+            mass=self.processor.mass,
+            moment_of_inertia=self.processor.moment_of_inertia,
+            damping_coefficient=self.processor.transdamp,
+            rotational_damping_coefficient=self.processor.rotdamp,
+            potential_grids=self.processor.get_grid_files().get('potential_grids', []),
+            charge_grids=self.processor.get_grid_files().get('charge_grids', []),
             pmf_grids=[],
             **kwargs
         )
         
         # Store file paths for reference
-        self.aligned_pdb = processor.aligned_pdb
-        self.aligned_psf = processor.aligned_psf
+        self.aligned_pdb = self.processor.aligned_pdb
+        self.aligned_psf = self.processor.aligned_psf
         
         logger.info(f"StructureRigidBodyType '{name}' initialized successfully")
 

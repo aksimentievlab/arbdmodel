@@ -2,6 +2,8 @@ import os
 import subprocess
 import numpy as np
 from pathlib import Path
+import tarfile
+import tempfile
 from .logger import logger
 from .engine import HydroProRunner, APBSRunner
 from .core_objects import RigidBodyType
@@ -12,6 +14,8 @@ import shutil
 
 
 class PdbProcessor:
+    CHARMM_TOPPAR_URL = "https://mackerell.umaryland.edu/download.php?filename=CHARMM_ff_params_files/toppar_c36_feb26.tgz"
+
     """
     Process molecular structure files to calculate properties and generate maps for ARBD
     Common Processor class for both diffusive and static rigidbody
@@ -23,7 +27,7 @@ class PdbProcessor:
         simconf=None,
         work_dir=None,
         tcl_path=None,
-        charmm_params_dir="charmm_params",
+        charmm_params_dir=None,
         **kwargs,
     ):  # remember to change to None
         """
@@ -40,7 +44,7 @@ class PdbProcessor:
             work_dir = kwargs.pop("output_dir")
         name_override = kwargs.pop("name", None)
         num_heavy_cluster = kwargs.pop("num_heavy_cluster", None)
-
+        
         self.structure_path = Path(structure_path)
         self.base_name = name_override or self.structure_path.stem
         self.work_dir = Path(work_dir) if work_dir else Path.cwd()
@@ -80,10 +84,55 @@ class PdbProcessor:
         self.elec_smoothed_dx = None
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
-        if tcl_path is None:
-            tcl_path=Path.cwd().absolute()
-        self.tcl_path=tcl_path
-        self.tclgen=TclScriptGenerator(work_dir=tcl_path,charmm_params_dir=charmm_params_dir)
+        self.tcl_path = Path(tcl_path).absolute() if tcl_path is not None else Path.cwd().absolute()
+        self.charmm_params_dir = Path(charmm_params_dir).absolute() if charmm_params_dir is not None else (self.work_dir / "charmm_params")
+        self._ensure_charmm_params(self.charmm_params_dir)
+        self.tclgen = TclScriptGenerator(work_dir=self.tcl_path, charmm_params_dir=self.charmm_params_dir)
+
+    def _has_charmm_params(self, params_dir: Path) -> bool:
+        """Return True when CHARMM parameter files already exist."""
+        if not params_dir.exists():
+            return False
+        for suffix in (".prm", ".str", ".rtf"):
+            if any(params_dir.rglob(f"*{suffix}")):
+                return True
+        return False
+
+    def _ensure_charmm_params(self, params_dir: Path):
+        """Download/extract CHARMM parameters only when missing."""
+        if self._has_charmm_params(params_dir):
+            logger.info(f"Using existing CHARMM parameters in {params_dir}")
+            return
+
+        params_dir.mkdir(parents=True, exist_ok=True)
+        tar_path = params_dir / "toppar_c36_feb26.tgz"
+
+        if not tar_path.exists():
+            logger.info(f"Downloading CHARMM parameters to {tar_path}")
+            subprocess.run(
+                ["wget", "-O", str(tar_path), self.CHARMM_TOPPAR_URL],
+                check=True,
+            )
+        else:
+            logger.info(f"Using existing CHARMM archive at {tar_path}")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            with tarfile.open(tar_path, "r:gz") as tf:
+                tf.extractall(tmpdir_path)
+
+            copied = 0
+            for suffix in ("*.prm", "*.str", "*.rtf"):
+                for src in tmpdir_path.rglob(suffix):
+                    dst = params_dir / src.name
+                    if not dst.exists():
+                        shutil.copy2(src, dst)
+                        copied += 1
+
+        if not self._has_charmm_params(params_dir):
+            raise RuntimeError(f"CHARMM parameter setup failed in {params_dir}")
+
+        logger.info(f"CHARMM parameters ready in {params_dir} (copied {copied} files)")
         
     def align_structure(self):
         """Align structure to principal axes using VMD."""
@@ -312,6 +361,7 @@ class PdbProcessor:
             logger.debug(f"Clustering script written to {vdw_tcl}")
 
         cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
+        logger.info(f"Running clustering command: {cmd}")
         subprocess.run(cmd, shell=True, check=True)
 
         import numpy as np

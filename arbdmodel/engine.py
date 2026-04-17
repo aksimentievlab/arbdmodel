@@ -1275,9 +1275,11 @@ class HydroProRunner:
             
             os.symlink(pdb_path, "hydro.pdb")
             # Run HydroPro
-            result = subprocess.run(str(self.binary), capture_output=True, 
+            if not Path(f"{structure_name}.hydro-res.txt").exists():
+                result = subprocess.run(str(self.binary), capture_output=True, 
                                  text=True,check=True)
-            
+            else:
+                logger.info("HydroPro output file already exists:" +f"{structure_name}.hydro-res.txt")
 
             trans_damp, rot_damp = self.parse_output(f"{structure_name}.hydro-res.txt")
             
@@ -1420,15 +1422,15 @@ quit"""
             self.write_config()
             
             # Run APBS
-            try:
+            if not Path(f"{self.structure_name}.elec.dx").exists():
                 result = subprocess.run(
                     [str(self.binary), f"{self.structure_name}.apbs"],
                     capture_output=True,
                     text=True,
                     check=True
                 )
-            except subprocess.CalledProcessError as e:
-                raise RuntimeError(f"APBS calculation failed: {e.stderr}")
+            else:
+                logger.info("APBS output file already exists:" +f"{self.structure_name}.elec.dx")
             
             # Check for output file
             output_file = Path(f"{self.structure_name}.elec.dx")
@@ -1677,8 +1679,9 @@ set IDs ""
 set minRadius 0.5
 
 package require ilstools
-
-ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
+set prm_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.prm]
+set str_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.str]
+ILStools::readcharmmparams [concat $prm_files $str_files]
 
 set ljParms ""
 set lj_hyd ""
@@ -1842,7 +1845,9 @@ while {[expr ![eof $ch]]} {
 close $ch
 
 package require ilstools
-ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
+set prm_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.prm]
+set str_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.str]
+ILStools::readcharmmparams [concat $prm_files $str_files]
 
 
 set ID [mol new $prefix.psf]

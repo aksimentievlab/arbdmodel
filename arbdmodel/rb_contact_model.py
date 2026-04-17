@@ -19,7 +19,7 @@ class RBContactModel(ArbdModel):
     
     def __init__(self, cell_vectors=None, cell_origin=None, 
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False, 
-                 num_heavy_cluster=3,
+                 num_heavy_cluster=3,charmm_params_dir=None,
                  boundary_params=None, **kwargs):
         """Initialize structure model Former SimpleARBD.
         
