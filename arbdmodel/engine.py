@@ -1120,7 +1120,7 @@ HydroProRunner and APBSRunner module provides interfaces to external tools used 
 
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
-    def __init__(self, mass, simconf=None, structure_name="hydrocal", cal_type="shape"):
+    def __init__(self, mass, simconf=None, structure_name="hydrocal", cal_type="shape", inertia=None):
         """Initialize HydroPro interface.
         
         Args:
@@ -1128,6 +1128,7 @@ class HydroProRunner:
             simconf: SimConf object with temperature, viscosity and solvent_density (optional)
             structure_name: Base name of structure files
             cal_type: shape or mesh, determined by program
+            inertia: Principal moments of inertia [Ix, Iy, Iz] in amu·Å².
         """
         if simconf is None:
             from . import DefaultSimConf
@@ -1152,8 +1153,9 @@ class HydroProRunner:
             
         self.structure_name = structure_name[0:10] if len(structure_name)>10 else structure_name
 
-        self.full_name =structure_name
+        self.full_name = structure_name
         self.mass = mass
+        self.inertia = inertia  # [Ix, Iy, Iz] in amu·Å²
         self.cal_type = cal_type
         
     def write_config(self, output_path="hydropro.dat",
@@ -1239,11 +1241,22 @@ class HydroProRunner:
         Rz = float(lines[line_num+2].strip().split()[5])
         
         # Convert units
-        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "1/ns"
+        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "amu/ns"
         trans_damp = [24.527692/(x*mass) for x in [Dx, Dy, Dz]]
         
-        # Rotation: "(295 k K) / ((1 /s) *  amu AA^2)" "1/ns"
-        rot_damp = [2.4527692e+17 / (x*mass) for x in [Rx, Ry, Rz]]
+        # Rotation: "(295 k K) / ((1/s) * amu·AA^2)" "amu·AA^2/ns"
+        # Must divide by principal inertia per axis, NOT scalar mass.
+        # Matches SimpleARBD's Accessory_routines_for_ARBD.py:
+        #   Rx,Ry,Rz = [2.4527692e+17/(x*I) for x,I in zip([Rx,Ry,Rz], inertia)]
+        if self.inertia is None:
+            logger.warning(
+                "HydroProRunner: inertia not provided; falling back to mass for rotational "
+                "damping conversion. rotDamping will be WRONG. Pass inertia=[Ix,Iy,Iz]."
+            )
+            rot_inertia = [mass, mass, mass]
+        else:
+            rot_inertia = list(self.inertia)
+        rot_damp = [2.4527692e+17 / (x * I) for x, I in zip([Rx, Ry, Rz], rot_inertia)]
         
         return trans_damp, rot_damp
                 

@@ -228,7 +228,8 @@ class PdbProcessor:
         hydro_runner = HydroProRunner(
                 mass=self.mass,
                 simconf=self.simconf,
-                structure_name=self.base_name)
+                structure_name=self.base_name,
+                inertia=self.moment_of_inertia)
             
             # Write config
         hydro_runner.write_config(output_path=self.work_dir / "hydropro.dat")
