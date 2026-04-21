@@ -222,7 +222,9 @@ class ShapeCGNonbonded(AbstractPotential):
             u_lj[i+1:] = 0
         except IndexError:
             # Handle case where r doesn't contain values >= rmin
-            u_lj = np.zeros_like(r)
+            logger.warning(f'{self.__class__.__name__.strip()}.potential(): potential cutoff is shorter than rmin in Weeks-Chandler-Andersen potential for types {typeA.name} and {typeB.name}')
+            pass
+
           
         # Combine potentials
         u = u_elec + u_lj
@@ -504,8 +506,8 @@ class ShapeCGModel(ArbdModel):
         Returns:
             Debye length in Angstroms
         """
-        # sqrt(80 * epsilon0 * 295 K / ((150 mM) * e**2/particle))
-        return 11.154259 * np.sqrt((150/c) * (295/temperature))
+        # sqrt(80 * epsilon0 * 295 K k / (2*(100 mM) * e**2/particle))
+        return 9.6598719 * np.sqrt((100/c) * (295/temperature))
         
     def add_protein_nb_interactions(self, prot_types, nt_sigma=10, debye_length=None):
         """Add nonbonded interactions between protein particles.
@@ -516,7 +518,7 @@ class ShapeCGModel(ArbdModel):
             debye_length: Debye length for electrostatics (default: calculated from 150 mM)
         """
         if debye_length is None:
-            debye_length = self.concentration_to_debye_length(150)
+            debye_length = self.concentration_to_debye_length(100)
 
         prot_nb = ShapeCGNonbonded(debye_length=debye_length)
         old_interactions = self.nonbonded_interactions
