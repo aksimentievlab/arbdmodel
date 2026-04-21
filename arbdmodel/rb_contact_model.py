@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
-import re
 import os
-import argparse
 from pathlib import Path
-from . import ArbdEngine
-from .model import ArbdModel
-from .config import SimConf, DefaultSimConf
-from .logger import logger
+from scipy.cluster import vq
 import numpy as np
-from pathlib import Path
+from .model import ArbdModel
+from .config import DefaultSimConf
 from .logger import logger
 from .coords import Generate_coordinates, Generate_spanning_vectors
-from .core_objects import RigidBodyType, RigidBody
-from .pdb_processor import PdbProcessor
-  
+from .core_objects import RigidBody, Group
+from .rb_from_pdb import DiffusiveRigidBodyType, StaticObject
+
 class RBContactModel(ArbdModel):
     """Model class for structure-based rigid body simulations"""
     
-    def __init__(self, cell_vectors=None, cell_origin=None, 
-                 dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False, 
-                 num_heavy_cluster=3,
-                 boundary_params=None, **kwargs):
+    def __init__(self, cell_vectors=None, cell_origin=None,
+                 dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False,
+                 num_heavy_cluster=3, charmm_params_dir=None, gaussian_width=None,
+                 pot_resolution=1, den_resolution=2,
+                 boundary_params=None, work_dir=None, **kwargs):
         """Initialize structure model Former SimpleARBD.
-        
         Args:
             diffusible_objects: List of RBContact instances for diffusible objects
             static_objects: List of RBContact instances for static objects
@@ -33,6 +29,7 @@ class RBContactModel(ArbdModel):
             configuration: Configuration object, defaults to DefaultSimConf
             use_boundary: Whether to create a boundary potential
             boundary_params: Optional parameters for boundary potential (well_depth, resolution, etc.)
+            work_dir: Directory for pooled ``clustered.txt`` and default layout for child processors.
             **kwargs: Additional arguments passed to ArbdModel
         """
         
@@ -42,7 +39,14 @@ class RBContactModel(ArbdModel):
         self.boundary_potential = None
         self.initial_positions = {}  # Store initial positions for each type
         self.num_heavy_cluster = num_heavy_cluster
-        
+        self.charmm_params_dir = charmm_params_dir
+        self.gaussian_width = gaussian_width if gaussian_width is not None else 2.5
+        self.pot_resolution = pot_resolution
+        self.den_resolution = den_resolution
+        self._diffusible_rb_types = []
+        self.shared_cluster_file = None
+        self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
+
         super().__init__(
             children=[], 
             cell_vectors=cell_vectors, 
@@ -74,7 +78,45 @@ class RBContactModel(ArbdModel):
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
             self.boundary_potential = boundary_file
             #self.add_nonbonded_interaction(self.boundary_potential)
-        
+
+    def add(self, obj):
+        """Register contact-model objects or delegate to ``ArbdModel.add``.
+
+        ``DiffusiveRigidBodyType`` instances are collected for pooled LJ clustering
+        in :meth:`build_vdw_maps`. ``StaticObject`` instances are processed after
+        ``build_vdw_maps`` (cluster file and resolutions are injected from the model).
+        ``RigidBody``, ``Group``, and other types use the standard ARBD model logic.
+        """
+        if isinstance(obj, DiffusiveRigidBodyType):
+            self._diffusible_rb_types.append(obj)
+            self.shared_cluster_file = None
+            return obj
+        if isinstance(obj, StaticObject):
+            if self.shared_cluster_file is None:
+                raise RuntimeError(
+                    "Call model.build_vdw_maps() before model.add(StaticObject)."
+                )
+            obj.cluster_file = Path(self.shared_cluster_file)
+            obj.pot_resolution = self.pot_resolution
+            obj.den_resolution = self.den_resolution
+            if obj.charmm_params_dir is None and self.charmm_params_dir is not None:
+                obj.charmm_params_dir = Path(self.charmm_params_dir).expanduser().resolve()
+            obj.process()
+            obj.smooth_grids(gaussian_width=self.gaussian_width)
+            self.static_objects.append(obj)
+            return obj
+        ret = super().add(obj)
+        self._track_diffusible_rigid_bodies(obj)
+        return ret
+
+    def _track_diffusible_rigid_bodies(self, obj):
+        """Record rigid bodies whose type is DiffusiveRigidBodyType (for I/O helpers)."""
+        if isinstance(obj, RigidBody):
+            if isinstance(obj.type_, DiffusiveRigidBodyType) and obj not in self.diffusible_objects:
+                self.diffusible_objects.append(obj)
+        elif isinstance(obj, Group):
+            for child in obj.children:
+                self._track_diffusible_rigid_bodies(child)
 
     def add_diffusible_object(self, structure_path,  copies=1, positions=None, 
                          orientations=None, name=None, initial_region=None, random_seed=None):
@@ -100,19 +142,16 @@ class RBContactModel(ArbdModel):
         logger.info(f"Processing structure files for {name} from {structure_path}")
             
             # Create the RigidBodyType using rbs/name directory
-        rb_dir = self.work_dir / "rbs" / name
-        os.makedirs(rb_dir, exist_ok=True)
-        processor=PdbProcessor(
-            structure_path=structure_path,
-            output_dir=rb_dir,
+        rb_type = DiffusiveRigidBodyType(
             name=name,
+            structure_path=structure_path,
             simconf=self.simconf,
-            num_heavy_cluster=self.num_heavy_cluster)
-        
-        processor.process_diffusive_structure()
-        
-        rb_type = processor.get_rb_type()
-            
+            work_dir=self.work_dir,
+            num_heavy_cluster=self.num_heavy_cluster,
+            charmm_params_dir=self.charmm_params_dir,
+        )
+        self.add(rb_type)
+
         logger.info(f"Created RBType for {name}")
             
         # Create base name for rigid bodies of this type
@@ -199,21 +238,181 @@ class RBContactModel(ArbdModel):
                 position=position,
                 orientation=orientation,
                 name=rb_name)
-            
-            # Add to model
-            self.diffusible_objects.append(rb)
+
             self.add(rb)
             created_bodies.append(rb)
             
         return created_bodies
 
-    def add_static_object(self, structure_path, is_gigantic=False, threshold=300):
+    def _run_pooled_clustering(self, all_records, n_heavy):
+        """Run pooled k-means over all LJ records and write a shared cluster file."""
+        heavy_records = [r for r in all_records if r["group"] == "heavy"]
+        hyd_records = [r for r in all_records if r["group"] == "hydrogen"]
+        if not heavy_records and not hyd_records:
+            raise ValueError("No LJ type data was generated for pooled clustering.")
+
+        heavy_points = np.array([[r["radius"], r["epsilon"]] for r in heavy_records], dtype=float) if heavy_records else np.empty((0, 2))
+        hyd_points = np.array([[r["radius"], r["epsilon"]] for r in hyd_records], dtype=float) if hyd_records else np.empty((0, 2))
+
+        def _expand_by_count(records):
+            expanded = []
+            for rec in records:
+                count = int(rec.get("count", 1))
+                if count <= 0:
+                    continue
+                expanded.append(np.repeat([[rec["radius"], rec["epsilon"]]], count, axis=0))
+            if not expanded:
+                return np.empty((0, 2))
+            return np.vstack(expanded)
+
+        def _cluster_points(points, weighted_points, n_clusters):
+            if points.shape[0] == 0 or n_clusters == 0:
+                return np.empty((0,), dtype=int), np.empty((0, 2))
+            if points.shape[0] == 1:
+                return np.array([0], dtype=int), points.copy()
+
+            data = weighted_points if weighted_points.shape[0] > 0 else points
+            means = np.mean(data, axis=0)
+            scales = np.std(data, axis=0)
+            scales[scales == 0] = 1.0
+            normalized = (data - means) / scales
+
+            cluster_count = min(n_clusters, data.shape[0])
+            codebook, _ = vq.kmeans(normalized, cluster_count)
+            codebook = codebook * scales + means
+            assignments, _ = vq.vq(points, codebook)
+            return assignments, codebook
+
+        np.random.seed(seed=42)
+        heavy_weighted = _expand_by_count(heavy_records)
+        hyd_weighted = _expand_by_count(hyd_records)
+        heavy_clusters = min(n_heavy, heavy_points.shape[0]) if heavy_points.shape[0] > 0 else 0
+        assignments_heavy, codebook_heavy = _cluster_points(heavy_points, heavy_weighted, heavy_clusters)
+        assignments_hyd, codebook_hyd = _cluster_points(hyd_points, hyd_weighted, 1 if hyd_points.shape[0] > 0 else 0)
+
+        if assignments_hyd.size > 0:
+            assignments_total = np.concatenate((assignments_heavy, assignments_hyd + heavy_clusters), axis=None)
+            codebook_total = np.concatenate((codebook_heavy, codebook_hyd), axis=0)
+        else:
+            assignments_total = assignments_heavy
+            codebook_total = codebook_heavy
+
+        ordered_records = heavy_records + hyd_records
+        type_array = {i: "" for i in range(len(set(assignments_total)))}
+        for assign, record in zip(assignments_total, ordered_records):
+            type_array[assign] = f"{type_array[assign]} {record['types']}"
+
+        cluster_file = self.work_dir / "clustered.txt"
+        with open(cluster_file, "w") as f:
+            for i, (radius, epsilon) in enumerate(codebook_total):
+                f.write(f"{radius} {epsilon}{type_array[i]}\n")
+        return cluster_file
+
+    def build_vdw_maps(self):
+        """Pool LJ records across all diffusible processors and build shared VDW maps."""
+        if not self._diffusible_rb_types:
+            logger.info("No diffusible rigid-body types to finalize clustering for.")
+            return None
+
+        all_records = []
+        for rb_type in self._diffusible_rb_types:
+            all_records.extend(rb_type.processor.lj_type_records)
+
+        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster)
+        self.shared_cluster_file = cluster_file
+
+        for rb_type in self._diffusible_rb_types:
+            rb_type.finalize_grids(
+                cluster_file,
+                gaussian_width=self.gaussian_width,
+                potResolution=self.pot_resolution,
+                denResolution=self.den_resolution,
+            )
+
+        logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")
+        return cluster_file
+
+    def finalize_diffusible_vdw_clustering(self):
+        """Backward-compatible alias for build_vdw_maps()."""
+        return self.build_vdw_maps()
+
+    def wire_static_interactions(self, wire_particles=True):
+        """Inject static object grids into diffusive rigid-body types and, optionally, particle types.
+
+        Call this after all static objects have been added via ``model.add(static_obj)``.
+        ``generate_all_structures()`` calls this automatically.
+
+        For each diffusive ``RigidBodyType``:
+          • its ``pmf_grids`` list receives every ``(keyword, path, scale)`` tuple from each
+            ``StaticObject.potential_grids`` — these become ``gridFile`` entries in the ``.bd``
+            file so ARBD applies the static field as a background PMF to the rigid body.
+
+        For each free particle type already registered in the model (``wire_particles=True``):
+          • ``grid_potentials`` is extended with ``(path, scale)`` from every static potential grid
+            so particles also feel the static background field.
+        """
+        if not self.static_objects:
+            return
+
+        # ── diffusive rigid-body types ──────────────────────────────────────
+        for rb_type in self._diffusible_rb_types:
+            if not isinstance(rb_type.pmf_grids, list):
+                rb_type.pmf_grids = list(rb_type.pmf_grids)
+            existing = {(k, str(g)) for k, g, *_ in rb_type.pmf_grids}
+            for static in self.static_objects:
+                for item in static.potential_grids:
+                    kw, path = item[0], item[1]
+                    scale = item[2] if len(item) == 3 else 1.0
+                    if (kw, str(path)) not in existing:
+                        rb_type.pmf_grids.append((kw, str(path), scale))
+                        existing.add((kw, str(path)))
+            logger.info(
+                f"Wired {len(self.static_objects)} static object(s) as PMF grids "
+                f"into diffusive RB type '{rb_type.name}'"
+            )
+
+        # ── free particle types ─────────────────────────────────────────────
+        if not wire_particles:
+            return
+        try:
+            pt_counts = list(self.getParticleTypesAndCounts())
+        except Exception:
+            return
+        for pt, (num, num_rb) in pt_counts:
+            if num == 0:
+                continue
+            if not hasattr(pt, "grid_potentials"):
+                pt.grid_potentials = []
+            elif not isinstance(pt.grid_potentials, list):
+                pt.grid_potentials = list(pt.grid_potentials)
+            existing_pt = {str(g) for g, *_ in pt.grid_potentials}
+            for static in self.static_objects:
+                for item in static.potential_grids:
+                    path = str(item[1])
+                    scale = item[2] if len(item) == 3 else 1.0
+                    if path not in existing_pt:
+                        pt.grid_potentials.append((path, scale, "dirichlet"))
+                        existing_pt.add(path)
+
+    def generate_all_structures(self):
+        """Finalize model structure generation and wire static-field interactions.
+
+        Ensures VDW maps exist (calls :meth:`build_vdw_maps` if needed), then wires
+        each static object's potential grids into the diffusive rigid-body types as
+        PMF background fields and into free particle types as grid potentials.
+        """
+        if self.shared_cluster_file is None:
+            self.build_vdw_maps()
+        self.wire_static_interactions()
+        logger.info("All model structures are generated and ready for simulation files.")
+        return self.shared_cluster_file
+
+    def add_static_object(self, structure_path, is_gigantic=False, threshold=300, work_dir=None):
         """
         Adds a static object to the simulation.
         
-        This method creates a StaticObject from the specified structure file, extracts its
-        electrostatic and potential/charge grids, and adds them to the simulation as
-        non-bonded interactions.
+        This method processes the specified static structure and keeps its
+        electrostatic and potential/charge grids for static-field usage.
         
         Parameters
         ----------
@@ -230,18 +429,21 @@ class RBContactModel(ArbdModel):
             The created and added static object.
         """
         name = Path(structure_path).stem
-        os.makedirs(self.work_dir / "static" / name, exist_ok=True)
-        
-        # Create the static object with static/{name} output directory
-        obj = PdbProcessor(
+        static_dir = Path(work_dir) if work_dir else self.work_dir / "static" / name
+        os.makedirs(static_dir, exist_ok=True)
+
+        obj = StaticObject(
             structure_path=structure_path,
-            output_dir=self.work_dir / "static" / name,
             name=name,
             simconf=self.simconf,
-            num_heavy_cluster=self.num_heavy_cluster)
-        
-        obj.get_grid_from_pdb(is_gigantic=is_gigantic, threshold=threshold)
-
+            work_dir=static_dir,
+            is_gigantic=is_gigantic,
+            threshold=threshold,
+            pot_resolution=self.pot_resolution,
+            den_resolution=self.den_resolution,
+            charmm_params_dir=self.charmm_params_dir,
+        )
+        """
         # Add potential grids to model
         for grid_type, grid_file, scale in obj.potential_grids:
             self.add_nonbonded_interaction(grid_type, grid_file, scale)
@@ -253,469 +455,5 @@ class RBContactModel(ArbdModel):
         # Add electrostatic grid if available
         if obj.elec_grid:
             self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
-
-        # Store the static object
-        self.static_objects.append(obj)
-        return obj
- 
-
-class RBContactEngine(ArbdEngine):
-    """Enhanced ARBD engine with additional functionality for structure simulations"""
-    
-    def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
-        """Initialize RBContactEngine.
-        
-        Args:
-            extra_bd_file_lines: Additional lines for BD configuration file
-            configuration: SimConf object
-            **conf_params: Additional configuration parameters
         """
-        super().__init__(extra_bd_file_lines, configuration, **conf_params)
-        
-    def write_simulation_files(self, model, output_name, configuration=None, **conf_params):
-        """Write all simulation files.
-        
-        Args:
-            model: RBContactModel to simulate
-            output_name: Base name for output files
-            configuration: SimConf object
-            **conf_params: Additional configuration parameters
-        """
-        # Call parent method to write standard files
-        super().write_simulation_files(model, output_name, configuration, **conf_params)
-        
-        # Additional functionality for structure rigid bodies
-        if hasattr(model, 'diffusible_objects') and model.diffusible_objects:
-            logger.info(f"Writing {len(model.diffusible_objects)} diffusible objects")
-            
-        if hasattr(model, 'static_objects') and model.static_objects:
-            logger.info(f"Writing {len(model.static_objects)} static objects")
-            
-    def run_simulation(self, model, output_name, replicas=1, gpu=0, **kwargs):
-        """Run ARBD simulation.
-        
-        Args:
-            model: RBContactModel to simulate
-            output_name: Base name for output files
-            replicas: Number of replicas to run
-            gpu: GPU index to use
-            **kwargs: Additional arguments for simulate method
-        """
-        # Prepare output directory
-        output_dir = kwargs.get('output_directory', 'output')
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-            
-        # Run simulations
-        for i in range(replicas):
-            replica_name = f"{output_name}_{i}" if replicas > 1 else output_name
-            
-            # Override GPU index if running multiple replicas
-            if replicas > 1:
-                kwargs['gpu'] = (gpu + i) % 8  # Assuming max 8 GPUs
-                
-            # Run simulation
-            self.simulate(model, replica_name, **kwargs)
-
-            
-
-
-class RBContactConfig:
-    """
-    Parse and manage RBContact configuration file.
-    
-    This class provides a modern, clean interface for reading RBContact
-    configuration files and setting up the simulation.
-    """
-    
-    def __init__(self, config_path):
-        """
-        Initialize RBContactConfig.
-        
-        Args:
-            config_path: Path to the RBContact configuration file
-        """
-        self.config_path = Path(config_path)
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"Config file not found: {self.config_path}")
-            
-        self.config = self._parse_config()
-        self.simconf = self._create_simconf()
-        from .binary_manager import initialize_binary_paths
-        initialize_binary_paths()
-        import ipdb
-        ipdb.set_trace()
-        
-    def _parse_config(self):
-        """
-        Parse the RBContact configuration file.
-        
-        Returns:
-            Dict containing configuration parameters
-        """
-        logger.info(f"Parsing config file: {self.config_path}")
-        
-        config = {}
-        with open(self.config_path) as f:
-            text = f.read()
-            
-        # Parse diffusible objects
-        match = re.search(r'Diffusible_objects:([ \w\.]+)', text)
-        if match:
-            config['diffusible_objects'] = match.group(1).strip().split()
-            
-        # Parse static objects
-        match = re.search(r'Static_objects \(Enter NA for no static object\):([ \w\.]+)', text)
-        if match:
-            val = match.group(1).strip()
-            config['static_objects'] = [] if val == 'NA' else val.split()
-            
-        # Parse remaining configuration parameters
-        parameter_patterns = {
-            'salt_concentration': r'SaltConcentration:(\s*[0-9]*\.[0-9]*)',
-            'temperature': r'Temperature \(K\):(\s*[0-9]*\.?[0-9]*)',
-            'viscosity': r'Viscosity:(\s*[0-9]*\.?[0-9]*)',
-            'solvent_density': r'Solvent_density:(\s*[0-9]*\.?[0-9]*)',
-            'num_heavy_cluster': r'Number_of_heavy_cluster \(Integer\):(\s*[0-9]+)',
-            'gaussian_width': r'GaussianWidth:(\s*[0-9]*\.?[0-9]*)',
-            'skip_parametrizing_diffusible': r'Skip_parametrizing_diffusible \(Yes/No\):([ \w]+)',
-            'gigantic_stat_objects': r'Gigantic_stat_objects \(Yes/No\):([ \w]+)',
-            'python_path': r'Python_path:(\s*\S+)',
-            'hydro_path': r'Hydro_path:(\s*\S+)',
-            'apbs_path': r'Apbs_path:(\s*\S+)',
-            'vmd_path': r'Vmd_path:(\s*\S+)',
-            'parameters_folder': r'Parameters_folder:(\s*\S+)',
-            'num_replicas': r'Num_replicas \(Integer\):(\s*[0-9]+)',
-            'timestep': r'Timestep \(Float\):(\s*[0-9]*\.?[0-9]*)',
-            'steps': r'Steps \(Integer\):(\s*[0-9]+)',
-            'interactive': r'Interactive \(Yes/No\):([ \w]+)',
-            'grid_path': r'Grid_path:(\s*\S+)',
-            'well_depth': r'WellDepth \(Positive\):\s*([0-9]+[\.]*[0-9]*)',
-            'well_resolution': r'WellResolution \(Positive\):\s*([0-9]+[\.]*[0-9]*)',
-            'arbd_path': r'ARBD_path:(\s*\S+)',
-            'simulation_path': r'Path_for_ARBD_simulations:(\s*\S+)',
-        }
-        
-        # Extract cell vectors and origin
-        vector_patterns = {
-            'cell_basis_vector1': r'CellBasisVector1:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'cell_basis_vector2': r'CellBasisVector2:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'cell_basis_vector3': r'CellBasisVector3:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'cell_origin': r'CellOrigin:\s*(-*[0-9]+[\.]*[0-9]* -*[0-9]+[\.]*[0-9]* -*[0-9]+[\.]*[0-9]*)',
-            'initial_coor_basis_vector1': r'InitialCoorBasisVector1:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'initial_coor_basis_vector2': r'InitialCoorBasisVector2:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'initial_coor_basis_vector3': r'InitialCoorBasisVector3:\s*([0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]* [0-9]+[\.]*[0-9]*)',
-            'initial_coor_origin': r'InitialCoorOrigin:\s*(-*[0-9]+[\.]*[0-9]* -*[0-9]+[\.]*[0-9]* -*[0-9]+[\.]*[0-9]*)',
-        }
-        
-        # Extract all parameters using regex
-        for param, pattern in parameter_patterns.items():
-            match = re.search(pattern, text)
-            if match:
-                config[param] = match.group(1).strip()
-                
-        # Extract and convert vector parameters
-        for param, pattern in vector_patterns.items():
-            match = re.search(pattern, text)
-            if match:
-                # Convert space-separated values to list of floats
-                values = [float(x) for x in match.group(1).split()]
-                config[param] = values
-                
-        # Extract copies per object
-        match = re.search(r'Number_of_copies_per_object \(Integer\(s\)\):([ 0-9]+)', text)
-        if match:
-            copies = match.group(1).strip().split()
-            if 'diffusible_objects' in config:
-                config['copies_per_object'] = {
-                    obj: int(copies[i]) for i, obj in enumerate(config['diffusible_objects'])
-                    if i < len(copies)
-                }
-                
-        # Extract extra potential tags
-        match = re.search(r'Extra_potentials_tags \(Path, vdw cluster group\):([\s\S]*)\n', text)
-        if match:
-            tags = re.findall(r'\((\S+\.dx,\s*\w+)\)', match.group(1))
-            config['extra_potentials'] = []
-            for tag in tags:
-                parts = tag.split(',')
-                config['extra_potentials'].append({
-                    'path': parts[0].strip(),
-                    'vdw_type': parts[1].strip()
-                })
-                
-        # Convert appropriate values to correct types
-        type_conversions = {
-            'salt_concentration': float,
-            'temperature': float,
-            'viscosity': float,
-            'solvent_density': float,
-            'num_heavy_cluster': int,
-            'gaussian_width': float,
-            'num_replicas': int,
-            'timestep': float,
-            'steps': int,
-            'well_depth': float,
-            'well_resolution': float,
-        }
-        
-        for param, convert in type_conversions.items():
-            if param in config:
-                try:
-                    config[param] = convert(config[param])
-                except (ValueError, TypeError):
-                    logger.warning(f"Could not convert {param} to {convert.__name__}")
-                    
-        # Boolean conversions
-        bool_conversions = {
-            'skip_parametrizing_diffusible': lambda x: x.lower() == 'yes',
-            'gigantic_stat_objects': lambda x: x.lower() == 'yes',
-            'interactive': lambda x: x.lower() == 'yes',
-        }
-        
-        for param, convert in bool_conversions.items():
-            if param in config:
-                try:
-                    config[param] = convert(config[param])
-                except (ValueError, TypeError, AttributeError):
-                    logger.warning(f"Could not convert {param} to boolean")
-                    
-        return config
-        
-    def _create_simconf(self) -> SimConf:
-        """
-        Create a SimConf object from the parsed configuration.
-        
-        Returns:
-            SimConf object
-        """
-        # Extract parameters for SimConf
-        params = {
-            'temperature': self.config.get('temperature', 300),
-            'viscosity': self.config.get('viscosity', 0.01),
-            'solvent_density': self.config.get('solvent_density', 1.0),
-            'num_heavy_cluster': self.config.get('num_heavy_cluster', 3),
-            'timestep': self.config.get('timestep', 0.0002),
-            'num_steps': self.config.get('steps', 10000000),
-            'output_period': 1000,  # Default
-        }
-        
-        # Add binary paths if available
-        binary_paths = {
-            'hydro_path': 'hydro_path',
-            'apbs_path': 'apbs_path',
-            'vmd_path': 'vmd_path',
-            'arbd_path': 'arbd_path'
-        }
-        
-        for config_key, simconf_key in binary_paths.items():
-            if config_key in self.config:
-                params[simconf_key] = self.config[config_key]
-                
-        return SimConf(**params)
-    
-    def create_model(self) -> RBContactModel:
-        """
-        Create a RBContactModel from the configuration.
-        
-        Returns:
-            RBContactModel instance
-        """
-        # Set up cell vectors and origin for model
-        cell_vectors = None
-        cell_origin = None
-        
-        if all(key in self.config for key in ['cell_basis_vector1', 'cell_basis_vector2', 'cell_basis_vector3']):
-            cell_vectors = [
-                self.config['cell_basis_vector1'],
-                self.config['cell_basis_vector2'],
-                self.config['cell_basis_vector3']
-            ]
-            
-        if 'cell_origin' in self.config:
-            cell_origin = self.config['cell_origin']
-            
-        # Create the model
-        model = RBContactModel(
-            cell_vectors=cell_vectors,
-            cell_origin=cell_origin,
-            configuration=self.simconf,
-            use_boundary='extra_potentials' in self.config and len(self.config['extra_potentials']) > 0,
-            boundary_params={
-                'well_depth': self.config.get('well_depth', 1.0),
-                'resolution': self.config.get('well_resolution', 2.0),
-            }
-        )
-        
-        return model
-    
-    def create_engine(self) -> RBContactEngine:
-        """
-        Create a RBContactEngine from the configuration.
-        
-        Returns:
-            RBContactEngine instance
-        """
-        # Create the engine with appropriate configuration
-        engine = RBContactEngine(
-            configuration=self.simconf,
-            extra_bd_file_lines=''
-        )
-        
-        return engine
-        
-    def setup_diffusible_objects(self, model: RBContactModel):
-        """
-        Set up diffusible objects in the model.
-        
-        Args:
-            model: RBContactModel to add diffusible objects to
-        """
-        if 'diffusible_objects' not in self.config:
-            logger.warning("No diffusible objects specified in configuration")
-            return
-            
-        # Create initial region from configuration
-        initial_region = None
-        if all(key in self.config for key in [
-            'initial_coor_basis_vector1', 
-            'initial_coor_basis_vector2', 
-            'initial_coor_basis_vector3',
-            'initial_coor_origin'
-        ]):
-            initial_region = {
-                'bv1': self.config['initial_coor_basis_vector1'],
-                'bv2': self.config['initial_coor_basis_vector2'],
-                'bv3': self.config['initial_coor_basis_vector3'],
-                'origin': self.config['initial_coor_origin']
-            }
-            
-        # Add each diffusible object
-        work_root = Path(self.config.get('parameters_folder', './parameters'))
-            
-        for obj_name in self.config['diffusible_objects']:
-            # Skip parametrization if requested
-            if self.config.get('skip_parametrizing_diffusible', False):
-                logger.info(f"Skipping parametrization for {obj_name} (as requested in config)")
-                continue
-                
-            # Determine number of copies
-            copies = self.config.get('copies_per_object', {}).get(obj_name, 1)
-            
-            # Find structure files
-            psf_file = Path(f"{obj_name}.psf")
-            pdb_file = Path(f"{obj_name}.pdb")
-            
-            if not (psf_file.exists() and pdb_file.exists()):
-                logger.warning(f"Structure files for {obj_name} not found: {psf_file}, {pdb_file}")
-                continue
-                
-            logger.info(f"Adding diffusible object: {obj_name} with {copies} copies")
-            
-            # Create work directory
-            work_dir = work_root / obj_name
-            
-            # Add to model
-            model.add_diffusible_object(
-                structure_path=psf_file,  # Use PSF as primary file
-                copies=copies,
-                name=obj_name,
-                initial_region=initial_region,
-                #random_seed=42,  # Fixed seed for reproducibility
-                )
-            
-    def setup_static_objects(self, model: RBContactModel):
-        """
-        Set up static objects in the model.
-        
-        Args:
-            model: RBContactModel to add static objects to
-        """
-        if 'static_objects' not in self.config or not self.config['static_objects']:
-            logger.info("No static objects specified in configuration")
-            return
-            
-        # Process each static object
-        for obj_name in self.config['static_objects']:
-            # Find structure files
-            psf_file = Path(f"{obj_name}.psf")
-            pdb_file = Path(f"{obj_name}.pdb")
-            
-            if not (psf_file.exists() and pdb_file.exists()):
-                logger.warning(f"Structure files for static object {obj_name} not found: {psf_file}, {pdb_file}")
-                continue
-                
-            # Determine if it's a gigantic object
-            is_gigantic = self.config.get('gigantic_stat_objects', False)
-            
-            logger.info(f"Adding static object: {obj_name} (gigantic: {is_gigantic})")
-            
-            # Create work directory
-            work_dir = Path(self.config.get('parameters_folder', './parameters')) / f"static_{obj_name}"
-            
-            # Add to model
-            model.add_static_object(
-                structure_path=psf_file,  # Use PSF as primary file
-                work_dir=work_dir,
-                is_gigantic=is_gigantic,
-                threshold=300  # Default threshold
-            )
-            
-    def run_simulation(self, model: RBContactModel, engine: RBContactEngine):
-        """
-        Run the simulation.
-        
-        Args:
-            model: RBContactModel to simulate
-            engine: RBContactEngine to use for simulation
-        """
-        # Set up output directory
-        sim_path = self.config.get('simulation_path', './simulation')
-        output_dir = Path(sim_path) / 'output'
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Determine number of replicas
-        replicas = self.config.get('num_replicas', 1)
-        
-        # Run simulation
-        logger.info(f"Running simulation with {replicas} replicas")
-        
-        engine.run_simulation(
-            model=model,
-            output_name=Path(self.config_path).stem,
-            replicas=replicas,
-            output_directory=str(output_dir),
-            directory=str(sim_path)
-        )
-   
-def rbcontact():
-    """
-    Main function to process RBContact configuration file and run simulation.
-    """
-    parser = argparse.ArgumentParser(description='Process RBContact configuration file')
-    parser.add_argument('config_file', help='Path to RBContact configuration file')
-    parser.add_argument('--setup-only', action='store_true', help='Only set up the simulation, do not run it')
-    args = parser.parse_args()
-    
-    # Parse configuration file
-    try:
-        config = RBContactConfig(args.config_file)
-    except Exception as e:
-        logger.error(f"Error parsing configuration file: {e}")
-        return 1
-        
-    # Create model and engine
-    model = config.create_model()
-    engine = config.create_engine()
-    
-    # Set up diffusible and static objects
-    config.setup_diffusible_objects(model)
-    config.setup_static_objects(model)
-    
-    if not args.setup_only:
-        # Run simulation
-        config.run_simulation(model, engine)
-    else:
-        logger.info("Setup complete. Simulation not started (--setup-only flag used)")
-    
-    return 0
+        return self.add(obj)

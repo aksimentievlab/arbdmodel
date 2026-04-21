@@ -720,8 +720,9 @@ class MeshProcessor:
         
         # Run HydroPro to get hydrodynamic properties
         self.runner = HydroProRunner(
-            self.mass,self.simconf,
-            structure_name="hydrocal",cal_type="mesh"
+            self.mass, self.simconf,
+            structure_name="hydrocal", cal_type="mesh",
+            inertia=list(self.principal_moments),
         )
         
         results = self.runner.run_calculation(work_dir=work_dir)
