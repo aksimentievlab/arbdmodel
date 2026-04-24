@@ -286,7 +286,7 @@ class PdbProcessor:
             grid[ids] = grid[ids] + (netCharge - np.sum(grid)) / numPoints
         
         # Write output
-        writeDx(str(charge_out), grid, origin, [delta, delta, delta])
+        writeDx(str(charge_out), grid, origin, delta)
         
         # Clean up temporary files
         try:

@@ -41,15 +41,25 @@ def writeDx(outfile, data, origin, delta, fmt="%.12f"):
   AssertionError
     If data is not a 3D array or if origin or delta do not have length 3.
   """
-  
+
   shape = np.shape(data)
   num = np.prod(shape)
   assert( len(shape) == 3 )
   assert( len(origin) == 3 )
-  assert( len(delta) == 3 )
+
+  delta = np.array(delta)
+  if delta.size == 1 or delta.size == 3:
+    delta = np.eye(3) * delta
+  elif delta.size == 9:
+    pass
+  else:
+    raise ValueError(f'writeDx: argument delta should be 1, 3 or 9 element object')
+
   headerInfo = dict( nx=shape[0], ny=shape[1], nz=shape[2],
                      ox=origin[0], oy=origin[1], oz=origin[2],
-                     dx=delta[0], dy=delta[1], dz=delta[2],
+                     dxx=delta[0][0], dxy=delta[0][1], dxz=delta[0][2],
+                     dyx=delta[1][0], dyy=delta[1][1], dyz=delta[1][2],
+                     dzx=delta[2][0], dzy=delta[2][1], dzz=delta[2][2],
                      num=num
                    )
   data = data.flatten(order='C')
@@ -57,9 +67,9 @@ def writeDx(outfile, data, origin, delta, fmt="%.12f"):
 # File format: http://opendx.sdsc.edu/docs/html/pages/usrgu068.htm#HDREDF
 object 1 class gridpositions counts  {nx} {ny} {nz}
 origin {ox} {oy} {oz}
-delta  {dx} 0.000000 0.000000
-delta  0.000000 {dy} 0.000000
-delta  0.000000 0.000000 {dz}
+delta  {dxx} {dxy} {dxz}
+delta  {dyx} {dyy} {dyz}
+delta  {dzx} {dzy} {dzz}
 object 2 class gridconnections counts  {nx} {ny} {nz}
 object 3 class array type double rank 0 items {num} data follows""".format(**headerInfo)
   len(data)
@@ -195,7 +205,7 @@ def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):
     smoothed_grid = gaussian_filter(grid, sigma=gaussian_sigma)
     
     # Save the smoothed grid
-    writeDx(str(out_file), smoothed_grid, origin, [delta]*3)
+    writeDx(str(out_file), smoothed_grid, origin, delta)
     return Path(out_file).absolute()
 
 
@@ -213,7 +223,7 @@ def Bound_grid(inFile,  lowerBound, upperBound,outFile=None):
     if outFile is None:
       outFile=inFile
     # Write output
-    writeDx(outFile, grid, origin, [delta, delta, delta])
+    writeDx(outFile, grid, origin, delta)
 
 def Create_null(grid_path='null.dx'):
     """Create null potential grid"""
