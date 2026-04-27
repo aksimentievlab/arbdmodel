@@ -602,6 +602,8 @@ class ArbdEngine(SimEngine):
         else:
             params['seed'] = "seed {:d}".format(configuration.seed)
         params['num_steps']       = int(configuration.num_steps)
+        for k in ('output_period','decomp_period'):
+            params[k] = int(params[k])
 
         # params['coordinateFile'] = "%s.coord.txt" % prefix
         params['particle_file'] = "%s.particles.txt" % prefix
@@ -642,16 +644,16 @@ class ArbdEngine(SimEngine):
         with open(filename,'w') as fh:
             fh.write("""{seed}
 timestep {timestep}
-steps {num_steps}
+steps {num_steps:d}
 temperature {temperature}
 ParticleDynamicType {integrator}{rigid_body_integrator}
 
-outputPeriod {output_period}
-outputEnergyPeriod {output_period}
+outputPeriod {output_period:d}
+outputEnergyPeriod {output_period:d}
 outputFormat dcd
 
 ## Infrequent domain decomposition because this kernel is still very slow
-decompPeriod {decomp_period}
+decompPeriod {decomp_period:d}
 cutoff {cutoff}
 pairlistDistance {pairlist_distance}
 
