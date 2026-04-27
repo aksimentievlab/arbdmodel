@@ -900,6 +900,17 @@ class RigidBodyType(ParticleType):
         if particle.parent is not None:
             raise ValueError('RigidBody-attached particles are not allowed to have a parent')
         self.attached_particles.append( particle )
+
+    @property
+    def directory(self):
+        try:
+            return self.__directory
+        except:
+            return self.name
+
+    @directory.setter
+    def directory(self, value):
+        self.__directory = value
         
     def _equal_check(a,b):
         if a.name == b.name:

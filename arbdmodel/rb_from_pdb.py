@@ -24,11 +24,13 @@ class DiffusiveRigidBodyType(RigidBodyType):
 
         # Parent model work_dir, or cwd
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
+        self.directory = kwargs.pop("directory",None)
+        if self.directory is None:
+            rb_dir = self.directory = self.work_dir / "rbs" / name
 
         # Create the RB output directory within work_dir
-        rb_dir = self.work_dir / "rbs" / name
         os.makedirs(rb_dir, exist_ok=True)
-        
+
         if simconf is None:
             from . import DefaultSimConf
             simconf = DefaultSimConf()
@@ -323,4 +325,3 @@ exit
                     self.elec_grid = Path(segment_processor.elec_dx)
         
         logger.info(f"Completed processing gigantic static object: {self.name}")
- 

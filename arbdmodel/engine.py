@@ -241,7 +241,7 @@ class ArbdEngine(SimEngine):
         for rbk, num in model.rigid_body_type_counts:
             if num > 0:
                 rbt = model.rigid_body_index[rbk]
-                rb_dir = rbt.name  # Create top-level directory named after the RigidBodyType
+                rb_dir = rbt.directory  # Create top-level directory named after the RigidBodyType
                 if not os.path.exists(rb_dir):
                     os.makedirs(rb_dir)
                 rb_type_dirs[rbt.name] = rb_dir
@@ -304,7 +304,7 @@ class ArbdEngine(SimEngine):
                     # Use RB-specific directory
                     rb_dir = self.rb_type_dirs.get(rbt.name)
                     if not rb_dir:
-                        logger.warning(f"No directory found for RigidBodyType {rbt.name}, using default")
+                        logger.warning(f"No directory found for RigidBodyType {rbt.name}, using default: {self.potential_directory}")
                         rb_dir = self.potential_directory
                     
                     # Create the attached particles file inside the RB directory
@@ -569,26 +569,28 @@ class ArbdEngine(SimEngine):
 
         ## Create helper function
         def _fix_path(filename, rb_type=None):
+
+            def _make_rel(abspath):
+                try:
+                    return os.path.relpath(str(abspath))
+                except:
+                    devlogger.info(f'Relative path for {filename} not found... using {abspath}')
+                    return abspath
+
             if rb_type and rb_type in self.rb_type_dirs:
                 # First, check if this is an existing file within the RB directory
                 rb_dir = self.rb_type_dirs[rb_type]
                 basename = os.path.basename(str(filename))
                 rb_path = os.path.join(rb_dir, basename)
                 if os.path.exists(rb_path):
-                    return rb_path
+                    return _make_rel(rb_path)
                 
                 # Check if this might be a resource we want to place in the RB directory
                 if basename.startswith(rb_type) or rb_type in str(filename):
-                    return rb_path
-            
-            abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
-            ret = None
-            try: 
-                ret = os.path.relpath(str(abspath))
-            except:
-                devlogger.info(f'Relative path for {filename} not found... using {abspath}')
-                ret = abspath
-            return str(ret)
+                    return _make_rel(rb_path)
+            else:
+                abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
+                return str(_make_rel(abspath))
         
         ## Build dictionary of parameters
         params = dict()
