@@ -1,4 +1,5 @@
 import os
+import io
 import subprocess
 import numpy as np
 from pathlib import Path
@@ -191,9 +192,17 @@ class PdbProcessor:
             self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
             self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
             
-            
-            cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} < {align_tcl}"
-            subprocess.run(cmd, shell=True, check=True)
+            cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name]
+            last_dir = os.getcwd()
+            try:
+                os.chdir(self.work_dir)
+                with open(align_tcl) as fh:
+                    _result = subprocess.run(cmd, check=True, capture_output=True, stdin=fh)
+            except:
+                raise
+            finally:
+                os.chdir(last_dir)
+
 
             # Read mass and inertia
             mass_file = self.work_dir / f"{self.base_name}.mass.txt"
@@ -250,8 +259,9 @@ class PdbProcessor:
             logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
-        cmd = f"{self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
-        subprocess.run(cmd, shell=True, check=True)
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', aligned_path]
+        with open(charge_tcl) as fh:
+            subprocess.run(cmd, check=True, capture_output=True, stdin=fh)
         
         # Check if charge distribution was created successfully
         charge_dx = self.work_dir / f"{aligned_name}.chargeDensity.dx"
@@ -367,9 +377,20 @@ class PdbProcessor:
             vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
             logger.debug(f"Clustering script written to {vdw_tcl}")
 
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
+        _env = os.environ.copy()
+        _env['VMDNOCUDA']=1
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name]
+        last_dir = os.getcwd()
         logger.info(f"Running clustering command: {cmd}")
-        subprocess.run(cmd, shell=True, check=True)
+        try:
+            os.chdir(self.work_dir)
+            with open(vdw_tcl) as fh:
+                subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
+        except:
+            raise
+        finally:
+            os.chdir(last_dir)
+
 
         tmp_file = self.work_dir / "tmp.dat"
         hyd_file = self.work_dir / "hyd.dat"
@@ -425,8 +446,16 @@ class PdbProcessor:
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
-        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_tcl}"
-        subprocess.run(cmd, shell=True, check=True)
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path]
+        last_dir = os.getcwd()
+        try:
+            os.chdir(self.work_dir)
+            with open(vdw_tcl) as fh:
+                subprocess.run(cmd, check=True, capture_output=True, stdin=fh)
+        except:
+            raise
+        finally:
+            os.chdir(last_dir)
 
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
@@ -642,8 +671,18 @@ class PdbProcessor:
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
         
         # Run VMD
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_script}"
-        subprocess.run(cmd, shell=True, check=True)
+        _env = os.environ.copy()
+        _env['VMDNOCUDA']=1
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path]
+        last_dir = os.getcwd()
+        try:
+            os.chdir(self.work_dir)
+            with open(vdw_script) as fh:
+                subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
+        except:
+            raise
+        finally:
+            os.chdir(last_dir)
         
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
@@ -666,13 +705,23 @@ class PdbProcessor:
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
         # First generate VDW maps for each segment
+        _env = os.environ.copy()
+        _env['VMDNOCUDA']=1
         for segment_idx in range(self.segment_count + 1):
             segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
             
             # Generate VDW maps for this segment
             vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
-            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} {cluster_path} < {vdw_script}"
-            subprocess.run(cmd, shell=True, check=True)
+            cmd = [self.vmd_path, '-dispdev', 'text', '-args', segment_name, cluster_path]
+            last_dir = os.getcwd()
+            try:
+                os.chdir(self.work_dir)
+                with open(vdw_script) as fh:
+                    subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
+            except:
+                raise
+            finally:
+                os.chdir(last_dir)
 
         # Write map gluing script
         glue_script = self.write_map_gluing_script()
@@ -692,8 +741,11 @@ class PdbProcessor:
                     last_map = temp_map
                 else:
                     # Glue with previous map
-                    cmd = f"VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {last_map} {current_map} {temp_map} < {glue_script}"
-                    subprocess.run(cmd, shell=True, check=True)
+                    _env = os.environ.copy()
+                    _env['VMDNOCUDA']=1
+                    cmd = [self.vmd_path,'-dispdev','text','-args',last_map,current_map,temp_map]
+                    with open(glue_script) as fh:
+                        subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
                     last_map = temp_map
             
             # Create final map

@@ -88,7 +88,7 @@ class SimEngine(metaclass=ABCMeta):
                             try:
                                 fd.write(line)
                             except:
-                                print("WARNING: could not encode line; your locale might not be set correctly")
+                                logger.warning("Could not encode line; your locale might not be set correctly")
                             fd.flush()
                 else:
                     with open(log_file,'w') as fd:
@@ -1293,7 +1293,7 @@ hydro.pdb\t!Input PDB file
 
             # Run HydroPro
             if not Path(f"{structure_name}.hydro-res.txt").exists():
-                logger.info(f'Running hydropro in {work_dir} on {self.full_name}')
+                logger.info(f'Running hydropro in {work_dir} on {self.full_name}; this may take several minutes')
                 result = subprocess.run(str(self.binary), capture_output=True, 
                                  text=True,check=True)
             else:
