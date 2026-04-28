@@ -1371,14 +1371,14 @@ class APBSRunner:
             IOError: If unable to write configuration file
         """
         # Calculate grid dimensions
-        xyz_cg = [str(int(dim + self.buffer)) for dim in self.xyz_dims]
+        xyz_cg = [(dim + self.buffer) for dim in self.xyz_dims]
         
         if not self.large_system:
             xyz_dime = xyz_cg
         else:
             # For large systems, reduce grid density
-            xyz_dime = [str(int((dim + self.buffer) / self.dividend)) for dim in self.xyz_dims]
-            
+            xyz_dime = [((dim + self.buffer) / self.dividend) for dim in self.xyz_dims]
+        xyz_dime = [int(np.ceil(x/32)*32+1) for x in xyz_dime]
         center = 'mol 1'  # Use molecule center for both cases
         
         config = f"""read
@@ -1386,25 +1386,24 @@ mol pqr {self.structure_name}.pqr
 end
 elec
 mg-auto
-dime {' '.join(xyz_dime)}
-cglen {' '.join(xyz_cg)}
+dime {' '.join(map(str,xyz_dime))}
+cglen {' '.join(map(str,xyz_cg))}
 cgcent {center}
-fglen {' '.join(xyz_cg)}
+fglen {' '.join(map(str,xyz_cg))}
 fgcent {center}
 mol 1
 npbe
 bcfl sdh
 srfm smol
 chgm spl2
-ion 1 {self.salt} 2.0
-ion -1 {self.salt} 2.0
+ion charge  1 conc {self.salt} radius 2.0
+ion charge -1 conc {self.salt} radius 2.0
 pdie 12.0
 sdie 78.54
 sdens 10.0
 srad 1.4
 swin 0.3
 temp {self.temperature}
-gamma 0.105
 calcenergy no
 calcforce no
 write pot dx {self.structure_name}.elec
@@ -1441,6 +1440,7 @@ quit"""
             
             # Run APBS
             if not Path(f"{self.structure_name}.elec.dx").exists():
+                logger.info(f'Running apbs in {workdir} on {self.structure_name}')
                 result = subprocess.run(
                     [str(self.binary), f"{self.structure_name}.apbs"],
                     capture_output=True,
