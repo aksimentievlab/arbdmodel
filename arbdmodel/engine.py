@@ -1158,7 +1158,7 @@ class HydroProRunner:
         self.cal_type = cal_type
         
     def write_config(self, output_path="hydropro.dat",
-                     aer=2.9,nsig=6,sig_min=1,sig_max=2,specific_volume=0.702,):
+                     aer=2.9,nsig=6,sig_min=1.2,sig_max=3.0,specific_volume=0.702,):
         """Write HydroPro configuration file with explicit parameters.
         
         Args:
@@ -1181,32 +1181,35 @@ class HydroProRunner:
             specific_volume=1
 
         with open(output_path, 'w') as f:
-            # Basic identification
-            f.write(f"{self.structure_name}\n")                  # Name of molecule
-            f.write(f"{self.structure_name[0:10]}.hydro\n")           # Base name for output files
-            f.write("hydro.pdb\n")                         
-            f.write("1\n")                                  # Calculation type always 1 (bead surface model)
+            # Basic input
+            f.write(f"""\
+{self.structure_name}\t!Name of molecule
+{self.structure_name[0:10]}.hydro\t!Base name for output files
+hydro.pdb\t!Input PDB file
+1\t!Type of calculation (1=bead surface model)""")
 
             # Bead model parameters
-            f.write(f"{aer},\n")                            # AER (radius in Angstroms)
-            f.write(f"{nsig},\n")                           # NSIG (values of shell thickness)
-            f.write(f"{sig_min},\n")                        # SIGMIN (min bead radius)
-            f.write(f"{sig_max},\n")                        # SIGMAX (max bead radius)
+            f.write(f"""
+{aer},\t!AER, hydrodynamic radius in Angstroms
+{nsig},\t!NSIG, value of shell thickness
+{sig_min},\t!SIGMIN (minimum bead radius)
+{sig_max},\t!SIGMIN (maximum bead radius)""")
             
             # Physical parameters
-            f.write(f"{temperature_c},\n")                  # Temperature in Celsius
-            f.write(f"{self.viscosity},\n")                      # Solvent viscosity in poise
-            f.write(f"{self.mass},\n")                           # Molecular weight in Daltons
-            f.write(f"{specific_volume},\n")                # Partial specific volume
-            f.write(f"{self.solvent_density}\n")                 # Solvent density
+            f.write(f"""
+{temperature_c},\t!Temperature in Celcius
+{self.viscosity or 0.01},\t!Solvent viscosity in poise
+{self.mass},\t!Molecular weight in Dalton
+{specific_volume},\t!Partial specific volume, cm**3/g
+{self.solvent_density or 1.0},\t!Solvent density, g/cm**3""")
             
             # Calculation control parameters
-            f.write("-1\n")                       # Number of Q values
-            f.write("-1\n")                      # Number of intervals
-            f.write("0\n")                      # Monte Carlo trials
-            f.write("1\n")                                  # IDIF=1 (yes) for full diffusion tensors
-            f.write("*")                                    # End marker
-
+            f.write(f"""
+0\t!Number of Q values
+0\t!Number of intervals
+0\t!Monte Carlo trials
+1\t!IDIF=1 for full diffusion tensors
+*\n""")
 
     def parse_output(self, output_file):
         mass=self.mass
@@ -1284,10 +1287,11 @@ class HydroProRunner:
             pdb_path = Path(f"{self.full_name}.pdb")
             if not pdb_path.exists():
                 raise FileNotFoundError(f"Structure file not found: {pdb_path}")
-            
             os.symlink(pdb_path, "hydro.pdb")
+
             # Run HydroPro
             if not Path(f"{structure_name}.hydro-res.txt").exists():
+                logger.info(f'Running hydropro in {work_dir} on {self.full_name}')
                 result = subprocess.run(str(self.binary), capture_output=True, 
                                  text=True,check=True)
             else:
@@ -1544,13 +1548,13 @@ while { $continue } {
     set R [trans_from_rotate $principleAxes]
     ## Fix left-handed principle axes sometimes returned by 'measure inertia'
     if { ! [rotationIsRightHanded $R] } {
-        puts "This was true"
+        # puts "This was true"
         # puts "rotation $R is not right handed! Fixing!"
         set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
     }
 
-    puts "My rotation is here: $R"
-    puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
+    # puts "My rotation is here: $R"
+    # puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
 
     ## Apply rotation and check that it worked
     $all move $R
