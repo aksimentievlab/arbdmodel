@@ -1158,7 +1158,7 @@ class HydroProRunner:
         self.cal_type = cal_type
         
     def write_config(self, output_path="hydropro.dat",
-                     aer=2.9,nsig=6,sig_min=1.2,sig_max=3.0,specific_volume=0.702,):
+                     aer=4.8,nsig=6,sig_min=1.2,sig_max=3.0,specific_volume=0.702,):
         """Write HydroPro configuration file with explicit parameters.
         
         Args:
@@ -1173,7 +1173,9 @@ class HydroProRunner:
             specific_volume: Partial specific volume in cm³/g
         """
         temperature_c = self.temperature - 273.15  # Convert K to C
+        _calculation_type = 2
         if self.cal_type=="mesh" or self.cal_type==1:
+            _calculation_type = 1
             aer=10
             nsig=4
             sig_min=10
@@ -1186,7 +1188,7 @@ class HydroProRunner:
 {self.structure_name}\t!Name of molecule
 {self.structure_name[0:10]}.hydro\t!Base name for output files
 hydro.pdb\t!Input PDB file
-1\t!Type of calculation (1=bead surface model)""")
+{_calculation_type}\t!Type of calculation (1==atomic shell model, 2==residue shell model)""")
 
             # Bead model parameters
             f.write(f"""
