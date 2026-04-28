@@ -441,8 +441,8 @@ class SwitchPot(AbstractPotential):
         #         if getattr(p,attr) != getattr(self,attr):
         #             logger
 
-        if p1 is None: p1 = NullPotential()
-        if p2 is None: p2 = NullPotential()
+        if p1 is None: p1 = NullPotential(range_=range_, resolution=resolution)
+        if p2 is None: p2 = NullPotential(range_=range_, resolution=resolution)
 
         self.potential1 = p1
         self.potential2 = p2
@@ -465,7 +465,7 @@ class SwitchPot(AbstractPotential):
         return hash((hash(self.potential1),hash(self.potential2)))
 
     def __eq__(self,other):
-        if isinstance(other, SwitchPotential): return False
+        if isinstance(other, SwitchPot): return False
         return (self.potential1 == other.potential1) and (self.potential2 == other.potential2)
 
 ## Bonded potentials            
