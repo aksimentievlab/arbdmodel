@@ -26,7 +26,7 @@ class DiffusiveRigidBodyType(RigidBodyType):
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
         self.directory = kwargs.pop("directory",None)
         if self.directory is None:
-            rb_dir = self.directory = self.work_dir / "rbs" / name
+            rb_dir = self.directory = Path.cwd() / self.work_dir / "rbs" / name
 
         # Create the RB output directory within work_dir
         os.makedirs(rb_dir, exist_ok=True)

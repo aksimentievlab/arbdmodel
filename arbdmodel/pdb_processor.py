@@ -305,8 +305,8 @@ class PdbProcessor:
         except OSError:
             pass
             
-        self.charge_dx = charge_out
-        self.charge_density_dx = charge_dx
+        self.charge_dx = Path.cwd() / charge_out
+        self.charge_density_dx = Path.cwd() / charge_dx
         
         logger.info(f"Charge distribution generated with net charge: {np.sum(grid):.6f}")
     
@@ -335,11 +335,11 @@ class PdbProcessor:
         # Run APBS
         #cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
         #subprocess.run(cmd, shell=True, check=True)
-        
-        out_file = self.work_dir / f"{aligned_name}.elec.dx"
+
+        out_file = Path.cwd() / self.work_dir / f"{aligned_name}.elec.dx"
         Bound_grid(inFile=out_file, lowerBound=-20, upperBound=20)
         
-        self.elec_dx = Path(out_file)
+        self.elec_dx = out_file
         logger.info(f"Electrostatic map generated for {aligned_name}")
 
 
@@ -461,8 +461,8 @@ class PdbProcessor:
         self.vdw_den_dxs = []
         
         for i in range(self.num_heavy_cluster + 1):
-            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
-            den_file = self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
+            pot_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
             
             if not pot_file.exists():
                 logger.warning(f"VDW potential file not found: {pot_file}")
@@ -689,11 +689,11 @@ class PdbProcessor:
 
         # Bound the grid values
         for i in range(self.num_heavy_cluster + 1):
-            pot_file = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            pot_file = Path.cwd() /self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
             if os.path.isfile(pot_file):
                 Bound_grid(inFile=pot_file, lowerBound=-20, upperBound=20)
                 self.vdw_pot_dxs.append(pot_file)
-            den_file = self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
+            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
             if os.path.isfile(den_file):
                 self.vdw_den_dxs.append(den_file)
 
@@ -750,8 +750,8 @@ class PdbProcessor:
             
             # Create final map
             if os.path.isfile(last_map):
-                temp_out = self.work_dir / f"{self.base_name}.vdw{i}.pot.tmp.dx"
-                final_out = self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+                temp_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.tmp.dx"
+                final_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
                 
                 shutil.copy(last_map, temp_out)
                 Bound_grid(inFile=temp_out, outFile=final_out, lowerBound=-20, upperBound=20)
