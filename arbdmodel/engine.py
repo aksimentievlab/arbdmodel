@@ -673,7 +673,6 @@ class ArbdEngine(SimEngine):
             fh.write("""{seed}
 timestep {timestep}
 steps {num_steps}
-numberFluct 0                   # deprecated
 
 interparticleForce 1            # other values deprecated
 fullLongRange 0                 # deprecated
