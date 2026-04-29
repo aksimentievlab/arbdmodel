@@ -4,7 +4,7 @@ from inspect import ismethod
 from copy import copy, deepcopy
 from pathlib import Path
 from .logger import logger, get_resource_path,devlogger
-from .interactions import SwitchPot 
+from .interactions import SwitchPotential
 
 class Citation():
     def __init__(self, author=None, title=None, journal=None, volume=None, number=None, pages=None, year=None, doi=None):
@@ -111,12 +111,12 @@ class BondedTerm():
         self.potential = potential
 
         if switch_schedule is None: switch_schedule = []
-        if len(switch_schedule) > 0 and not isinstance(potential,SwitchPot):
+        if len(switch_schedule) > 0 and not isinstance(potential,SwitchPotential):
             raise ValueError("Bonded term's potential is not switchable")
         self.switch_schedule = switch_schedule
 
     def add_switch_step(self, step, value):
-        if  not isinstance(self.potential,SwitchPot):
+        if  not isinstance(self.potential,SwitchPotential):
             raise ValueError("Bonded term's potential is not switchable")
 
         if step < 0:
