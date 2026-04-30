@@ -88,7 +88,7 @@ class SimEngine(metaclass=ABCMeta):
                             try:
                                 fd.write(line)
                             except:
-                                print("WARNING: could not encode line; your locale might not be set correctly")
+                                logger.warning("Could not encode line; your locale might not be set correctly")
                             fd.flush()
                 else:
                     with open(log_file,'w') as fd:
@@ -241,7 +241,7 @@ class ArbdEngine(SimEngine):
         for rbk, num in model.rigid_body_type_counts:
             if num > 0:
                 rbt = model.rigid_body_index[rbk]
-                rb_dir = rbt.name  # Create top-level directory named after the RigidBodyType
+                rb_dir = rbt.directory  # Create top-level directory named after the RigidBodyType
                 if not os.path.exists(rb_dir):
                     os.makedirs(rb_dir)
                 rb_type_dirs[rbt.name] = rb_dir
@@ -305,7 +305,7 @@ class ArbdEngine(SimEngine):
                     # Use RB-specific directory
                     rb_dir = self.rb_type_dirs.get(rbt.name)
                     if not rb_dir:
-                        logger.warning(f"No directory found for RigidBodyType {rbt.name}, using default")
+                        logger.warning(f"No directory found for RigidBodyType {rbt.name}, using default: {self.potential_directory}")
                         rb_dir = self.potential_directory
                     
                     # Create the attached particles file inside the RB directory
@@ -601,26 +601,28 @@ class ArbdEngine(SimEngine):
 
         ## Create helper function
         def _fix_path(filename, rb_type=None):
+
+            def _make_rel(abspath):
+                try:
+                    return os.path.relpath(str(abspath))
+                except:
+                    devlogger.info(f'Relative path for {filename} not found... using {abspath}')
+                    return abspath
+
             if rb_type and rb_type in self.rb_type_dirs:
                 # First, check if this is an existing file within the RB directory
                 rb_dir = self.rb_type_dirs[rb_type]
                 basename = os.path.basename(str(filename))
                 rb_path = os.path.join(rb_dir, basename)
                 if os.path.exists(rb_path):
-                    return rb_path
+                    return _make_rel(rb_path)
                 
                 # Check if this might be a resource we want to place in the RB directory
                 if basename.startswith(rb_type) or rb_type in str(filename):
-                    return rb_path
-            
-            abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
-            ret = None
-            try: 
-                ret = os.path.relpath(str(abspath))
-            except:
-                devlogger.info(f'Relative path for {filename} not found... using {abspath}')
-                ret = abspath
-            return str(ret)
+                    return _make_rel(rb_path)
+            else:
+                abspath = str(filename) if str(filename)[0] == '/' else Path(model._d_orig) / filename
+                return str(_make_rel(abspath))
         
         ## Build dictionary of parameters
         params = dict()
@@ -632,6 +634,8 @@ class ArbdEngine(SimEngine):
         else:
             params['seed'] = "seed {:d}".format(configuration.seed)
         params['num_steps']       = int(configuration.num_steps)
+        for k in ('output_period','decomp_period'):
+            params[k] = int(params[k])
 
         # params['coordinateFile'] = "%s.coord.txt" % prefix
         params['particle_file'] = "%s.particles.txt" % prefix
@@ -672,20 +676,16 @@ class ArbdEngine(SimEngine):
         with open(filename,'w') as fh:
             fh.write("""{seed}
 timestep {timestep}
-steps {num_steps}
-
-interparticleForce 1            # other values deprecated
-fullLongRange 0                 # deprecated
+steps {num_steps:d}
 temperature {temperature}
 ParticleDynamicType {integrator}{rigid_body_integrator}
 
-outputPeriod {output_period}
-## Energy doesn't actually get printed!
-outputEnergyPeriod {output_period}
+outputPeriod {output_period:d}
+outputEnergyPeriod {output_period:d}
 outputFormat dcd
 
 ## Infrequent domain decomposition because this kernel is still very slow
-decompPeriod {decomp_period}
+decompPeriod {decomp_period:d}
 cutoff {cutoff}
 pairlistDistance {pairlist_distance}
 
@@ -1151,7 +1151,7 @@ HydroProRunner and APBSRunner module provides interfaces to external tools used 
 
 class HydroProRunner:
     """Interface to HydroPro for hydrodynamic calculations"""
-    def __init__(self, mass, simconf=None, structure_name="hydrocal", cal_type="shape"):
+    def __init__(self, mass, simconf=None, structure_name="hydrocal", cal_type="shape", inertia=None):
         """Initialize HydroPro interface.
         
         Args:
@@ -1159,6 +1159,7 @@ class HydroProRunner:
             simconf: SimConf object with temperature, viscosity and solvent_density (optional)
             structure_name: Base name of structure files
             cal_type: shape or mesh, determined by program
+            inertia: Principal moments of inertia [Ix, Iy, Iz] in amu·Å².
         """
         if simconf is None:
             from . import DefaultSimConf
@@ -1183,12 +1184,13 @@ class HydroProRunner:
             
         self.structure_name = structure_name[0:10] if len(structure_name)>10 else structure_name
 
-        self.full_name =structure_name
+        self.full_name = structure_name
         self.mass = mass
+        self.inertia = inertia  # [Ix, Iy, Iz] in amu·Å²
         self.cal_type = cal_type
         
     def write_config(self, output_path="hydropro.dat",
-                     aer=2.9,nsig=6,sig_min=1,sig_max=2,specific_volume=0.702,):
+                     aer=4.8,nsig=6,sig_min=1.2,sig_max=3.0,specific_volume=0.702,):
         """Write HydroPro configuration file with explicit parameters.
         
         Args:
@@ -1203,7 +1205,9 @@ class HydroProRunner:
             specific_volume: Partial specific volume in cm³/g
         """
         temperature_c = self.temperature - 273.15  # Convert K to C
+        _calculation_type = 2
         if self.cal_type=="mesh" or self.cal_type==1:
+            _calculation_type = 1
             aer=10
             nsig=4
             sig_min=10
@@ -1211,32 +1215,35 @@ class HydroProRunner:
             specific_volume=1
 
         with open(output_path, 'w') as f:
-            # Basic identification
-            f.write(f"{self.structure_name}\n")                  # Name of molecule
-            f.write(f"{self.structure_name[0:10]}.hydro\n")           # Base name for output files
-            f.write("hydro.pdb\n")                         
-            f.write("1\n")                                  # Calculation type always 1 (bead surface model)
+            # Basic input
+            f.write(f"""\
+{self.structure_name}\t!Name of molecule
+{self.structure_name[0:10]}.hydro\t!Base name for output files
+hydro.pdb\t!Input PDB file
+{_calculation_type}\t!Type of calculation (1==atomic shell model, 2==residue shell model)""")
 
             # Bead model parameters
-            f.write(f"{aer},\n")                            # AER (radius in Angstroms)
-            f.write(f"{nsig},\n")                           # NSIG (values of shell thickness)
-            f.write(f"{sig_min},\n")                        # SIGMIN (min bead radius)
-            f.write(f"{sig_max},\n")                        # SIGMAX (max bead radius)
+            f.write(f"""
+{aer},\t!AER, hydrodynamic radius in Angstroms
+{nsig},\t!NSIG, value of shell thickness
+{sig_min},\t!SIGMIN (minimum bead radius)
+{sig_max},\t!SIGMIN (maximum bead radius)""")
             
             # Physical parameters
-            f.write(f"{temperature_c},\n")                  # Temperature in Celsius
-            f.write(f"{self.viscosity},\n")                      # Solvent viscosity in poise
-            f.write(f"{self.mass},\n")                           # Molecular weight in Daltons
-            f.write(f"{specific_volume},\n")                # Partial specific volume
-            f.write(f"{self.solvent_density}\n")                 # Solvent density
+            f.write(f"""
+{temperature_c},\t!Temperature in Celcius
+{self.viscosity or 0.01},\t!Solvent viscosity in poise
+{self.mass},\t!Molecular weight in Dalton
+{specific_volume},\t!Partial specific volume, cm**3/g
+{self.solvent_density or 1.0},\t!Solvent density, g/cm**3""")
             
             # Calculation control parameters
-            f.write("-1\n")                       # Number of Q values
-            f.write("-1\n")                      # Number of intervals
-            f.write("0\n")                      # Monte Carlo trials
-            f.write("1\n")                                  # IDIF=1 (yes) for full diffusion tensors
-            f.write("*")                                    # End marker
-
+            f.write(f"""
+0\t!Number of Q values
+0\t!Number of intervals
+0\t!Monte Carlo trials
+1\t!IDIF=1 for full diffusion tensors
+*\n""")
 
     def parse_output(self, output_file):
         mass=self.mass
@@ -1270,11 +1277,22 @@ class HydroProRunner:
         Rz = float(lines[line_num+2].strip().split()[5])
         
         # Convert units
-        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "1/ns"
+        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "amu/ns"
         trans_damp = [24.527692/(x*mass) for x in [Dx, Dy, Dz]]
         
-        # Rotation: "(295 k K) / ((1 /s) *  amu AA^2)" "1/ns"
-        rot_damp = [2.4527692e+17 / (x*mass) for x in [Rx, Ry, Rz]]
+        # Rotation: "(295 k K) / ((1/s) * amu·AA^2)" "amu·AA^2/ns"
+        # Must divide by principal inertia per axis, NOT scalar mass.
+        # Matches SimpleARBD's Accessory_routines_for_ARBD.py:
+        #   Rx,Ry,Rz = [2.4527692e+17/(x*I) for x,I in zip([Rx,Ry,Rz], inertia)]
+        if self.inertia is None:
+            logger.warning(
+                "HydroProRunner: inertia not provided; falling back to mass for rotational "
+                "damping conversion. rotDamping will be WRONG. Pass inertia=[Ix,Iy,Iz]."
+            )
+            rot_inertia = [mass, mass, mass]
+        else:
+            rot_inertia = list(self.inertia)
+        rot_damp = [2.4527692e+17 / (x * I) for x, I in zip([Rx, Ry, Rz], rot_inertia)]
         
         return trans_damp, rot_damp
                 
@@ -1303,12 +1321,15 @@ class HydroProRunner:
             pdb_path = Path(f"{self.full_name}.pdb")
             if not pdb_path.exists():
                 raise FileNotFoundError(f"Structure file not found: {pdb_path}")
-            
             os.symlink(pdb_path, "hydro.pdb")
+
             # Run HydroPro
-            result = subprocess.run(str(self.binary), capture_output=True, 
+            if not Path(f"{structure_name}.hydro-res.txt").exists():
+                logger.info(f'Running hydropro in {work_dir} on {self.full_name}; this may take several minutes')
+                result = subprocess.run(str(self.binary), capture_output=True, 
                                  text=True,check=True)
-            
+            else:
+                logger.info("HydroPro output file already exists:" +f"{structure_name}.hydro-res.txt")
 
             trans_damp, rot_damp = self.parse_output(f"{structure_name}.hydro-res.txt")
             
@@ -1382,14 +1403,14 @@ class APBSRunner:
             IOError: If unable to write configuration file
         """
         # Calculate grid dimensions
-        xyz_cg = [str(int(dim + self.buffer)) for dim in self.xyz_dims]
+        xyz_cg = [(dim + self.buffer) for dim in self.xyz_dims]
         
         if not self.large_system:
             xyz_dime = xyz_cg
         else:
             # For large systems, reduce grid density
-            xyz_dime = [str(int((dim + self.buffer) / self.dividend)) for dim in self.xyz_dims]
-            
+            xyz_dime = [((dim + self.buffer) / self.dividend) for dim in self.xyz_dims]
+        xyz_dime = [int(np.ceil(x/32)*32+1) for x in xyz_dime]
         center = 'mol 1'  # Use molecule center for both cases
         
         config = f"""read
@@ -1397,25 +1418,24 @@ mol pqr {self.structure_name}.pqr
 end
 elec
 mg-auto
-dime {' '.join(xyz_dime)}
-cglen {' '.join(xyz_cg)}
+dime {' '.join(map(str,xyz_dime))}
+cglen {' '.join(map(str,xyz_cg))}
 cgcent {center}
-fglen {' '.join(xyz_cg)}
+fglen {' '.join(map(str,xyz_cg))}
 fgcent {center}
 mol 1
 npbe
 bcfl sdh
 srfm smol
 chgm spl2
-ion 1 {self.salt} 2.0
-ion -1 {self.salt} 2.0
+ion charge  1 conc {self.salt} radius 2.0
+ion charge -1 conc {self.salt} radius 2.0
 pdie 12.0
 sdie 78.54
 sdens 10.0
 srad 1.4
 swin 0.3
 temp {self.temperature}
-gamma 0.105
 calcenergy no
 calcforce no
 write pot dx {self.structure_name}.elec
@@ -1451,15 +1471,16 @@ quit"""
             self.write_config()
             
             # Run APBS
-            try:
+            if not Path(f"{self.structure_name}.elec.dx").exists():
+                logger.info(f'Running apbs in {workdir} on {self.structure_name}')
                 result = subprocess.run(
                     [str(self.binary), f"{self.structure_name}.apbs"],
                     capture_output=True,
                     text=True,
                     check=True
                 )
-            except subprocess.CalledProcessError as e:
-                raise RuntimeError(f"APBS calculation failed: {e.stderr}")
+            else:
+                logger.info("APBS output file already exists:" +f"{self.structure_name}.elec.dx")
             
             # Check for output file
             output_file = Path(f"{self.structure_name}.elec.dx")
@@ -1561,13 +1582,13 @@ while { $continue } {
     set R [trans_from_rotate $principleAxes]
     ## Fix left-handed principle axes sometimes returned by 'measure inertia'
     if { ! [rotationIsRightHanded $R] } {
-        puts "This was true"
+        # puts "This was true"
         # puts "rotation $R is not right handed! Fixing!"
         set R [transmult {{1 0 0 0} {0 1 0 0} {0 0 -1 0} {0 0 0 1}} $R]
     }
 
-    puts "My rotation is here: $R"
-    puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
+    # puts "My rotation is here: $R"
+    # puts "My second line is here: [lassign [measure inertia $sel moments] com principleAxes]"
 
     ## Apply rotation and check that it worked
     $all move $R
@@ -1708,8 +1729,9 @@ set IDs ""
 set minRadius 0.5
 
 package require ilstools
-
-ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
+set prm_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.prm]
+set str_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.str]
+ILStools::readcharmmparams [concat $prm_files $str_files]
 
 set ljParms ""
 set lj_hyd ""
@@ -1873,7 +1895,9 @@ while {[expr ![eof $ch]]} {
 close $ch
 
 package require ilstools
-ILStools::readcharmmparams [glob ''' + str(self.params_dir) + '''/*]
+set prm_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.prm]
+set str_files [glob -nocomplain ''' + str(self.params_dir) + '''/*.str]
+ILStools::readcharmmparams [concat $prm_files $str_files]
 
 
 set ID [mol new $prefix.psf]

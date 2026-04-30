@@ -314,7 +314,8 @@ class SurfaceMeshProcessor:
         self.runner = HydroProRunner(
             self.mass,
             simconf=self.simconf,
-            structure_name="hydrocal"
+            structure_name="hydrocal",
+            inertia=list(self.principal_moments),
         )
         
         results = self.runner.run_calculation(work_dir=work_dir)

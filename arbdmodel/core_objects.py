@@ -940,6 +940,17 @@ class RigidBodyType(ParticleType):
         if particle.parent is not None:
             raise ValueError('RigidBody-attached particles are not allowed to have a parent')
         self.attached_particles.append( particle )
+
+    @property
+    def directory(self):
+        try:
+            return self.__directory
+        except:
+            return self.name
+
+    @directory.setter
+    def directory(self, value):
+        self.__directory = value
         
     def _equal_check(a,b):
         if a.name == b.name:
@@ -1183,7 +1194,7 @@ class RigidBody(PointParticle):
         Child.__init__(self, parent=parent)
         Transformable.__init__(self,position, orientation)
 
-        if type(type_) != RigidBodyType:
+        if not isinstance(type_, RigidBodyType):
             raise ValueError(f'Attempted to create a RigidBody object from an invalid type {type_}')
 
         self.type_    = type_                

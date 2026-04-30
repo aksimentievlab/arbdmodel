@@ -40,6 +40,9 @@ dependencies = [
 Homepage = "https://gitlab.engr.illinois.edu/tbgl/tools/arbdmodel"
 Issues = "https://gitlab.engr.illinois.edu/tbgl/tools/arbdmodel/issues"
 
+[project.scripts]
+contact_model = "arbdmodel.contact_model:contact_model"
+
 [tool.setuptools.packages.find]
 where = ["."]
 

@@ -99,7 +99,7 @@ class _BinaryManager:
             return binary_path
             
         # 3. Not found
-        return None
+        return "Warning: Binary not found"
     
     def _find_binary(self, binary_name):
         """

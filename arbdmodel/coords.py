@@ -392,29 +392,27 @@ def calculate_dimensions_from_cell_vectors(cell_vectors, cell_origin=None, buffe
     Returns:
         dimensions: 3D box dimensions as a tuple (x_dim, y_dim, z_dim)
     """
-    if cell_vectors is None:
-        return None
         
-    # Make sure we have proper cell vectors
     if len(cell_vectors) != 3:
         raise ValueError("Expected 3 cell basis vectors, got {}".format(len(cell_vectors)))
-    
-    # Convert to numpy arrays for easier manipulation
-    vectors = [np.array(v) for v in cell_vectors]
 
-    # Check that vectors are orthogonal and aliged with x,y,z axis
-    if not all( v[i] == np.linalg.norm(v) for i,v in vectors ):
-        raise NotImplementedError('Cell vectors not aligned along x, y and z axes are not yet supported')
-    
-    # Calculate maximum extent along each dimension
-    dimensions = [0, 0, 0]
-    for i in range(3):
-        for v in vectors:
-            dimensions[i] += abs(v[i])
-    
-    # Apply buffer factor
+    vectors = [np.array(v, dtype=float) for v in cell_vectors]
+    print(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
+
+    is_orthogonal = all(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
+    if not is_orthogonal:
+        # For non-orthogonal cells use the axis-aligned bounding box so the
+        # periodic volume fully contains the cell.  ARBD only supports
+        # orthogonal output so these are upper-bound estimates.
+        logger.warning(
+            "Non-orthogonal cell vectors detected; using axis-aligned bounding box "
+            "with buffer_factor=%.2f for internal dimension estimates.", buffer_factor
+        )
+        dimensions = [max(abs(v[i]) for v in vectors) for i in range(3)]
+    else:
+        dimensions = [sum(abs(v[i]) for v in vectors) for i in range(3)]
+
     dimensions = [dim * buffer_factor for dim in dimensions]
-    
     return tuple(dimensions)
 
 def unit_quat_conversions():
