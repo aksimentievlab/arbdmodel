@@ -1,18 +1,31 @@
 """rb_vis.py — VMD visualization helper for ARBD rigid-body trajectories.
 
-Usage (typical)::
+Usage — with any model::
 
-    from arbdmodel import RBContactModel
+    from arbdmodel import ArbdModel, RBContactModel
     from arbdmodel.rb_vis import ArbdVis
 
+    # Works with RBContactModel (DiffusiveRigidBodyType — structure files known)
     model = RBContactModel(...)
-    # ... build model, run simulation ...
-
     vis = ArbdVis(model, traj_path="output/sim.rb-traj", output_dir="vis/")
-    vis.write()   # writes vis/launcher.tcl and vis/run_vis.sh
-    # vis.run()   # also launches VMD immediately
+    vis.write()
 
-Low-level usage (no model object)::
+    # Also works with a plain ArbdModel that has DiffusiveRigidBodyType objects
+    model = ArbdModel(...)
+    vis = ArbdVis(model, traj_path="output/sim.rb-traj", output_dir="vis/")
+    vis.write()
+
+    # Plain RigidBodyType (no structure file) — supply structure paths explicitly
+    model = ArbdModel(...)   # uses bare RigidBodyType, not DiffusiveRigidBodyType
+    vis = ArbdVis(
+        model,
+        traj_path="output/sim.rb-traj",
+        output_dir="vis/",
+        rb_types=[("myRBtype", "/path/to/struct")],  # overrides model lookup
+    )
+    vis.write()
+
+Low-level usage (no model object at all)::
 
     vis = ArbdVis(
         traj_path="output/sim.rb-traj",
@@ -67,6 +80,21 @@ axes location Off
 }
 
 
+def _struct_stem_from_rb_type(rb_type) -> Optional[str]:
+    """Return the structure file stem for a RigidBodyType, or None if unavailable.
+
+    ``DiffusiveRigidBodyType`` objects carry ``aligned_psf`` / ``aligned_pdb``
+    set during construction.  Plain ``RigidBodyType`` objects do not.  The TCL
+    ``loadTrajectory`` proc tries ``<stem>.psf``/``<stem>.pdb`` then
+    ``<stem>.xyz``, so we strip the suffix here.
+    """
+    for attr in ("aligned_psf", "aligned_pdb"):
+        path = getattr(rb_type, attr, None)
+        if path is not None:
+            return str(Path(path).with_suffix(""))
+    return None
+
+
 class ArbdVis:
     """Generate VMD visualization scripts for an ARBD rigid-body simulation.
 
@@ -77,9 +105,14 @@ class ArbdVis:
     output_dir : str or Path
         Directory where ``launcher.tcl`` and ``run_vis.sh`` will be written.
         Created automatically if it does not exist.
-    model : RBContactModel, optional
-        If provided the RB type and static-object information is read directly
-        from ``model._diffusible_rb_types`` and ``model.static_objects``.
+    model : ArbdModel or RBContactModel, optional
+        Any ``ArbdModel`` (or subclass such as ``RBContactModel``).  RB type
+        information is read from the model automatically:
+        ``RBContactModel._diffusible_rb_types`` (preferred) or
+        ``ArbdModel.rigid_body_index`` (fallback for plain models).
+        Types that carry structure files (``DiffusiveRigidBodyType``) are
+        picked up automatically; plain ``RigidBodyType`` objects have no
+        structure file and must be supplemented via *rb_types*.
         Either *model* or *rb_types* must be supplied.
     rb_types : list of (name, struct_path), optional
         Explicit list of ``(key_root, structure_path)`` pairs.  *struct_path*
@@ -173,24 +206,59 @@ class ArbdVis:
 
     @staticmethod
     def _rb_types_from_model(model) -> list:
-        """Extract (name, struct_stem) pairs from an RBContactModel."""
+        """Extract (name, struct_stem) pairs from any ArbdModel or RBContactModel.
+
+        Resolution order for the list of RigidBodyType objects:
+
+        1. ``model._diffusible_rb_types`` — present on ``RBContactModel``, gives
+           ``DiffusiveRigidBodyType`` objects that always carry ``aligned_psf``.
+        2. ``model.rigid_body_index`` — present on any ``ArbdModel`` after
+           ``_count_types()``, maps ``{name: type_object}``.  Works for both
+           ``DiffusiveRigidBodyType`` (has ``aligned_psf``) and plain
+           ``RigidBodyType`` (no structure file; user must supply ``rb_types``
+           manually for those).
+
+        Types with no structure file are skipped with a warning.
+        """
         result = []
-        for rb_type in getattr(model, "_diffusible_rb_types", []):
-            name = rb_type.name
-            # Prefer aligned PSF/PDB if present; fall back to a bare stem so
-            # the TCL loader can probe extensions itself.
-            if hasattr(rb_type, "aligned_psf") and rb_type.aligned_psf is not None:
-                # Pass the stem (without .psf) so the TCL proc can load
-                # the PSF+PDB pair automatically.
-                struct = str(Path(rb_type.aligned_psf).with_suffix(""))
-            elif hasattr(rb_type, "aligned_pdb") and rb_type.aligned_pdb is not None:
-                struct = str(Path(rb_type.aligned_pdb).with_suffix(""))
+
+        # ── Path 1: RBContactModel ────────────────────────────────────────
+        diffusible = getattr(model, "_diffusible_rb_types", None)
+        if diffusible:
+            for rb_type in diffusible:
+                struct = _struct_stem_from_rb_type(rb_type)
+                if struct is not None:
+                    result.append((rb_type.name, struct))
+            return result
+
+        # ── Path 2: plain ArbdModel — read rigid_body_index ──────────────
+        rb_index = getattr(model, "rigid_body_index", None)
+        if rb_index is None:
+            # _count_types() may not have been called yet; trigger it
+            try:
+                model._count_types()
+                rb_index = getattr(model, "rigid_body_index", {})
+            except Exception as exc:
+                logger.warning(f"ArbdVis: could not read RB types from model ({exc}); "
+                               "supply rb_types manually")
+                return result
+
+        for name, rb_type in (rb_index or {}).items():
+            struct = _struct_stem_from_rb_type(rb_type)
+            if struct is not None:
+                result.append((name, struct))
             else:
-                logger.warning(f"ArbdVis: no structure file found for RB type '{name}'; skipping")
-                continue
-            result.append((name, struct))
+                logger.warning(
+                    f"ArbdVis: RB type '{name}' is a plain RigidBodyType with no "
+                    "structure file — add it via the rb_types argument: "
+                    f"rb_types=[('{name}', '/path/to/struct')]"
+                )
+
         if not result:
-            logger.warning("ArbdVis: model has no diffusive RB types with structure files")
+            logger.warning(
+                "ArbdVis: no RB types with structure files found in model; "
+                "supply rb_types manually"
+            )
         return result
 
     @staticmethod
