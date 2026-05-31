@@ -126,6 +126,8 @@ def average_grids(grids, mask='nan'):
     average[sl] = totals[sl] / counts[sl]
     average[counts == 0] = np.nan
     return average
+def write_dx(outfile, data, origin, delta, fmt="%.12f"):
+  writeDx(outfile, data, origin, delta, fmt)
 
 def loadGrid(file, **kwargs):
     """Load grid data from DX file"""
@@ -160,6 +162,10 @@ def loadGrid(file, **kwargs):
             
     # Reshape into 3D array
     grid = np.array(data).reshape(dims)
+    return grid, origin, delta
+
+def load_grid(file, **kwargs):
+    grid, origin, delta = loadGrid(file, **kwargs)
     return grid, origin, delta
 
 def smooth_grid(in_file,out_file=None, gaussian_sigma=2.5,  ):

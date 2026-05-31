@@ -8,9 +8,10 @@ from .config import DefaultSimConf
 from .logger import logger
 from .coords import Generate_coordinates, Generate_spanning_vectors
 from .core_objects import RigidBody, Group
-from .rb_from_pdb import DiffusiveRigidBodyType, StaticObject
+from .rb_from_pdb import PdbToStaticGrids
+from .pdb_rigidbody_type import PdbRigidBodyType
 
-class RBContactModel(ArbdModel):
+class PdbRBModel(ArbdModel):
     """Model class for structure-based rigid body simulations"""
     
     def __init__(self, cell_vectors=None, cell_origin=None,
@@ -82,19 +83,19 @@ class RBContactModel(ArbdModel):
     def add(self, obj):
         """Register contact-model objects or delegate to ``ArbdModel.add``.
 
-        ``DiffusiveRigidBodyType`` instances are collected for pooled LJ clustering
-        in :meth:`build_vdw_maps`. ``StaticObject`` instances are processed after
+        ``PdbRigidBodyType`` instances are collected for pooled LJ clustering
+        in :meth:`build_vdw_maps`. ``PdbToStaticGrids`` instances are processed after
         ``build_vdw_maps`` (cluster file and resolutions are injected from the model).
         ``RigidBody``, ``Group``, and other types use the standard ARBD model logic.
         """
-        if isinstance(obj, DiffusiveRigidBodyType):
+        if isinstance(obj, PdbRigidBodyType):
             self._diffusible_rb_types.append(obj)
             self.shared_cluster_file = None
             return obj
-        if isinstance(obj, StaticObject):
+        if isinstance(obj, PdbToStaticGrids):
             if self.shared_cluster_file is None:
                 raise RuntimeError(
-                    "Call model.build_vdw_maps() before model.add(StaticObject)."
+                    "Call model.build_vdw_maps() before model.add(PdbToStaticGrids)."
                 )
             obj.cluster_file = Path(self.shared_cluster_file)
             obj.pot_resolution = self.pot_resolution
@@ -110,9 +111,9 @@ class RBContactModel(ArbdModel):
         return ret
 
     def _track_diffusible_rigid_bodies(self, obj):
-        """Record rigid bodies whose type is DiffusiveRigidBodyType (for I/O helpers)."""
+        """Record rigid bodies whose type is PdbRigidBodyType (for I/O helpers)."""
         if isinstance(obj, RigidBody):
-            if isinstance(obj.type_, DiffusiveRigidBodyType) and obj not in self.diffusible_objects:
+            if isinstance(obj.type_, PdbRigidBodyType) and obj not in self.diffusible_objects:
                 self.diffusible_objects.append(obj)
         elif isinstance(obj, Group):
             for child in obj.children:
@@ -142,7 +143,7 @@ class RBContactModel(ArbdModel):
         logger.info(f"Processing structure files for {name} from {structure_path}")
             
             # Create the RigidBodyType using rbs/name directory
-        rb_type = DiffusiveRigidBodyType(
+        rb_type = PdbRigidBodyType(
             name=name,
             structure_path=structure_path,
             simconf=self.simconf,
@@ -344,7 +345,7 @@ class RBContactModel(ArbdModel):
 
         For each diffusive ``RigidBodyType``:
           • its ``pmf_grids`` list receives every ``(keyword, path, scale)`` tuple from each
-            ``StaticObject.potential_grids`` — these become ``gridFile`` entries in the ``.bd``
+            ``PdbToStaticGrids.potential_grids`` — these become ``gridFile`` entries in the ``.bd``
             file so ARBD applies the static field as a background PMF to the rigid body.
 
         For each free particle type already registered in the model (``wire_particles=True``):
@@ -425,14 +426,14 @@ class RBContactModel(ArbdModel):
         
         Returns
         -------
-        StaticObject
+        PdbToStaticGrids
             The created and added static object.
         """
         name = Path(structure_path).stem
         static_dir = Path(work_dir) if work_dir else self.work_dir / "static" / name
         os.makedirs(static_dir, exist_ok=True)
 
-        obj = StaticObject(
+        obj = PdbToStaticGrids(
             structure_path=structure_path,
             name=name,
             simconf=self.simconf,
