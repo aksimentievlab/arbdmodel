@@ -641,15 +641,10 @@ class ArbdEngine(SimEngine):
             fh.write("""{seed}
 timestep {timestep}
 steps {num_steps}
-numberFluct 0                   # deprecated
-
-interparticleForce 1            # other values deprecated
-fullLongRange 0                 # deprecated
 temperature {temperature}
 ParticleDynamicType {integrator}{rigid_body_integrator}
 
 outputPeriod {output_period}
-## Energy doesn't actually get printed!
 outputEnergyPeriod {output_period}
 outputFormat dcd
 
