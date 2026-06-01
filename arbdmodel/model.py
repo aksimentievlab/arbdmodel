@@ -843,7 +843,8 @@ class ArbdModel(PdbModel):
         if len(t)==0:
             dummy_type=ParticleType("dummy",1, mass=1, diffusivity=1)
             self.add(PointParticle(dummy_type,np.array([0,0,0])))
-        
+        self._countParticleTypes()
+        self._updateParticleOrder()
     
     def getParticleTypesAndCounts(self):
         """ Includes rigid body-attached particles """
