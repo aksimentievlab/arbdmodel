@@ -251,7 +251,7 @@ class ArbdEngine(SimEngine):
 
         model.write_psf( output_name+'.psf' )
         model.write_pdb( output_name+'.pdb' )
-
+        
         self._write_particle_file(model, output_name + ".particles.txt", configuration)
         
         self._write_restraint_file(model, f"{main_potentials_dir}/{output_name}.restraint.txt")
@@ -661,7 +661,7 @@ systemSize {dimX} {dimY} {dimZ}
             
             ## Write entries for each type of particle
             for pt,(num,num_rigid) in model.getParticleTypesAndCounts():
-                if num+num_rigid == 0: continue
+                #if num+num_rigid == 0: continue
                 devlogger.debug(f'Writing configuration for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
