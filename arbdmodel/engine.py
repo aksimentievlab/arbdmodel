@@ -241,7 +241,7 @@ class ArbdEngine(SimEngine):
         for rbk, num in model.rigid_body_type_counts:
             if num > 0:
                 rbt = model.rigid_body_index[rbk]
-                rb_dir = rbt.name  # Create top-level directory named after the RigidBodyType
+                rb_dir = str(rbt.processor.work_dir) if hasattr(rbt, 'processor') else f"rbs/{rbt.name}"
                 if not os.path.exists(rb_dir):
                     os.makedirs(rb_dir)
                 rb_type_dirs[rbt.name] = rb_dir
@@ -890,6 +890,7 @@ rotDamping {' '.join(map(str,gamma_rot))}
 
                 fh.write(f'\ninputRBCoordinates {self._rb_coordinate_filename}\n')
                 ...
+
                 
         write_null_dx = False
         for pt,(num,num_rb) in model.getParticleTypesAndCounts():

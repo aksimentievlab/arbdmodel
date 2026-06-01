@@ -8,7 +8,7 @@ from .config import DefaultSimConf
 from .logger import logger
 from .coords import Generate_coordinates, Generate_spanning_vectors
 from .core_objects import RigidBody, Group
-from .rb_from_pdb import PdbToStaticGrids
+from .pdb_static_grids import PdbToStaticGrids
 from .pdb_rigidbody_type import PdbRigidBodyType
 
 class PdbRBModel(ArbdModel):
@@ -333,7 +333,7 @@ class PdbRBModel(ArbdModel):
         logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")
         return cluster_file
 
-    def finalize_diffusible_vdw_clustering(self):
+    def finalize_vdw(self):
         """Backward-compatible alias for build_vdw_maps()."""
         return self.build_vdw_maps()
 

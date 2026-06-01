@@ -8,10 +8,10 @@ from . import ArbdEngine
 from .config import SimConf
 from .logger import logger
 from .pdb_rigidbody_type import PdbRigidBodyType
+from .rb_contact_model import PdbRBModel
 
 
-
-class PdbRBEngine(ArbdEngine):
+class ContactModelEngine(ArbdEngine):
     """Engine wrapper for contact-model simulations."""
 
     def __init__(self, extra_bd_file_lines="", configuration=None, **conf_params):
