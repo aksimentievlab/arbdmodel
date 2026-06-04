@@ -245,7 +245,7 @@ class PdbRBModel(ArbdModel):
             
         return created_bodies
 
-    def _run_pooled_clustering(self, all_records, n_heavy):
+    def _run_pooled_clustering(self, all_records, n_heavy, use_hydrogen=False):
         """Run pooled k-means over all LJ records and write a shared cluster file."""
         heavy_records = [r for r in all_records if r["group"] == "heavy"]
         hyd_records = [r for r in all_records if r["group"] == "hydrogen"]
@@ -290,8 +290,8 @@ class PdbRBModel(ArbdModel):
         heavy_clusters = min(n_heavy, heavy_points.shape[0]) if heavy_points.shape[0] > 0 else 0
         assignments_heavy, codebook_heavy = _cluster_points(heavy_points, heavy_weighted, heavy_clusters)
         assignments_hyd, codebook_hyd = _cluster_points(hyd_points, hyd_weighted, 1 if hyd_points.shape[0] > 0 else 0)
-
-        if assignments_hyd.size > 0:
+        
+        if assignments_hyd.size > 0 and use_hydrogen:
             assignments_total = np.concatenate((assignments_heavy, assignments_hyd + heavy_clusters), axis=None)
             codebook_total = np.concatenate((codebook_heavy, codebook_hyd), axis=0)
         else:
@@ -309,7 +309,7 @@ class PdbRBModel(ArbdModel):
                 f.write(f"{radius} {epsilon}{type_array[i]}\n")
         return cluster_file
 
-    def build_vdw_maps(self):
+    def build_vdw_maps(self, use_hydrogen=False):
         """Pool LJ records across all diffusible processors and build shared VDW maps."""
         if not self._diffusible_rb_types:
             logger.info("No diffusible rigid-body types to finalize clustering for.")
@@ -319,7 +319,7 @@ class PdbRBModel(ArbdModel):
         for rb_type in self._diffusible_rb_types:
             all_records.extend(rb_type.processor.lj_type_records)
 
-        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster)
+        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen)
         self.shared_cluster_file = cluster_file
 
         for rb_type in self._diffusible_rb_types:
@@ -443,18 +443,5 @@ class PdbRBModel(ArbdModel):
             pot_resolution=self.pot_resolution,
             den_resolution=self.den_resolution,
             charmm_params_dir=self.charmm_params_dir,
-        )
-        """
-        # Add potential grids to model
-        for grid_type, grid_file, scale in obj.potential_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file, scale)
-            
-        # Add charge grids to model
-        for grid_type, grid_file in obj.charge_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file)
-            
-        # Add electrostatic grid if available
-        if obj.elec_grid:
-            self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
-        """
+        ) 
         return self.add(obj)

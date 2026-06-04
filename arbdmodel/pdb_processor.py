@@ -68,6 +68,7 @@ class PdbProcessor:
         os.makedirs(self.work_dir, exist_ok=True)
         
         if simconf is None:
+            logger.warning("No simulation configuration provided, using default values")
             from . import DefaultSimConf
             simconf = DefaultSimConf()
             
@@ -458,9 +459,11 @@ class PdbProcessor:
         """Get dictionary of grid files for use in RigidBodyType (raw paths; smoothing is applied in rb_from_pdb)."""
         potential_grids = []
         charge_grids = []
+        scale=1.0 / (0.001987204 * self.temperature)
 
         if self.elec_dx and Path(self.elec_dx).exists():
-            potential_grids.append(("elec", str(self.elec_dx), 0.59616195))
+            
+            potential_grids.append(("elec", str(self.elec_dx), scale))
 
         if self.charge_dx and self.charge_dx.exists():
             charge_grids.append(("elec", str(self.charge_dx)))
@@ -468,7 +471,7 @@ class PdbProcessor:
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             vdw_key = f"vdw{i}"
             if pot_file.exists():
-                potential_grids.append((vdw_key, str(pot_file), 0.59616195))
+                potential_grids.append((vdw_key, str(pot_file), scale))
 
         for i, den_file in enumerate(self.vdw_den_dxs):
             vdw_key = f"vdw{i}"
@@ -493,6 +496,7 @@ class PdbProcessor:
 
     def get_rb_type(self):
         """Get RigidBodyType for the processed structure."""
+        logger.warning("Only use this if you only have 1 rb type")
         self.preprocess_diffusive_structure()
         if self.clustered_path.exists():
             self.generate_vdw_diffusive(cluster_file=self.clustered_path)

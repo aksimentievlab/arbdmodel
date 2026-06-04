@@ -132,10 +132,29 @@ _types = dict(
                      charge = 0,
                      sigma = 5.86,
                      freq=0.011
+                 ),
+#adenine, cytosine, guanine, and uracil
+    A_RNA=ParticleType("ADE",
+                     mass = 347,
+                     charge = -1,
+                 ),
+    C_RNA=ParticleType("CYT",
+                     mass = 323,
+                     charge = -1,
+                 ),
+    G_RNA=ParticleType("GUA",
+                     mass = 363,
+                     charge = -1,
+                 ),
+    U_RNA=ParticleType("URA",
+                     mass = 324,
+                     charge = -1,
                  )
 )
 epsilon_dict = {}
 sigma_dict={}
+RNA_resnames=["ADE","CYT","GUA","URA"]
+
 resnames=[]
 for k,t in list(_types.items()):
     t.resname = t.name
@@ -144,6 +163,7 @@ for k,t in list(_types.items()):
 df=pd.read_csv(get_resource_path("mpipi_params/mpipi_protein_resname.csv"))
 df.index=df["MPIPI"]
 df.fillna(0,inplace=True)
+
 
 for i in resnames:
     for j in resnames:
@@ -160,7 +180,7 @@ for i in resnames:
 
     
 class MpipiNonbonded(AbstractPotential):
-    def __init__(self, debye_length=7.95, resolution=0.1, range_=(0,35)):
+    def __init__(self, resolution=0.1, range_=(0,35)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
         self.debye_length = 7.95 # fixed per paper (795 pm, 0.15 m NaCl); user-supplied value intentionally ignored
         self.max_force = 100
@@ -178,13 +198,18 @@ class MpipiNonbonded(AbstractPotential):
             q2=typeB.charge*0.375
         else: 
             q2 = typeB.charge*0.75
+
         D = 80                  # dielectric of water
         ## units "e**2 / (4 * pi * epsilon0 AA)" kcal_mol
         A =  332.06371
         u_elec = (A*q1*q2/D)*np.exp(-r/ld) / r 
         
         vij=1
-        muij=2
+
+        if typeA.resname in RNA_resnames or typeB.resname in RNA_resnames:
+            muij=3
+        else:
+            muij=2
 
         if typeA.resname=="ILE":
             if typeB.resname=="ILE":
@@ -204,51 +229,20 @@ class MpipiNonbonded(AbstractPotential):
         sasa_scaling =1
         u_wang=sasa_scaling*eps_ij*alpha*((sigma_ij/r)**(2*muij)-1)*((Rij/r)**(2*muij)-1)**(2*vij)
 
-
-        """ Mpipi scale model """
-        """
-        A_is_idp = B_is_idp = False
-        try:
-            A_is_idp = typeA.is_idp
-        except:
-            pass
-        try:
-            B_is_idp = typeB.is_idp
-        except:
-            pass
-
-        _idp_scale = (int(A_is_idp)*int(B_is_idp))
-
-        alpha = 0.159 + _idp_scale * (0.228 - 0.159)
-        epsilon0 = -1.36 + _idp_scale * (1.36 - 1.0)
-
-        e_mj = "ERR"[(typeA.resname,typeB.resname)]        
-        epsilon = alpha * np.abs( e_mj - epsilon0 )
-        lambda_ = -1 if epsilon0 > e_mj else 1
-
-        sigma = 0.5 * (typeA.sigma + typeB.sigma)
-        
-        r6 = (sigma/r)**6
-        r12 = r6**2
-        u_lj = 4 * epsilon * (r12-r6)
-        u_hps = lambda_ * np.array(u_lj)
-        s = r<=sigma*2**(1/6)
-        u_hps[s] = u_lj[s] + (1-lambda_) * epsilon
-
-        u = u_elec + u_hps
-        """
         u = u_elec + u_wang
         return u
 
 class MpipiBeads(PolymerBeads):
+    """
+    is_rna: boolean, if True, the sequence is RNA, otherwise it is protein
+    """
 
     def __init__(self, polymer, sequence=None,
                  spring_constant = 19.19,
-                 rest_length = 3.81, **kwargs):
-
+                 rest_length = 3.81,is_rna=False, **kwargs):
+        self.is_rna = is_rna
         if sequence is None:
             raise NotImplementedError
-            # ... set random sequence
 
         self.spring_constant = spring_constant
         PolymerBeads.__init__(self, polymer, sequence, rest_length=rest_length, **kwargs)
@@ -261,6 +255,9 @@ class MpipiBeads(PolymerBeads):
 
     def _generate_ith_bead_group(self, i, r, o):
         s = self.sequence[i]
+        if self.is_rna:
+            s = s + "_RNA"
+        print(s,self.is_rna)
         return PointParticle(_types[s], r,
                              name = s,
                              resid = i+1)
@@ -291,6 +288,7 @@ class MpipiModel(PolymerModel):
                  spring_constant = 19.19,
                  debye_length = 7.95,
                  damping_coefficient = 10,
+                 is_rna = False,
                  DEBUG=False,
                  **kwargs):
 
@@ -311,10 +309,11 @@ Please cite all appropriate articles!""")
 
         if 'decomp_period' not in kwargs:
             kwargs['decomp_period'] = 1000
-
+        self.is_rna = is_rna
+        
         self.rest_length = rest_length
         self.spring_constant = spring_constant
-
+        
         """ Assign sequences """
         if sequences is None:
             raise NotImplementedError("MpipiModel must be provided a sequences argument")
@@ -342,12 +341,14 @@ Please cite all appropriate articles!""")
                        rest_length = self.rest_length,
                        spring_constant = self.spring_constant,
                        monomers_per_bead_group = self.monomers_per_bead_group,
-                       polymer_index = polymer_index
+                       polymer_index = polymer_index,
+                       is_rna = self.is_rna
                        )
 
     def set_damping_coefficient(self, damping_coefficient):
         for t in self.types:
-            t.damping_coefficient = damping_coefficient
+            if not hasattr(t, 'damping_coefficient') or t.damping_coefficient is None:
+                t.damping_coefficient = damping_coefficient
             # t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)
 
 if __name__ == "__main__":
