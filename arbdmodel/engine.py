@@ -1308,7 +1308,7 @@ class APBSRunner:
     """
     
     def __init__( self, structure_name, xyz_dims, buffer: float = 50, large_system: bool = False,
-        dividend: int = 2,simconf= None,binary_path= None,psize_script= None,):
+        dividend: int = 2,simconf= None,binary_path= None, resolution=2.0,psize_script= None,):
         """Initialize APBS interface.
         
         Args:
@@ -1330,10 +1330,10 @@ class APBSRunner:
         self.buffer = float(buffer)
         self.large_system = bool(large_system)
         self.dividend = int(dividend)
-        
+        self.resolution = resolution
         if not xyz_dims or len(xyz_dims) != 3:
             raise ValueError("xyz_dims must be a list of 3 dimensions")
-        
+        self.out_file_name= f"{self.structure_name}.{self.resolution}A.elec.dx"
         # Get binary path using priority order
         self.binary = Path(simconf.get_binary('apbs'))
         self.psize = Path(psize_script) if psize_script else None
@@ -1361,6 +1361,10 @@ class APBSRunner:
         Raises:
             IOError: If unable to write configuration file
         """
+        spacing = self.resolution
+        if self.large_system:
+            spacing = spacing / self.dividend
+        
         # Calculate grid dimensions
         xyz_cg = [str(int(dim + self.buffer)) for dim in self.xyz_dims]
         
@@ -1369,7 +1373,18 @@ class APBSRunner:
         else:
             # For large systems, reduce grid density
             xyz_dime = [str(int((dim + self.buffer) / self.dividend)) for dim in self.xyz_dims]
-            
+        
+        xyz_cg=[]
+        xyz_dime=[]
+        for dim in self.xyz_dims:
+            box_len = dim + self.buffer
+            raw_dime = int(np.ceil(box_len / spacing)) + 1 # mg-auto requires dime = 4n + 1
+            n = (raw_dime - 1 + 3) // 4
+            dime = 4 * n + 1
+            fglen = (dime - 1) * spacing
+            xyz_dime.append(str(dime))
+            xyz_cg.append(f"{fglen:g}") 
+
         center = 'mol 1'  # Use molecule center for both cases
         
         config = f"""read
@@ -1398,7 +1413,7 @@ temp {self.temperature}
 gamma 0.105
 calcenergy no
 calcforce no
-write pot dx {self.structure_name}.elec
+write pot dx {self.structure_name}.{self.resolution}A.elec
 end
 quit"""
 
@@ -1431,7 +1446,7 @@ quit"""
             self.write_config()
             
             # Run APBS
-            if not Path(f"{self.structure_name}.elec.dx").exists():
+            if not Path(self.out_file_name).exists():
                 result = subprocess.run(
                     [str(self.binary), f"{self.structure_name}.apbs"],
                     capture_output=True,
@@ -1442,7 +1457,7 @@ quit"""
                 logger.info("APBS output file already exists:" +f"{self.structure_name}.elec.dx")
             
             # Check for output file
-            output_file = Path(f"{self.structure_name}.elec.dx")
+            output_file = Path(self.out_file_name)
             if not output_file.exists():
                 raise FileNotFoundError("APBS failed to generate output file")
                 
@@ -1811,12 +1826,12 @@ foreach r $newR e $newE {
     # Write out density grid
     set sel [atomselect $ID "type $typeArray($i)"]
     puts "Creating density map for types: [$sel get type]"
-    volmap interp $sel -o ${prefix}.vdw${i}.den.dx -res $denResolution
+    volmap interp $sel -o ${prefix}.vdw${i}.${denResolution}A.den.dx -res $denResolution
     $sel delete
     
     # Write potential grid
     puts "Creating potential map..."
-    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.${potResolution}A.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1
         
     incr i
 }
@@ -1876,7 +1891,7 @@ foreach r $newR e $newE {
     puts "My r is: $r"
     puts "My e is: $e"
     ## write potential grid
-    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1 -first 0 -last 0
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o ${prefix}.vdw${i}.${potResolution}A.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1 -first 0 -last 0
     incr i
 }
 

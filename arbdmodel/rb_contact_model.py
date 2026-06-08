@@ -17,7 +17,6 @@ class PdbRBModel(ArbdModel):
     def __init__(self, cell_vectors=None, cell_origin=None,
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False,
                  num_heavy_cluster=3, charmm_params_dir=None, gaussian_width=None,
-                 pot_resolution=1, den_resolution=2,
                  boundary_params=None, work_dir=None, **kwargs):
         """Initialize structure model Former SimpleARBD.
         Args:
@@ -42,8 +41,11 @@ class PdbRBModel(ArbdModel):
         self.num_heavy_cluster = num_heavy_cluster
         self.charmm_params_dir = charmm_params_dir
         self.gaussian_width = gaussian_width if gaussian_width is not None else 2.5
-        self.pot_resolution = pot_resolution
-        self.den_resolution = den_resolution
+
+        self.pot_resolution = self.simconf.pot_resolution if self.simconf.pot_resolution is not None else 1.0
+        self.den_resolution = self.simconf.den_resolution if self.simconf.den_resolution is not None else 2.0
+        self.elec_resolution = self.simconf.elec_resolution if self.simconf.elec_resolution is not None else 2.0
+
         self._diffusible_rb_types = []
         self.shared_cluster_file = None
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
@@ -79,6 +81,18 @@ class PdbRBModel(ArbdModel):
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
             self.boundary_potential = boundary_file
             #self.add_nonbonded_interaction(self.boundary_potential)
+    def set_grid_resolution(self, pot_resolution=1.0, den_resolution=2.0, elec_resolution=2.0):
+        """
+        Set the grid resolution for the model.
+        Args:
+            pot_resolution: Grid resolution for VDW potential maps (default 1 Å; high-res: 0.5)
+            den_resolution: Grid resolution for VDW density maps (default 2 Å; high-res: 1)
+            elec_resolution: Grid resolution for charge density maps (default 2 Å; high-res: 1)
+        """
+        self.pot_resolution = pot_resolution
+        self.den_resolution = den_resolution
+        self.elec_resolution = elec_resolution
+
 
     def add(self, obj):
         """Register contact-model objects or delegate to ``ArbdModel.add``.
@@ -309,7 +323,7 @@ class PdbRBModel(ArbdModel):
                 f.write(f"{radius} {epsilon}{type_array[i]}\n")
         return cluster_file
 
-    def build_vdw_maps(self, use_hydrogen=False):
+    def build_vdw_maps(self):
         """Pool LJ records across all diffusible processors and build shared VDW maps."""
         if not self._diffusible_rb_types:
             logger.info("No diffusible rigid-body types to finalize clustering for.")
@@ -319,15 +333,13 @@ class PdbRBModel(ArbdModel):
         for rb_type in self._diffusible_rb_types:
             all_records.extend(rb_type.processor.lj_type_records)
 
-        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen)
+        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen=True)
         self.shared_cluster_file = cluster_file
 
         for rb_type in self._diffusible_rb_types:
             rb_type.finalize_grids(
                 cluster_file,
                 gaussian_width=self.gaussian_width,
-                potResolution=self.pot_resolution,
-                denResolution=self.den_resolution,
             )
 
         logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")

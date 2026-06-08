@@ -257,7 +257,6 @@ class MpipiBeads(PolymerBeads):
         s = self.sequence[i]
         if self.is_rna:
             s = s + "_RNA"
-        print(s,self.is_rna)
         return PointParticle(_types[s], r,
                              name = s,
                              resid = i+1)

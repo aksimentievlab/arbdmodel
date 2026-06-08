@@ -62,6 +62,10 @@ class SimConf:
                  rigid_body_grid_grid_period=None,
                  ## SimpleARBD parameters
                  viscosity=None, solvent_density=None, salt=None,num_heavy_cluster=None,
+                 den_resolution=None,
+                 pot_resolution=None,
+                 elec_resolution=None,
+                 hydrogen_cluster=False,
                  ## Binary paths
                  arbd_path=None, namd_path=None, vmd_path=None, 
                  hydropro_path=None, apbs_path=None, **kwargs):
@@ -90,7 +94,12 @@ class SimConf:
         self.viscosity = viscosity
         self.solvent_density = solvent_density
         self.salt=salt
-        
+
+        self.den_resolution = den_resolution
+        self.pot_resolution = pot_resolution
+        self.elec_resolution = elec_resolution
+        self.hydrogen_cluster = hydrogen_cluster
+
         # Set binary paths
         if arbd_path: BinaryManager.set_binary_path('arbd', arbd_path)
         if namd_path: BinaryManager.set_binary_path('namd', namd_path)
@@ -293,6 +302,10 @@ class DefaultSimConf(SimConf):
                  temperature=295, pressure=1,
                  cutoff=50,  decomp_period=40,restart_file=None, gpu=0,
                  viscosity=0.01, solvent_density=1.0, salt=0.15,num_heavy_cluster=3,
+                 den_resolution=2,
+                 pot_resolution=2,
+                 elec_resolution=2,
+                 hydrogen_cluster=False,
                  **kwargs):
         
         # Set default paths only for essential binaries or those that exist
@@ -331,6 +344,10 @@ class DefaultSimConf(SimConf):
                          solvent_density=solvent_density,
                          num_heavy_cluster=num_heavy_cluster,
                          salt=salt,
+                         den_resolution=den_resolution,
+                         pot_resolution=pot_resolution,
+                         elec_resolution=elec_resolution,
+                         hydrogen_cluster=hydrogen_cluster,
                          **{**default_paths, **kwargs})  # User-provided values override defaults
 
     @property

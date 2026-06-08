@@ -22,6 +22,7 @@ class PdbRigidBodyType(RigidBodyType):
         os.makedirs(rb_dir, exist_ok=True)
         
         if simconf is None:
+            logger.warning("No simconf provided, using default simconf")
             from . import DefaultSimConf
             simconf = DefaultSimConf()
 
@@ -31,7 +32,11 @@ class PdbRigidBodyType(RigidBodyType):
             simconf=simconf,
             work_dir=rb_dir,
             charmm_params_dir=charmm_params_dir,
+            pot_resolution=simconf.pot_resolution,
+            den_resolution=simconf.den_resolution,
+            elec_resolution=simconf.elec_resolution,
         )
+
         if num_heavy_cluster is not None:
             proc_kw["num_heavy_cluster"] = num_heavy_cluster
         self.processor = PdbProcessor(**proc_kw)
@@ -58,14 +63,13 @@ class PdbRigidBodyType(RigidBodyType):
         
         logger.info(f"DiffusiveRigidBodyType '{name}' initialized with metadata only")
 
-    def finalize_grids(self, cluster_file, gaussian_width=2.5, potResolution=1, denResolution=2):
+    def finalize_grids(self, cluster_file, gaussian_width=2.5):
         """Generate VDW maps from pooled cluster file, smooth potentials, and refresh grid lists."""
         from .grid import smooth_grid
 
         p = self.processor
         p.generate_vdw_diffusive(
-            cluster_file=cluster_file, potResolution=potResolution, denResolution=denResolution
-        )
+            cluster_file=cluster_file)
         if p.elec_dx and Path(p.elec_dx).exists():
             p.elec_dx = Path(smooth_grid(in_file=p.elec_dx, gaussian_sigma=gaussian_width))
         smoothed_pots = []
@@ -75,5 +79,6 @@ class PdbRigidBodyType(RigidBodyType):
         p.vdw_pot_dxs = smoothed_pots
 
         grid_files = p.get_grid_files()
+        print(grid_files)
         self.potential_grids = grid_files["potential_grids"]
         self.charge_grids = grid_files["charge_grids"]
