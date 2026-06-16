@@ -118,7 +118,7 @@ proc loadTrajectory {rbvmd files {attachID top} {skip 1} {beg 0} {end -1} {keyFi
     variable rigidBodyIDs
 
     if { [string equal $attachID top] } { set attachID [molinfo top] }
-
+    
     array set trans [parseRigidBodyTrajectoryFiles $files $skip $beg $end $keyFilter]
     set keys [array names trans]
 
@@ -157,6 +157,8 @@ proc loadTrajectory {rbvmd files {attachID top} {skip 1} {beg 0} {end -1} {keyFi
         }
 
         foreach key [lsort -dictionary [array names trans]] {
+            if [info exists molToKey($key)] continue
+
             ## Load structure: try PSF/PDB pair, then XYZ, then verbatim path
             if { [file exists ${rbvmd}.psf] && [file exists ${rbvmd}.pdb] } {
                 set ID [mol new ${rbvmd}.psf]
@@ -173,6 +175,7 @@ proc loadTrajectory {rbvmd files {attachID top} {skip 1} {beg 0} {end -1} {keyFi
             lappend newIDs $ID
             lappend rigidBodyIDs $ID
             set molToKey($ID) $key
+            set molToKey($key) $ID
             [atomselect $ID all] move [lindex $trans($key) $lastFrame]
         }
 
