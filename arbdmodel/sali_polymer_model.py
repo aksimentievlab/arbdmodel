@@ -112,7 +112,7 @@ class SaliModel(ArbdModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: amu/ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
 
         print("WARNING: diffusion coefficient arbitrarily set to 100 AA**2/ns in SaliModel")

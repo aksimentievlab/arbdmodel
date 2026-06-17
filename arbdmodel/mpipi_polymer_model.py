@@ -293,7 +293,7 @@ class MpipiModel(PolymerModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: amu/ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
 
         logger.info("""You are using an implementation of the Mpipi Polymer model as described for proteins and RNA based on:

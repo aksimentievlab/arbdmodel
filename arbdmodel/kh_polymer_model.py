@@ -291,7 +291,7 @@ class KhModel(PolymerModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: amu/ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
 
         logger.info("""You are using an implementation of the Kim-Hummer model as described for proteins with IDPs by the Mittal lab:

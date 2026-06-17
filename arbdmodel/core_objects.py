@@ -667,8 +667,8 @@ class ParticleType():
         name (str): Unique identifier for this particle type.
         charge (float, default=0, units: e): Electric charge of the particle.
         mass (float, default=None, units: amu): Mass of the particle.
-        diffusivity (float, default=None, units: AA^2/ns)): Diffusion coefficient of the particle. For BD only. 
-        damping_coefficient (float, default=None, units: amu/ns): Damping coefficient for dynamics. For MD, Langevin and FusDynamic only. 
+        diffusivity (float, default=None, units: AA**2/ns): Diffusion coefficient of the particle. For BD only.
+        damping_coefficient (float, default=None, units: 1/ns): Translational friction coefficient per unit mass (zeta/m). Written to .bd as transDamping. For MD, Langevin and FusDynamic only. 
 
     Note:
         - When a parent is specified, all non-excluded attributes are inherited.
@@ -851,7 +851,7 @@ class RigidBodyType(ParticleType):
         parent (ParticleType, optional): Parent type to fall back on for nonbonded interactions.
         moment_of_inertia (float or array-like, optional): Moment of inertia tensor for the rigid body.
         rotational_diffusivity (float or array-like, units: 1/ns): Rotational diffusivity coefficient.
-        rotational_damping_coefficient (float or array-like, units: amu*AA**2/ns): Rotational damping coefficient.
+        rotational_damping_coefficient (float or array-like, units: 1/ns): Rotational friction coefficient per unit inertia (zeta_rot/I). Written to .bd as rotDamping.
         attached_particles (tuple or list): Particles attached to this rigid body.
         potential_grids (tuple): Collection of potential grid definitions, each with length 2 or 3.
         charge_grids (tuple): Collection of charge grid definitions, each with length 2 or 3.

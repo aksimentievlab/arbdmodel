@@ -483,7 +483,7 @@ class OnckModel(PolymerModel):
 
         """
         [debye_length]: angstroms
-        [damping_coefficient]: amu/ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
 
         """
 
