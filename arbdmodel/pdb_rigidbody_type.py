@@ -8,7 +8,7 @@ from .pdb_processor import PdbProcessor
 class PdbRigidBodyType(RigidBodyType):
     """RigidBodyType subclass for structure-based rigid body objects"""
     
-    def __init__(self, name, structure_path, simconf=None, **kwargs):
+    def __init__(self, name, structure_path, simconf=None, rb_dir_name="rbs",**kwargs):
 
         charmm_params_dir = kwargs.pop("charmm_params_dir", None)
         work_dir = kwargs.pop("work_dir", None)
@@ -18,7 +18,7 @@ class PdbRigidBodyType(RigidBodyType):
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
 
         # Create the RB output directory within work_dir
-        rb_dir = self.work_dir / "rbs" / name
+        rb_dir = self.work_dir /rb_dir_name / name
         os.makedirs(rb_dir, exist_ok=True)
         
         if simconf is None:

@@ -55,7 +55,7 @@ class FjcModel(PolymerModel):
                  **kwargs):
 
         """ 
-        [damping_coefficient]: ns
+        [damping_coefficient]: amu/ns
         """
         
         if 'timestep' not in kwargs: kwargs['timestep'] = 50e-6

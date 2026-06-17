@@ -169,11 +169,29 @@ class PdbProcessor:
         """Align structure to principal axes using VMD."""
         # Write alignment TCL script
         align_tcl = self.tcl_path / "align.tcl"
+        aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
+        aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
+        mass_file = self.work_dir / f"{self.base_name}.mass.txt"
+        inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
+
         if not align_tcl.exists():
             align_tcl = self.tclgen.write_align_tcl()
             logger.debug(f"Alignment script written to {align_tcl}")
         
-
+        if aligned_pdb.exists() and aligned_psf.exists() and mass_file.exists() and inertia_file.exists():
+            logger.info(f"Structure already aligned: {aligned_pdb} and {aligned_psf}")
+            self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
+            self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
+            with open(mass_file) as f:
+                self.mass = float(f.readline().strip())
+                
+            with open(inertia_file) as f:
+                self.moment_of_inertia = [float(x) for x in f.readline().strip().split()]
+                
+            logger.info(f"Structure aligned: Mass = {self.mass}, Inertia = {self.moment_of_inertia}")
+            self.base_name=f"{self.base_name}.aligned"  # Reasign base name to aligned pdb and psf
+            return
+        
         # Run alignment
         try:
             # Copy input files to work directory if they're not already there

@@ -1,0 +1,50 @@
+seed 38562
+timestep 1e-05
+steps 10000
+numberFluct 0                   # deprecated
+
+interparticleForce 1            # other values deprecated
+fullLongRange 0                 # deprecated
+temperature 295
+ParticleDynamicType Langevin
+
+outputPeriod 100.0
+## Energy doesn't actually get printed!
+outputEnergyPeriod 100.0
+outputFormat dcd
+
+## Infrequent domain decomposition because this kernel is still very slow
+decompPeriod 1000
+cutoff 40
+pairlistDistance 10
+
+origin -500.0 -500.0 -500.0
+systemSize 1000 1000 1000
+
+
+
+
+particle ALA2
+num 35
+mass 71.08
+transDamping 10 10 10
+gridFile potentials/null.dx
+
+particle GLY2
+num 35
+mass 57.05
+transDamping 10 10 10
+gridFile potentials/null.dx
+
+## Input coordinates
+inputParticles 3-linear-hps.particles.txt
+restartCoordinates output/3-linear-hps-bd-relax.restart
+
+## Interaction potentials
+tabulatedPotential  1
+## The i@j@file syntax means particle type i will have NB interactions with particle type j using the potential in file
+tabulatedFile 0@0@potentials/3-linear-hps-nb.ALA2-ALA2.dat
+tabulatedFile 0@1@potentials/3-linear-hps-nb.ALA2-GLY2.dat
+tabulatedFile 1@1@potentials/3-linear-hps-nb.GLY2-GLY2.dat
+tabulatedBondFile ./potentials/bond-2.390-3.800.dat
+inputBonds potentials/3-linear-hps.bond.txt

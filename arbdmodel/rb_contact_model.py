@@ -17,7 +17,7 @@ class PdbRBModel(ArbdModel):
     def __init__(self, cell_vectors=None, cell_origin=None,
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False,
                  num_heavy_cluster=3, charmm_params_dir=None, gaussian_width=None,
-                 boundary_params=None, work_dir=None, **kwargs):
+                 boundary_params=None, work_dir=None, use_hydrogen_cluster=False,**kwargs):
         """Initialize structure model Former SimpleARBD.
         Args:
             diffusible_objects: List of RBContact instances for diffusible objects
@@ -32,7 +32,7 @@ class PdbRBModel(ArbdModel):
             work_dir: Directory for pooled ``clustered.txt`` and default layout for child processors.
             **kwargs: Additional arguments passed to ArbdModel
         """
-        
+        self.use_hydrogen_cluster = use_hydrogen_cluster
         self.simconf = configuration or DefaultSimConf()
         self.diffusible_objects = []
         self.static_objects = []
@@ -46,7 +46,7 @@ class PdbRBModel(ArbdModel):
         self.den_resolution = self.simconf.den_resolution if self.simconf.den_resolution is not None else 2.0
         self.elec_resolution = self.simconf.elec_resolution if self.simconf.elec_resolution is not None else 2.0
 
-        self._diffusible_rb_types = []
+        self.diffusible_rb_types = []
         self.shared_cluster_file = None
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
 
@@ -103,7 +103,7 @@ class PdbRBModel(ArbdModel):
         ``RigidBody``, ``Group``, and other types use the standard ARBD model logic.
         """
         if isinstance(obj, PdbRigidBodyType):
-            self._diffusible_rb_types.append(obj)
+            self.diffusible_rb_types.append(obj)
             self.shared_cluster_file = None
             return obj
         if isinstance(obj, PdbToStaticGrids):
@@ -325,18 +325,18 @@ class PdbRBModel(ArbdModel):
 
     def build_vdw_maps(self):
         """Pool LJ records across all diffusible processors and build shared VDW maps."""
-        if not self._diffusible_rb_types:
+        if not self.diffusible_rb_types:
             logger.info("No diffusible rigid-body types to finalize clustering for.")
             return None
 
         all_records = []
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             all_records.extend(rb_type.processor.lj_type_records)
 
-        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen=True)
+        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen=self.use_hydrogen_cluster)
         self.shared_cluster_file = cluster_file
 
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             rb_type.finalize_grids(
                 cluster_file,
                 gaussian_width=self.gaussian_width,
@@ -368,7 +368,7 @@ class PdbRBModel(ArbdModel):
             return
 
         # ── diffusive rigid-body types ──────────────────────────────────────
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             if not isinstance(rb_type.pmf_grids, list):
                 rb_type.pmf_grids = list(rb_type.pmf_grids)
             existing = {(k, str(g)) for k, g, *_ in rb_type.pmf_grids}
