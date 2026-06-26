@@ -1612,7 +1612,7 @@ $sel writepsf $prefix.aligned.psf'''
         logger.debug(f"Wrote alignment script to {script_path}")
         return script_path
     
-    def write_charge_density_tcl(self, filename="charge-density.tcl", resolution=2.0):
+    def write_charge_density_tcl(self, filename="charge-density.tcl"):
         """
         Write the alignment TCL script to file
         
@@ -1624,8 +1624,9 @@ $sel writepsf $prefix.aligned.psf'''
         """
         charge_tcl = self.work_dir / filename
         with open(charge_tcl, 'w') as f:
-            f.write(f'''lassign $argv prefix
-set resolution {resolution}
+            f.write(f'''
+set prefix [lindex $argv 0]
+set resolution [lindex $argv 1]            
 set ID [mol new $prefix.psf]
 mol addfile $prefix.pdb
 set all [atomselect $ID all]
@@ -1691,14 +1692,12 @@ close $ch''')
         logger.debug(f"Wrote VDW script to {script_path}")
         return script_path
     
-    def generate_cluster_tcl(self, potResolution=1, denResolution=2):
+    def generate_cluster_tcl(self):
         """Generate VDW maps using VMD."""
         # Create VDW TCL script
         vdw_tcl = self.work_dir / "vdw_cluster.tcl"
         with open(vdw_tcl, 'w') as f:
             f.write(f'''set prefixes $argv
-set potResolution ''' + str(potResolution) + '''
-set denResolution ''' + str(denResolution) + '''
 set IDs ""
 set minRadius 0.5
 
@@ -1769,7 +1768,7 @@ close $ch
 ''')
         return vdw_tcl
 
-    def generate_diffusive_tcl(self, potResolution=1, denResolution=2):
+    def generate_diffusive_tcl(self):
         vdw_tcl = self.work_dir / "vdw_diffusive.tcl"
 
         with open(vdw_tcl, 'w') as f:
@@ -1794,8 +1793,8 @@ proc readClusterResults {filename} {
 
 set prefix [lindex $argv 0]
 set clusterFile [lindex $argv 1]
-set potResolution """ + str(potResolution) + '''
-set denResolution ''' + str(denResolution) + """
+set potResolution [lindex $argv 2]
+set denResolution [lindex $argv 3]
 
 # Load molecule
 mol new ${prefix}.psf 
@@ -1843,7 +1842,7 @@ exit
         return vdw_tcl
     
 
-    def generate_static_vdw_tcl(self, potResolution=1, denResolution=2):
+    def generate_static_vdw_tcl(self):
         """Generate VDW maps using VMD."""
         # Create VDW TCL script
         vdw_tcl = self.work_dir / "vdw_static.tcl"
@@ -1851,8 +1850,8 @@ exit
         with open(vdw_tcl, 'w') as f:
             f.write(f'''set prefix [lindex $argv 0]
 set cluster_result_path [lindex $argv 1]
-
-set potResolution ''' + str(potResolution) + '''
+set potResolution [lindex $argv 2]
+'''+ '''
 set ch [open  $cluster_result_path  r]
 set i 0
 set newR ""

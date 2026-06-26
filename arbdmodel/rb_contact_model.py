@@ -328,7 +328,7 @@ class PdbRBModel(ArbdModel):
         if not self.diffusible_rb_types:
             logger.info("No diffusible rigid-body types to finalize clustering for.")
             return None
-
+        
         all_records = []
         for rb_type in self.diffusible_rb_types:
             all_records.extend(rb_type.processor.lj_type_records)
@@ -343,6 +343,8 @@ class PdbRBModel(ArbdModel):
             )
 
         logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")
+        os.remove(self.work_dir / "vdw_cluster.tcl")
+        os.remove(self.work_dir / "vdw_diffusive.tcl")
         return cluster_file
 
     def finalize_vdw(self):

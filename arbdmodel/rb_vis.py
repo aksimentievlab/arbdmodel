@@ -102,6 +102,7 @@ class ArbdVis:
     ----------
     traj_path : str or Path
         Path (or glob) to the ``.rb-traj`` file(s) produced by ARBD.
+    color_by : color by rb IDs or rb types. Default is "rb_ids". can be shorten to "ids" or "types".
     output_dir : str or Path
         Directory where ``launcher.tcl`` and ``run_vis.sh`` will be written.
         Created automatically if it does not exist.
@@ -147,10 +148,11 @@ class ArbdVis:
         rb_types: Optional[list] = None,
         static_pdbs: Optional[list] = None,
         dcd_path: Optional[Union[str, Path]] = None,
+        color_by: Optional[str] = "rb_ids",
         skip: int = 1,
         beg: int = 0,
         end: int = -1,
-        vmd_path: Union[str, Path] = Path("/Common/linux/bin/vmd"),
+        vmd_path: Union[str, Path] = Path("which vmd"),
         display: Optional[str] = "publication",
     ):
         if model is None and rb_types is None:
@@ -165,7 +167,12 @@ class ArbdVis:
         self.end        = end
         self.vmd_path   = Path(vmd_path)
         self.display    = display
-
+        if "ids" in color_by:
+            self.color_by = "rb_ids"
+        elif "types" in color_by:
+            self.color_by = "rb_types"
+        else:
+            raise ValueError(f"Invalid color_by option: {color_by}")
         # ── Resolve RB types ──────────────────────────────────────────────
         if model is not None:
             self._rb_types = self._rb_types_from_model(model)
@@ -312,30 +319,59 @@ class ArbdVis:
             ]
 
         # ── One loadTrajectory call per RB type ───────────────────────────
-        lines += [
-            "## ── Rigid body trajectories (one call per type) ─────────────────────",
-            "set rbIDs {}",
-        ]
-        for name, struct in self._rb_types:
-            lines.append(
-                f"set rbIDs [concat $rbIDs [loadTrajectory "
-                f"{{{struct}}} "
-                f"{{{self.traj_path}}} "
-                f"$attachID $skip $beg $end "
-                f"{{{name}}}]]"
-            )
-        lines.append("")
 
-        # ── Default RB representation ─────────────────────────────────────
-        lines += [
-            "## ── Default representation for each RB instance ─────────────────────",
-            "foreach rbID $rbIDs {",
-            "    mol modstyle    0 $rbID QuickSurf 1.0 0.5 1.9 1.0",
-            "    mol modmaterial 0 $rbID AOChalky",
-            "    mol modcolor    0 $rbID Molecule",
-            "}",
-            "",
-        ]
+        if self.color_by == "rb_ids":
+            lines += [
+                "## ── Rigid body trajectories (one call per type) ─────────────────────",
+                "set rbIDs {}",
+            ]
+            for name, struct in self._rb_types:
+                lines.append(
+                    f"set rbIDs [concat $rbIDs [loadTrajectory "
+                    f"{{{struct}}} "
+                    f"{{{self.traj_path}}} "
+                    f"$attachID $skip $beg $end "
+                    f"{{{name}}}]]"
+                )
+            lines.append("")
+
+
+            # ── Default RB representation ─────────────────────────────────────
+            lines += [
+                "## ── Default representation for each RB instance ─────────────────────",
+                "foreach rbID $rbIDs {",
+                "    mol modstyle    0 $rbID QuickSurf 1.0 0.5 1.9 1.0",
+                "    mol modmaterial 0 $rbID AOChalky",
+                "    mol modcolor    0 $rbID Molecule",
+                "}",
+                "",
+            ]
+        else:
+            colorID=0
+            lines += [
+                "## ── Rigid body trajectories (one call per type) ─────────────────────",
+                "set rbIDs {}",
+            ]
+            for name, struct in self._rb_types:
+                lines.append(f"set current_type [loadTrajectory {struct} {self.traj_path} $attachID $skip $beg $end {name}]")
+                lines += [
+                "foreach rbID $current_type {",
+                "    mol modstyle    0 $rbID QuickSurf 1.0 0.5 1.9 1.0",
+                "    mol modmaterial 0 $rbID AOChalky",
+                f"    mol modcolor    0 $rbID ColorID {colorID}",
+                "}",
+                "",]
+                vmd_name=name.split(".")[0]
+                lines.append(f"set {vmd_name}_rbIDs $current_type")
+                lines.append(f"puts ${vmd_name}_rbIDs")
+                lines.append(f"set rbIDs [concat $rbIDs $current_type]")
+                lines.append("")
+                colorID += 1
+            lines.append("")
+
+
+            # ── Default RB representation ─────────────────────────────────────
+            
 
         # ── Static background objects ─────────────────────────────────────
         if self._static_pdbs:

@@ -135,19 +135,19 @@ _types = dict(
                  ),
 #adenine, cytosine, guanine, and uracil
     A_RNA=ParticleType("ADE",
-                     mass = 347,
+                     mass = 329,
                      charge = -1,
                  ),
     C_RNA=ParticleType("CYT",
-                     mass = 323,
+                     mass = 306,
                      charge = -1,
                  ),
     G_RNA=ParticleType("GUA",
-                     mass = 363,
+                     mass = 345,
                      charge = -1,
                  ),
     U_RNA=ParticleType("URA",
-                     mass = 324,
+                     mass = 306,
                      charge = -1,
                  )
 )
@@ -284,9 +284,10 @@ class MpipiModel(PolymerModel):
     def __init__(self, polymers,
                  sequences = None,
                  rest_length = 3.8,
-                 spring_constant = 19.19,
+                 spring_constant = 19.19, #8.03 J/mol/pm^2
                  debye_length = 7.95,
-                 damping_coefficient = 10,
+                 diffusivity = 10,
+                 damping_coefficient = 100,
                  is_rna = False,
                  DEBUG=False,
                  **kwargs):
@@ -309,8 +310,14 @@ Please cite all appropriate articles!""")
         if 'decomp_period' not in kwargs:
             kwargs['decomp_period'] = 1000
         self.is_rna = is_rna
+
+        if is_rna:
+            self.rest_length = 5
+        else:
+            self.rest_length = 3.81
+        if np.abs(rest_length - self.rest_length) > 0.1:
+            logger.warning(f"Rest length {rest_length} is not equal to the default rest length {self.rest_length} restlength is overridden with mpipi default {self.rest_length}")
         
-        self.rest_length = rest_length
         self.spring_constant = spring_constant
         
         """ Assign sequences """
@@ -322,8 +329,8 @@ Please cite all appropriate articles!""")
 
         """ Update type diffusion coefficients """
         self.types = all_types = [t for key,t in _types.items()]
+        self.set_diffusivity( diffusivity )
         self.set_damping_coefficient( damping_coefficient )
-
         """ Set up nonbonded interactions """
         nonbonded = MpipiNonbonded(debye_length)
         for t in all_types:
@@ -344,12 +351,13 @@ Please cite all appropriate articles!""")
                        is_rna = self.is_rna
                        )
 
+    def set_diffusivity(self, diffusivity):
+        for t in self.types:
+            if not hasattr(t, 'diffusivity') or t.diffusivity is None:
+                t.diffusivity = diffusivity
     def set_damping_coefficient(self, damping_coefficient):
         for t in self.types:
-            if not hasattr(t, 'damping_coefficient') or t.damping_coefficient is None:
-                t.damping_coefficient = damping_coefficient
-            # t.diffusivity = 831447.2 * temperature / (t.mass * damping_coefficient)
-
+            t.damping_coefficient = damping_coefficient
 if __name__ == "__main__":
     pass
 """

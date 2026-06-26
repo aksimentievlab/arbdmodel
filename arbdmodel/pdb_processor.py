@@ -282,11 +282,12 @@ class PdbProcessor:
         # Create TCL script for VMD
         charge_tcl = self.tcl_path / "charge-density.tcl"
         if not charge_tcl.exists():
-            charge_tcl = self.tclgen.write_charge_density_tcl(resolution=resolution)
+            charge_tcl = self.tclgen.write_charge_density_tcl()
             logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
-        cmd = f"{self.vmd_path} -dispdev text -args {aligned_path} < {charge_tcl}"
+        cmd = f"{self.vmd_path} -dispdev text -args {aligned_path} {resolution} < {charge_tcl}"
+        logger.info(f"Running charge density command: {cmd}")
         subprocess.run(cmd, shell=True, check=True)
         
         # Check if charge distribution was created successfully
@@ -397,12 +398,10 @@ class PdbProcessor:
         return lj_types
 
     def collect_lj_type_records(self):
-        potResolution=self.pot_resolution
-        denResolution=self.den_resolution
         """Collect per-processor LJ statistics for model-level pooled clustering."""
         vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
         if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
+            vdw_tcl = self.tclgen.generate_cluster_tcl()
             logger.debug(f"Clustering script written to {vdw_tcl}")
 
         cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} < {vdw_tcl}"
@@ -458,7 +457,7 @@ class PdbProcessor:
         vdw_tcl = self.tcl_path / "vdw_diffusive.tcl"
         
         if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.generate_diffusive_tcl(potResolution=potResolution, denResolution=denResolution)
+            vdw_tcl = self.tclgen.generate_diffusive_tcl()
             logger.debug(f"Clustering script written to {vdw_tcl}")
         else:
             logger.info(f"Clustering script found at {vdw_tcl}")
@@ -467,7 +466,7 @@ class PdbProcessor:
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
-        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_tcl}"
+        cmd = f"cd {self.work_dir} && {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} {potResolution} {denResolution} < {vdw_tcl}"
         subprocess.run(cmd, shell=True, check=True)
 
         self.vdw_pot_dxs = []
@@ -674,8 +673,6 @@ class PdbProcessor:
         return segments[0], segments[1], segments[2]
 
     def process_static_vdw(self, is_gigantic=False):
-        potResolution=self.pot_resolution
-        denResolution=self.den_resolution
         """Process VDW maps for static objects"""
 
         # Generate maps based on size
@@ -689,13 +686,13 @@ class PdbProcessor:
         denResolution=self.den_resolution
         """Process standard static object VDW maps"""
         # Generate static VDW map script
-        vdw_script = self.tclgen.generate_static_vdw_tcl(potResolution=potResolution, denResolution=denResolution)
+        vdw_script = self.tclgen.generate_static_vdw_tcl()
         cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
         
         # Run VMD
-        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} < {vdw_script}"
+        cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {self.base_name} {cluster_path} {potResolution} < {vdw_script}"
         subprocess.run(cmd, shell=True, check=True)
         
         self.vdw_pot_dxs = []
@@ -713,9 +710,8 @@ class PdbProcessor:
 
     def _process_gigantic_vdw(self, cluster_file=None):
         potResolution=self.pot_resolution
-        denResolution=self.den_resolution
         """Process gigantic static object VDW maps with segmentation"""
-        #!!!! Needs work. standard vdw works
+        #!!!! Needs testing. standard vdw works
         cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
@@ -725,8 +721,8 @@ class PdbProcessor:
             segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
             
             # Generate VDW maps for this segment
-            vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
-            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} {cluster_path} < {vdw_script}"
+            vdw_script = self.tclgen.generate_static_vdw_tcl()
+            cmd = f"cd {self.work_dir} && VMDNOCUDA=1 {self.vmd_path} -dispdev text -args {segment_name} {cluster_path} {potResolution} < {vdw_script}"
             subprocess.run(cmd, shell=True, check=True)
 
         # Write map gluing script
