@@ -304,7 +304,7 @@ Nat Comput Sci. 2021 Nov; 1(11): 732–743. Published online 2021 Nov 22. doi: 1
 Please cite all appropriate articles!""")
 
 
-        if 'timestep' not in kwargs: kwargs['timestep'] = 10e-6
+        if 'timestep' not in kwargs: kwargs['timestecp'] = 10e-6
         if 'cutoff' not in kwargs: kwargs['cutoff'] = 35
 
         if 'decomp_period' not in kwargs:
@@ -332,7 +332,7 @@ Please cite all appropriate articles!""")
         self.set_diffusivity( diffusivity )
         self.set_damping_coefficient( damping_coefficient )
         """ Set up nonbonded interactions """
-        nonbonded = MpipiNonbonded(debye_length)
+        nonbonded = MpipiNonbonded()
         for t in all_types:
             self._add_nonbonded_interaction(nonbonded, t)
                 
