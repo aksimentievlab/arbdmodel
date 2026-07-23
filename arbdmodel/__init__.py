@@ -20,6 +20,6 @@ __all__ = ['ParticleType', 'PointParticle', 'RigidBodyType', 'RigidBody', 'Group
     'PdbModel', 'ArbdModel',
     'SimEngine', 'ArbdEngine', 'NamdEngine','get_resource_path',
     'logger', 'set_log_level','EasyRBModel','PdbRBConfig',
-    'PdbRBModel', 'PdbRigidBodyType', 'PdbToStaticGrids']
+    'EadyRBModel', 'PdbRigidBodyType', 'PdbToStaticGrids']
 
 __version__ = get_version()
