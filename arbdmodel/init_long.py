@@ -2161,7 +2161,7 @@ systemSize {dimX} {dimY} {dimZ}
                     try:
                         D = pt.diffusivity
                     except:
-                        """ units "k K/(amu/ns)" "AA**2/ns" """
+                        """ damping_coefficient is zeta/m [1/ns]; D = 831447.2*T/(m*zeta/m) """
                         D = 831447.2 * configuration.temperature / (pt.mass * pt.damping_coefficient)
                     particleParams['dynamics'] = 'diffusion {D}'.format(D = D)
                 elif configuration.integrator in ('MD','Langevin','FusDynamic'):
@@ -2169,7 +2169,7 @@ systemSize {dimX} {dimY} {dimZ}
                         gamma = pt.damping_coefficient
                         if gamma is None: raise
                     except:
-                        """ units "k K/(AA**2/ns)" "amu/ns" """
+                        """ zeta/m [1/ns] = 831447.2*T/(m*D); written to .bd as transDamping """
                         gamma = 831447.2 * configuration.temperature / (pt.mass*pt.diffusivity)
                     particleParams['dynamics'] = """mass {mass}
 transDamping {g} {g} {g}""".format(mass=pt.mass, g=gamma)
@@ -2325,7 +2325,7 @@ tabulatedPotential  1
                     try:
                         gamma = rbt.damping_coefficient
                     except:
-                        """ units "k K/(AA**2/ns)" "dalton/ns" """
+                        """ zeta/m [1/ns] = 831447.2*T/(m*D); written to .bd as transDamping """
                         gamma = 831447.2 * configuration.temperature / (rbt.mass*np.array(rbt.diffusivity))
                     if len(gamma) == 1:
                         logger.warn(f'Using single diffusion coefficient for all motions along all rigid body principal axes for {rbt}')
@@ -2334,7 +2334,7 @@ tabulatedPotential  1
                     try:
                         gamma_rot = rbt.rotational_damping_coefficient
                     except:
-                        """ units "k K/(1/ns)" "AA**2 dalton/ns" """
+                        """ zeta_rot/I [1/ns] = 831447.2*T/(I*D_rot); written to .bd as rotDamping """
                         gamma_rot = 831447.2 * configuration.temperature / (np.array(rbt.moment_of_inertia)*np.array(rbt.diffusivity))
                     if len(gamma_rot) == 1:
                         logger.warn(f'Using single rotational diffusion coefficient for all motions along all rigid body principal axes for {pt}')

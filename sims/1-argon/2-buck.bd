@@ -1,0 +1,40 @@
+seed 17556
+timestep 2e-05
+steps 1000
+numberFluct 0                   # deprecated
+
+interparticleForce 1            # other values deprecated
+fullLongRange 0                 # deprecated
+temperature 295
+ParticleDynamicType Langevin
+
+outputPeriod 100.0
+## Energy doesn't actually get printed!
+outputEnergyPeriod 100.0
+outputFormat dcd
+
+## Infrequent domain decomposition because this kernel is still very slow
+decompPeriod 40
+cutoff 50
+pairlistDistance 10
+
+origin -310.0 -310.0 -310.0
+systemSize 620 620 620
+
+
+
+
+particle Ar
+num 6400
+mass 39.95
+transDamping 5000 5000 5000
+gridFile potentials/null.dx
+
+## Input coordinates
+inputParticles 2-buck.particles.txt
+
+
+## Interaction potentials
+tabulatedPotential  1
+## The i@j@file syntax means particle type i will have NB interactions with particle type j using the potential in file
+tabulatedFile 0@0@potentials/2-buck-nb.Ar-Ar.dat

@@ -1,0 +1,60 @@
+seed 47862
+timestep 2.0000000000000003e-06
+steps 10000
+numberFluct 0                   # deprecated
+
+interparticleForce 1            # other values deprecated
+fullLongRange 0                 # deprecated
+temperature 295
+ParticleDynamicType BD
+
+outputPeriod 100.0
+## Energy doesn't actually get printed!
+outputEnergyPeriod 100.0
+outputFormat dcd
+
+## Infrequent domain decomposition because this kernel is still very slow
+decompPeriod 40
+cutoff 35
+pairlistDistance 10
+
+origin -500.0 -500.0 -500.0
+systemSize 1000 1000 1000
+
+
+
+
+particle B
+num 70
+diffusion 1093
+gridFile potentials/null.dx
+
+particle P
+num 70
+diffusion 1621
+gridFile potentials/null.dx
+
+## Input coordinates
+inputParticles 5-linear-ssdna-bd-relax.particles.txt
+
+
+## Interaction potentials
+tabulatedPotential  1
+## The i@j@file syntax means particle type i will have NB interactions with particle type j using the potential in file
+tabulatedFile 0@0@potentials/5-linear-ssdna-bd-relax-nb.B-B.dat
+tabulatedFile 0@1@potentials/5-linear-ssdna-bd-relax-nb.B-P.dat
+tabulatedFile 1@1@potentials/5-linear-ssdna-bd-relax-nb.P-P.dat
+tabulatedBondFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/BPP.dat
+tabulatedBondFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/BBP.dat
+tabulatedBondFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/BPB.dat
+tabulatedAngleFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/b1p2b2.dat
+tabulatedAngleFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/p1p2b2.dat
+tabulatedAngleFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/b1p2p3.dat
+tabulatedAngleFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/p1p2p3.dat
+tabulatedDihedralFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/p0p1p2p3.dat
+tabulatedDihedralFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/b1p2p3b3.dat
+tabulatedDihedralFile /data/server10/pinyili2/arbdmodel/arbdmodel/resources/two_bead_model/b1p1p2b2.dat
+inputBonds potentials/5-linear-ssdna-bd-relax.bond.txt
+inputAngles potentials/5-linear-ssdna-bd-relax.angle.txt
+inputDihedrals potentials/5-linear-ssdna-bd-relax.dihedral.txt
+inputExcludes potentials/5-linear-ssdna-bd-relax.exclusion.txt

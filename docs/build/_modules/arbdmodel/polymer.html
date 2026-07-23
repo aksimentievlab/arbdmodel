@@ -1,0 +1,1383 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.polymer &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/polymer';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/config.html">config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_pdb.html">rb_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_mesh.html">rb_from_mesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_parametric.html">rb_from_parametric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_contact_model.html">rb_contact_model module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/polymer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.polymer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABCMeta</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArbdModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.coords</span><span class="w"> </span><span class="kn">import</span> <span class="n">rotationAboutAxis</span><span class="p">,</span> <span class="n">quaternion_from_matrix</span><span class="p">,</span> <span class="n">quaternion_to_matrix</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">Group</span><span class="p">,</span> <span class="n">PointParticle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interactions</span><span class="w"> </span><span class="kn">import</span> <span class="n">HarmonicBond</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TODO:</span>
+<span class="sd"> - test for large systems</span>
+<span class="sd"> - rework Location class </span>
+<span class="sd"> - remove recursive calls</span>
+<span class="sd"> - document</span>
+<span class="sd"> - develop unit test suite</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># class ParticleNotConnectedError(Exception):</span>
+<span class="c1">#     pass</span>
+
+<div class="viewcode-block" id="Location">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Location">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Location</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Site for connection within an object &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Location.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Location.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">contour_position</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="n">on_fwd_strand</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="c1">## TODO: remove cyclic references(?)</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">ConnectableElement</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">=</span> <span class="n">contour_position</span>  <span class="c1"># represents position along contour length in polymer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="n">type_</span>
+        <span class="c1"># self.particle = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Location.get_connected_location">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Location.get_connected_location">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_connected_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">other</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Location.set_connection">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Location.set_connection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">connection</span> <span class="c1"># TODO weakref? </span></div>
+
+
+<div class="viewcode-block" id="Location.get_monomer_index">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Location.get_monomer_index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_monomer_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">contour_to_monomer_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contour_position</span><span class="p">,</span> <span class="n">nearest_monomer</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">idx</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_fwd_strand</span><span class="p">:</span>
+            <span class="n">on_fwd</span> <span class="o">=</span> <span class="s2">&quot;on_fwd_strand&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">on_fwd</span> <span class="o">=</span> <span class="s2">&quot;on_rev_strand&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Location </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">[</span><span class="si">{:.2f}</span><span class="s2">,</span><span class="si">{:d}</span><span class="s2">]&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_fwd_strand</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="Connection">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Connection">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Connection</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for connecting two elements</span>
+<span class="sd">    </span>
+<span class="sd">    This class represents a connection between two elements, where each element is a Location object.</span>
+<span class="sd">    It provides methods for managing connections, including finding the other end of a connection</span>
+<span class="sd">    and deleting the connection.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        A (Location): The first Location object in the connection.</span>
+<span class="sd">        B (Location): The second Location object in the connection.</span>
+<span class="sd">        type_ (str): The type of connection.</span>
+<span class="sd">        </span>
+<span class="sd">    Methods:</span>
+<span class="sd">        other(location): Returns the other Location object in the connection.</span>
+<span class="sd">        delete(): Deletes the connection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="Connection.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Connection.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">type_</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">Location</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">Location</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_</span> <span class="o">=</span> <span class="n">type_</span></div>
+
+        
+<div class="viewcode-block" id="Connection.other">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Connection.other">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span>
+        <span class="k">elif</span> <span class="n">location</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span></div>
+
+
+<div class="viewcode-block" id="Connection.delete">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.Connection.delete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Connection </span><span class="si">{}</span><span class="s2">--</span><span class="si">{}</span><span class="s2">--</span><span class="si">{}</span><span class="s2">]&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="ConnectableElement">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.ConnectableElement">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectableElement</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ConnectableElement is an abstract base class that represents an object that can be connected to other objects.</span>
+<span class="sd">    This class provides functionality for managing connections between objects, where connections are typically made between &#39;Location&#39; objects that are associated with the ConnectableElement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        locations (list): A list of Location objects associated with this element. Alias for connection_locations.</span>
+<span class="sd">        connection_locations (list): A list of Location objects associated with this element.</span>
+<span class="sd">        connections (list): A list of Connection objects that this element is a part of.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        get_locations(type_=None, exclude=()): </span>
+<span class="sd">            Returns locations of a specified type, excluding certain types.</span>
+<span class="sd">        get_location_at(contour_position, on_fwd_strand=True, new_type=&quot;crossover&quot;):</span>
+<span class="sd">            Returns a location at a specific contour position and strand orientation, </span>
+<span class="sd">            creating one if necessary.</span>
+<span class="sd">        get_connections_and_locations(connection_type=None, exclude=()):</span>
+<span class="sd">            Returns a list of [connection, location_in_self, location_in_other] for each connection.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        - The class is designed to be subclassed.</span>
+<span class="sd">        - It appears to be part of a system for modeling polymer structures, possibly DNA origami or similar structures.</span>
+<span class="sd">        - The class enforces that objects cannot be connected to themselves directly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ConnectableElement.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.ConnectableElement.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_locations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connections</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connection_locations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">connection_locations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">connections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">## TODO decide on names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_locations</span> <span class="o">=</span> <span class="n">connection_locations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="n">connections</span></div>
+
+
+<div class="viewcode-block" id="ConnectableElement.get_locations">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_locations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_locations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">()):</span>
+        <span class="n">locs</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_locations</span> <span class="k">if</span> <span class="p">(</span><span class="n">type_</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">l</span><span class="o">.</span><span class="n">type_</span> <span class="o">==</span> <span class="n">type_</span><span class="p">)</span> <span class="ow">and</span> <span class="n">l</span><span class="o">.</span><span class="n">type_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">counter</span><span class="p">:</span>
+                <span class="n">counter</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">counter</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="p">[</span><span class="n">counter</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">locs</span></div>
+
+
+<div class="viewcode-block" id="ConnectableElement.get_location_at">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_location_at">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_location_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contour_position</span><span class="p">,</span> <span class="n">on_fwd_strand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new_type</span><span class="o">=</span><span class="s2">&quot;crossover&quot;</span><span class="p">):</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1">## Assumes that intrahelical connections have been made before crossovers</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">on_fwd_strand</span> <span class="o">==</span> <span class="n">on_fwd_strand</span> <span class="ow">and</span> <span class="n">l</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="n">loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="n">l</span>
+            <span class="c1"># assert( loc is not None )</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">==</span> <span class="n">contour_position</span> <span class="ow">and</span> <span class="n">l</span><span class="o">.</span><span class="n">on_fwd_strand</span> <span class="o">==</span> <span class="n">on_fwd_strand</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="n">loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="n">l</span>
+        <span class="k">if</span> <span class="n">loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">Location</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">contour_position</span><span class="o">=</span><span class="n">contour_position</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="n">new_type</span><span class="p">,</span> <span class="n">on_fwd_strand</span><span class="o">=</span><span class="n">on_fwd_strand</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loc</span></div>
+
+
+<div class="viewcode-block" id="ConnectableElement.get_connections_and_locations">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.ConnectableElement.get_connections_and_locations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_connections_and_locations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns a list with each entry of the form:</span>
+<span class="sd">            connection, location_in_self, location_in_other &quot;&quot;&quot;</span>
+        <span class="n">type_</span> <span class="o">=</span> <span class="n">connection_type</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">type_</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">type_</span> <span class="o">==</span> <span class="n">type_</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">type_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                <span class="k">if</span>   <span class="n">c</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">B</span><span class="p">]</span> <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">c</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">A</span><span class="p">]</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>
+                    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Object contains connection that fails to refer to object&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="c1">## TODO fix circular references        </span>
+        <span class="n">A</span><span class="p">,</span><span class="n">B</span> <span class="o">=</span> <span class="p">[</span><span class="n">connection</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">B</span><span class="p">]</span>
+            
+        <span class="n">A</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Objects cannot yet be connected to themselves; if you are attempting to make a circular object, try breaking the object into multiple components&quot;</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">locations</span>
+        <span class="k">if</span> <span class="n">A</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">locations</span>
+        <span class="k">if</span> <span class="n">B</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolymerSection</span><span class="p">(</span><span class="n">ConnectableElement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class that describes a linear section of a polymer.</span>
+<span class="sd">    A PolymerSection represents a continuous section of a polymer, defined by the number of monomers</span>
+<span class="sd">    and their spatial properties. It handles spatial transformations, contour-to-position mapping,</span>
+<span class="sd">    and manages connections to other polymer elements.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        segname (str): Name of the polymer section.</span>
+<span class="sd">        num_monomers (int): Number of monomers in this polymer section.</span>
+<span class="sd">        monomer_length (float): Length of each monomer.</span>
+<span class="sd">        start_position (ndarray): 3D coordinates of the section&#39;s starting point.</span>
+<span class="sd">        end_position (ndarray): 3D coordinates of the section&#39;s ending point.</span>
+<span class="sd">        start_orientation (ndarray, optional): Initial orientation matrix.</span>
+<span class="sd">        position_spline_params (tuple): Spline parameters for position interpolation.</span>
+<span class="sd">        quaternion_spline_params (tuple, optional): Spline parameters for orientation interpolation.</span>
+<span class="sd">        sequence (list, optional): Sequence of monomers if applicable.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PolymerSection.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">num_monomers</span><span class="p">,</span>
+                 <span class="n">monomer_length</span><span class="p">,</span>
+                 <span class="n">start_position</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">end_position</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="n">ConnectableElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_locations</span><span class="o">=</span><span class="p">[],</span> <span class="n">connections</span><span class="o">=</span><span class="p">[])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;segname&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segname</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_monomers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monomer_length</span> <span class="o">=</span> <span class="n">monomer_length</span>
+        
+        <span class="k">if</span> <span class="n">start_position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">start_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">end_position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">monomer_length</span><span class="o">*</span><span class="n">num_monomers</span><span class="p">))</span> <span class="o">+</span> <span class="n">start_position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_position</span> <span class="o">=</span> <span class="n">start_position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_position</span> <span class="o">=</span> <span class="n">end_position</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_orientation</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">## Set up interpolation for positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_splines_from_ends</span><span class="p">()</span></div>
+
+
+        <span class="c1"># self.sequence = None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">[</span><span class="si">{:d}</span><span class="s2">]&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">segname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="PolymerSection.set_splines">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_splines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_splines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets up splines for the polymer&#39;s position.</span>
+
+<span class="sd">        This method creates cubic splines that interpolate the polymer&#39;s position coordinates</span>
+<span class="sd">        along its contour. These splines can be used for smooth interpolation between discrete</span>
+<span class="sd">        polymer positions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contours : array_like</span>
+<span class="sd">            Contour parameter values corresponding to each coordinate point.</span>
+<span class="sd">            Typically represents positions along the polymer chain.</span>
+<span class="sd">            </span>
+<span class="sd">        coords : ndarray</span>
+<span class="sd">            Coordinates of the polymer, shape (n_points, n_dimensions).</span>
+<span class="sd">            Each row represents the position of a polymer segment in space.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        -----</span>
+<span class="sd">        The method uses scipy.interpolate.splprep with linear splines (k=1) and no smoothing (s=0).</span>
+<span class="sd">        The resulting spline parameters are stored in self.position_spline_params as a tuple </span>
+<span class="sd">        containing the knot points, coefficients, and degree of the spline (tck) and </span>
+<span class="sd">        the parameter values (u).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splprep</span><span class="p">(</span> <span class="n">coords</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">contours</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">tck</span><span class="p">,</span><span class="n">u</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.set_orientation_splines">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.set_orientation_splines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_orientation_splines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="n">quaternions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set spline interpolation parameters for orientation.</span>
+<span class="sd">        </span>
+<span class="sd">        Creates a linear interpolation spline (k=1) for quaternion orientations along contour points.</span>
+<span class="sd">        The spline parameters are stored in the self.quaternion_spline_params attribute.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contours : array_like</span>
+<span class="sd">            Parametric positions along the polymer contour where orientations are defined.</span>
+<span class="sd">        quaternions : array_like</span>
+<span class="sd">            Array of quaternions defining orientations at each contour point.</span>
+<span class="sd">            Should be of shape (n, 4) where n is the number of contour points.</span>
+<span class="sd">            </span>
+<span class="sd">        Note</span>
+<span class="sd">        -----</span>
+<span class="sd">        Uses scipy.interpolate.splprep with smoothing factor s=0 (exact interpolation)</span>
+<span class="sd">        and k=1 (linear interpolation).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splprep</span><span class="p">(</span> <span class="n">quaternions</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">contours</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">tck</span><span class="p">,</span><span class="n">u</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.get_center">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_center">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_location_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">contour_to_monomer_index</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">contour_position</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PolymerSection.insert_monomers">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.insert_monomers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_monomers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_monomer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_monomer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">num_monomer</span><span class="p">),</span><span class="n">num_monomer</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">at_monomer</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to insert DNA into </span><span class="si">{}</span><span class="s2"> at a negative location&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">at_monomer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to insert DNA into </span><span class="si">{}</span><span class="s2"> at beyond the end of the Polymer&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">num_monomers</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to insert DNA a negative amount of DNA into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="n">num_monomers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">num_monomer</span><span class="p">)</span>
+        <span class="n">monomer_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_location_positions</span><span class="p">()</span>
+        <span class="n">new_monomer_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">at_monomer</span> <span class="k">else</span> <span class="n">p</span><span class="o">+</span><span class="n">num_monomers</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">monomer_positions</span><span class="p">]</span>
+
+        <span class="c1">## TODO: handle sequence</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="o">+</span><span class="n">num_monomer</span>
+
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">,</span> <span class="n">new_monomer_positions</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomer_index_to_contour</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.remove_monomers">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.remove_monomers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_monomers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_monomer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">last_monomer</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Removes nucleotides between first_monomer and last_monomer, inclusive &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">first_monomer</span><span class="p">),</span><span class="n">first_monomer</span><span class="p">))</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">last_monomer</span><span class="p">),</span><span class="n">last_monomer</span><span class="p">))</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">first_monomer</span><span class="p">,</span><span class="n">last_monomer</span><span class="p">))</span>
+        <span class="n">last_monomer</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">first_monomer</span><span class="p">,</span><span class="n">last_monomer</span><span class="p">))</span>
+        <span class="n">fist_monomer</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="k">if</span> <span class="n">first_monomer</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">first_monomer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to remove DNA from </span><span class="si">{}</span><span class="s2"> starting at an invalid location </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_monomer</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">last_monomer</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">last_monomer</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to remove DNA from </span><span class="si">{}</span><span class="s2"> ending at an invalid location </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">last_monomer</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">first_monomer</span> <span class="o">==</span> <span class="n">last_monomer</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">first_monomer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">first_monomer</span><span class="p">)</span>
+        <span class="n">last_monomer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">last_monomer</span><span class="p">)</span>
+
+        <span class="n">monomer_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_location_positions</span><span class="p">()</span>
+
+        <span class="n">bad_locations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">first_monomer</span> <span class="ow">and</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">last_monomer</span><span class="p">,</span> <span class="n">monomer_positions</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bad_locations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Attempted to remove DNA containing locations </span><span class="si">{}</span><span class="s2"> from </span><span class="si">{}</span><span class="s2"> between </span><span class="si">{}</span><span class="s2"> and </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bad_locations</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="n">first_monomer</span><span class="p">,</span><span class="n">last_monomer</span><span class="p">))</span>
+
+        <span class="n">removed_monomer</span> <span class="o">=</span> <span class="n">last_monomer</span><span class="o">-</span><span class="n">first_monomer</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">new_monomer_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">last_monomer</span> <span class="k">else</span> <span class="n">p</span><span class="o">-</span><span class="n">removed_monomer</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">monomer_positions</span><span class="p">]</span>
+        <span class="n">num_monomers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="o">-</span><span class="n">removed_monomer</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="p">))</span> 
+                                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">first_monomer</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">last_monomer</span><span class="p">]</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_monomers</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span> <span class="o">=</span> <span class="n">num_monomers</span>
+
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="p">,</span> <span class="n">new_monomer_positions</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">contour_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomer_position_to_contour</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__filter_contours</span><span class="p">(</span><span class="n">contours</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">position_filter</span><span class="p">,</span> <span class="n">contour_filter</span><span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">contours</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">positions</span>
+
+        <span class="c1">## Filter</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">contour_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">contour_filter</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">ids</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">position_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">position_filter</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">,:]),</span> <span class="n">ids</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ids</span>
+
+<div class="viewcode-block" id="PolymerSection.translate">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.translate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">translation_vector</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contour_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">translation_vector</span><span class="p">)</span>
+        <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">PolymerSection</span><span class="o">.</span><span class="n">__filter_contours</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">position_filter</span><span class="p">,</span> <span class="n">contour_filter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span>
+
+        <span class="c1">## Translate</span>
+        <span class="n">r</span><span class="p">[</span><span class="n">ids</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">ids</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">dr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_splines</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">r</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.rotate">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.rotate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation_matrix</span><span class="p">,</span> <span class="n">about</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">contour_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">PolymerSection</span><span class="o">.</span><span class="n">__filter_contours</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">position_filter</span><span class="p">,</span> <span class="n">contour_filter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">about</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">## TODO: do this more efficiently</span>
+            <span class="n">r</span><span class="p">[</span><span class="n">ids</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rotation_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">about</span><span class="p">)</span>
+            <span class="c1">## TODO: do this more efficiently</span>
+            <span class="n">r</span><span class="p">[</span><span class="n">ids</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rotation_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">-</span><span class="n">dr</span><span class="p">)</span> <span class="o">+</span> <span class="n">dr</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_splines</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">## TODO: performance: don&#39;t shift between quaternion and matrix representations so much</span>
+            <span class="n">tck</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span>
+            <span class="n">orientations</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">contour_to_orientation</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">u</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">orientations</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">rotation_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">orientations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">quats</span> <span class="o">=</span> <span class="p">[</span><span class="n">quaternion_from_matrix</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">orientations</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_orientation_splines</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">quats</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_splines_from_ends</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">r0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_position</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_position</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">//</span><span class="nb">int</span><span class="p">(</span><span class="n">resolution</span><span class="p">)))</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">u</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">r0</span> <span class="o">+</span> <span class="n">s</span><span class="o">*</span><span class="n">r1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_splines</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PolymerSection.contour_to_monomer_index">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_monomer_index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contour_to_monomer_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contour_pos</span><span class="p">,</span> <span class="n">nearest_monomer</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">contour_pos</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_monomer</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+        <span class="k">if</span> <span class="n">nearest_monomer</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span><span class="n">idx</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">idx</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.monomer_index_to_contour">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.monomer_index_to_contour">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">monomer_index_to_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">monomer_pos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">monomer_pos</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_monomers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.contour_to_position">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_position">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contour_to_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">p</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.contour_to_tangent">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_tangent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contour_to_tangent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_spline_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">der</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">T</span></div>
+
+        
+
+<div class="viewcode-block" id="PolymerSection.contour_to_orientation">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.contour_to_orientation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contour_to_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a contour position to an orientation matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        This method calculates the orientation of the polymer at a given contour position.</span>
+<span class="sd">        It handles both linear and spline-based orientations.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        orientation : array-like</span>
+<span class="sd">            Orientation matrix at the given contour position.   </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">)</span>   <span class="c1"># TODO make vectorized version</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contour_to_tangent</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+            <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="n">rotAxisL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">)</span>
+            <span class="n">zAxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">rotAxisL</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">rotAxisL</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                <span class="k">if</span> <span class="n">axis</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">zAxis</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">theta</span> <span class="o">=</span> <span class="mi">180</span><span class="o">-</span><span class="n">theta</span>
+                <span class="n">orientation0</span> <span class="o">=</span> <span class="n">rotationAboutAxis</span><span class="p">(</span> <span class="n">rotAxis</span><span class="o">/</span><span class="n">rotAxisL</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">normalizeAxis</span><span class="o">=</span><span class="kc">False</span> <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">orientation0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">axis</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">zAxis</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> \
+                               <span class="n">rotationAboutAxis</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span> <span class="mi">180</span><span class="p">,</span> <span class="n">normalizeAxis</span><span class="o">=</span><span class="kc">False</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">orientation0</span> <span class="o">=</span> <span class="n">orientation0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_orientation</span><span class="p">)</span>
+
+            <span class="c1"># orientation = rotationAboutAxis( axis, self.twist_per_nt*self.contour_to_monomer_index(s), normalizeAxis=False )</span>
+            <span class="c1"># orientation = orientation.dot(orientation0)</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quaternion_spline_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="c1"># TODO: is this needed?</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="n">quaternion_to_matrix</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">orientation</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.get_contour_sorted_connections_and_locations">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.get_contour_sorted_connections_and_locations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_contour_sorted_connections_and_locations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">type_</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get connections and locations sorted by contour position.</span>
+<span class="sd">        </span>
+<span class="sd">        This method retrieves all connections and locations of a specified type and</span>
+<span class="sd">        sorts them based on their contour positions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        type_ : str</span>
+<span class="sd">            The type of connection to retrieve.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sort_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">contour_position</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections_and_locations</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_fn</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="PolymerSection.add_location">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.add_location">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="n">on_fwd_strand</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1">## Create location if needed, add to polymer</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomer_index_to_contour</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># TODO? loc = self.Location( contour_position=c, type_=type_, on_fwd_strand=is_fwd )</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">Location</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">contour_position</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span> <span class="n">on_fwd_strand</span><span class="o">=</span><span class="n">on_fwd_strand</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerSection.iterate_connections_and_locations">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerSection.iterate_connections_and_locations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterate_connections_and_locations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1">## connections to other polymers</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contour_sorted_connections_and_locations</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">cl</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cl</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">c</span></div>
+</div>
+
+
+<div class="viewcode-block" id="PolymerGroup">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolymerGroup</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for managing a group of polymers.</span>
+<span class="sd">    </span>
+<span class="sd">    This class represents a group of polymers, which can be used to represent a</span>
+<span class="sd">    complex system of polymers. It provides methods for managing the polymers,</span>
+<span class="sd">    including finding connections and locations.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        polymers (list): A list of PolymerSection objects.</span>
+<span class="sd">        grid_potentials (list): A list of grid potentials.</span>
+<span class="sd">        </span>
+<span class="sd">    Methods:</span>
+<span class="sd">        get_connections(type_=None, exclude=()): Find all connections in model, without double-counting.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="PolymerGroup.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymers</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Simulation system parameters &quot;&quot;&quot;</span>
+        <span class="c1">## TODO decide whether to move these elsewhere</span>
+        <span class="c1"># self.dimensions = dimensions</span>
+        <span class="c1"># self.temperature = temperature</span>
+        <span class="c1"># self.timestep = timestep</span>
+        <span class="c1"># self.cutoff = cutoff</span>
+        <span class="c1"># self.decomposition_period = decomposition_period</span>
+        <span class="c1"># self.pairlist_distance = pairlist_distance</span>
+        <span class="c1"># self.nonbonded_resolution = nonbonded_resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span> <span class="o">=</span> <span class="n">polymers</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_potentials</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+        <span class="c1"># self.useNonbondedScheme( nbDnaScheme )</span>
+
+<div class="viewcode-block" id="PolymerGroup.get_connections">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_connections">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">exclude</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Find all connections in model, without double-counting &quot;&quot;&quot;</span>
+        <span class="n">added</span><span class="o">=</span><span class="nb">set</span><span class="p">()</span>
+        <span class="n">ret</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">get_connections_and_locations</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">added</span><span class="p">]</span>
+            <span class="n">added</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">items</span><span class="p">])</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">items</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">contour_position</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    
+<div class="viewcode-block" id="PolymerGroup.extend">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.extend">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">include_strands</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PolymerSectionModel</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">include_strands</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">strands</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">strands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">include_strands</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">strands</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">strands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear_beads</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PolymerGroup.update">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span> <span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polymer</span><span class="p">,</span> <span class="n">PolymerSection</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="n">polymer</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">polymer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polymer</span><span class="p">)</span></div>
+
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Operations on spline coordinates &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PolymerGroup.translate">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.translate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">translation_vector</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">translation_vector</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="n">position_filter</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="PolymerGroup.rotate">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.rotate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation_matrix</span><span class="p">,</span> <span class="n">about</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">,</span> <span class="n">about</span><span class="o">=</span><span class="n">about</span><span class="p">,</span> <span class="n">position_filter</span><span class="o">=</span><span class="n">position_filter</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerGroup.get_center">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.get_center">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_ssdna</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">include_ssdna</span><span class="p">:</span>
+            <span class="n">polymers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">polymers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">DoubleStrandedPolymerSection</span><span class="p">),</span> 
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">))</span>
+        <span class="n">centers</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">polymers</span><span class="p">]</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">*</span><span class="mi">2</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">DoubleStrandedPolymerSection</span><span class="p">)</span> <span class="k">else</span> <span class="n">s</span><span class="o">.</span><span class="n">num_monomers</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">polymers</span><span class="p">]</span>
+        <span class="c1"># centers,weights = [np.array(a) for a in (centers,weights)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span> <span class="n">centers</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerGroup.dimensions_from_structure">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.dimensions_from_structure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dimensions_from_structure</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">padding_factor</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">isotropic</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+        <span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">,</span><span class="n">dz</span> <span class="o">=</span> <span class="p">[(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">positions</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">positions</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="mi">30</span><span class="p">)</span><span class="o">*</span><span class="n">padding_factor</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">isotropic</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">dz</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">,</span><span class="n">dz</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">,</span><span class="n">dz</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PolymerGroup.add_grid_potential">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.add_grid_potential">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_grid_potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_file</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">per_monomer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">grid_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">grid_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">grid_file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Grid file </span><span class="si">{}</span><span class="s2"> does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_file</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">grid_file</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="n">grid_file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="n">grid_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_potentials</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">grid_file</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">per_</span><span class="p">,</span><span class="n">pmp</span><span class="p">,</span><span class="n">er</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PolymerGroup.vmd_tube_tcl">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_tube_tcl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vmd_tube_tcl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;drawTubes.tcl&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tclFile</span><span class="p">:</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;## beginning TCL script </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">draw_tube</span><span class="p">(</span><span class="n">polymer</span><span class="p">,</span><span class="n">radius_value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;## Tube being drawn... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="n">contours</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">//</span><span class="n">resolution</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">rs</span> <span class="o">=</span> <span class="p">[</span><span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contours</span><span class="p">]</span>
+               
+                <span class="n">radius_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">radius_value</span><span class="p">)</span>
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top color </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">color</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rs</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="n">r0</span> <span class="o">=</span> <span class="n">rs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">r1</span> <span class="o">=</span> <span class="n">rs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">filled</span> <span class="o">=</span> <span class="s2">&quot;yes&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">rs</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;no&quot;</span>
+                    <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top cylinder {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} radius </span><span class="si">{}</span><span class="s2"> resolution 30 filled </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">radius_value</span><span class="p">),</span> <span class="n">filled</span><span class="p">))</span>
+                    <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top sphere {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} radius </span><span class="si">{}</span><span class="s2"> resolution 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">radius_value</span><span class="p">)))</span>
+                <span class="n">r0</span> <span class="o">=</span> <span class="n">rs</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">r0</span> <span class="o">=</span> <span class="n">rs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top cylinder {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} radius </span><span class="si">{}</span><span class="s2"> resolution 30 filled yes </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">radius_value</span><span class="p">)))</span>
+
+            <span class="c1">## material</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top materials on </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top material AOEdgy </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1">## iterate through the model polymers</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+                <span class="n">draw_tube</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="s2">&quot;cyan&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="PolymerGroup.vmd_cylinder_tcl">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerGroup.vmd_cylinder_tcl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vmd_cylinder_tcl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;drawCylinders.tcl&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tclFile</span><span class="p">:</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;## beginning TCL script </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">draw_cylinder</span><span class="p">(</span><span class="n">polymer</span><span class="p">,</span><span class="n">radius_value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">):</span>
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;## cylinder being drawn... </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">r0</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">r1</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                
+                <span class="n">radius_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">radius_value</span><span class="p">)</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+                
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top color </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="p">))</span>
+                <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top cylinder {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} {{ </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> }} radius </span><span class="si">{}</span><span class="s2"> resolution 30 filled yes </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">radius_value</span><span class="p">))</span>
+
+            <span class="c1">## material</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top materials on </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">tclFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;graphics top material AOEdgy </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1">## iterate through the model polymers</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymers</span><span class="p">:</span>
+                <span class="n">draw_cylinder</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="s2">&quot;cyan&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="PolymerBeads">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerBeads">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolymerBeads</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Abstract class for bead-based models that are built from Polymer objects &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PolymerBeads.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerBeads.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">monomers_per_bead_group</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rest_length</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span> <span class="o">=</span> <span class="n">polymer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span>
+        <span class="c1"># self.spring_constant = spring_constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span> <span class="o">=</span> <span class="n">monomers_per_bead_group</span>
+        
+        <span class="k">if</span> <span class="n">rest_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rest_length</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="n">monomer_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rest_length</span> <span class="o">=</span> <span class="n">rest_length</span>
+        
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;segname&#39;</span><span class="p">,</span><span class="s1">&#39;chain&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">polymer</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+        <span class="n">Group</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">monomers_per_bead_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__monomers_per_bead_group</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_bead_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__num_bead_groups</span>    
+    
+    <span class="nd">@monomers_per_bead_group</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">monomers_per_bead_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;monomers_per_bead_group must be positive&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_bead_groups</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">/</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="nd">@num_bead_groups</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_bead_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_bead_groups must be positive&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__num_bead_groups</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__monomers_per_bead_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">num_monomers</span><span class="o">/</span><span class="n">value</span> <span class="c1"># get exact ratio</span>
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clear_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">## self.children = []</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all</span><span class="p">()</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_ith_bead_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Normally a bead, but sometimes a group of beads &quot;&quot;&quot;</span>
+        <span class="n">bead</span> <span class="o">=</span> <span class="n">PointParticle</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span>
+                             <span class="n">resid</span> <span class="o">=</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_join_adjacent_bead_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">b1</span><span class="p">,</span><span class="n">b2</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">]</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot; units &quot;10 kJ/N_A&quot; kcal_mol &quot;&quot;&quot;</span>
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">HarmonicBond</span><span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_constant</span><span class="p">,</span>
+                                <span class="n">r0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_length</span><span class="p">,</span>
+                                <span class="n">rRange</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span>
+                                <span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                                <span class="n">maxForce</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_bond</span><span class="p">(</span> <span class="n">i</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">bond</span> <span class="o">=</span> <span class="n">bond</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bead_groups</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">monomer_index_to_contour</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_position</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polymer</span><span class="o">.</span><span class="n">contour_to_orientation</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_ith_bead_group</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span><span class="o">-</span><span class="n">di</span><span class="p">):</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">_di</span> <span class="k">for</span> <span class="n">_di</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">di</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">_join_adjacent_bead_groups</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolymerModel">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolymerModel</span><span class="p">(</span><span class="n">ArbdModel</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<div class="viewcode-block" id="PolymerModel.__init__">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerModel.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymers</span><span class="p">,</span>
+                 <span class="n">sequences</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">monomers_per_bead_group</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Assign sequences &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sequences</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polymers</span><span class="p">))]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span> <span class="o">=</span> <span class="n">PolymerGroup</span><span class="p">(</span><span class="n">polymers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequences</span> <span class="o">=</span> <span class="n">sequences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monomers_per_bead_group</span> <span class="o">=</span> <span class="n">monomers_per_bead_group</span>
+        <span class="n">ArbdModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">                </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Generate beads &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_beads</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PolymerModel.update_splines">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerModel.update_splines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_splines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span><span class="o">.</span><span class="n">polymers</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_splines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">n</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">n</span></div>
+
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_polymer_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polymer</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">polymer_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+            
+<div class="viewcode-block" id="PolymerModel.generate_beads">
+<a class="viewcode-back" href="../../polymer_modeling/polymer.html#arbdmodel.polymer.PolymerModel.generate_beads">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_beads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peptides</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_polymer_beads</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">p</span><span class="p">,</span><span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polymer_group</span><span class="o">.</span><span class="n">polymers</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sequences</span><span class="p">))]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peptides</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">_generate_beads</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

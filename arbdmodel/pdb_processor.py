@@ -42,6 +42,7 @@ class PdbProcessor:
         work_dir=None,
         tcl_path=None,
         charmm_params_dir=None,
+        hydrogen_cluster=False,
         **kwargs,
     ):  # remember to change to None
         """
@@ -52,6 +53,11 @@ class PdbProcessor:
             simconf: SimConf object containing configuration parameters
             num_heavy_cluster: Number of heavy atom clusters for VDW maps
             work_dir: Working directory, should be either rbs or static (as enviromental potential)
+            pot_resolution: Grid resolution for VDW potential maps (default 1 Å; high-res: 0.5)
+            den_resolution: Grid resolution for VDW density maps (default 2 Å; high-res: 1)
+            charge_resolution: Grid resolution for charge density maps (default 2 Å; high-res: 1)
+            elec_resolution: Grid resolution for electrostatic potential maps (default 2 Å; high-res: 1)
+            hydrogen_cluster: Whether to cluster hydrogen atoms (default False)
             charmm_params_dir: Directory with CHARMM .prm/.str/.rtf. If None, uses env
                 ARBD_CHARMM_PARAMS or ~/.cache/arbdmodel/charmm_toppar_c36_feb26 (shared across runs).
         """
@@ -69,6 +75,7 @@ class PdbProcessor:
         os.makedirs(self.work_dir, exist_ok=True)
         
         if simconf is None:
+            logger.warning("No simulation configuration provided, using default values")
             from . import DefaultSimConf
             simconf = DefaultSimConf()
             
@@ -77,6 +84,11 @@ class PdbProcessor:
         self.temperature = simconf.temperature
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
+
+        self.pot_resolution = simconf.pot_resolution
+        self.den_resolution = simconf.den_resolution
+        self.elec_resolution = simconf.elec_resolution
+        self.hydrogen_cluster = hydrogen_cluster
 
         self.num_heavy_cluster = int(num_heavy_cluster) if num_heavy_cluster is not None else simconf.num_heavy_cluster
         if self.num_heavy_cluster is None:
@@ -158,11 +170,29 @@ class PdbProcessor:
         """Align structure to principal axes using VMD."""
         # Write alignment TCL script
         align_tcl = self.tcl_path / "align.tcl"
+        aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
+        aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
+        mass_file = self.work_dir / f"{self.base_name}.mass.txt"
+        inertia_file = self.work_dir / f"{self.base_name}.inertia.txt"
+
         if not align_tcl.exists():
             align_tcl = self.tclgen.write_align_tcl()
             logger.debug(f"Alignment script written to {align_tcl}")
         
-
+        if aligned_pdb.exists() and aligned_psf.exists() and mass_file.exists() and inertia_file.exists():
+            logger.info(f"Structure already aligned: {aligned_pdb} and {aligned_psf}")
+            self.aligned_pdb = self.work_dir / f"{self.base_name}.aligned.pdb"
+            self.aligned_psf = self.work_dir / f"{self.base_name}.aligned.psf"
+            with open(mass_file) as f:
+                self.mass = float(f.readline().strip())
+                
+            with open(inertia_file) as f:
+                self.moment_of_inertia = [float(x) for x in f.readline().strip().split()]
+                
+            logger.info(f"Structure aligned: Mass = {self.mass}, Inertia = {self.moment_of_inertia}")
+            self.base_name=f"{self.base_name}.aligned"  # Reasign base name to aligned pdb and psf
+            return
+        
         # Run alignment
         try:
             # Copy input files to work directory if they're not already there
@@ -247,7 +277,13 @@ class PdbProcessor:
         logger.info(f"Hydrodynamic properties: trans_damp={self.transdamp}, rot_damp={self.rotdamp}")
             
     
-    def generate_charge_distribution(self, resolution=2.0):
+    def generate_charge_distribution(self):
+        resolution=self.den_resolution
+
+        if self.den_resolution is None:
+            logger.warning("Den resolution not provided, using default value of 2")
+            resolution = 2.0
+
         """Generate charge distribution using VMD."""
         aligned_name = f"{self.base_name}"
         aligned_path = str(self.work_dir / aligned_name)
@@ -255,17 +291,18 @@ class PdbProcessor:
         # Create TCL script for VMD
         charge_tcl = self.tcl_path / "charge-density.tcl"
         if not charge_tcl.exists():
-            charge_tcl = self.tclgen.write_charge_density_tcl(resolution=resolution)
+            charge_tcl = self.tclgen.write_charge_density_tcl()
             logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', aligned_path]
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', aligned_path, resolution]
+        logger.info(f"Running charge density command: {cmd}")
         with open(charge_tcl) as fh:
             subprocess.run(cmd, check=True, capture_output=True, stdin=fh)
         
         # Check if charge distribution was created successfully
         charge_dx = self.work_dir / f"{aligned_name}.chargeDensity.dx"
-        charge_out = self.work_dir / f"{aligned_name}.charge.dx"
+        charge_out = self.work_dir / f"{aligned_name}.{resolution}A.charge.dx"
         netcharge_file = self.work_dir / f"{aligned_name}.netCharge.dat"
         
         if not charge_dx.exists():
@@ -311,6 +348,7 @@ class PdbProcessor:
         logger.info(f"Charge distribution generated with net charge: {np.sum(grid):.6f}")
     
     def generate_electrostatic_map(self, buffer=50):
+        resolution=self.elec_resolution
         """Generate electrostatic potential map using APBS."""
         if not self.apbs_path:
             logger.warning("APBS executable not provided, skipping electrostatic calculations")
@@ -327,7 +365,7 @@ class PdbProcessor:
         # Initialize APBS runner
         apbs_runner = APBSRunner(structure_name=aligned_name, simconf=self.simconf,
             xyz_dims=dimensions,
-            buffer=buffer)
+            buffer=buffer,resolution=resolution)
         
         # Write APBS configuration using the runner
         apbs_runner.run_calculation(workdir=self.work_dir)
@@ -335,8 +373,7 @@ class PdbProcessor:
         # Run APBS
         #cmd = f"cd {self.work_dir} && {self.apbs_path} {aligned_name}.apbs"
         #subprocess.run(cmd, shell=True, check=True)
-
-        out_file = Path.cwd() / self.work_dir / f"{aligned_name}.elec.dx"
+        out_file = Path.cwd() / self.work_dir / f"{aligned_name}.{resolution}A.elec.dx"
         Bound_grid(inFile=out_file, lowerBound=-20, upperBound=20)
         
         self.elec_dx = out_file
@@ -370,11 +407,11 @@ class PdbProcessor:
             lj_types.append(current_term.strip())
         return lj_types
 
-    def collect_lj_type_records(self, potResolution=1, denResolution=2):
+    def collect_lj_type_records(self):
         """Collect per-processor LJ statistics for model-level pooled clustering."""
         vdw_tcl = self.tcl_path / "vdw_cluster.tcl"
         if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.generate_cluster_tcl(potResolution=potResolution, denResolution=denResolution)
+            vdw_tcl = self.tclgen.generate_cluster_tcl()
             logger.debug(f"Clustering script written to {vdw_tcl}")
 
         _env = os.environ.copy()
@@ -435,18 +472,22 @@ class PdbProcessor:
             self._lj_type_records = self.collect_lj_type_records()
         return self._lj_type_records
 
-    def generate_vdw_diffusive(self, cluster_file=None, potResolution=1, denResolution=2):
+    def generate_vdw_diffusive(self, cluster_file=None):
+        potResolution=self.pot_resolution
+        denResolution=self.den_resolution
         vdw_tcl = self.tcl_path / "vdw_diffusive.tcl"
         
         if not vdw_tcl.exists():
-            vdw_tcl = self.tclgen.generate_diffusive_tcl(potResolution=potResolution, denResolution=denResolution)
+            vdw_tcl = self.tclgen.generate_diffusive_tcl()
             logger.debug(f"Clustering script written to {vdw_tcl}")
+        else:
+            logger.info(f"Clustering script found at {vdw_tcl}")
 
         cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path]
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path, potResolution, denResolution]
         last_dir = os.getcwd()
         try:
             os.chdir(self.work_dir)
@@ -460,9 +501,9 @@ class PdbProcessor:
         self.vdw_pot_dxs = []
         self.vdw_den_dxs = []
         
-        for i in range(self.num_heavy_cluster + 1):
-            pot_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
-            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
+        for i in range(self.num_heavy_cluster + int(self.hydrogen_cluster)):
+            pot_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{potResolution}A.pot.dx"
+            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{denResolution}A.den.dx"
             
             if not pot_file.exists():
                 logger.warning(f"VDW potential file not found: {pot_file}")
@@ -487,9 +528,12 @@ class PdbProcessor:
         """Get dictionary of grid files for use in RigidBodyType (raw paths; smoothing is applied in rb_from_pdb)."""
         potential_grids = []
         charge_grids = []
+        # APBS writes phi in kT/e; ARBD expects kcal/mol -> multiply by kT
+        elec_scale = 0.001987204 * self.temperature
 
         if self.elec_dx and Path(self.elec_dx).exists():
-            potential_grids.append(("elec", str(self.elec_dx), 0.59616195))
+            potential_grids.append(("elec", str(self.elec_dx), elec_scale))
+            potential_grids.append(("neg_elec", str(self.elec_dx), -elec_scale))
 
         if self.charge_dx and self.charge_dx.exists():
             charge_grids.append(("elec", str(self.charge_dx)))
@@ -497,7 +541,8 @@ class PdbProcessor:
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             vdw_key = f"vdw{i}"
             if pot_file.exists():
-                potential_grids.append((vdw_key, str(pot_file), 0.59616195))
+                # VDW pot.dx maps are already in kcal/mol
+                potential_grids.append((vdw_key, str(pot_file), 1.0))
 
         for i, den_file in enumerate(self.vdw_den_dxs):
             vdw_key = f"vdw{i}"
@@ -522,6 +567,7 @@ class PdbProcessor:
 
     def get_rb_type(self):
         """Get RigidBodyType for the processed structure."""
+        logger.warning("Only use this if you only have 1 rb type")
         self.preprocess_diffusive_structure()
         if self.clustered_path.exists():
             self.generate_vdw_diffusive(cluster_file=self.clustered_path)
@@ -570,7 +616,9 @@ class PdbProcessor:
         rb_type.potential_grids = grid_files.get("potential_grids", [])
         rb_type.charge_grids = grid_files.get("charge_grids", [])
 
-    def get_static_grids(self, is_gigantic=False, potResolution=1, denResolution=2, cluster_file=None):
+    def get_static_grids(self, is_gigantic=False, cluster_file=None):
+        potResolution=self.pot_resolution
+        denResolution=self.den_resolution
         """
         Process a static structure and return its grid files.
         Similar to get_rb_type() but for static objects.
@@ -653,16 +701,18 @@ class PdbProcessor:
         segments = [np.ceil(elm / threshold) for elm in in_xyz]
         return segments[0], segments[1], segments[2]
 
-    def process_static_vdw(self, potResolution=1, denResolution=2, is_gigantic=False):
+    def process_static_vdw(self, is_gigantic=False):
         """Process VDW maps for static objects"""
 
         # Generate maps based on size
         if is_gigantic:
-            self._process_gigantic_vdw(potResolution, denResolution)
+            self._process_gigantic_vdw()
         else:
-            self._process_standard_vdw(potResolution=potResolution, denResolution=denResolution)
+            self._process_standard_vdw()
 
-    def _process_standard_vdw(self, potResolution=1, denResolution=2, cluster_file=None):
+    def _process_standard_vdw(self, cluster_file=None):
+        potResolution=self.pot_resolution
+        denResolution=self.den_resolution
         """Process standard static object VDW maps"""
         # Generate static VDW map script
         vdw_script = self.tclgen.generate_static_vdw_tcl()
@@ -673,7 +723,7 @@ class PdbProcessor:
         # Run VMD
         _env = os.environ.copy()
         _env['VMDNOCUDA']=1
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path]
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path, potResolution]
         last_dir = os.getcwd()
         try:
             os.chdir(self.work_dir)
@@ -689,17 +739,18 @@ class PdbProcessor:
 
         # Bound the grid values
         for i in range(self.num_heavy_cluster + 1):
-            pot_file = Path.cwd() /self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+            pot_file = Path.cwd() /self.work_dir / f"{self.base_name}.vdw{i}.{potResolution}A.pot.dx"
             if os.path.isfile(pot_file):
                 Bound_grid(inFile=pot_file, lowerBound=-20, upperBound=20)
                 self.vdw_pot_dxs.append(pot_file)
-            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.den.dx"
+            den_file = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{denResolution}A.den.dx"
             if os.path.isfile(den_file):
                 self.vdw_den_dxs.append(den_file)
 
-    def _process_gigantic_vdw(self, potResolution, denResolution, cluster_file=None):
+    def _process_gigantic_vdw(self, cluster_file=None):
+        potResolution=self.pot_resolution
         """Process gigantic static object VDW maps with segmentation"""
-        #!!!! Needs work. standard vdw works
+        #!!!! Needs testing. standard vdw works
         cluster_path = Path(cluster_file) if cluster_file is not None else self.clustered_path
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
@@ -711,8 +762,8 @@ class PdbProcessor:
             segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
             
             # Generate VDW maps for this segment
-            vdw_script = self.tclgen.write_vdw_map_generation_static(potResolution)
-            cmd = [self.vmd_path, '-dispdev', 'text', '-args', segment_name, cluster_path]
+            vdw_script = self.tclgen.generate_static_vdw_tcl()
+            cmd = [self.vmd_path, '-dispdev', 'text', '-args', segment_name, cluster_path, potResolution]
             last_dir = os.getcwd()
             try:
                 os.chdir(self.work_dir)
@@ -732,7 +783,7 @@ class PdbProcessor:
             
             # Process each segment
             for j in range(self.segment_count + 1):
-                current_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.dx"
+                current_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.{potResolution}A.pot.dx"
                 temp_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.tmp.dx"
                 
                 if j == 0:
@@ -751,7 +802,7 @@ class PdbProcessor:
             # Create final map
             if os.path.isfile(last_map):
                 temp_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.tmp.dx"
-                final_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.dx"
+                final_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{poteResolution}A.pot.dx"
                 
                 shutil.copy(last_map, temp_out)
                 Bound_grid(inFile=temp_out, outFile=final_out, lowerBound=-20, upperBound=20)
@@ -776,7 +827,9 @@ voltool add -i1 $InMap1 -i2 $InMap2 -union -nointerp -o $OutMap
         """SimpleARBD-compatible entrypoint for diffusible objects."""
         return self.get_rb_type()
 
-    def process_structure(self, is_gigantic=False, potResolution=1, denResolution=2, threshold=300, cluster_file=None):
+    def process_structure(self, is_gigantic=False, threshold=300, cluster_file=None):
+        potResolution=self.pot_resolution
+        denResolution=self.den_resolution
         """SimpleARBD-compatible entrypoint for static-like processing."""
         self.threshold = threshold
         grid_files = self.get_static_grids(
@@ -790,12 +843,12 @@ voltool add -i1 $InMap1 -i2 $InMap2 -union -nointerp -o $OutMap
         self.elec_grid = grid_files.get("elec_grid")
         return grid_files
 
-    def get_grid_from_pdb(self, is_gigantic=False, threshold=300, potResolution=1, denResolution=2, cluster_file=None):
+    def get_grid_from_pdb(self, is_gigantic=False, threshold=300, cluster_file=None):
         """Compatibility wrapper matching legacy SimpleARBD call sites."""
         return self.process_structure(
             is_gigantic=is_gigantic,
-            potResolution=potResolution,
-            denResolution=denResolution,
+            potResolution=self.pot_resolution,
+            denResolution=self.den_resolution,
             threshold=threshold,
             cluster_file=cluster_file,
         )

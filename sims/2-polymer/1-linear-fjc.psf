@@ -1,0 +1,38 @@
+PSF NAMD
+
+       0 !NTITLE
+
+       7 !NATOM
+       1 PROT    1          A       A       X       0.000000 120.000000
+       2 PROT    2          A       A       X       0.000000 120.000000
+       3 PROT    3          A       A       X       0.000000 120.000000
+       4 PROT    4          A       A       X       0.000000 120.000000
+       5 PROT    5          A       A       X       0.000000 120.000000
+       6 PROT    6          A       A       X       0.000000 120.000000
+       7 PROT    7          A       A       X       0.000000 120.000000
+
+       6 !NBOND
+       6       7        1       2        4       5        2       3
+       5       6        3       4 
+
+       0 !NTHETA
+
+       0 !NPHI
+
+       0 !NIMPHI
+
+
+       0 !NDON: donors
+
+
+
+       0 !NACC: acceptors
+
+
+
+       0 !NNB
+
+      0      0      0      0      0      0      0
+
+       1       0 !NGRP
+

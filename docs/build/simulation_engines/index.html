@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Simulation Engines &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'simulation_engines/index';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="engine module" href="engine.html" />
+    <link rel="prev" title="ibi module" href="../interaction_potentials/ibi.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core/config.html">config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/rb_from_pdb.html">rb_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/rb_from_mesh.html">rb_from_mesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/rb_from_parametric.html">rb_from_parametric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rigidbody_models/rb_contact_model.html">rb_contact_model module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">engine module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2Fsimulation_engines/index.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/simulation_engines/index.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Simulation Engines</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="simulation-engines">
+<h1>Simulation Engines<a class="headerlink" href="#simulation-engines" title="Link to this heading">#</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="engine.html">engine module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine"><code class="docutils literal notranslate"><span class="pre">SimEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine.__init__"><code class="docutils literal notranslate"><span class="pre">SimEngine.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">SimEngine.default_binary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">SimEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">SimEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.SimEngine.simulate"><code class="docutils literal notranslate"><span class="pre">SimEngine.simulate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.ArbdEngine"><code class="docutils literal notranslate"><span class="pre">ArbdEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.ArbdEngine.__init__"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.ArbdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.default_binary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.ArbdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.ArbdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">ArbdEngine.write_simulation_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine"><code class="docutils literal notranslate"><span class="pre">NamdEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine.__init__"><code class="docutils literal notranslate"><span class="pre">NamdEngine.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine.default_binary"><code class="docutils literal notranslate"><span class="pre">NamdEngine.default_binary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine.get_default_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.get_default_conf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine.write_simulation_files"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_simulation_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.NamdEngine.write_conf"><code class="docutils literal notranslate"><span class="pre">NamdEngine.write_conf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.HydroProRunner"><code class="docutils literal notranslate"><span class="pre">HydroProRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.HydroProRunner.__init__"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.HydroProRunner.write_config"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.write_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.HydroProRunner.parse_output"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.parse_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.HydroProRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">HydroProRunner.run_calculation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.APBSRunner"><code class="docutils literal notranslate"><span class="pre">APBSRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.APBSRunner.__init__"><code class="docutils literal notranslate"><span class="pre">APBSRunner.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.APBSRunner.write_config"><code class="docutils literal notranslate"><span class="pre">APBSRunner.write_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.APBSRunner.run_calculation"><code class="docutils literal notranslate"><span class="pre">APBSRunner.run_calculation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.__init__"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.write_align_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.write_align_tcl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.write_charge_density_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.write_charge_density_tcl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.process_vdw_parameters"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.process_vdw_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.write_vdw_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.write_vdw_tcl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.generate_cluster_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.generate_cluster_tcl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.generate_diffusive_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.generate_diffusive_tcl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.html#arbdmodel.engine.TclScriptGenerator.generate_static_vdw_tcl"><code class="docutils literal notranslate"><span class="pre">TclScriptGenerator.generate_static_vdw_tcl()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../interaction_potentials/ibi.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ibi module</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="engine.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">engine module</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

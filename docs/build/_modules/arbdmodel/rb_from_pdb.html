@@ -1,0 +1,949 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbdmodel.rb_from_pdb &#8212; ARBD Model  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arbdmodel/rb_from_pdb';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ARBD Model  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ARBD Model Documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../core/index.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../core/core_objects.html">core_objects module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../core/config.html">config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../polymer_modeling/index.html">Polymer Modeling</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/polymer.html">polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/fjc_polymer_model.html">fjc_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/hps_polymer_model.html">hps_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/kh_polymer_model.html">kh_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/mpipi_polymer.html">mpipi_polymer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/onck_polymer_model.html">onck_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/sali_polymer_model.html">sali_polymer_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../polymer_modeling/ssdna_two_bead.html">ssdna_two_bead module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../rigidbody_models/index.html">RigidBody Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_pdb.html">rb_from_pdb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_mesh.html">rb_from_mesh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_from_parametric.html">rb_from_parametric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rigidbody_models/rb_contact_model.html">rb_contact_model module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../interaction_potentials/index.html">Interaction Potentials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/interactions.html">interactions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interaction_potentials/ibi.html">ibi module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../simulation_engines/index.html">Simulation Engines</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../simulation_engines/engine.html">engine module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../shape-based_models/index.html">Shape-Based Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../utilities/index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/coords.html">coords module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/grid.html">grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/logger.html">logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/version.html">version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/binary_manager.html">binary_manager module</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/username/arbdmodel/issues/new?title=Issue%20on%20page%20%2F_modules/arbdmodel/rb_from_pdb.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for arbdmodel.rb_from_pdb</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">RigidBody</span><span class="p">,</span> <span class="n">RigidBodyType</span><span class="p">,</span> <span class="n">DefaultSimConf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArbdModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pdb_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdbProcessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.coords</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generate_coordinates</span><span class="p">,</span> <span class="n">Generate_spanning_vectors</span>
+
+<span class="sd">&quot;&quot;&quot;Structure rigid body modeling module for ARBD.</span>
+
+<span class="sd">This module provides classes for structure-based rigid body modeling in the ARBD package,</span>
+<span class="sd">using a clean implementation that processes molecular structures into grid maps.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+  
+
+    
+<div class="viewcode-block" id="DiffusiveRigidBodyType">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.DiffusiveRigidBodyType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DiffusiveRigidBodyType</span><span class="p">(</span><span class="n">RigidBodyType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RigidBodyType subclass for structure-based rigid body objects&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="DiffusiveRigidBodyType.__init__">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.DiffusiveRigidBodyType.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">structure_path</span><span class="p">,</span> <span class="n">simconf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># Use current directory if work_dir is not specified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        
+        <span class="c1"># Create the RB output directory within work_dir</span>
+        <span class="n">rb_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;rbs&quot;</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">rb_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">simconf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultSimConf</span>
+            <span class="n">simconf</span> <span class="o">=</span> <span class="n">DefaultSimConf</span><span class="p">()</span>
+
+        <span class="c1"># Process the structure to get properties and grid maps</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">PdbProcessor</span><span class="p">(</span>
+            <span class="n">structure_path</span><span class="o">=</span><span class="n">structure_path</span><span class="p">,</span> <span class="n">simconf</span><span class="o">=</span><span class="n">simconf</span><span class="p">,</span>
+            <span class="n">work_dir</span><span class="o">=</span><span class="n">rb_dir</span><span class="p">)</span>  <span class="c1"># Pass the rigid body specific directory</span>
+        
+        <span class="c1"># Process the structure to get all properties and grid files</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">process_diffusive_structure</span><span class="p">()</span>
+        
+        <span class="c1"># Initialize the parent class with collected data</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> 
+            <span class="n">mass</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+            <span class="n">moment_of_inertia</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">moment_of_inertia</span><span class="p">,</span>
+            <span class="n">damping_coefficient</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">transdamp</span><span class="p">,</span>
+            <span class="n">rotational_damping_coefficient</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">rotdamp</span><span class="p">,</span>
+            <span class="n">potential_grids</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">get_grid_files</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;potential_grids&#39;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">charge_grids</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">get_grid_files</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;charge_grids&#39;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">pmf_grids</span><span class="o">=</span><span class="p">[],</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Store file paths for reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_pdb</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">aligned_pdb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aligned_psf</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">aligned_psf</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;StructureRigidBodyType &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; initialized successfully&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="StaticObject">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StaticObject">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StaticObject</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a static (immobile) object in the simulation&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="StaticObject.__init__">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StaticObject.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simconf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">is_gigantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize static object from a structure file.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            structure_path: Path to structure file (.psf/.pdb)</span>
+<span class="sd">            name: Name for this static object (defaults to structure filename)</span>
+<span class="sd">            simconf: SimConf object containing configuration parameters</span>
+<span class="sd">            work_dir: Working directory (defaults to current directory)</span>
+<span class="sd">            is_gigantic: Whether this is a gigantic object requiring segmentation</span>
+<span class="sd">            threshold: Size threshold for segmentation (if is_gigantic=True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">structure_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">structure_path</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span> <span class="k">else</span> <span class="s2">&quot;static_object&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_gigantic</span> <span class="o">=</span> <span class="n">is_gigantic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+        
+        <span class="c1"># Use current directory as base</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        
+        <span class="c1"># Create static output directory</span>
+        <span class="n">static_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">static_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Default config if not provided</span>
+        <span class="k">if</span> <span class="n">simconf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">simconf</span> <span class="o">=</span> <span class="n">DefaultSimConf</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">simconf</span> <span class="o">=</span> <span class="n">simconf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potential_grids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_grids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elec_grid</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1"># Process the structure if provided</span>
+        <span class="k">if</span> <span class="n">structure_path</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">()</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_segments_num</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find number of segments needed for a gigantic object.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            dimensions: List of dimensions [x, y, z]</span>
+<span class="sd">            threshold: Size threshold for segmentation (defaults to self.threshold)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of (nx, ny, nz) segment counts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+            
+        <span class="n">in_xyz</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">]</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">elm</span> <span class="o">/</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">in_xyz</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">segments</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">segments</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">segments</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="StaticObject.process">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StaticObject.process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the structure file to create potential and density grids&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No structure path provided for static object&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_gigantic</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_gigantic</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_standard</span><span class="p">()</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the structure normally (without segmentation)&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing static object: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Use static directory for output</span>
+        <span class="n">static_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        
+        <span class="c1"># Create processor and generate maps</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">PdbProcessor</span><span class="p">(</span>
+            <span class="n">structure_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="p">,</span>
+            <span class="n">simconf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="p">,</span>
+            <span class="n">work_dir</span><span class="o">=</span><span class="n">static_dir</span><span class="p">)</span>  <span class="c1"># Use the static object directory</span>
+        
+        <span class="n">processor</span><span class="o">.</span><span class="n">process_structure</span><span class="p">()</span>
+        
+        <span class="c1"># Collect grid files from the processor</span>
+        <span class="n">grid_files</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_grid_files</span><span class="p">()</span>
+        
+        <span class="c1"># Store grids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potential_grids</span> <span class="o">=</span> <span class="n">grid_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;potential_grids&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge_grids</span> <span class="o">=</span> <span class="n">grid_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;charge_grids&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">processor</span><span class="p">,</span> <span class="s1">&#39;elec_smoothed_dx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">processor</span><span class="o">.</span><span class="n">elec_smoothed_dx</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elec_grid</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">elec_smoothed_dx</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_gigantic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a gigantic structure by segmentation&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">MDAnalysis</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mda</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing gigantic static object: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Use static directory for output</span>
+        <span class="n">static_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        
+        <span class="c1"># Get dimensions by reading the structure file</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">mda</span><span class="o">.</span><span class="n">Universe</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="p">))</span>
+        <span class="n">min_coords</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">max_coords</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">max_coords</span> <span class="o">-</span> <span class="n">min_coords</span>
+        
+        <span class="c1"># Calculate segmentation</span>
+        <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_segments_num</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Segmenting into </span><span class="si">{</span><span class="n">nx</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">ny</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">nz</span><span class="si">}</span><span class="s2"> parts&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create segment directory</span>
+        <span class="n">segments_dir</span> <span class="o">=</span> <span class="n">static_dir</span> <span class="o">/</span> <span class="s2">&quot;segments&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">segments_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Write VMD script for segmentation</span>
+        <span class="n">segment_script</span> <span class="o">=</span> <span class="n">static_dir</span> <span class="o">/</span> <span class="s2">&quot;segment.tcl&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">segment_script</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2"># Segment structure</span>
+<span class="s2">mol new </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_path</span><span class="si">}</span>
+<span class="s2">set all [atomselect top all]</span>
+<span class="s2">set mM [measure minmax $all]</span>
+<span class="s2">set dimAl [vecsub [lindex $mM 1] [lindex $mM 0]]</span>
+<span class="s2">set min_x [expr [lindex [lindex $mM 0] 0] - 1]</span>
+<span class="s2">set min_y [expr [lindex [lindex $mM 0] 1] - 1]</span>
+<span class="s2">set min_z [expr [lindex [lindex $mM 0] 2] - 1]</span>
+<span class="s2">set dx [expr ([lindex $dimAl 0] + 2)/</span><span class="si">{</span><span class="n">nx</span><span class="si">}</span><span class="s2">]</span>
+<span class="s2">set dy [expr ([lindex $dimAl 1] + 2)/</span><span class="si">{</span><span class="n">ny</span><span class="si">}</span><span class="s2">]</span>
+<span class="s2">set dz [expr ([lindex $dimAl 2] + 2)/</span><span class="si">{</span><span class="n">nz</span><span class="si">}</span><span class="s2">]</span>
+
+<span class="s2">set count 0</span>
+<span class="s2">for </span><span class="se">{{</span><span class="s2">set i 0</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">$i &lt; </span><span class="si">{</span><span class="n">nx</span><span class="si">}</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">incr i</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span>
+<span class="s2">  for </span><span class="se">{{</span><span class="s2">set j 0</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">$j &lt; </span><span class="si">{</span><span class="n">ny</span><span class="si">}</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">incr j</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span>
+<span class="s2">    for </span><span class="se">{{</span><span class="s2">set k 0</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">$k &lt; </span><span class="si">{</span><span class="n">nz</span><span class="si">}</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span><span class="s2">incr k</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span>
+<span class="s2">      set outName </span><span class="si">{</span><span class="n">segments_dir</span><span class="si">}</span><span class="s2">/segment_$count</span>
+<span class="s2">      set low_x [expr $min_x + $i * $dx]</span>
+<span class="s2">      set low_y [expr $min_y + $j * $dy]</span>
+<span class="s2">      set low_z [expr $min_z + $k * $dz]</span>
+<span class="s2">      set up_x [expr $min_x + ($i+1) * $dx]</span>
+<span class="s2">      set up_y [expr $min_y + ($j+1) * $dy]</span>
+<span class="s2">      set up_z [expr $min_z + ($k+1) * $dz]</span>
+<span class="s2">      set sel [atomselect top &quot;(x &gt; $low_x and x &lt; $up_x) and (y &gt; $low_y and y &lt; $up_y) and (z &gt; $low_z and z &lt; $up_z)&quot;]</span>
+<span class="s2">      set sel_N [$sel num]</span>
+<span class="s2">      if </span><span class="se">{{</span><span class="s2">$sel_N &gt; 0</span><span class="se">}}</span><span class="s2"> </span><span class="se">{{</span>
+<span class="s2">        $sel writepqr $outName.pqr</span>
+<span class="s2">        $sel writepsf $outName.psf</span>
+<span class="s2">        $sel writepdb $outName.pdb</span>
+<span class="s2">        set count [expr $count + 1]</span>
+<span class="s2">      </span><span class="se">}}</span>
+<span class="s2">    </span><span class="se">}}</span>
+<span class="s2">  </span><span class="se">}}</span>
+<span class="se">}}</span>
+<span class="s2">exit</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Run segmentation</span>
+        <span class="n">vmd_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="o">.</span><span class="n">get_binary</span><span class="p">(</span><span class="s1">&#39;vmd&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vmd_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;VMD binary not found in configuration&quot;</span><span class="p">)</span>
+            
+        <span class="n">run</span><span class="p">([</span><span class="n">vmd_path</span><span class="p">,</span> <span class="s2">&quot;-dispdev&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;-e&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">segment_script</span><span class="p">)],</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Process each segment</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">segments_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;segment_*.pdb&quot;</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments to process&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Process each segment</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">segment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">segments</span><span class="p">):</span>
+            <span class="n">segment_dir</span> <span class="o">=</span> <span class="n">segments_dir</span> <span class="o">/</span> <span class="n">segment</span><span class="o">.</span><span class="n">stem</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">segment_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing segment </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">segment</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="n">segment_processor</span> <span class="o">=</span> <span class="n">PdbProcessor</span><span class="p">(</span>
+                <span class="n">structure_path</span><span class="o">=</span><span class="n">segment</span><span class="p">,</span>
+                <span class="n">simconf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="p">,</span>
+                <span class="n">work_dir</span><span class="o">=</span><span class="n">segment_dir</span><span class="p">)</span>
+            
+            <span class="n">segment_processor</span><span class="o">.</span><span class="n">process_structure</span><span class="p">()</span>
+            
+            <span class="c1"># Collect grid maps from this segment</span>
+            <span class="n">grid_files</span> <span class="o">=</span> <span class="n">segment_processor</span><span class="o">.</span><span class="n">get_grid_files</span><span class="p">()</span>
+            
+            <span class="c1"># Store grids from this segment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">potential_grids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">grid_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;potential_grids&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charge_grids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">grid_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;charge_grids&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+            
+            <span class="c1"># Store the first electrostatic grid as the main one</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">segment_processor</span><span class="p">,</span> <span class="s1">&#39;elec_smoothed_dx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elec_grid</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">elec_grid</span> <span class="o">=</span> <span class="n">segment_processor</span><span class="o">.</span><span class="n">elec_smoothed_dx</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing gigantic static object: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="StructureRigidBodyModel">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StructureRigidBodyModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StructureRigidBodyModel</span><span class="p">(</span><span class="n">ArbdModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model class for structure-based rigid body simulations&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="StructureRigidBodyModel.__init__">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StructureRigidBodyModel.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cell_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_factor</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_boundary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                 <span class="n">num_heavy_cluster</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">boundary_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize structure model.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            diffusible_objects: List of StructureRigidBody instances for diffusible objects</span>
+<span class="sd">            static_objects: List of StructureRigidBody instances for static objects</span>
+<span class="sd">            cell_vectors: List of 3 cell basis vectors defining the simulation box</span>
+<span class="sd">            cell_origin: Cell origin coordinates</span>
+<span class="sd">            dimensions: Explicit dimensions for the simulation box (overrides cell_vectors)</span>
+<span class="sd">            buffer_factor: Factor to scale dimensions derived from cell vectors</span>
+<span class="sd">            configuration: Configuration object, defaults to DefaultSimConf</span>
+<span class="sd">            use_boundary: Whether to create a boundary potential</span>
+<span class="sd">            boundary_params: Optional parameters for boundary potential (well_depth, resolution, etc.)</span>
+<span class="sd">            **kwargs: Additional arguments passed to ArbdModel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">simconf</span> <span class="o">=</span> <span class="n">configuration</span> <span class="ow">or</span> <span class="n">DefaultSimConf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diffusible_objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">static_objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boundary_potential</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Store initial positions for each type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heavy_cluster</span> <span class="o">=</span> <span class="n">num_heavy_cluster</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">children</span><span class="o">=</span><span class="p">[],</span> 
+            <span class="n">cell_vectors</span><span class="o">=</span><span class="n">cell_vectors</span><span class="p">,</span> 
+            <span class="n">cell_origin</span><span class="o">=</span><span class="n">cell_origin</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+            <span class="n">buffer_factor</span><span class="o">=</span><span class="n">buffer_factor</span><span class="p">,</span>
+            <span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Process boundary if requested</span>
+        <span class="k">if</span> <span class="n">use_boundary</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating boundary potential&quot;</span><span class="p">)</span>
+            <span class="c1"># Create boundary potential</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.interactions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryPotential</span>
+            
+            <span class="c1"># Use provided boundary parameters or defaults</span>
+            <span class="n">bp_params</span> <span class="o">=</span> <span class="n">boundary_params</span> <span class="ow">or</span> <span class="p">{}</span>
+            
+            <span class="n">boundary</span> <span class="o">=</span> <span class="n">BoundaryPotential</span><span class="p">(</span>
+                <span class="n">cell_vectors</span><span class="o">=</span><span class="n">cell_vectors</span><span class="p">,</span>
+                <span class="n">cell_origin</span><span class="o">=</span><span class="n">cell_origin</span><span class="p">,</span>
+                <span class="n">well_depth</span><span class="o">=</span><span class="n">bp_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;well_depth&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">resolution</span><span class="o">=</span><span class="n">bp_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+                <span class="n">blur</span><span class="o">=</span><span class="n">bp_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;blur&#39;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Generate the boundary file and store it</span>
+            <span class="n">boundary_file</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">bp_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_file&#39;</span><span class="p">,</span> <span class="s1">&#39;boundary.dx&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundary_potential</span> <span class="o">=</span> <span class="n">boundary_file</span></div>
+
+            <span class="c1">#self.add_nonbonded_interaction(self.boundary_potential)</span>
+        
+
+<div class="viewcode-block" id="StructureRigidBodyModel.add_diffusible_object">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StructureRigidBodyModel.add_diffusible_object">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_diffusible_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rb_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copies</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                         <span class="n">orientations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_region</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a diffusible (mobile) rigid body type to the model.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            structure_path: Path to structure files (.psf/.pdb) to create a StructureRigidBodyType</span>
+<span class="sd">            rb_type: Existing RigidBodyType instance (if structure_path not provided)</span>
+<span class="sd">            copies: Number of copies to add</span>
+<span class="sd">            positions: Optional list of positions for each copy</span>
+<span class="sd">            orientations: Optional list of orientations for each copy</span>
+<span class="sd">            name: Optional base name for the rigid bodies</span>
+<span class="sd">            initial_region: Optional dict with vectors defining initial region</span>
+<span class="sd">            random_seed: Optional seed for random number generator</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List of created RigidBody instances</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Process the structure to create a RigidBodyType if structure_path provided</span>
+        <span class="k">if</span> <span class="n">structure_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Create a StructureRigidBodyType from the structure files</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">structure_path</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+                
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing structure files for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">structure_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Create the RigidBodyType using rbs/name directory</span>
+            <span class="n">rb_type</span> <span class="o">=</span> <span class="n">DiffusiveRigidBodyType</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">structure_path</span><span class="o">=</span><span class="n">structure_path</span><span class="p">,</span>
+                <span class="n">simconf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created StructureRigidBodyType for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">rb_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either structure_path or rb_type must be provided&quot;</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rb_type</span><span class="p">,</span> <span class="n">RigidBodyType</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Object must be a RigidBodyType&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create base name for rigid bodies of this type</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">rb_type</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">created_bodies</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Generate positions if not provided</span>
+        <span class="k">if</span> <span class="n">positions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">copies</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Set up default initial region if not provided</span>
+            <span class="k">if</span> <span class="n">initial_region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_dim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+                <span class="n">initial_region</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;bv1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">max_dim</span><span class="o">*</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;bv2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_dim</span><span class="o">*</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;bv3&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_dim</span><span class="o">*</span><span class="mf">0.8</span><span class="p">],</span>
+                    <span class="s1">&#39;origin&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="p">}</span>
+                
+            <span class="c1"># Get dimensions for this rigid body type</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>  <span class="c1"># Default</span>
+            
+            <span class="c1"># Try to get actual dimensions from structure</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rb_type</span><span class="p">,</span> <span class="s1">&#39;aligned_pdb&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">rb_type</span><span class="o">.</span><span class="n">aligned_pdb</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Try to read dimensions from dimension.dat file in the same directory</span>
+                    <span class="n">dim_file</span> <span class="o">=</span> <span class="n">rb_type</span><span class="o">.</span><span class="n">aligned_pdb</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rb_type</span><span class="o">.</span><span class="n">aligned_pdb</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.dimension.dat&quot;</span>
+                    <span class="k">if</span> <span class="n">dim_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dim_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using dimensions from </span><span class="si">{</span><span class="n">dim_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not read dimensions from file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Generate spanning vectors</span>
+            <span class="n">bv1</span><span class="p">,</span> <span class="n">bv2</span><span class="p">,</span> <span class="n">bv3</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span> <span class="o">=</span> <span class="n">Generate_spanning_vectors</span><span class="p">(</span>
+                <span class="n">initial_region</span><span class="p">[</span><span class="s1">&#39;bv1&#39;</span><span class="p">],</span> 
+                <span class="n">initial_region</span><span class="p">[</span><span class="s1">&#39;bv2&#39;</span><span class="p">],</span> 
+                <span class="n">initial_region</span><span class="p">[</span><span class="s1">&#39;bv3&#39;</span><span class="p">],</span>
+                <span class="n">dimensions</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Set random seed if provided</span>
+            <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">prev_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+            
+            <span class="c1"># Generate coordinates</span>
+            <span class="n">generated_coords</span> <span class="o">=</span> <span class="n">Generate_coordinates</span><span class="p">(</span>
+                <span class="n">bv1</span><span class="p">,</span> <span class="n">bv2</span><span class="p">,</span> <span class="n">bv3</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">copies</span><span class="p">,</span>
+                <span class="n">initial_region</span><span class="p">[</span><span class="s1">&#39;origin&#39;</span><span class="p">],</span> <span class="n">random_seed</span> <span class="ow">or</span> <span class="mi">0</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Restore random state if we changed it</span>
+            <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">prev_state</span><span class="p">)</span>
+            
+            <span class="c1"># Store positions for later use</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span><span class="p">[</span><span class="n">rb_type</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">generated_coords</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">generated_coords</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">copies</span><span class="si">}</span><span class="s2"> initial positions for </span><span class="si">{</span><span class="n">rb_type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Set up default orientation if none provided</span>
+        <span class="n">default_orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        
+        <span class="c1"># Add requested number of copies</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">copies</span><span class="p">):</span>
+            <span class="c1"># Create position and orientation for this copy</span>
+            <span class="k">if</span> <span class="n">positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Generate random position within the model bounds</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+                
+            <span class="k">if</span> <span class="n">orientations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">orientations</span><span class="p">):</span>
+                <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">orientation</span> <span class="o">=</span> <span class="n">default_orientation</span>
+            
+            <span class="c1"># Create a new rigid body</span>
+            <span class="n">rb_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">copies</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">base_name</span>
+            <span class="n">rb</span> <span class="o">=</span> <span class="n">RigidBody</span><span class="p">(</span>
+                <span class="n">type_</span><span class="o">=</span><span class="n">rb_type</span><span class="p">,</span>
+                <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">rb_name</span><span class="p">)</span>
+            
+            <span class="c1"># Add to model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diffusible_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rb</span><span class="p">)</span>
+            <span class="n">created_bodies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rb</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="n">created_bodies</span></div>
+
+
+<div class="viewcode-block" id="StructureRigidBodyModel.add_static_object">
+<a class="viewcode-back" href="../../rigidbody_models/rb_from_pdb.html#arbdmodel.rb_from_pdb.StructureRigidBodyModel.add_static_object">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_static_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_path</span><span class="p">,</span> <span class="n">is_gigantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a static object to the simulation.</span>
+<span class="sd">        </span>
+<span class="sd">        This method creates a StaticObject from the specified structure file, extracts its</span>
+<span class="sd">        electrostatic and potential/charge grids, and adds them to the simulation as</span>
+<span class="sd">        non-bonded interactions.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure_path : str</span>
+<span class="sd">            Path to the structure file of the static object.</span>
+<span class="sd">        is_gigantic : bool, default=False</span>
+<span class="sd">            Flag indicating whether the structure is exceptionally large.</span>
+<span class="sd">        threshold : int, default=300</span>
+<span class="sd">            Size threshold for processing large structures.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        StaticObject</span>
+<span class="sd">            The created and added static object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">structure_path</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+        
+        <span class="c1"># Create the static object with static/{name} output directory</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">StaticObject</span><span class="p">(</span>
+            <span class="n">structure_path</span><span class="o">=</span><span class="n">structure_path</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">simconf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simconf</span><span class="p">,</span>
+            <span class="n">is_gigantic</span><span class="o">=</span><span class="n">is_gigantic</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Add potential grids to model</span>
+        <span class="k">for</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">grid_file</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">potential_grids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span><span class="n">grid_type</span><span class="p">,</span> <span class="n">grid_file</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+            
+        <span class="c1"># Add charge grids to model</span>
+        <span class="k">for</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">grid_file</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">charge_grids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span><span class="n">grid_type</span><span class="p">,</span> <span class="n">grid_file</span><span class="p">)</span>
+            
+        <span class="c1"># Add electrostatic grid if available</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">elec_grid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span><span class="s2">&quot;elec&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">elec_grid</span><span class="p">,</span> <span class="mf">0.59616195</span><span class="p">)</span>
+
+        <span class="c1"># Store the static object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">static_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+ 
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By ARBD Model Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, ARBD Model Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
