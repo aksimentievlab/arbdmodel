@@ -665,7 +665,7 @@ systemSize {dimX} {dimY} {dimZ}
             
             ## Write entries for each type of particle
             for pt,(num,num_rigid) in model.getParticleTypesAndCounts():
-                #if num+num_rigid == 0: continue
+                if num+num_rigid == 0: continue
                 devlogger.debug(f'Writing configuration for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()

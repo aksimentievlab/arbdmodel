@@ -840,7 +840,7 @@ class ArbdModel(PdbModel):
         if not self.skip_type_recount:
             self.type_counts = None # force recount
         t=self.getParticleTypesAndCounts()
-        if len(t)==0:
+        if len(t)==0:           # support older versions of arbd that require a point particle
             dummy_type=ParticleType("dummy",1, mass=1, diffusivity=1)
             self.add(PointParticle(dummy_type,np.array([0,0,0])))
         self._countParticleTypes()
