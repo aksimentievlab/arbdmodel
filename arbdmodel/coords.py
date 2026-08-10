@@ -288,18 +288,22 @@ def rotationAboutAxis(axis,angle, normalizeAxis=True):
     q = [cos] + [sin*x for x in axis]
     return quaternion_to_matrix(q)
 
-def get_inertial_properties(coords):
+def get_inertial_properties(coords, weights=None):
     """ Use singular value decomposition to obtain principal moments and axes of a point cloud.
 
     coords: Nx3 coordinate array
     Return: axes, moments, centroid
     """
 
-    m = coords.mean(axis=0)
+    m = np.average(coords, weights=weights, axis=0)
     points = coords-m
-    U,s,V = np.linalg.svd(coords)
+    if weights is not None:
+        Wr = np.diag(np.sqrt(weights))
+        # Wr_inv = np.linalg.inv(Wr)
+        points = Wr @ points
+    U,s,V = np.linalg.svd(points)
     s_sq = s**2
-    assert(s_sq.size == 3)
+    assert(s_sq.size == coords.shape[-1])
     return V, np.sum(s_sq)-s_sq, m
 
 # By Chun
