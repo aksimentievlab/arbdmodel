@@ -684,9 +684,9 @@ class ParticleType():
                           "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, mass=None, diffusivity=None,
+    def __init__(self, name, charge=None, mass=None, diffusivity=None,
                  damping_coefficient=None, parent=None,
-                 rigid_body_potentials=tuple(), **kwargs):
+                 rigid_body_potentials=None, **kwargs):
 
         """ Parent type is used to fall back on for nonbonded
         interactions if this type is not specifically referenced """
@@ -696,17 +696,24 @@ class ParticleType():
                 if k not in ParticleType.excludedAttributes:
                     self.__dict__[k] = v
             assert( type(parent) == type(self) )
+            if charge is None:
+                charge = parent.charge
+            if rigid_body_potentials is None:
+                rigid_body_potentials = tuple(parent.rigid_body_potentials)
 
         # if diffusivity is None:
         #     assert( (damping_coefficient is not None) and (mass is not None) )
 
         ## TODO: make most attributes @property
         self.name   = name
+        if charge is None: charge = 0
         self.charge = charge
         if mass is not None: self.mass = mass
         if damping_coefficient is not None: self.damping_coefficient = damping_coefficient
         if diffusivity is not None: self.diffusivity = diffusivity
         self.parent = parent
+        if rigid_body_potentials is None:
+            rigid_body_potentials = tuple()
         self.rigid_body_potentials = rigid_body_potentials
         devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
         
