@@ -264,7 +264,8 @@ class ArbdEngine(SimEngine):
         self._write_product_potential_file(model, f"{main_potentials_dir}/{output_name}.product_potential.txt")
         self._write_group_sites_file(model, f"{main_potentials_dir}/{output_name}.group_sites.txt")
         self._write_rb_coordinate_file(model, configuration, f'{output_name}.rbcoords.txt')
-        
+        self._write_potential_switching_schedule_file(model, f'{output_name}.potential_switch_schedule.txt')
+
         self._write_potential_files(model, output_name, directory=main_potentials_dir, configuration=configuration)
         
         self._write_rb_attached_particles_files(model, output_name, configuration)
@@ -362,6 +363,7 @@ class ArbdEngine(SimEngine):
 
         x = np.arange(0, configuration.cutoff)
         _null_interaction = None
+        _null_written = False
         for i,j,t1,t2 in model._particleTypePairIter():
             interaction = model._get_nonbonded_interaction(t1,t2)
             try:
@@ -370,16 +372,18 @@ class ArbdEngine(SimEngine):
                 f = "%s.%s-%s.dat" % (prefix, t1.name, t2.name)
                 logger.debug(f'_write_nonbonded_parameter_files could not find filename for {interaction}; using default {f}')
             if interaction is None:
-                if _null_interaction is None:
-                    _null_interaction = NullPotential()
-                    f = _null_interaction.filename(types=(t1,t2))
-                    _null_interaction.range_ = [0, configuration.cutoff]
-                    _null_interaction.write_file(f,(t1,t2))
+                if _null_interaction is None: _null_interaction = NullPotential()
                 interaction = _null_interaction
-                f = _null_interaction.filename(types=(t1,t2))
-
-            devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
-            if not isinstance(interaction,NullPotential):
+            if isinstance(interaction, NullPotential):
+                f = interaction.filename(types=(t1,t2))
+                if not _null_written:
+                    devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
+                    interaction.range_ = [0, configuration.cutoff]
+                    interaction.resolution = configuration.cutoff/3
+                    interaction.write_file(f,(t1,t2))
+                    _null_written = True
+            else:
+                devlogger.debug(f'_write_nonbonded_parameter_files: {i}, {j}, {t1}, {t2}, {interaction}')
                 old_range = interaction.range_
                 interaction.range_ = [0, configuration.cutoff]
                 interaction.write_file(f, (t1, t2))
@@ -415,7 +419,11 @@ class ArbdEngine(SimEngine):
                 b.write_file()
 
         with open(self._bond_filename,'w') as fh:
-            for i,j,b,ex in model.get_bonds():
+            for idx,_bond in enumerate(model.get_bonds()):
+                ## idea: have model unpickler that converts lists of bonds to new BondedTerm
+                switch_schedule = None
+                i,j,b,ex,switch_schedule = _bond
+
                 try:
                     bfile = b.filename()
                 except:
@@ -426,7 +434,7 @@ class ArbdEngine(SimEngine):
                 else:
                     fh.write("BOND ADD %d %d %s\n" % item)
 
-            for i,j,b,ax,ex in model.get_bondXY():
+            for i,j,b,ax,ex,sw in model.get_bondXY():
                 try:
                     bfile = b.filename()
                 except:
@@ -441,50 +449,50 @@ class ArbdEngine(SimEngine):
 
     def _write_angle_file( self, model, filename ):
         self._angle_filename = filename
-        for b in list( set( [b for i,j,k,b in model.get_angles()] ) ):
+        for b in list( set( [b for i,j,k,b,sw in model.get_angles()] ) ):
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         with open(self._angle_filename,'w') as fh:
             for b in model.get_angles():
                 try:
-                    bfile = b[-1].filename()
+                    bfile = b[-2].filename()
                 except:
-                    bfile = str(b[-1])
-                item = tuple([p.idx for p in b[:-1]] + [bfile])
+                    bfile = str(b[-2])
+                item = tuple([p.idx for p in b[:-2]] + [bfile])
                 fh.write("ANGLE %d %d %d %s\n" % item)
 
     def _write_dihedral_file( self, model, filename ):
         self._dihedral_filename = filename
-        for b in list( set( [b for i,j,k,l,b in model.get_dihedrals()] ) ):
+        for b in list( set( [b for i,j,k,l,b,sw in model.get_dihedrals()] ) ):
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         with open(self._dihedral_filename,'w') as fh:
             for b in model.get_dihedrals():
                 try:
-                    bfile = b[-1].filename()
+                    bfile = b[-2].filename()
                 except:
-                    bfile = str(b[-1])
-                item = tuple([p.idx for p in b[:-1]] + [bfile])
+                    bfile = str(b[-2])
+                item = tuple([p.idx for p in b[:-2]] + [bfile])
                 fh.write("DIHEDRAL %d %d %d %d %s\n" % item)
 
     def _write_vector_angle_file( self, model, filename ):
         self._vector_angle_filename = filename
 
-        for b in list( set( [b for i,j,k,l,b in model.get_vector_angles()] ) ):
+        for b in list( set( [b for i,j,k,l,b,sw in model.get_vector_angles()] ) ):
             if type(b) is not str and not isinstance(b, Path):
                 b.write_file()
 
         if len(model.vector_angles) > 0:
             with open(self._vector_angle_filename,'w') as fh:
                 for b in model.get_vector_angles():
-                    p = b[-1]
+                    p = b[-2]
                     try:
                         bfile = p.filename()
                     except:
                         bfile = str(p)
-                    item = tuple([p.idx for p in b[:-1]] + [bfile])
+                    item = tuple([p.idx for p in b[:-2]] + [bfile])
                     fh.write("VECANGLE %d %d %d %d %s\n" % item)
 
     def _write_exclusion_file( self, model, filename ):
@@ -500,13 +508,13 @@ class ArbdEngine(SimEngine):
             with open(self._bond_angle_filename,'w') as fh:
                 for b in model.get_bond_angles():
                     bfiles = []
-                    for p in b[-1]:
+                    for p in b[-2]:
                         try:
                             bfile = p.filename()
                         except:
                             bfile = str(p)
                         bfiles.append(bfile)
-                    item = tuple([p.idx for p in b[:-1]] + bfiles)
+                    item = tuple([p.idx for p in b[:-2]] + bfiles)
                     fh.write("BONDANGLE %d %d %d %d %s %s %s\n" % item)
 
     def _write_product_potential_file( self, model, filename ):
@@ -534,6 +542,30 @@ class ArbdEngine(SimEngine):
                         line = line+" ".join([str(x.idx) for x in ijk])+" "
                         line = line+" ".join([str(x) for x in [type_,bfile] if x != ""])+" "
                     fh.write(line)
+
+    def _write_potential_switching_schedule_file( self, model, filename ):
+        switching_terms = dict(particles=[], bonds=[], angles=[], dihedrals=[])
+        switching_keywords = {k: k[:-1].upper() for k in switching_terms.keys()}
+        switching_keywords['particles'] = 'TYPE'
+
+        for key,fn in (('particles',model.__iter__),
+                       ('bonds', model.get_bonds),
+                       ('angles', model.get_angles),
+                       ('dihedrals', model.get_dihedrals)):
+            for i,b in enumerate(fn()):
+                if len(b.switch_schedule) > 0:
+                    switching_terms[key].append((i,b.switch_schedule))
+
+        self._potential_switching_schedule_filename = None
+        if sum([len(v) for k,v in switching_terms.items()]) > 0:
+            self._potential_switching_schedule_filename = filename
+            with open(filename, 'w') as fh:
+                for k,terms in switching_terms.items():
+                    for i,shedule in terms:
+                        fh.write(f'{switching_keywords[k]} {i}')
+                        for step,value in shedule:
+                            fh.write(f' {step} {value}')
+                        fh.write('\n')
 
     def _write_group_sites_file( self, model, filename ):
         self._group_sites_filename = filename
@@ -664,8 +696,8 @@ systemSize {dimX} {dimY} {dimZ}
 \n""".format(extra_bd_file_lines=self.extra_bd_file_lines, **params))
             
             ## Write entries for each type of particle
-            for pt,(num,num_rigid) in model.getParticleTypesAndCounts():
-                if num+num_rigid == 0: continue
+            for pt,(num,num_rigid,num_switch) in model.getParticleTypesAndCounts():
+                if num+num_rigid+num_switch == 0: continue
                 devlogger.debug(f'Writing configuration for particle type {pt}')
                 ## TODO create new particle types if existing has grid
                 particleParams = pt.__dict__.copy()
@@ -745,6 +777,11 @@ num {num}
                         fh.write(f"rigidBodyPotential {keyword}\n")
                         if s != 1: raise NotImplementedError('Instead scale rigid body potential')
 
+                try: _sw_t = pt.switch_type
+                except: _sw_t = None
+                if _sw_t is not None:
+                    fh.write(f'switchType {_sw_t.name}\n')
+
             ## Write coordinates and interactions
             fh.write("""
 ## Input coordinates
@@ -798,20 +835,12 @@ tabulatedPotential  1
                     fh.write("tabulatedVecangleFile %s\n" % bfile)
 
             if len(dihedrals) > 0:
-                for b in list(set([b for i,j,k,l,b in dihedrals])):
+                for b in list(set([b for i,j,k,l,b,sw in dihedrals])):
                     try:
                         bfile = b.filename()
                     except:
                         bfile = str(b)
                     fh.write("tabulatedDihedralFile %s\n" % bfile)
-
-            if len(vector_angles) > 0:
-                for b in list(set([b for i,j,k,l,b in vector_angles])):
-                    try:
-                        bfile = b.filename()
-                    except:
-                        bfile = str(b)
-                    fh.write("tabulatedVecangleFile %s\n" % bfile)
 
             if len(restraints) > 0:
                 fh.write("inputRestraints %s\n" % self._restraint_filename)
@@ -833,6 +862,9 @@ tabulatedPotential  1
                 fh.write("inputProductPotentials %s\n" % self._product_potential_filename)
             if len(group_sites) > 0:
                 fh.write("inputGroups %s\n" % self._group_sites_filename)
+
+            if self._potential_switching_schedule_filename is not None:
+                fh.write(f"inputPotentialSchedule {self._potential_switching_schedule_filename}\n")
 
             if len(model.rigid_bodies) > 0:
                 for rbi,num in model.rigid_body_type_counts:
@@ -897,8 +929,8 @@ rotDamping {' '.join(map(str,gamma_rot))}
 
                 
         write_null_dx = False
-        for pt,(num,num_rb) in model.getParticleTypesAndCounts():
-            if num+num_rb == 0: continue
+        for pt,(num,num_rb,num_sw) in model.getParticleTypesAndCounts():
+            if num+num_rb+num_sw == 0: continue
             if "grid_potentials" not in pt.__dict__:
                 gridfile = "{}/null.dx".format(self.potential_directory)
                 with open(gridfile, 'w') as fh:
