@@ -221,7 +221,7 @@ class HpsModel(PolymerModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: 1/ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
         if 'timestep' not in kwargs: kwargs['timestep'] = 10e-6
         if 'cutoff' not in kwargs: kwargs['cutoff'] = max(4*debye_length,20)

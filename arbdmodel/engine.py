@@ -241,7 +241,7 @@ class ArbdEngine(SimEngine):
         for rbk, num in model.rigid_body_type_counts:
             if num > 0:
                 rbt = model.rigid_body_index[rbk]
-                rb_dir = rbt.directory  # Create top-level directory named after the RigidBodyType
+                rb_dir = str(rbt.processor.work_dir) if hasattr(rbt, 'processor') else f"rbs/{rbt.name}"
                 if not os.path.exists(rb_dir):
                     os.makedirs(rb_dir)
                 rb_type_dirs[rbt.name] = rb_dir
@@ -251,7 +251,7 @@ class ArbdEngine(SimEngine):
 
         model.write_psf( output_name+'.psf' )
         model.write_pdb( output_name+'.pdb' )
-
+        
         self._write_particle_file(model, output_name + ".particles.txt", configuration)
         
         self._write_restraint_file(model, f"{main_potentials_dir}/{output_name}.restraint.txt")
@@ -706,7 +706,7 @@ systemSize {dimX} {dimY} {dimZ}
                     try:
                         D = pt.diffusivity
                     except:
-                        """ units "k K/(amu/ns)" "AA**2/ns" """
+                        """ damping_coefficient is zeta/m [1/ns]; D = 831447.2*T/(m*zeta/m) """
                         D = 831447.2 * configuration.temperature / (pt.mass * pt.damping_coefficient)
                     particleParams['dynamics'] = 'diffusion {D}'.format(D = D)
                 elif configuration.integrator in ('MD','Langevin','FusDynamic'):
@@ -714,7 +714,7 @@ systemSize {dimX} {dimY} {dimZ}
                         gamma = pt.damping_coefficient
                         if gamma is None: raise
                     except:
-                        """ units "k K/(AA**2/ns)" "amu/ns" """
+                        """ zeta/m [1/ns] = 831447.2*T/(m*D); written to .bd as transDamping """
                         gamma = 831447.2 * configuration.temperature / (pt.mass*pt.diffusivity)
                     particleParams['dynamics'] = """mass {mass}
 transDamping {g} {g} {g}""".format(mass=pt.mass, g=gamma)
@@ -875,7 +875,7 @@ tabulatedPotential  1
                     try:
                         gamma = rbt.damping_coefficient
                     except:
-                        """ units "k K/(AA**2/ns)" "dalton/ns" """
+                        """ zeta/m [1/ns] = 831447.2*T/(m*D); written to .bd as transDamping """
                         gamma = 831447.2 * configuration.temperature / (rbt.mass*np.array(rbt.diffusivity))
                     if len(gamma) == 1:
                         logger.warn(f'Using single diffusion coefficient for all motions along all rigid body principal axes for {rbt}')
@@ -884,7 +884,7 @@ tabulatedPotential  1
                     try:
                         gamma_rot = rbt.rotational_damping_coefficient
                     except:
-                        """ units "k K/(1/ns)" "AA**2 dalton/ns" """
+                        """ zeta_rot/I [1/ns] = 831447.2*T/(I*D_rot); written to .bd as rotDamping """
                         gamma_rot = 831447.2 * configuration.temperature / (np.array(rbt.moment_of_inertia)*np.array(rbt.diffusivity))
                     if len(gamma_rot) == 1:
                         logger.warn(f'Using single rotational diffusion coefficient for all motions along all rigid body principal axes for {pt}')
@@ -926,6 +926,7 @@ rotDamping {' '.join(map(str,gamma_rot))}
 
                 fh.write(f'\ninputRBCoordinates {self._rb_coordinate_filename}\n')
                 ...
+
                 
         write_null_dx = False
         for pt,(num,num_rb,num_sw) in model.getParticleTypesAndCounts():
@@ -1277,10 +1278,10 @@ hydro.pdb\t!Input PDB file
         Rz = float(lines[line_num+2].strip().split()[5])
         
         # Convert units
-        # Translation: "(295 k K) / (( cm^2/s) *  amu)" "amu/ns"
+        # Translation: zeta/m [1/ns] = (295 k K) / (D_trans[cm^2/s] * mass[amu])
         trans_damp = [24.527692/(x*mass) for x in [Dx, Dy, Dz]]
         
-        # Rotation: "(295 k K) / ((1/s) * amu·AA^2)" "amu·AA^2/ns"
+        # Rotation: zeta_rot/I [1/ns] = (295 k K) / (D_rot[1/s] * inertia[amu*AA^2])
         # Must divide by principal inertia per axis, NOT scalar mass.
         # Matches SimpleARBD's Accessory_routines_for_ARBD.py:
         #   Rx,Ry,Rz = [2.4527692e+17/(x*I) for x,I in zip([Rx,Ry,Rz], inertia)]
@@ -1349,7 +1350,7 @@ class APBSRunner:
     """
     
     def __init__( self, structure_name, xyz_dims, buffer: float = 50, large_system: bool = False,
-        dividend: int = 2,simconf= None,binary_path= None,psize_script= None,):
+        dividend: int = 2,simconf= None,binary_path= None, resolution=2.0,psize_script= None,):
         """Initialize APBS interface.
         
         Args:
@@ -1371,10 +1372,10 @@ class APBSRunner:
         self.buffer = float(buffer)
         self.large_system = bool(large_system)
         self.dividend = int(dividend)
-        
+        self.resolution = resolution
         if not xyz_dims or len(xyz_dims) != 3:
             raise ValueError("xyz_dims must be a list of 3 dimensions")
-        
+        self.out_file_name= f"{self.structure_name}.{self.resolution}A.elec.dx"
         # Get binary path using priority order
         self.binary = Path(simconf.get_binary('apbs'))
         self.psize = Path(psize_script) if psize_script else None
@@ -1402,15 +1403,22 @@ class APBSRunner:
         Raises:
             IOError: If unable to write configuration file
         """
-        # Calculate grid dimensions
-        xyz_cg = [(dim + self.buffer) for dim in self.xyz_dims]
+        spacing = self.resolution
+        if self.large_system:
+            spacing = spacing / self.dividend
         
-        if not self.large_system:
-            xyz_dime = xyz_cg
-        else:
-            # For large systems, reduce grid density
-            xyz_dime = [((dim + self.buffer) / self.dividend) for dim in self.xyz_dims]
-        xyz_dime = [int(np.ceil(x/32)*32+1) for x in xyz_dime]
+        # Calculate grid dimensions
+        xyz_cg=[]
+        xyz_dime=[]
+        for dim in self.xyz_dims:
+            box_len = dim + self.buffer
+            raw_dime = int(np.ceil(box_len / spacing)) + 1 # mg-auto requires dime = 4n + 1
+            n = (raw_dime - 1 + 3) // 4
+            dime = 4 * n + 1
+            fglen = (dime - 1) * spacing
+            xyz_dime.append(str(dime))
+            xyz_cg.append(f"{fglen:g}") 
+
         center = 'mol 1'  # Use molecule center for both cases
         
         config = f"""read
@@ -1438,7 +1446,7 @@ swin 0.3
 temp {self.temperature}
 calcenergy no
 calcforce no
-write pot dx {self.structure_name}.elec
+write pot dx {self.structure_name}.{self.resolution}A.elec
 end
 quit"""
 
@@ -1471,8 +1479,7 @@ quit"""
             self.write_config()
             
             # Run APBS
-            if not Path(f"{self.structure_name}.elec.dx").exists():
-                logger.info(f'Running apbs in {workdir} on {self.structure_name}')
+            if not Path(self.out_file_name).exists():
                 result = subprocess.run(
                     [str(self.binary), f"{self.structure_name}.apbs"],
                     capture_output=True,
@@ -1483,7 +1490,7 @@ quit"""
                 logger.info("APBS output file already exists:" +f"{self.structure_name}.elec.dx")
             
             # Check for output file
-            output_file = Path(f"{self.structure_name}.elec.dx")
+            output_file = Path(self.out_file_name)
             if not output_file.exists():
                 raise FileNotFoundError("APBS failed to generate output file")
                 
@@ -1638,7 +1645,7 @@ $sel writepsf $prefix.aligned.psf'''
         logger.debug(f"Wrote alignment script to {script_path}")
         return script_path
     
-    def write_charge_density_tcl(self, filename="charge-density.tcl", resolution=2.0):
+    def write_charge_density_tcl(self, filename="charge-density.tcl"):
         """
         Write the alignment TCL script to file
         
@@ -1650,8 +1657,9 @@ $sel writepsf $prefix.aligned.psf'''
         """
         charge_tcl = self.work_dir / filename
         with open(charge_tcl, 'w') as f:
-            f.write(f'''lassign $argv prefix
-set resolution {resolution}
+            f.write(f'''
+set prefix [lindex $argv 0]
+set resolution [lindex $argv 1]            
 set ID [mol new $prefix.psf]
 mol addfile $prefix.pdb
 set all [atomselect $ID all]
@@ -1717,14 +1725,12 @@ close $ch''')
         logger.debug(f"Wrote VDW script to {script_path}")
         return script_path
     
-    def generate_cluster_tcl(self, potResolution=1, denResolution=2):
+    def generate_cluster_tcl(self):
         """Generate VDW maps using VMD."""
         # Create VDW TCL script
         vdw_tcl = self.work_dir / "vdw_cluster.tcl"
         with open(vdw_tcl, 'w') as f:
             f.write(f'''set prefixes $argv
-set potResolution ''' + str(potResolution) + '''
-set denResolution ''' + str(denResolution) + '''
 set IDs ""
 set minRadius 0.5
 
@@ -1795,7 +1801,7 @@ close $ch
 ''')
         return vdw_tcl
 
-    def generate_diffusive_tcl(self, potResolution=1, denResolution=2):
+    def generate_diffusive_tcl(self):
         vdw_tcl = self.work_dir / "vdw_diffusive.tcl"
 
         with open(vdw_tcl, 'w') as f:
@@ -1820,8 +1826,8 @@ proc readClusterResults {filename} {
 
 set prefix [lindex $argv 0]
 set clusterFile [lindex $argv 1]
-set potResolution """ + str(potResolution) + '''
-set denResolution ''' + str(denResolution) + """
+set potResolution [lindex $argv 2]
+set denResolution [lindex $argv 3]
 
 # Load molecule
 mol new ${prefix}.psf 
@@ -1852,12 +1858,12 @@ foreach r $newR e $newE {
     # Write out density grid
     set sel [atomselect $ID "type $typeArray($i)"]
     puts "Creating density map for types: [$sel get type]"
-    volmap interp $sel -o ${prefix}.vdw${i}.den.dx -res $denResolution
+    volmap interp $sel -o ${prefix}.vdw${i}.${denResolution}A.den.dx -res $denResolution
     $sel delete
     
     # Write potential grid
     puts "Creating potential map..."
-    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.${potResolution}A.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1
         
     incr i
 }
@@ -1869,7 +1875,7 @@ exit
         return vdw_tcl
     
 
-    def generate_static_vdw_tcl(self, potResolution=1, denResolution=2):
+    def generate_static_vdw_tcl(self):
         """Generate VDW maps using VMD."""
         # Create VDW TCL script
         vdw_tcl = self.work_dir / "vdw_static.tcl"
@@ -1877,8 +1883,8 @@ exit
         with open(vdw_tcl, 'w') as f:
             f.write(f'''set prefix [lindex $argv 0]
 set cluster_result_path [lindex $argv 1]
-
-set potResolution ''' + str(potResolution) + '''
+set potResolution [lindex $argv 2]
+'''+ '''
 set ch [open  $cluster_result_path  r]
 set i 0
 set newR ""
@@ -1917,7 +1923,7 @@ foreach r $newR e $newE {
     puts "My r is: $r"
     puts "My e is: $e"
     ## write potential grid
-    volmap ils $ID $minmaxPot -cutoff 12.0 -o $prefix.vdw$i.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1 -first 0 -last 0
+    volmap ils $ID $minmaxPot -cutoff 12.0 -o ${prefix}.vdw${i}.${potResolution}A.pot.dx -res $potResolution -subres 3 -probecoor {{0.01 0.01 0.01}} -probevdw "{$e $r}" -maxenergy 20 -orient 1 -first 0 -last 0
     incr i
 }
 

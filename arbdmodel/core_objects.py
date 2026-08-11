@@ -703,11 +703,10 @@ class ParticleType():
     Parameters:
         excludedAttributes (tuple): Parameters that are not inherited from parent types.
         name (str): Unique identifier for this particle type.
-        charge (float): Electric charge of the particle. Defaults to 0.
-        mass (float, optional): Mass of the particle.
-        diffusivity (float, optional): Diffusion coefficient of the particle.
-        damping_coefficient (float, optional): Damping coefficient for dynamics.
-        parent (ParticleType, optional): Parent type to inherit properties from.
+        charge (float, default=0, units: e): Electric charge of the particle.
+        mass (float, default=None, units: amu): Mass of the particle.
+        diffusivity (float, default=None, units: AA**2/ns): Diffusion coefficient of the particle. For BD only.
+        damping_coefficient (float, default=None, units: 1/ns): Translational friction coefficient per unit mass (zeta/m). Written to .bd as transDamping. For MD, Langevin and FusDynamic only. 
 
     Note:
         - When a parent is specified, all non-excluded attributes are inherited.
@@ -724,7 +723,7 @@ class ParticleType():
                           "parent", "excludedAttributes",
     )
 
-    def __init__(self, name, charge=0, mass=None, diffusivity=None,
+    def __init__(self, name, charge=None, mass=None, diffusivity=None,
                  damping_coefficient=None, parent=None,
                  rigid_body_potentials=tuple(), switch_type = None, **kwargs):
 
@@ -736,17 +735,24 @@ class ParticleType():
                 if k not in ParticleType.excludedAttributes:
                     self.__dict__[k] = v
             assert( type(parent) == type(self) )
+            if charge is None:
+                charge = parent.charge
+            if rigid_body_potentials is None:
+                rigid_body_potentials = tuple(parent.rigid_body_potentials)
 
         # if diffusivity is None:
         #     assert( (damping_coefficient is not None) and (mass is not None) )
 
         ## TODO: make most attributes @property
         self.name   = name
+        if charge is None: charge = 0
         self.charge = charge
         if mass is not None: self.mass = mass
         if damping_coefficient is not None: self.damping_coefficient = damping_coefficient
         if diffusivity is not None: self.diffusivity = diffusivity
         self.parent = parent
+        if rigid_body_potentials is None:
+            rigid_body_potentials = tuple()
         self.rigid_body_potentials = rigid_body_potentials
         self.switch_type = switch_type
         devlogger.debug(f'Created {type(self)} {name} @ {hex(id(self))}')
@@ -891,8 +897,8 @@ class RigidBodyType(ParticleType):
         name (str): Name identifier for the rigid body type.
         parent (ParticleType, optional): Parent type to fall back on for nonbonded interactions.
         moment_of_inertia (float or array-like, optional): Moment of inertia tensor for the rigid body.
-        rotational_diffusivity (float or array-like, optional): Rotational diffusivity coefficient.
-        rotational_damping_coefficient (float or array-like, optional): Rotational damping coefficient.
+        rotational_diffusivity (float or array-like, units: 1/ns): Rotational diffusivity coefficient.
+        rotational_damping_coefficient (float or array-like, units: 1/ns): Rotational friction coefficient per unit inertia (zeta_rot/I). Written to .bd as rotDamping.
         attached_particles (tuple or list): Particles attached to this rigid body.
         potential_grids (tuple): Collection of potential grid definitions, each with length 2 or 3.
         charge_grids (tuple): Collection of charge grid definitions, each with length 2 or 3.

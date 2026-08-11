@@ -321,10 +321,10 @@ class SurfaceMeshProcessor:
         results = self.runner.run_calculation(work_dir=work_dir)
         
         self.transdamp = results['translation_damping']
-        self.rotational_damping_coefficient = results['rotation_damping']
+        self.rotdamp = results['rotation_damping']
         
         logger.info(f"Translational damping: {self.transdamp}")
-        logger.info(f"Rotational damping: {self.rotational_damping_coefficient}")
+        logger.info(f"Rotational damping: {self.rotdamp}")
         
         return pdb_path
 
@@ -509,7 +509,7 @@ def process_surface_mesh(mesh_file, density=19.3, temperature=303, viscosity=0.0
     logger.info("\nTranslational damping coefficients [1/ns]:")
     logger.info(processor.transdamp)
     logger.info("\nRotational damping coefficients [1/ns]:")
-    logger.info(processor.rotational_damping_coefficient)
+    logger.info(processor.rotdamp)
     
     if output_dx:
         processor.write_no_enter_potential_dx()

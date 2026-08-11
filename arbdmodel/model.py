@@ -11,7 +11,7 @@ from .logger import devlogger, logger, get_resource_path
 from .interactions import NullPotential
 from . import Transformable, Parent, Group
 from .config import SimConf
-from .core_objects import GroupSite, NonbondedTerm, NonbondedTermList
+from .core_objects import GroupSite, NonbondedTerm, NonbondedTermList, ParticleType, PointParticle
 from .engine import ArbdEngine, NamdEngine
 from .coords import calculate_dimensions_from_cell_vectors
 
@@ -857,7 +857,12 @@ class ArbdModel(PdbModel):
     def prepare_for_simulation(self):
         if not self.skip_type_recount:
             self.type_counts = None # force recount
-        self.getParticleTypesAndCounts()
+        t=self.getParticleTypesAndCounts()
+        if len(t)==0:           # support older versions of arbd that require a point particle
+            dummy_type=ParticleType("dummy",1, mass=1, diffusivity=1)
+            self.add(PointParticle(dummy_type,np.array([0,0,0])))
+        self._countParticleTypes()
+        self._updateParticleOrder()
     
     def getParticleTypesAndCounts(self):
         """ Includes rigid body-attached particles """

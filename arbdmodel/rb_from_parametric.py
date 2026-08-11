@@ -937,3 +937,14 @@ class ParametricProcessor:
         rb_type.potential_grids = [("shape", str(potential_dx), 1.0)]
         
         return rb_type
+
+class ParametricRigidBodyType(MeshRigidBodyType):
+    """RigidBodyType subclass for parametric rigid body objects"""
+    
+    def __init__(self, name, mesh_file, density=1.0, simconf=None, unit_scale=1.0, **kwargs):
+        super().__init__(name, mesh_file, density, simconf, unit_scale, **kwargs)
+        
+        self.mesh_file = Path(mesh_file)
+        self.density = density
+        self.simconf = simconf
+        self.unit_scale = unit_scale

@@ -8,16 +8,16 @@ from .config import DefaultSimConf
 from .logger import logger
 from .coords import Generate_coordinates, Generate_spanning_vectors
 from .core_objects import RigidBody, Group
-from .rb_from_pdb import DiffusiveRigidBodyType, StaticObject
+from .pdb_static_grids import PdbToStaticGrids
+from .pdb_rigidbody_type import PdbRigidBodyType
 
-class RBContactModel(ArbdModel):
+class PdbRBModel(ArbdModel):
     """Model class for structure-based rigid body simulations"""
     
     def __init__(self, cell_vectors=None, cell_origin=None,
                  dimensions=None, buffer_factor=1.2, configuration=None, use_boundary=False,
                  num_heavy_cluster=3, charmm_params_dir=None, gaussian_width=None,
-                 pot_resolution=1, den_resolution=2,
-                 boundary_params=None, work_dir=None, **kwargs):
+                 boundary_params=None, work_dir=None, use_hydrogen_cluster=False,**kwargs):
         """Initialize structure model Former SimpleARBD.
         Args:
             diffusible_objects: List of RBContact instances for diffusible objects
@@ -32,7 +32,7 @@ class RBContactModel(ArbdModel):
             work_dir: Directory for pooled ``clustered.txt`` and default layout for child processors.
             **kwargs: Additional arguments passed to ArbdModel
         """
-        
+        self.use_hydrogen_cluster = use_hydrogen_cluster
         self.simconf = configuration or DefaultSimConf()
         self.diffusible_objects = []
         self.static_objects = []
@@ -41,9 +41,12 @@ class RBContactModel(ArbdModel):
         self.num_heavy_cluster = num_heavy_cluster
         self.charmm_params_dir = charmm_params_dir
         self.gaussian_width = gaussian_width if gaussian_width is not None else 2.5
-        self.pot_resolution = pot_resolution
-        self.den_resolution = den_resolution
-        self._diffusible_rb_types = []
+
+        self.pot_resolution = self.simconf.pot_resolution if self.simconf.pot_resolution is not None else 1.0
+        self.den_resolution = self.simconf.den_resolution if self.simconf.den_resolution is not None else 2.0
+        self.elec_resolution = self.simconf.elec_resolution if self.simconf.elec_resolution is not None else 2.0
+
+        self.diffusible_rb_types = []
         self.shared_cluster_file = None
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
 
@@ -78,23 +81,35 @@ class RBContactModel(ArbdModel):
             boundary_file = boundary.write_file(bp_params.get('output_file', 'boundary.dx'))
             self.boundary_potential = boundary_file
             #self.add_nonbonded_interaction(self.boundary_potential)
+    def set_grid_resolution(self, pot_resolution=1.0, den_resolution=2.0, elec_resolution=2.0):
+        """
+        Set the grid resolution for the model.
+        Args:
+            pot_resolution: Grid resolution for VDW potential maps (default 1 Å; high-res: 0.5)
+            den_resolution: Grid resolution for VDW density maps (default 2 Å; high-res: 1)
+            elec_resolution: Grid resolution for charge density maps (default 2 Å; high-res: 1)
+        """
+        self.pot_resolution = pot_resolution
+        self.den_resolution = den_resolution
+        self.elec_resolution = elec_resolution
+
 
     def add(self, obj):
         """Register contact-model objects or delegate to ``ArbdModel.add``.
 
-        ``DiffusiveRigidBodyType`` instances are collected for pooled LJ clustering
-        in :meth:`build_vdw_maps`. ``StaticObject`` instances are processed after
+        ``PdbRigidBodyType`` instances are collected for pooled LJ clustering
+        in :meth:`build_vdw_maps`. ``PdbToStaticGrids`` instances are processed after
         ``build_vdw_maps`` (cluster file and resolutions are injected from the model).
         ``RigidBody``, ``Group``, and other types use the standard ARBD model logic.
         """
-        if isinstance(obj, DiffusiveRigidBodyType):
-            self._diffusible_rb_types.append(obj)
+        if isinstance(obj, PdbRigidBodyType):
+            self.diffusible_rb_types.append(obj)
             self.shared_cluster_file = None
             return obj
-        if isinstance(obj, StaticObject):
+        if isinstance(obj, PdbToStaticGrids):
             if self.shared_cluster_file is None:
                 raise RuntimeError(
-                    "Call model.build_vdw_maps() before model.add(StaticObject)."
+                    "Call model.build_vdw_maps() before model.add(PdbToStaticGrids)."
                 )
             obj.cluster_file = Path(self.shared_cluster_file)
             obj.pot_resolution = self.pot_resolution
@@ -110,9 +125,9 @@ class RBContactModel(ArbdModel):
         return ret
 
     def _track_diffusible_rigid_bodies(self, obj):
-        """Record rigid bodies whose type is DiffusiveRigidBodyType (for I/O helpers)."""
+        """Record rigid bodies whose type is PdbRigidBodyType (for I/O helpers)."""
         if isinstance(obj, RigidBody):
-            if isinstance(obj.type_, DiffusiveRigidBodyType) and obj not in self.diffusible_objects:
+            if isinstance(obj.type_, PdbRigidBodyType) and obj not in self.diffusible_objects:
                 self.diffusible_objects.append(obj)
         elif isinstance(obj, Group):
             for child in obj.children:
@@ -142,7 +157,7 @@ class RBContactModel(ArbdModel):
         logger.info(f"Processing structure files for {name} from {structure_path}")
             
             # Create the RigidBodyType using rbs/name directory
-        rb_type = DiffusiveRigidBodyType(
+        rb_type = PdbRigidBodyType(
             name=name,
             structure_path=structure_path,
             simconf=self.simconf,
@@ -244,7 +259,7 @@ class RBContactModel(ArbdModel):
             
         return created_bodies
 
-    def _run_pooled_clustering(self, all_records, n_heavy):
+    def _run_pooled_clustering(self, all_records, n_heavy, use_hydrogen=False):
         """Run pooled k-means over all LJ records and write a shared cluster file."""
         heavy_records = [r for r in all_records if r["group"] == "heavy"]
         hyd_records = [r for r in all_records if r["group"] == "hydrogen"]
@@ -289,8 +304,8 @@ class RBContactModel(ArbdModel):
         heavy_clusters = min(n_heavy, heavy_points.shape[0]) if heavy_points.shape[0] > 0 else 0
         assignments_heavy, codebook_heavy = _cluster_points(heavy_points, heavy_weighted, heavy_clusters)
         assignments_hyd, codebook_hyd = _cluster_points(hyd_points, hyd_weighted, 1 if hyd_points.shape[0] > 0 else 0)
-
-        if assignments_hyd.size > 0:
+        
+        if assignments_hyd.size > 0 and use_hydrogen:
             assignments_total = np.concatenate((assignments_heavy, assignments_hyd + heavy_clusters), axis=None)
             codebook_total = np.concatenate((codebook_heavy, codebook_hyd), axis=0)
         else:
@@ -310,29 +325,29 @@ class RBContactModel(ArbdModel):
 
     def build_vdw_maps(self):
         """Pool LJ records across all diffusible processors and build shared VDW maps."""
-        if not self._diffusible_rb_types:
+        if not self.diffusible_rb_types:
             logger.info("No diffusible rigid-body types to finalize clustering for.")
             return None
-
+        
         all_records = []
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             all_records.extend(rb_type.processor.lj_type_records)
 
-        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster)
+        cluster_file = self._run_pooled_clustering(all_records, self.num_heavy_cluster, use_hydrogen=self.use_hydrogen_cluster)
         self.shared_cluster_file = cluster_file
 
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             rb_type.finalize_grids(
                 cluster_file,
                 gaussian_width=self.gaussian_width,
-                potResolution=self.pot_resolution,
-                denResolution=self.den_resolution,
             )
 
         logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")
+        os.remove(self.work_dir / "vdw_cluster.tcl")
+        os.remove(self.work_dir / "vdw_diffusive.tcl")
         return cluster_file
 
-    def finalize_diffusible_vdw_clustering(self):
+    def finalize_vdw(self):
         """Backward-compatible alias for build_vdw_maps()."""
         return self.build_vdw_maps()
 
@@ -344,7 +359,7 @@ class RBContactModel(ArbdModel):
 
         For each diffusive ``RigidBodyType``:
           • its ``pmf_grids`` list receives every ``(keyword, path, scale)`` tuple from each
-            ``StaticObject.potential_grids`` — these become ``gridFile`` entries in the ``.bd``
+            ``PdbToStaticGrids.potential_grids`` — these become ``gridFile`` entries in the ``.bd``
             file so ARBD applies the static field as a background PMF to the rigid body.
 
         For each free particle type already registered in the model (``wire_particles=True``):
@@ -355,7 +370,7 @@ class RBContactModel(ArbdModel):
             return
 
         # ── diffusive rigid-body types ──────────────────────────────────────
-        for rb_type in self._diffusible_rb_types:
+        for rb_type in self.diffusible_rb_types:
             if not isinstance(rb_type.pmf_grids, list):
                 rb_type.pmf_grids = list(rb_type.pmf_grids)
             existing = {(k, str(g)) for k, g, *_ in rb_type.pmf_grids}
@@ -425,14 +440,14 @@ class RBContactModel(ArbdModel):
         
         Returns
         -------
-        StaticObject
+        PdbToStaticGrids
             The created and added static object.
         """
         name = Path(structure_path).stem
         static_dir = Path(work_dir) if work_dir else self.work_dir / "static" / name
         os.makedirs(static_dir, exist_ok=True)
 
-        obj = StaticObject(
+        obj = PdbToStaticGrids(
             structure_path=structure_path,
             name=name,
             simconf=self.simconf,
@@ -442,18 +457,5 @@ class RBContactModel(ArbdModel):
             pot_resolution=self.pot_resolution,
             den_resolution=self.den_resolution,
             charmm_params_dir=self.charmm_params_dir,
-        )
-        """
-        # Add potential grids to model
-        for grid_type, grid_file, scale in obj.potential_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file, scale)
-            
-        # Add charge grids to model
-        for grid_type, grid_file in obj.charge_grids:
-            self.add_nonbonded_interaction(grid_type, grid_file)
-            
-        # Add electrostatic grid if available
-        if obj.elec_grid:
-            self.add_nonbonded_interaction("elec", obj.elec_grid, 0.59616195)
-        """
+        ) 
         return self.add(obj)

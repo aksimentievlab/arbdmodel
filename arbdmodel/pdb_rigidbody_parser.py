@@ -7,7 +7,8 @@ from pathlib import Path
 from . import ArbdEngine
 from .config import SimConf
 from .logger import logger
-from .rb_contact_model import RBContactModel
+from .pdb_rigidbody_type import PdbRigidBodyType
+from .rb_contact_model import PdbRBModel
 
 
 class ContactModelEngine(ArbdEngine):
@@ -35,7 +36,7 @@ class ContactModelEngine(ArbdEngine):
             self.simulate(model, replica_name, **kwargs)
 
 
-class ContactModelConfig:
+class PdbRBConfig:
     """Parse and manage contact-model configuration files."""
 
     def __init__(self, config_path):
@@ -202,7 +203,7 @@ class ContactModelConfig:
         if "cell_origin" in self.config:
             cell_origin = self.config["cell_origin"]
 
-        return RBContactModel(
+        return PdbRBModel(
             cell_vectors=cell_vectors,
             cell_origin=cell_origin,
             configuration=self.simconf,
@@ -297,14 +298,14 @@ class ContactModelConfig:
         )
 
 
-def contact_model():
+def pdb_rb_parsing():
     parser = argparse.ArgumentParser(description="Process contact-model configuration file")
     parser.add_argument("config_file", help="Path to configuration file")
     parser.add_argument("--setup-only", action="store_true", help="Only set up the simulation")
     args = parser.parse_args()
 
     try:
-        cfg = ContactModelConfig(args.config_file)
+        cfg = PdbRBConfig(args.config_file)
     except Exception as e:
         logger.error(f"Error parsing configuration file: {e}")
         return 1

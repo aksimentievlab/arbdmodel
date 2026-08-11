@@ -395,9 +395,9 @@ class OnckBeads(PolymerBeads):
     def _join_adjacent_bead_groups(self, ids):
 
         def bead_to_type(bead):
-            if bead.type_.name == 'PRO':
+            if bead.type_.name[:3] == 'PRO':
                 return 'P'
-            elif bead.type_.name == 'GLY':
+            elif bead.type_.name[:3] == 'GLY':
                 return 'G'
             else:
                 return 'X'
@@ -483,7 +483,7 @@ class OnckModel(PolymerModel):
 
         """
         [debye_length]: angstroms
-        [damping_coefficient]: ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
 
         """
 
@@ -500,8 +500,8 @@ class OnckModel(PolymerModel):
         _msg = _msg + "\n  and\n".join(ref.display() for ref in version_refs[self.version])
         print(_msg)
 
-        if debye_length != 12.7:
-            logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1.27 nm.
+        if debye_length != 10/1.27:
+            logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1/1.27 nm.
     Be advised that the non-bonded cutoff is simply set to 5 * debye_length, but this is not necessarily prescribed by the model.""")
 
         if 'timestep' not in kwargs: kwargs['timestep'] = 20e-6

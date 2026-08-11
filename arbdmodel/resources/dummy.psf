@@ -1,0 +1,26 @@
+PSF
+
+       1 !NTITLE
+ REMARKS Dummy single-atom PSF — used as VMD frame-counter anchor for ARBD RB trajectories
+
+       1 !NATOM
+       1      0    UNK  1    CA     0.000000       12.0000           0
+
+       0 !NBOND: bonds
+
+       0 !NTHETA: angles
+
+       0 !NPHI: dihedrals
+
+       0 !NIMPHI: impropers
+
+       0 !NDON: donors
+
+       0 !NACC: acceptors
+
+       0 !NNB
+
+       0
+
+       1       0 !NGRP
+       0       0       0

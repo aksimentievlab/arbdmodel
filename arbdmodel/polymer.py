@@ -228,7 +228,7 @@ class PolymerSection(ConnectableElement):
                  **kwargs):
         
         ConnectableElement.__init__(self, connection_locations=[], connections=[])
-
+        self.name = name
         if 'segname' not in kwargs:
             self.segname = name
 
