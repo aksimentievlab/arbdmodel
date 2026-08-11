@@ -3,9 +3,10 @@ import numpy as np
 import sys
 
 ## Local imports
-from . import logger, ParticleType, PointParticle, Group, get_resource_path
+from .logger import logger,  get_resource_path
+from . import ParticleType, PointParticle, Group
 from .polymer import PolymerBeads, PolymerModel
-from .interactions import TabulatedNonbonded, HarmonicBond, HarmonicAngle, HarmonicDihedral
+from .interactions import TabulatedPotential, HarmonicBond, HarmonicAngle, HarmonicDihedral
 
 """Define particle types"""
 
@@ -163,9 +164,9 @@ class DnaModel(PolymerModel):
         PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group=1, **kwargs)
         self.strands = self.children # make a nice alias
         
-        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBBB.dat')), typeA=_B, typeB=_B )
-        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBPB.dat')), typeA=_P, typeB=_B )
-        self.add_nonbonded_interaction( TabulatedNonbonded(get_resource_path('two_bead_model/NBPP.dat')), typeA=_P, typeB=_P )
+        self.add_nonbonded_interaction( TabulatedPotential(get_resource_path('two_bead_model/NBBB.dat')), typeA=_B, typeB=_B )
+        self.add_nonbonded_interaction( TabulatedPotential(get_resource_path('two_bead_model/NBPB.dat')), typeA=_P, typeB=_B )
+        self.add_nonbonded_interaction( TabulatedPotential(get_resource_path('two_bead_model/NBPP.dat')), typeA=_P, typeB=_P )
 
         self.generate_beads()
                 

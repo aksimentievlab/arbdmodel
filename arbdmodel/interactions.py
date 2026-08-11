@@ -3,12 +3,43 @@ import os, sys
 import scipy
 import numpy as np
 from shutil import copyfile
+from .grid import writeDx
+from pathlib import Path
 
 """ Module providing classes used to describe potentials in ARBD """
 
 
 ## Abstract classes that others inherit from
 class AbstractPotential(metaclass=ABCMeta):
+    """
+    Abstract base class for implementing interaction potentials.
+    This class defines the basic structure for creating and managing interaction potential
+    functions that can be written to files and used in simulations.
+
+    Parameters
+    ----------
+    range_ : tuple of (float, float or None)
+        The range of distances for the potential (min, max).
+        If max is None, potential extends to infinity.
+    resolution : float, optional
+        The spacing between points in the discretized potential. Default is 0.1.
+    max_force : float or None, optional
+        Maximum allowed force magnitude. If provided, forces exceeding this value will be capped.
+    max_potential : float or None, optional
+        Maximum allowed potential energy. If provided, the potential will be modified
+        to ensure it doesn't exceed this value.
+    zero : str, optional
+        Method to set the zero of the potential. Options are:
+        - 'min': Zero is at the minimum value
+        - 'first': Zero is at the first point
+        - 'last': Zero is at the last point
+    periodic : bool
+        Whether the potential is periodic (False by default).
+
+    Note
+    -----
+    Subclasses must implement at minimum the `potential` and `filename` methods.
+    """
     """ Abstract class for writing potentials """
 
     def __init__(self, range_=(0,None), resolution=0.1, 
@@ -48,7 +79,7 @@ class AbstractPotential(metaclass=ABCMeta):
         u[:-1][left] = u[right]
 
     def filename(self, types=None):
-        raise NotImplementedError('Inherited potential objects should overload this function')
+        raise NotImplementedError(f'{self.__class__}: Inherited potential objects should overload this function')
 
     def _cap_potential(self, r, u):
         self.__remove_nans(u)
@@ -94,6 +125,31 @@ class AbstractPotential(metaclass=ABCMeta):
         return u
 
     def write_file(self, filename=None, types=None):
+        """
+        Write potential energy values as a function of distance to a file.
+
+        This method evaluates the potential function over a range of distances and writes
+        the distance-potential pairs to a text file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The path to the output file. If None, a default filename will be generated using
+            the `filename` method with the given types.
+        types : tuple or list, optional
+            The particle types for which to calculate the potential. Used for both filename 
+            generation (if filename is None) and potential evaluation. If None, defaults to 
+            the types defined in the interaction model.
+
+        Note
+        -----
+        The potential values are capped using the `_cap_potential` method to handle
+        potential singularities or extreme values. The output file contains two columns:
+        distance (r) and potential energy (u).
+
+        Any 'divide by zero' or 'invalid value' numpy warnings are ignored during
+        the potential calculation.
+        """
         if filename is None:
             filename = self.filename(types)
         rmin,rmax = self.range_
@@ -107,7 +163,9 @@ class AbstractPotential(metaclass=ABCMeta):
 
     def __hash__(self):
         try:    fname = self.filename(None)
-        except: fname = self.filename(('',''))
+        except:
+            try: fname = self.filename(('',''))
+            except: fname=None
         return hash((fname, self.range_, self.resolution, self.max_force, self.max_potential, self.zero))
 
     def __eq__(self, other):
@@ -117,9 +175,13 @@ class AbstractPotential(metaclass=ABCMeta):
         if (type(self).__name__ != type(other).__name__):
             return False
         try:    fname1 = self.filename(None)
-        except: fname1 = self.filename(('',''))
-        try:    fname2 = self.filename(None)
-        except: fname2 = self.filename(('',''))
+        except:
+            try: fname1 = self.filename(('',''))
+            except: fname1=None
+        try:    fname2 = other.filename(None)
+        except:
+            try: fname2 = other.filename(('',''))
+            except: fname2=None
         return  fname1 == fname2
 
 
@@ -150,19 +212,81 @@ class HalfHarmonic(AbstractPotential):
         u[r > r0] = np.zeros( np.shape(u[r > r0]) )
         return u
 
-class TabulatedNonbonded(AbstractPotential):
-    def __init__(self, tableFile, *args, **kwargs):
+class TabulatedPotential(AbstractPotential):
+    def __init__(self, tableFile, filename_prefix='./potentials/', *args, **kwargs):
+        """ Convenience class that copies a supplied tabulated potential to a (typically local) destination. """
         self.tableFile = tableFile
-        AbstractPotential.__init__(self,*args,**kwargs)
-
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, *args, **kwargs)
         ## TODO: check that tableFile exists and is regular file
 
     def potential(self, r, types):
         raise NotImplementedError('This should probably not be implemented')
+
+    def filename(self, types=None):
+        return f"{self.filename_prefix}{Path(self.tableFile).name}"
         
-    def write_file(self, filename, types):
-        if filename != self.tableFile:
+    def write_file(self, filename=None, types=None):
+        if filename is None:
+            filename = self.filename(types)
+
+        # if filename != self.tableFile:
+        if not Path(filename).exists():
             copyfile(self.tableFile, filename)
+
+class TabulatedNonbonded(TabulatedPotential):
+    def __init__(self, *args, **kwargs):
+        logger.warning('TabulatedNonbonded class is to be deprecated in favor of TabulatedPotential; please update your scripts')
+        self.super().__init__(*args,**kwargs)
+
+
+class NullPotential(AbstractPotential):
+    def __init__(self, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
+
+    def potential(self, r, types):
+        return np.zeros(r.shape)
+
+    def filename(self, types=None):
+        return f"{self.filename_prefix}nullpot.dat"
+
+class SwitchPotential(AbstractPotential):
+    def __init__(self, p1, p2, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
+        self.filename_prefix = filename_prefix
+        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
+
+        # for attr in ('range_','resolution'):
+        #     for p in (p1,p1):
+        #         if getattr(p,attr) != getattr(self,attr):
+        #             logger
+
+        if p1 is None: p1 = NullPotential(range_=range_, resolution=resolution)
+        if p2 is None: p2 = NullPotential(range_=range_, resolution=resolution)
+
+        self.potential1 = p1
+        self.potential2 = p2
+        # self.fname = f"{p1.filename()}&{p2.filename()}"
+
+    def filename(self, types=None):
+        return f"{self.potential1.filename(types)}&{self.potential2.filename(types)}"
+
+    def write_file(self, filename=None, types=None):
+        f1 = f2 = None
+        if filename is not None:
+            f1,f2 = filename.split('&')
+        self.potential1.write_file(f1,types)
+        self.potential2.write_file(f2,types)
+
+    def potential(self, r, types):
+        raise NotImplementedError('SwitchPotential.potential() should not be called directly')
+
+    def __hash__(self):
+        return hash((hash(self.potential1),hash(self.potential2)))
+
+    def __eq__(self,other):
+        if isinstance(other, SwitchPotential): return False
+        return (self.potential1 == other.potential1) and (self.potential2 == other.potential2)
 
 ## Bonded potentials            
 class HarmonicBondedPotential(AbstractPotential):
@@ -258,7 +382,6 @@ class HarmonicDihedral(HarmonicBondedPotential):
     def periodic(self):
         return True
 
-
 class HarmonicVectorAngle(HarmonicBondedPotential):
     def __init__(self, *args, **kwargs):
         if 'range_' not in kwargs: kwargs['range_'] = (0,180)
@@ -279,7 +402,7 @@ class WLCSKPotential(HarmonicBondedPotential, metaclass=ABCMeta):
         ## Note, we're leveraging the HarmonicBondedPotential base class and set k to lp here, but it isn't proper
         HarmonicBondedPotential.__init__(self, d, lp, **kwargs)
         self.d = d          # separation
-        self.lp = lp            # persistence length
+        self.k = self.lp = lp            # persistence length
         self.kT = kT
 
     def filename(self,types=None):
@@ -288,6 +411,10 @@ class WLCSKPotential(HarmonicBondedPotential, metaclass=ABCMeta):
                                        self.d, self.lp)
 
     def __hash__(self):
+        try: self.k             # Preferably do not commit (needed to load some pkl model)
+        except: self.k = self.lp
+        try: self.filename_prefix ## also
+        except: self.filename_prefix = self.prefix
         return hash((self.d, self.lp, self.kT, HarmonicBondedPotential.__hash__(self)))
 
     def __eq__(self, other):
@@ -339,13 +466,3 @@ class WLCSKAngle(WLCSKPotential):
         u = self.kT * C * (1-np.cos(dr * np.pi / 180))
         return u
 
-class NullPotential(AbstractPotential):
-    def __init__(self, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
-        self.filename_prefix = filename_prefix
-        AbstractPotential.__init__(self, range_=range_, resolution=resolution, *args,**kwargs)
-
-    def potential(self, r, types):
-        return np.zeros(r.shape)
-
-    def filename(self, types=None):
-        return f"{self.filename_prefix}nullpot.dat"

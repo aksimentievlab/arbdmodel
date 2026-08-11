@@ -1,5 +1,4 @@
-
-_txtdata = """CYS CYS -0.509719
+CYS CYS -0.509719
 CYS MET -0.448877
 MET MET -0.512423
 CYS PHE -0.558393
@@ -208,30 +207,4 @@ GLU PRO  0.055434
 HIS PRO -0.078418
 ARG PRO -0.004056
 LYS PRO  0.094643
-PRO PRO -0.010816"""
-
-epsilon_mj = dict()
-
-def __add_value(key,v):
-    if key not in epsilon_mj:
-        epsilon_mj[key] = v
-    else:
-        assert(epsilon_mj[key] == v)
-
-for line in _txtdata.split('\n'):
-    n1,n2,v = line.split()
-    v = float(v)
-    
-    __add_value((n1,n2), v)
-    __add_value((n2,n1), v)
-
-    __add_value((n1+'IDP',n2), v)
-    __add_value((n2,n1+'IDP'), v)
-    __add_value((n2+'IDP',n1), v)
-    __add_value((n1,n2+'IDP'), v)
-    __add_value((n2+'IDP',n1+'IDP'), v)
-    __add_value((n1+'IDP',n2+'IDP'), v)
-
-    
-if __name__ == '__main__':
-    print(epsilon_mj)
+PRO PRO -0.010816

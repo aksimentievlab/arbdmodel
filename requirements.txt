@@ -1,9 +1,9 @@
-gendocs
 Sphinx
 MyST-Parser
 furo
 sphinx-copybutton
 sphinx-autobuild
+sphinx-book-theme
 MDAnalysis
 numpy
 scipy

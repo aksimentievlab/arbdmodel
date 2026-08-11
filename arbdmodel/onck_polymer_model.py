@@ -5,10 +5,10 @@ import numpy as np
 import sys
 
 ## Local imports
-from . import devlogger, logger, ParticleType, PointParticle, get_resource_path
+from .logger import devlogger, logger, get_resource_path
+from .core_objects import ParticleType, PointParticle, Citation
 from .polymer import PolymerBeads, PolymerModel
-from .interactions import AbstractPotential, HarmonicBond
-from .version import Citation
+from .interactions import AbstractPotential, HarmonicBond, TabulatedPotential
 
 """Define particle types"""
 _types = dict(
@@ -126,8 +126,7 @@ _types_versions = {1.0: _types}
 _types_versions['1.0cp'] = {k:ParticleType(t.name,
                                            mass = t.mass,
                                            charge = t.charge,
-                                           epsilon = t.epsilon,
-                                           version = '1.0cp') for k,t in _types.items()}
+                                           epsilon = t.epsilon) for k,t in _types.items()}
 for k in 'R D E K'.split(): _types_versions['1.0cp'][k].epsilon = 0.005
 
 _types_versions[1.1] = dict()   # https://www.pnas.org/doi/10.1073/pnas.2221804120
@@ -210,6 +209,35 @@ version_refs = {1.0: (__base_ref,),
 _types = _types_versions[1.1]
 
 class OnckNonbonded(AbstractPotential):
+    """
+    Nonbonded interaction potential for 1BPA and 1BPA-1.1.
+
+    This class implements nonbonded interactions including electrostatics with
+    distance-dependent dielectric and Lennard-Jones type potentials.
+
+    Parameters
+    ----------
+    debye_length : float, optional
+        The Debye-Hückel screening length in angstroms. Default is 12.7 Å.
+    resolution : float, optional
+        The spatial resolution for potential calculation. Default is 0.1 Å.
+    range_ : tuple, optional
+        The range of distances for which to calculate the potential. Default is (0, None).
+    max_force : float
+        Maximum allowed force in the system, used as a cap for stability. Default is 50
+
+    Note
+    -----
+    The potential includes:
+    
+    1. Electrostatic interactions with distance-dependent dielectric constant
+    2. Modified Lennard-Jones interactions that depend on residue types:
+       - Special 8-6 LJ potential for cationic-aromatic interactions in 1.0cp/1.1 versions
+       - General LJ-type potential for other interactions
+
+    The effective dielectric D decreases with distance according to a specific formula.
+    """
+
     """ Nonbonded interaction for 1BPA and 1BPA-1.1 """
     def __init__(self, debye_length=10/1.27, resolution=0.01, range_=(0,None)):
         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
@@ -288,6 +316,45 @@ class OnckNonbonded(AbstractPotential):
         return u
 
 class OnckBeads(PolymerBeads):
+    """
+    A class that represents polymer beads in the Onck model.
+
+    The Onck model is a coarse-grained model for proteins where each amino acid is represented
+    by a single bead. The model includes specific bonded interactions (bonds, angles, dihedrals)
+    based on the amino acid types in the sequence.
+
+    Parameters
+    ----------
+    polymer : Polymer
+        The parent polymer object to which these beads belong.
+    sequence : list, optional
+        The sequence of amino acid types for each bead, must match polymer length.
+    spring_constant : float, default=38.422562
+        Spring constant for peptide bonds in units of 8038 kJ/(N_A nm^2) or 0.5 kcal_mol/AA^2.
+    rest_length : float, default=3.8
+        Equilibrium length of peptide bonds.
+    version : float, optional
+        Version of the Onck model to use. Defaults to 1.1 if not specified.
+    **kwargs
+        Additional keyword arguments passed to the parent PolymerBeads constructor.
+    types_dict : dict
+        Mapping between amino acid codes and bead types.
+    peptide_bond : HarmonicBond
+        Bond potential used for peptide bonds between adjacent beads.
+
+    Raises
+    ------
+    ValueError
+        If the version is not supported or if the sequence length doesn't match the polymer length.
+    NotImplementedError
+        If sequence is None (random sequence generation not implemented).
+
+    Note
+    -----
+    The Onck model distinguishes between proline (P), glycine (G), and all other amino acids (X)
+    for certain bonded interactions. Special potentials are loaded from files for angle and 
+    dihedral interactions based on this classification.
+    """
     def __init__(self, polymer, sequence=None,
                  spring_constant = 38.422562, # units "8038 kJ / (N_A nm**2)" "0.5 * kcal_mol/AA**2"
                  rest_length=3.8, version=None, **kwargs):
@@ -332,9 +399,9 @@ class OnckBeads(PolymerBeads):
     def _join_adjacent_bead_groups(self, ids):
 
         def bead_to_type(bead):
-            if bead.type_.name == 'PRO':
+            if bead.type_.name[:3] == 'PRO':
                 return 'P'
-            elif bead.type_.name == 'GLY':
+            elif bead.type_.name[:3] == 'GLY':
                 return 'G'
             else:
                 return 'X'
@@ -352,7 +419,7 @@ class OnckBeads(PolymerBeads):
             filename = 'onck_model_potentials/bend_O{}{}.txt'.format(
                 t2, 'P' if t3 == 'P' else 'Y' )
             self.add_angle( i=b1, j=b2, k=b3,
-                          angle = get_resource_path(filename) )
+                          angle = TabulatedPotential( get_resource_path(filename) ) )
             self.add_exclusion( i=b1, j=b3 )
         elif len(ids) == 4:
             ## Four consecutive monomers
@@ -361,12 +428,54 @@ class OnckBeads(PolymerBeads):
 
             filename = 'onck_model_potentials/dih_{}{}.txt'.format(t2,t3)
             self.add_dihedral( i=b1, j=b2, k=b3, l=b4,
-                               dihedral = get_resource_path(filename) )
+                               dihedral = TabulatedPotential( get_resource_path(filename) ) )
             self.add_exclusion( i=b1, j=b4 )
         else:
             raise Exception('Programming error!')
 
 class OnckModel(PolymerModel):
+    """
+    A polymer model based on Onck's coarse-grained model for disordered FG-Nup peptides.
+
+    The OnckModel class implements a coarse-grained model of polymers based on the work by Onck et al.
+    This model is specifically designed for disordered FG-Nup peptides and incorporates
+    electrostatic interactions through a Debye-Hückel potential.
+
+    Parameters
+    ----------
+    polymers : list
+        List of polymers to be modeled.
+    sequences : list, optional
+        List of amino acid sequences corresponding to each polymer.
+        Must be provided. Default is None.
+    debye_length : float, optional
+        Debye screening length in angstroms. Default is 10.
+    damping_coefficient : float, optional
+        Damping coefficient in ns. Default is 100.
+    version : float, optional
+        Version of the Onck model to use. Default is 1.1 (corresponding to 1BPA-1.1 from 2023).
+    DEBUG : bool, optional
+        Whether to enable debug mode. Default is False.
+    **kwargs : dict
+        Additional keyword arguments to pass to the parent PolymerModel class.
+        Common options include:
+        - timestep: Simulation timestep (default: 20e-6)
+        - cutoff: Cutoff distance for non-bonded interactions (default: max(5*debye_length, 25))
+        - decomp_period: Decomposition period (default: 1000)
+    types_dict : dict
+        Dictionary mapping from type keys to type objects for the given version.
+    types : list
+        List of all types used in the model.
+
+    Note
+    -----
+    The model differs from the published Onck model if a Debye length other than 12.7 Å is chosen.
+    In such cases, the non-bonded cutoff is set to 5 * debye_length.
+
+    References
+    ----------
+    Please refer to the citations displayed during initialization.
+    """
     def __init__(self, polymers,
                  sequences = None,
                  debye_length = 10,
@@ -378,11 +487,11 @@ class OnckModel(PolymerModel):
 
         """
         [debye_length]: angstroms
-        [damping_coefficient]: ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
 
         """
 
-        if version is None:
+        if version == None:
             logger.warning(f'No Onck model version specified; using version 1BPA-1.1 from 2023')
             version = 1.1
         if version not in _types_versions:
@@ -395,8 +504,8 @@ class OnckModel(PolymerModel):
         _msg = _msg + "\n  and\n".join(ref.display() for ref in version_refs[self.version])
         print(_msg)
 
-        if debye_length != 12.7:
-            logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1.27 nm.
+        if debye_length != 10/1.27:
+            logger.warning("""Deviating from the model published by Onck by choosing a Debye length differing from 1/1.27 nm.
     Be advised that the non-bonded cutoff is simply set to 5 * debye_length, but this is not necessarily prescribed by the model.""")
 
         if 'timestep' not in kwargs: kwargs['timestep'] = 20e-6

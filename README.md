@@ -7,6 +7,18 @@ systems out of point-like particles interacting through bonded and
 non-bonded potentials. Rigid body particles are not yet supported.
 The interface presently communicates with ARBD through files.
 
+## Building Document
+
+To build the documentation, first install the required dependencies and then generate the docs using the following commands:
+
+```bash
+pip install -r requirements.txt
+python gen_docs.py 
+open docs/build/index.html 
+```
+
+Then the documentation will be opened from your browser.
+
 ## Example: Constructing a coarse-grained ssDNA model
 
 ```python

@@ -1,6 +1,5 @@
-from . import logger
+from .logger import logger
 import numpy as np
-from scipy.optimize import newton
 
 def minimizeRmsd(coordsB, coordsA, weights=None, maxIter=100):
     ## Going through many iterations wasn't really needed
@@ -93,14 +92,48 @@ def _minimizeRmsd(coordsB, coordsA, weights=None):
     return q, comB, comA
 
 def quaternion_to_matrix(q):
+    """
+    Convert a quaternion to a rotation matrix.
+    
+    This function converts a quaternion representation of a rotation into a 3x3 
+    rotation matrix. The quaternion is automatically normalized before conversion.
+    
+    Parameters
+    ----------
+    q : array_like
+        A quaternion represented as a 4-element array [q0, q1, q2, q3], where q0 
+        is the scalar (real) part and q1, q2, q3 are the vector (imaginary) parts.
+        
+    Returns
+    -------
+    numpy.ndarray
+        A 3x3 rotation matrix corresponding to the input quaternion.
+        
+    Notes
+    -----
+    The quaternion convention used here is (q0, q1, q2, q3) where q0 is the scalar
+    part. The quaternion is normalized internally to ensure it represents a valid
+    rotation.
+    
+    The Wikipedia article referenced employed a less common convention for quaternions:
+    http://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Rotation_matrix_.E2.86.94_quaternion
+    Alternative notation would be:
+    q1,q2,q3,q4 = q
+    R = [[1-2*(q2*q2 + q3*q3),    2*(q1*q2 - q3*q4),    2*(q1*q3 + q2*q4)],
+         [  2*(q1*q2 + q3*q4),  1-2*(q1*q1 + q3*q3),    2*(q2*q3 - q1*q4)],
+         [  2*(q1*q3 - q2*q4),    2*(q1*q4 + q2*q3),  1-2*(q2*q2 + q1*q1)]]
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> q = [1, 0, 0, 0]  # Identity quaternion
+    >>> R = quaternion_to_matrix(q)
+    >>> print(R)
+    [[1. 0. 0.]
+     [0. 1. 0.]
+     [0. 0. 1.]]
+    """
     assert(len(q) == 4)
-
-    ## It looks like the wikipedia article I used employed a less common convention for q (see below
-    ## http://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Rotation_matrix_.E2.86.94_quaternion
-    # q1,q2,q3,q4 = q
-    # R = [[1-2*(q2*q2 + q3*q3),    2*(q1*q2 - q3*q4),    2*(q1*q3 + q2*q4)],
-    #      [  2*(q1*q2 + q3*q4),  1-2*(q1*q1 + q3*q3),    2*(q2*q3 - q1*q4)],
-    #      [  2*(q1*q3 - q2*q4),    2*(q1*q4 + q2*q3),  1-2*(q2*q2 + q1*q1)]]
 
     q = q / np.linalg.norm(q)
     q0,q1,q2,q3 = q
@@ -110,51 +143,58 @@ def quaternion_to_matrix(q):
 
     return np.array(R)
 
-def quaternion_from_matrix( R ):
-    R=R.T
-    q = np.empty(4)
-    if R[2,2] < 0:
-        if R[0,0] > R[1,1]:
-            trace = 1.0 + R[0,0] - R[1,1] - R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[1,2] < R[2,1]: s = -s
-            q[0] = (R[1,2] - R[2,1]) / s
-            q[1] = 0.25 * s
-            q[2] = (R[0,1] + R[1,0]) / s
-            q[3] = (R[2,0] + R[0,2]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 1],0)):
-                q[1] = 1
-        else:
-            trace = 1.0 - R[0,0] + R[1,1] - R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[2,0] < R[0,2]: s = -s
-            q[0] = (R[2,0] - R[0,2]) / s
-            q[1] = (R[0,1] + R[1,0]) / s
-            q[2] = 0.25 * s
-            q[3] = (R[1,2] + R[2,1]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 2],0)):
-                q[2] = 1
-    else:
-        if R[0,0] < -R[1,1]:
-            trace = 1.0 - R[0,0] - R[1,1] + R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            if R[0,1] < R[1,0]: s = -s
-            q[0] = (R[0,1] - R[1,0]) / s
-            q[1] = (R[2,0] + R[0,2]) / s
-            q[2] = (R[1,2] + R[2,1]) / s
-            q[3] = 0.25 * s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 3],0)):
-                q[3] = 1
-        else:
-            trace = 1.0 + R[0,0] + R[1,1] + R[2,2]
-            s = 2.0 * np.sqrt(trace)
-            q[0] = 0.25 * s
-            q[1] = (R[1,2] - R[2,1]) / s
-            q[2] = (R[2,0] - R[0,2]) / s
-            q[3] = (R[0,1] - R[1,0]) / s
-            if np.isclose(trace,1) and np.all(np.isclose([x for i,x in enumerate(q) if i != 0],0)):
-                q[0] = 1
-    assert( q[0] >= 0 )
+def quaternion_from_matrix(R):
+    """
+    Convert N rotation matrices (N,3,3) to quaternions (N,4) in
+    (w,x,y,z) order using Vectorized SciPy/Eigen-style max-diagonal
+    algorithm.
+    """
+    R = np.asarray(R)
+    dim = len(R.shape)
+    if dim == 2: R = R.reshape(1,*R.shape)
+
+    ## We use an unusual convention for R, and rather than change
+    ## the code everywhere we can simply take the transpose here
+    R = np.transpose(R,(0,2,1))
+
+    N = R.shape[0]
+    r00 = R[:,0,0]; r01 = R[:,0,1]; r02 = R[:,0,2]
+    r10 = R[:,1,0]; r11 = R[:,1,1]; r12 = R[:,1,2]
+    r20 = R[:,2,0]; r21 = R[:,2,1]; r22 = R[:,2,2]
+
+    K = np.empty((N,4,4))
+
+    K[:,0,0] = r00 - r11 - r22
+    K[:,0,1] = r10 + r01
+    K[:,0,2] = r20 + r02
+    K[:,0,3] = r12 - r21
+
+    K[:,1,0] = K[:,0,1]
+    K[:,1,1] = -r00 + r11 - r22
+    K[:,1,2] = r21 + r12
+    K[:,1,3] = r20 - r02
+
+    K[:,2,0] = K[:,0,2]
+    K[:,2,1] = K[:,1,2]
+    K[:,2,2] = -r00 - r11 + r22
+    K[:,2,3] = r01 - r10
+
+    K[:,3,0] = K[:,0,3]
+    K[:,3,1] = K[:,1,3]
+    K[:,3,2] = K[:,2,3]
+    K[:,3,3] = r00 + r11 + r22
+
+    K /= 3.0
+
+    ## Batched symmetric eigendecomposition
+    eigvals, eigvecs = np.linalg.eigh(K)
+
+    ## Largest eigenvalue eigenvector
+    idx = np.argmax(eigvals, axis=1)
+    q = eigvecs[np.arange(N), :, idx]
+    q = np.roll(q,1,axis=1)            # use (w,x,y,z) convention
+
+    if dim == 2: q = q[0]
     return q
 
 def __quaternion_from_matrix__deprecated( R ):
@@ -225,8 +265,20 @@ def quaternion_slerp(q1,q2,t):
     assert(len(q1) == 4)
     assert(len(q2) == 4)
     assert(t >= 0 and t <= 1)
+    if np.all(np.isclose(q1,q2)): return q1
     q1_inv = quaternion_inverse(q1)
     return quaternion_product( q1, quaternion_exp( quaternion_product( q1_inv, q2 ), t ) )
+
+def average_quaternions(quats):
+    qs = list(quats)
+    if len(qs) == 1: return qs[0]
+    while len(qs) > 1:
+        if len(qs) % 2 == 1:
+            qs[-2] = quaternion_slerp(qs[-2],qs[-1],0.5) # probably better if random
+            qs = qs[:-1]
+        qs = [quaternion_slerp(q1,q2,0.5) for q1,q2 in zip(qs[::2],qs[1::2])]
+    return qs[0]
+
 
 def rotationAboutAxis(axis,angle, normalizeAxis=True):
     if normalizeAxis: axis = axis / np.linalg.norm(axis)
@@ -235,6 +287,75 @@ def rotationAboutAxis(axis,angle, normalizeAxis=True):
     sin = np.sin( angle )
     q = [cos] + [sin*x for x in axis]
     return quaternion_to_matrix(q)
+
+def get_inertial_properties(coords, weights=None):
+    """ Use singular value decomposition to obtain principal moments and axes of a point cloud.
+
+    coords: Nx3 coordinate array
+    Return: axes, moments, centroid
+    """
+
+    m = np.average(coords, weights=weights, axis=0)
+    points = coords-m
+    if weights is not None:
+        Wr = np.diag(np.sqrt(weights))
+        # Wr_inv = np.linalg.inv(Wr)
+        points = Wr @ points
+    U,s,V = np.linalg.svd(points)
+    s_sq = s**2
+    assert(s_sq.size == coords.shape[-1])
+    return V, np.sum(s_sq)-s_sq, m
+
+# By Chun
+def Generate_spanning_vectors(bv1, bv2, bv3, dimensions, buff=5):
+    dd = max(dimensions) + 2 * buff
+
+    n1 = round(np.linalg.norm(bv1)/dd) + 1
+    n2 = round(np.linalg.norm(bv2)/dd) + 1
+    n3 = round(np.linalg.norm(bv3)/dd) + 1
+
+    v1 = np.array(bv1) /n1
+    v2 = np.array(bv2) /n2
+    v3 = np.array(bv3) /n3
+
+    return v1, v2, v3, n1, n2, n3
+
+def Generate_coordinates(bv1, bv2, bv3, n1, n2, n3, num_copy, origin, replica_index):
+    ori_vec = np.array(origin)
+
+    if n1 * n2 * n3 > num_copy:
+        check = True
+    else:
+        check = False
+
+    np.random.seed(42 + replica_index)
+
+    count = 0
+    inds = []
+    while count < num_copy:
+        ind = (np.random.randint(0, n1), np.random.randint(0, n2), np.random.randint(0, n3))
+        if not check:
+            inds.append(ind)
+            count += 1
+        elif check:
+            if not ind in inds:
+                inds.append(ind)
+                count += 1
+            else:
+                while ind in inds:
+                    ind = (np.random.randint(0, n1), np.random.randint(0, n2), np.random.randint(0, n3))
+                inds.append(ind)
+                count += 1
+
+    coors = []
+    for ind in inds:
+        r1 = (ind[0] - (n1 - 1) * 0.5) * bv1
+        r2 = (ind[1] - (n2 - 1) * 0.5) * bv2
+        r3 = (ind[2] - (n3 - 1) * 0.5) * bv3
+        coors.append((r1 + r2 + r3 + ori_vec).tolist())
+
+    return coors
+#Code to here from simplearbd
 
 def readArbdCoords(fname):
     logger.warning('readArbdCoords is deprecated. Please update your code to use read_arbd_coordinates')
@@ -271,10 +392,46 @@ def read_average_arbd_coordinates(psf,pdb,dcd,rmsd_threshold=3.5, first_frame=0,
         if rmsd > rmsd_threshold**2:
             break
     t0=t+1
-    logger.info("Averaging coordinates in %s after frame %d" % (dcd, t0) )
+    logger.info(f"Averaging coordinates in {dcd} after frame {t0}")
     
     pos = np.mean(pos, axis=0)
     return pos
+
+
+def calculate_dimensions_from_cell_vectors(cell_vectors, cell_origin=None, buffer_factor=1.2):
+    """
+    Calculate simulation box dimensions from cell basis vectors with buffer.
+    
+    Args:
+        cell_vectors: List of 3 cell basis vectors [[x1,y1,z1], [x2,y2,z2], [x3,y3,z3]]
+        cell_origin: Cell origin coordinates [x,y,z], defaults to [0,0,0]
+        buffer_factor: Factor to scale the dimensions for additional buffer space
+        
+    Returns:
+        dimensions: 3D box dimensions as a tuple (x_dim, y_dim, z_dim)
+    """
+        
+    if len(cell_vectors) != 3:
+        raise ValueError("Expected 3 cell basis vectors, got {}".format(len(cell_vectors)))
+
+    vectors = [np.array(v, dtype=float) for v in cell_vectors]
+    print(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
+
+    is_orthogonal = all(np.isclose(v[i], np.linalg.norm(v)) for i, v in enumerate(vectors))
+    if not is_orthogonal:
+        # For non-orthogonal cells use the axis-aligned bounding box so the
+        # periodic volume fully contains the cell.  ARBD only supports
+        # orthogonal output so these are upper-bound estimates.
+        logger.warning(
+            "Non-orthogonal cell vectors detected; using axis-aligned bounding box "
+            "with buffer_factor=%.2f for internal dimension estimates.", buffer_factor
+        )
+        dimensions = [max(abs(v[i]) for v in vectors) for i in range(3)]
+    else:
+        dimensions = [sum(abs(v[i]) for v in vectors) for i in range(3)]
+
+    dimensions = [dim * buffer_factor for dim in dimensions]
+    return tuple(dimensions)
 
 def unit_quat_conversions():
     for axis in [[0,0,1],[1,1,1],[1,0,0],[-1,-2,0]]:

@@ -6,9 +6,11 @@ import sys
 
 
 ## Local imports
-from . import ArbdModel, ParticleType, PointParticle, Group, get_resource_path    
+from . import ParticleType, PointParticle, Group
+from .logger import logger, get_resource_path    
+from .model import ArbdModel
 from .polymer import PolymerSection, PolymerGroup
-from .interactions import NonbondedScheme, HarmonicBond, HarmonicPotential
+from .interactions import AbstractPotential, HarmonicBond, HarmonicBondedPotential
 from .coords import quaternion_to_matrix
 
 
@@ -21,18 +23,18 @@ type_ = ParticleType("AA",
 ## Bonded potentials
 class LinearBond(HarmonicBond):
     def __init__(self, k, r0, rRange=(0,50), resolution=0.1, maxForce=None, max_potential=None, prefix="potentials/"):
-        HarmonicPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, prefix)
+        HarmonicBondedPotential.__init__(self, k, r0, rRange, resolution, maxForce, max_potential, prefix)
         self.type_ = "linearbond"
         self.kscale_ = 1.0
 
     def potential(self, dr):
         return self.k*np.abs(dr)
 
-class SaliNonbonded(NonbondedScheme):
-    def __init__(self, resolution=0.1, rMin=0):
-        NonbondedScheme.__init__(self, typesA=None, typesB=None, resolution=resolution, rMin=rMin)
+class SaliNonbonded(AbstractPotential):
+    def __init__(self, resolution=0.1):
+        AbstractPotential.__init__(self, resolution=resolution)
 
-    def potential(self, r, typeA, typeB):
+    def potential(self, r):
         """ Constant force excluded volume """
         force = 10              # kcal_mol/AA
         radius = 6
@@ -110,7 +112,7 @@ class SaliModel(ArbdModel):
 
         """ 
         [debye_length]: angstroms
-        [damping_coefficient]: ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
 
         print("WARNING: diffusion coefficient arbitrarily set to 100 AA**2/ns in SaliModel")

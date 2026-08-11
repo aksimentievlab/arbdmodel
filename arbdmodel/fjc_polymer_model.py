@@ -2,12 +2,12 @@
 ## Test with `python -m arbdmodel.fjc_polymer_model`
 
 import numpy as np
-import sys
 
 ## Local imports
-from . import logger, ParticleType, PointParticle
+from . import ParticleType, PointParticle
 from .polymer import PolymerBeads, PolymerModel
 from .interactions import AbstractPotential, HarmonicBond
+from .logger import logger
 
 
 """Define particle types"""
@@ -16,15 +16,6 @@ type_ = ParticleType("X",
                      mass=120
 )
 
-# ## Bonded potentials
-# class FjcNonbonded(AbstractPotential):
-#     """ This potential should apply zero force; however, it is required for the arbd engine """
-#     def __init__(self, resolution=0.1, range_=(0,1)):
-#         AbstractPotential.__init__(self, resolution=resolution, range_=range_)
-
-#     def potential(self, r, types):
-#         u = np.zeros(r.shape)
-#         return u
 
 class FjcBeadsFromPolymer(PolymerBeads):
 
@@ -64,7 +55,7 @@ class FjcModel(PolymerModel):
                  **kwargs):
 
         """ 
-        [damping_coefficient]: ns
+        [damping_coefficient]: 1/ns (zeta/m, written to .bd as transDamping)
         """
         
         if 'timestep' not in kwargs: kwargs['timestep'] = 50e-6
@@ -77,7 +68,6 @@ class FjcModel(PolymerModel):
         PolymerModel.__init__(self, polymers, sequences, monomers_per_bead_group, **kwargs)
 
         """ Update type diffusion coefficients """
-        logger.warning("Diffusion coefficient arbitrarily set to 100 AA**2/ns in FjcModel")
         self.set_damping_coefficient( damping_coefficient )
 
         """ Set up nonbonded interactions """

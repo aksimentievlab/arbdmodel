@@ -1,3 +1,59 @@
 [build-system]
 requires = ["setuptools>=46.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "arbdmodel"
+dynamic = ["version"]
+
+# version = "file: arbdmodel/RELEASE-VERSION"
+# version = { attr = "arbdmodel.__version__" }
+
+description = "ARBD simulation interface"
+readme = {file = "README.md", content-type = "text/markdown"}
+
+authors = [
+ {name = "Christopher Maffeo", email = "cmaffeo2@illinois.edu"},
+]
+
+license = {file = "LICENSE"}
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+keywords = ["Coarse-grained simulation",
+	    "Molecular dynamics",
+	    "Brownian dynamics"]
+
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.14",
+    "scipy>=1.1",
+    "mdanalysis>=2.0.0",
+    "appdirs>=1.4",
+    "pandas>=1.0.0",
+    ]
+
+
+[project.urls]
+Homepage = "https://gitlab.engr.illinois.edu/tbgl/tools/arbdmodel"
+Issues = "https://gitlab.engr.illinois.edu/tbgl/tools/arbdmodel/issues"
+
+[project.scripts]
+contact_model = "arbdmodel.contact_model:contact_model"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+arbdmodel = ["RELEASE-VERSION","resources/*","resources/*/*"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+version_file = "arbdmodel/RELEASE-VERSION"
+
+[tool.setuptools]
+## Package will read some files at runtime, avoid installing as .zip
+zip-safe = false
+# package-dir = {"" = "arbdmodel"} # remap package root
