@@ -434,7 +434,7 @@ class ArbdEngine(SimEngine):
                 else:
                     fh.write("BOND ADD %d %d %s\n" % item)
 
-            for i,j,b,ax,ex,sw in model.get_bondXY():
+            for i,j,b,ax,ex in model.get_bondXY():
                 try:
                     bfile = b.filename()
                 except:

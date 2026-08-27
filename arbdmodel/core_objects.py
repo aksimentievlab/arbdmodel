@@ -365,6 +365,28 @@ class Parent():
         if len(potential_list) > 4: raise ValueError("Too many potentials")
 
         self.product_potentials.append(potential_list)
+    def add_vector_angle(self, i,j,k,l, potential):
+        assert( len(set((i,j,k,l))) >= 3 )
+        self.vector_angles.append( (i,j,k,l, potential) )
+
+    def add_bond_angle(self, i,j,k,l, bond_angle, exclude=False):
+        assert( len(set((i,j,k,l))) == 4 )
+        ## TODO: how to handle duplicating and cloning bonds
+        # beads = [b for b in self]
+        # for b in (i,j): assert(b in beads)
+        self.bond_angles.append( (i,j,k,l, bond_angle) )
+
+    def add_product_potential(self, potential_list):
+        """ potential_list: list of tuples of form (particle_i, particle_j,..., TabulatedPotential) """
+        if len(potential_list) < 2: raise ValueError("Too few potentials")
+        for elem in potential_list:
+            beads = elem[:-1]
+            pot = elem[-1]
+            if len(beads) < 2: raise ValueError("Too few particles specified in product_potential")
+            if len(beads) > 4: raise ValueError("Too many particles specified in product_potential")
+
+        self.product_potentials.append(potential_list)
+        ## TODO: how to handle duplicating and cloning bonds
 
     def get_restraints(self):
         ret = []
