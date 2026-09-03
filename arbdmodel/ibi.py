@@ -190,7 +190,7 @@ class AngleDof(DegreeOfFreedom):
         rji = self.wrap_vector(ri-rj)
         rjk = self.wrap_vector(rk-rj)
         cos = rji.dot(rjk) / (np.linalg.norm(rji)*np.linalg.norm(rjk))
-        angle = np.arccos(cos)
+        angle = np.arccos(np.clip(cos, -1.0, 1.0))
         angle = angle*180/np.pi
         return angle
 
