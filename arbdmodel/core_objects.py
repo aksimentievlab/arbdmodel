@@ -194,7 +194,6 @@ class NonbondedTerm():
     def __getitem__(self, index):
         return list(self)[index]
 
-
 class Parent():
     """
     The Parent class implements a hierarchical tree structure for organizing objects in a simulation.

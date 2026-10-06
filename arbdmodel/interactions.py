@@ -251,6 +251,7 @@ class NullPotential(AbstractPotential):
     def filename(self, types=None):
         return f"{self.filename_prefix}nullpot.dat"
 
+<<<<<<< HEAD
 class SwitchPotential(AbstractPotential):
     def __init__(self, p1, p2, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
         self.filename_prefix = filename_prefix
@@ -288,6 +289,8 @@ class SwitchPotential(AbstractPotential):
         if isinstance(other, SwitchPotential): return False
         return (self.potential1 == other.potential1) and (self.potential2 == other.potential2)
 
+=======
+>>>>>>> 0fd9050607315b50297136eb5be714f3c875840a
 ## Bonded potentials            
 class HarmonicBondedPotential(AbstractPotential):
     def __init__(self, k, r0, filename_prefix='./potentials/', *args, **kwargs):
@@ -364,6 +367,31 @@ class HarmonicAngle(HarmonicBondedPotential):
     @property
     def type_(self):
         return 'angle'
+
+class CosineAngle(HarmonicBondedPotential):
+    """
+    Cosine-harmonic angle, U = k/2 (cos(theta) - cos(theta0))^2.
+
+    Same form as GROMACS angle function 2 (G96), used by Martini.
+
+    Parameters
+    ----------
+    k : float
+        Force constant (kcal/mol).
+    r0 : float
+        Equilibrium angle theta0 (degrees).
+    """
+    def __init__(self, *args, **kwargs):
+        if 'range_' not in kwargs: kwargs['range_'] = (0,181)
+        HarmonicBondedPotential.__init__(self, *args, **kwargs)
+
+    @property
+    def type_(self):
+        return 'cosangle'
+
+    def potential(self, r, types=None):
+        dc = np.cos(np.radians(r)) - np.cos(np.radians(self.r0))
+        return 0.5*self.k*dc**2
 
 class HarmonicDihedral(HarmonicBondedPotential):
     def __init__(self, *args, **kwargs):

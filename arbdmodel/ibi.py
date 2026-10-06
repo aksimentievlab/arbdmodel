@@ -413,6 +413,19 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
                                self.resolution )
         self.__dists = {}
 
+    def get_learning_rate(self, iteration=None):
+        """Learning rate in effect at `iteration` (default: the current one).
+        Fixed at 1 for the first iteration. That call has no previous potential
+        to update -- it is a plain Boltzmann inversion, U = -kT ln(rho) -- and
+        the rate is applied there as an overall scaling factor.
+        """
+        if iteration is None:
+            iteration = self.iteration
+        if iteration <= 1:
+            return 1.0
+        try:    return self.learning_rate(iteration)
+        except: return self.learning_rate
+
     def potential(self, r=None, types=None):
         """
         Return the pair potential obtained using the Iterative Boltzmann Inversion (IBI) method.
@@ -768,8 +781,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
         """
 
         if scaling_factor is None:
-            try:    scaling_factor = self.learning_rate(self.iteration)
-            except: scaling_factor = self.learning_rate
+            scaling_factor = self.get_learning_rate()
 
         savgol_opts = dict(
             window_length=1+(self.smooth//2)*2, polyorder=3,
@@ -818,8 +830,7 @@ class AbstractIBIpotential(AbstractPotential, metaclass=ABCMeta):
             du = du * 0.58622592 * (temperature/295)
             du = du * (rho_aa/rho_aa.max())**0.25 # penalize learning for values where target density is very low
 
-            try:    alpha = self.learning_rate(self.iteration)
-            except: alpha = self.learning_rate
+            alpha = self.get_learning_rate()
             u = u0 + alpha * du
 
         f = self.filename(smoothed=False)

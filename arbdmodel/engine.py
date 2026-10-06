@@ -630,7 +630,7 @@ class ArbdEngine(SimEngine):
             params[k] = v
 
         if configuration.seed is None:
-            params['seed']     = f'seed {int(np.random.default_rng().integers(1,99999,1))}'
+            params['seed']     = f'seed {int(np.random.default_rng().integers(1,99999,1).item())}'
         else:
             params['seed'] = "seed {:d}".format(configuration.seed)
         params['num_steps']       = int(configuration.num_steps)
