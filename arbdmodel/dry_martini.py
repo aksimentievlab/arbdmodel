@@ -306,7 +306,7 @@ class DryMartiniModel(ArbdModel):
         logger.info("""You are using Dry Martini v2.1 as described in:
         C. Arnarez et al., Dry Martini, a coarse-grained force field for lipid membrane simulations with implicit solvent.
         J. Chem. Theory Comput. 2015, 11, 260-275. doi:10.1021/ct500477k
-
+        
 Please cite all appropriate articles!""")
 
         self.topology = DryMartiniTopology() if topology is None else topology
