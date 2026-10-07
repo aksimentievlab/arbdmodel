@@ -339,9 +339,23 @@ Please cite all appropriate articles!""")
 
     @classmethod
     def from_gro(cls, gro_file, dimensions=None, **kwargs):
-        """ Build a model from a GROMACS .gro file (box taken from the file unless given). """
+        """
+        Build a model from a GROMACS .gro file.
+
+        Coordinates move from the .gro box [0, L) to the centred ARBD box [-L/2, L/2).
+        If `dimensions` differs from the .gro box, lipid centres are scaled to the new
+        box with each lipid's internal geometry kept.
+        """
         lipids, box = read_gro_lipids(gro_file)
-        return cls(lipids, dimensions=box if dimensions is None else dimensions, **kwargs)
+        box = np.asarray(box, dtype=float)
+        new = box if dimensions is None else np.asarray(dimensions, dtype=float)
+        placed = []
+        for name, xyz in lipids:
+            xyz = xyz - box * np.round((xyz - xyz[0]) / box)
+            com = xyz.mean(axis=0)
+            xyz = xyz - com + com * new / box
+            placed.append((name, (xyz + new / 2) % new - new / 2))
+        return cls(placed, dimensions=list(new), **kwargs)
 
 
 def read_gro_lipids(gro_file):
