@@ -541,7 +541,7 @@ class ArbdEngine(SimEngine):
                             bfile = str(b)
                         line = line+" ".join([str(x.idx) for x in ijk])+" "
                         line = line+" ".join([str(x) for x in [type_,bfile] if x != ""])+" "
-                    fh.write(line)
+                    fh.write(line + "\n")
 
     def _write_potential_switching_schedule_file( self, model, filename ):
         switching_terms = dict(particles=[], bonds=[], angles=[], dihedrals=[])
@@ -658,9 +658,8 @@ class ArbdEngine(SimEngine):
             params['pairlist_distance'] = 10
         else:
             params['pairlist_distance'] -= params['cutoff'] 
-            if params['pairlist_distance'] < 0:
-                params['pairlist_distance'] = 0
-                logger.warning("pairlist_distance must be greater than cutoff. Setting pairlist_distance = cutoff")
+        if params['pairlist_distance'] < 0:
+            raise ValueError('Pairlist distance in arbd is skin and is smaller than cutoff')
 
         if params['integrator'] == 'MD':
             params['integrator'] = 'Langevin'

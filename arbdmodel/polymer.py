@@ -313,22 +313,22 @@ class PolymerSection(ConnectableElement):
     def _get_location_positions(self):
         return [self.contour_to_monomer_index(l.contour_position) for l in self.locations]
 
-    def insert_monomers(self, at_monomer: int, num_monomer: int, seq=tuple()):
-        assert(np.isclose(np.around(num_monomer),num_monomer))
+    def insert_monomers(self, at_monomer: int, num_monomers: int, seq=tuple()):
+        assert(np.isclose(np.around(num_monomers),num_monomers))
         if at_monomer < 0:
             raise ValueError("Attempted to insert DNA into {} at a negative location".format(self))
-        if at_monomer > self.num_monomer-1:
+        if at_monomer > self.num_monomers-1:
             raise ValueError("Attempted to insert DNA into {} at beyond the end of the Polymer".format(self))
         if num_monomers < 0:
             raise ValueError("Attempted to insert DNA a negative amount of DNA into {}".format(self))
 
-        num_monomers = np.around(num_monomer)
+        num_monomers = np.around(num_monomers)
         monomer_positions = self._get_location_positions()
         new_monomer_positions = [p if p <= at_monomer else p+num_monomers for p in monomer_positions]
 
         ## TODO: handle sequence
 
-        self.num_monomers = self.num_monomer+num_monomer
+        self.num_monomers = self.num_monomers+num_monomers
 
         for l,p in zip(self.locations, new_monomer_positions):
             l.contour_position = self.monomer_index_to_contour(p)
@@ -341,9 +341,9 @@ class PolymerSection(ConnectableElement):
         last_monomer = max((first_monomer,last_monomer))
         fist_monomer = tmp
 
-        if first_monomer < 0 or first_monomer > self.num_monomer-2:
+        if first_monomer < 0 or first_monomer > self.num_monomers-2:
             raise ValueError("Attempted to remove DNA from {} starting at an invalid location {}".format(self, first_monomer))
-        if last_monomer < 1 or last_monomer > self.num_monomer-1:
+        if last_monomer < 1 or last_monomer > self.num_monomers-1:
             raise ValueError("Attempted to remove DNA from {} ending at an invalid location {}".format(self, last_monomer))
         if first_monomer == last_monomer:
             return
@@ -359,10 +359,10 @@ class PolymerSection(ConnectableElement):
 
         removed_monomer = last_monomer-first_monomer+1
         new_monomer_positions = [p if p <= last_monomer else p-removed_monomer for p in monomer_positions]
-        num_monomers = self.num_monomer-removed_monomer
+        num_monomers = self.num_monomers-removed_monomer
 
-        if self.sequence is not None and len(self.sequence) == self.num_monomer:
-            self.sequence = [s for s,i in zip(self.sequence,range(self.num_monomer)) 
+        if self.sequence is not None and len(self.sequence) == self.num_monomers:
+            self.sequence = [s for s,i in zip(self.sequence,range(self.num_monomers)) 
                                 if i < first_monomer or i > last_monomer]
             assert( len(self.sequence) == num_monomers )
 
@@ -431,7 +431,7 @@ class PolymerSection(ConnectableElement):
         self.set_splines(u, coords)
 
     def contour_to_monomer_index(self, contour_pos, nearest_monomer=False):
-        idx = contour_pos*(self.num_monomer) - 0.5
+        idx = contour_pos*(self.num_monomers) - 0.5
         if nearest_monomer:
             assert( np.isclose(np.around(idx),idx) )
             idx = np.around(idx)
