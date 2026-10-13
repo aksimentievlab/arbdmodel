@@ -87,6 +87,7 @@ class PdbProcessor:
 
         self.pot_resolution = simconf.pot_resolution
         self.den_resolution = simconf.den_resolution
+        self.charge_resolution = getattr(simconf, "charge_resolution", None)
         self.elec_resolution = simconf.elec_resolution
         self.hydrogen_cluster = hydrogen_cluster
 
@@ -278,10 +279,10 @@ class PdbProcessor:
             
     
     def generate_charge_distribution(self):
-        resolution=self.den_resolution
+        resolution = self.charge_resolution if self.charge_resolution is not None else self.den_resolution
 
-        if self.den_resolution is None:
-            logger.warning("Den resolution not provided, using default value of 2")
+        if resolution is None:
+            logger.warning("Charge/den resolution not provided, using default value of 2")
             resolution = 2.0
 
         """Generate charge distribution using VMD."""
@@ -323,9 +324,8 @@ class PdbProcessor:
             netCharge = float(fin.readline().strip())
         
         # Load grid data
-        grid, origin, delta = loadGrid(str(temp_file2))
-        grid = grid * resolution**3
-        
+        grid, origin, delta = loadGrid(str(temp_file2))  # volmap interp: charge per voxel
+
         # Fix charge to match net charge
         ids = np.where(np.abs(grid[:]) > 0.01)
         numPoints = np.size(ids)
@@ -541,8 +541,8 @@ class PdbProcessor:
         for i, pot_file in enumerate(self.vdw_pot_dxs):
             vdw_key = f"vdw{i}"
             if pot_file.exists():
-                # VDW pot.dx maps are already in kcal/mol
-                potential_grids.append((vdw_key, str(pot_file), 1.0))
+                # volmap ils writes kT (map ∝ 1/T) -> kcal/mol, same as elec
+                potential_grids.append((vdw_key, str(pot_file), elec_scale))
 
         for i, den_file in enumerate(self.vdw_den_dxs):
             vdw_key = f"vdw{i}"

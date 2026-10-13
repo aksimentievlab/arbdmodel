@@ -1286,9 +1286,10 @@ hydro.pdb\t!Input PDB file
         Ry = float(lines[line_num+1].strip().split()[4])
         Rz = float(lines[line_num+2].strip().split()[5])
         
-        # Convert units
-        # Translation: zeta/m [1/ns] = (295 k K) / (D_trans[cm^2/s] * mass[amu])
-        trans_damp = [24.527692/(x*mass) for x in [Dx, Dy, Dz]]
+        # Convert units; constants are k*295K, rescaled to the HydroPro run temperature
+        t_scale = float(self.temperature) / 295.0
+        # Translation: zeta/m [1/ns] = (k T) / (D_trans[cm^2/s] * mass[amu])
+        trans_damp = [24.527692 * t_scale / (x*mass) for x in [Dx, Dy, Dz]]
         
         # Rotation: zeta_rot/I [1/ns] = (295 k K) / (D_rot[1/s] * inertia[amu*AA^2])
         # Must divide by principal inertia per axis, NOT scalar mass.
@@ -1302,7 +1303,7 @@ hydro.pdb\t!Input PDB file
             rot_inertia = [mass, mass, mass]
         else:
             rot_inertia = list(self.inertia)
-        rot_damp = [2.4527692e+17 / (x * I) for x, I in zip([Rx, Ry, Rz], rot_inertia)]
+        rot_damp = [2.4527692e+17 * t_scale / (x * I) for x, I in zip([Rx, Ry, Rz], rot_inertia)]
         
         return trans_damp, rot_damp
                 
@@ -1676,7 +1677,7 @@ set all [atomselect $ID all]
 set netCharge [measure sumweights $all weight charge]
 
 ## Write out charge density
-volmap density $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
+volmap interp $all -o $prefix.chargeDensity.dx -res $resolution -weight charge
 ## Write out pqr for subsequent EM calculation
 $all writepqr $prefix.pqr
 

@@ -49,6 +49,8 @@ class SimConf:
         # SimpleARBD parameters
         viscosity (float): Solvent viscosity. 
         solvent_density (float): Solvent density. in g/cm^3
+        den_resolution (float): vdW density grid spacing (Å).
+        charge_resolution (float): Charge density grid spacing (Å); default = den_resolution.
         hydropro_regen (bool): Rerun HydroPro even if output exists (default: reuse).
         mars_md (bool): Write MARS-MD flavored .bd (default: ARBD).
 
@@ -65,6 +67,7 @@ class SimConf:
                  ## SimpleARBD parameters
                  viscosity=None, solvent_density=None, salt=None,num_heavy_cluster=None,
                  den_resolution=None,
+                 charge_resolution=None,
                  pot_resolution=None,
                  elec_resolution=None,
                  hydrogen_cluster=False,
@@ -99,6 +102,7 @@ class SimConf:
         self.salt=salt
 
         self.den_resolution = den_resolution
+        self.charge_resolution = charge_resolution
         self.pot_resolution = pot_resolution
         self.elec_resolution = elec_resolution
         self.hydrogen_cluster = hydrogen_cluster
