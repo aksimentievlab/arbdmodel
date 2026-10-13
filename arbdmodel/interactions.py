@@ -251,7 +251,6 @@ class NullPotential(AbstractPotential):
     def filename(self, types=None):
         return f"{self.filename_prefix}nullpot.dat"
 
-<<<<<<< HEAD
 class SwitchPotential(AbstractPotential):
     def __init__(self, p1, p2, range_=(0,1), resolution=0.5, filename_prefix='./potentials/', *args, **kwargs):
         self.filename_prefix = filename_prefix
@@ -288,9 +287,6 @@ class SwitchPotential(AbstractPotential):
     def __eq__(self,other):
         if isinstance(other, SwitchPotential): return False
         return (self.potential1 == other.potential1) and (self.potential2 == other.potential2)
-
-=======
->>>>>>> 0fd9050607315b50297136eb5be714f3c875840a
 ## Bonded potentials            
 class HarmonicBondedPotential(AbstractPotential):
     def __init__(self, k, r0, filename_prefix='./potentials/', *args, **kwargs):
