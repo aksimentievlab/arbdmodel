@@ -548,7 +548,7 @@ class ArbdEngine(SimEngine):
         switching_keywords = {k: k[:-1].upper() for k in switching_terms.keys()}
         switching_keywords['particles'] = 'TYPE'
 
-        for key,fn in (('particles',model.__iter__),
+        for key,fn in (('particles',lambda: (p for p in model if not p.rigid)),
                        ('bonds', model.get_bonds),
                        ('angles', model.get_angles),
                        ('dihedrals', model.get_dihedrals)):
@@ -658,6 +658,9 @@ class ArbdEngine(SimEngine):
             params['pairlist_distance'] = 10
         else:
             params['pairlist_distance'] -= params['cutoff'] 
+            if params['pairlist_distance'] < 0:
+                params['pairlist_distance'] = 0
+                logger.warning("pairlist_distance must be greater than cutoff. Setting pairlist_distance = cutoff")
 
         if params['integrator'] == 'MD':
             params['integrator'] = 'Langevin'
@@ -898,6 +901,12 @@ inertia {' '.join(map(str,rbt.moment_of_inertia))}
 transDamping {' '.join(map(str,gamma))}
 rotDamping {' '.join(map(str,gamma_rot))}
 """)
+                    mars_md = bool(getattr(configuration, 'mars_md', None))
+                    if mars_md:
+                        for key, f in (('inputPsf', getattr(rbt, 'aligned_psf', None)),
+                                       ('inputPdb', getattr(rbt, 'aligned_pdb', None))):
+                            if f is not None and os.path.exists(str(f)):
+                                fh.write(f"{key} {_fix_path(f, rbt.name)}\n")
 
                     for item in rbt.potential_grids:
                         try:    keyword,g,s = item
@@ -917,7 +926,7 @@ rotDamping {' '.join(map(str,gamma_rot))}
                         try:    keyword,g,s = item
                         except: (keyword,g),s = (item,1)
                         g = _fix_path(g,rbt.name)
-                        fh.write(f"gridFile {keyword} {g}\n")
+                        fh.write(f"{'pmf' if mars_md else 'gridFile'} {keyword} {g}\n")
                         if s != 1: fh.write(f"pmfScale {keyword} {s}\n")
 
                     ## AttachedParticles
@@ -1170,7 +1179,8 @@ class HydroProRunner:
         self.viscosity = simconf.viscosity
         self.solvent_density = simconf.solvent_density
         self.binary = simconf.get_binary('hydropro')
-            
+        self.regen = bool(getattr(simconf, 'hydropro_regen', None))
+
         # Check if binary exists
         if self.binary is None:
             raise FileNotFoundError("HydroPro binary not found. Please configure in simconf.")
@@ -1325,6 +1335,8 @@ hydro.pdb\t!Input PDB file
             os.symlink(pdb_path, "hydro.pdb")
 
             # Run HydroPro
+            if self.regen and Path(f"{structure_name}.hydro-res.txt").exists():
+                os.replace(f"{structure_name}.hydro-res.txt", f"{structure_name}.hydro-res.txt.bak")
             if not Path(f"{structure_name}.hydro-res.txt").exists():
                 logger.info(f'Running hydropro in {work_dir} on {self.full_name}; this may take several minutes')
                 result = subprocess.run(str(self.binary), capture_output=True, 
@@ -1478,16 +1490,15 @@ quit"""
             # Write configuration file
             self.write_config()
             
-            # Run APBS
-            if not Path(self.out_file_name).exists():
-                result = subprocess.run(
-                    [str(self.binary), f"{self.structure_name}.apbs"],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-            else:
-                logger.info("APBS output file already exists:" +f"{self.structure_name}.elec.dx")
+            # Run APBS (always; salt/temp/buffer may have changed)
+            if Path(self.out_file_name).exists():
+                os.replace(self.out_file_name, f"{self.out_file_name}.bak")
+            result = subprocess.run(
+                [str(self.binary), f"{self.structure_name}.apbs"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
             
             # Check for output file
             output_file = Path(self.out_file_name)
@@ -1834,6 +1845,13 @@ mol new ${prefix}.psf
 mol addfile ${prefix}.pdb 
 
 set ID [molinfo top]
+
+# Assign CHARMM LJ params (volmap ils reads them from radius/occupancy)
+package require ilstools
+set prm_files [glob -nocomplain """ + str(self.params_dir) + """/*.prm]
+set str_files [glob -nocomplain """ + str(self.params_dir) + """/*.str]
+ILStools::readcharmmparams [concat $prm_files $str_files]
+ILStools::assigncharmmparams $ID
 
 # Read cluster results
 lassign [readClusterResults $clusterFile] newR newE typeArrayList

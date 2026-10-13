@@ -63,19 +63,25 @@ class PdbRigidBodyType(RigidBodyType):
         
         logger.info(f"DiffusiveRigidBodyType '{name}' initialized with metadata only")
 
-    def finalize_grids(self, cluster_file, gaussian_width=2.5):
-        """Generate VDW maps from pooled cluster file, smooth potentials, and refresh grid lists."""
+    def finalize_grids(self, cluster_file, elec_width=5.0, vdw_width=1.0):
+        """Generate VDW maps from pooled cluster file, smooth potentials, and refresh grid lists.
+
+        @param elec_width elec smoothing sigma (Å); voxels = elec_width / elec_resolution
+        @param vdw_width vdW smoothing sigma (Å); voxels = vdw_width / pot_resolution
+        """
         from .grid import smooth_grid
 
         p = self.processor
         p.generate_vdw_diffusive(
             cluster_file=cluster_file)
         if p.elec_dx and Path(p.elec_dx).exists():
-            p.elec_dx = Path(smooth_grid(in_file=p.elec_dx, gaussian_sigma=gaussian_width))
+            elec_sigma = elec_width / float(p.elec_resolution or 2.0)
+            p.elec_dx = Path(smooth_grid(in_file=p.elec_dx, gaussian_sigma=elec_sigma))
         smoothed_pots = []
+        vdw_sigma = vdw_width / float(p.pot_resolution or 1.0)
         for pot in p.vdw_pot_dxs:
             if pot.exists():
-                smoothed_pots.append(Path(smooth_grid(in_file=pot, gaussian_sigma=gaussian_width)))
+                smoothed_pots.append(Path(smooth_grid(in_file=pot, gaussian_sigma=vdw_sigma)))
         p.vdw_pot_dxs = smoothed_pots
 
         grid_files = p.get_grid_files()

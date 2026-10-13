@@ -49,6 +49,8 @@ class SimConf:
         # SimpleARBD parameters
         viscosity (float): Solvent viscosity. 
         solvent_density (float): Solvent density. in g/cm^3
+        hydropro_regen (bool): Rerun HydroPro even if output exists (default: reuse).
+        mars_md (bool): Write MARS-MD flavored .bd (default: ARBD).
 
     """
 
@@ -66,9 +68,10 @@ class SimConf:
                  pot_resolution=None,
                  elec_resolution=None,
                  hydrogen_cluster=False,
+                 hydropro_regen=None,
                  ## Binary paths
                  arbd_path=None, namd_path=None, vmd_path=None, 
-                 hydropro_path=None, apbs_path=None, **kwargs):
+                 hydropro_path=None, apbs_path=None, mars_md=None,**kwargs):
 
 
         self.num_steps = num_steps
@@ -99,7 +102,8 @@ class SimConf:
         self.pot_resolution = pot_resolution
         self.elec_resolution = elec_resolution
         self.hydrogen_cluster = hydrogen_cluster
-
+        self.hydropro_regen = hydropro_regen
+        self.mars_md=mars_md
         # Set binary paths
         if arbd_path: BinaryManager.set_binary_path('arbd', arbd_path)
         if namd_path: BinaryManager.set_binary_path('namd', namd_path)

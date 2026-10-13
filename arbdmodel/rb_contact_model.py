@@ -337,10 +337,7 @@ class PdbRBModel(ArbdModel):
         self.shared_cluster_file = cluster_file
 
         for rb_type in self.diffusible_rb_types:
-            rb_type.finalize_grids(
-                cluster_file,
-                gaussian_width=self.gaussian_width,
-            )
+            rb_type.finalize_grids(cluster_file)
 
         logger.info(f"Pooled LJ clustering complete. Shared cluster file: {cluster_file}")
         os.remove(self.work_dir / "vdw_cluster.tcl")

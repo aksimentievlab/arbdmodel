@@ -295,7 +295,7 @@ class PdbProcessor:
             logger.debug(f"Charge density script written to {charge_tcl}")
         
         # Run VMD to generate charge density
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', aligned_path, resolution]
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', aligned_path, str(resolution)]
         logger.info(f"Running charge density command: {cmd}")
         with open(charge_tcl) as fh:
             subprocess.run(cmd, check=True, capture_output=True, stdin=fh)
@@ -422,7 +422,7 @@ class PdbProcessor:
         try:
             os.chdir(self.work_dir)
             with open(vdw_tcl) as fh:
-                subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
+                subprocess.run(cmd, env={k: str(v) for k, v in _env.items()}, check=True, capture_output=True, stdin=fh)
         except:
             raise
         finally:
@@ -487,7 +487,7 @@ class PdbProcessor:
         if not cluster_path.exists():
             raise FileNotFoundError(f"Cluster file not found: {cluster_path}")
 
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path, potResolution, denResolution]
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, str(cluster_path), str(potResolution), str(denResolution)]
         last_dir = os.getcwd()
         try:
             os.chdir(self.work_dir)
@@ -722,8 +722,8 @@ class PdbProcessor:
         
         # Run VMD
         _env = os.environ.copy()
-        _env['VMDNOCUDA']=1
-        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, cluster_path, potResolution]
+        _env['VMDNOCUDA']='1'
+        cmd = [self.vmd_path, '-dispdev', 'text', '-args', self.base_name, str(cluster_path), str(potResolution)]
         last_dir = os.getcwd()
         try:
             os.chdir(self.work_dir)
@@ -757,13 +757,13 @@ class PdbProcessor:
 
         # First generate VDW maps for each segment
         _env = os.environ.copy()
-        _env['VMDNOCUDA']=1
+        _env['VMDNOCUDA']='1'
         for segment_idx in range(self.segment_count + 1):
             segment_name = f"{self.base_name}.stat_temp.{segment_idx}"
-            
+
             # Generate VDW maps for this segment
             vdw_script = self.tclgen.generate_static_vdw_tcl()
-            cmd = [self.vmd_path, '-dispdev', 'text', '-args', segment_name, cluster_path, potResolution]
+            cmd = [self.vmd_path, '-dispdev', 'text', '-args', segment_name, str(cluster_path), str(potResolution)]
             last_dir = os.getcwd()
             try:
                 os.chdir(self.work_dir)
@@ -783,8 +783,8 @@ class PdbProcessor:
             
             # Process each segment
             for j in range(self.segment_count + 1):
-                current_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.{potResolution}A.pot.dx"
-                temp_map = f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.tmp.dx"
+                current_map = str(self.work_dir / f"{self.base_name}.stat_temp.{j}.vdw{i}.{potResolution}A.pot.dx")
+                temp_map = str(self.work_dir / f"{self.base_name}.stat_temp.{j}.vdw{i}.pot.tmp.dx")
                 
                 if j == 0:
                     # First segment - just copy
@@ -793,7 +793,7 @@ class PdbProcessor:
                 else:
                     # Glue with previous map
                     _env = os.environ.copy()
-                    _env['VMDNOCUDA']=1
+                    _env['VMDNOCUDA']='1'
                     cmd = [self.vmd_path,'-dispdev','text','-args',last_map,current_map,temp_map]
                     with open(glue_script) as fh:
                         subprocess.run(cmd, env=_env, check=True, capture_output=True, stdin=fh)
@@ -802,7 +802,7 @@ class PdbProcessor:
             # Create final map
             if os.path.isfile(last_map):
                 temp_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.pot.tmp.dx"
-                final_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{poteResolution}A.pot.dx"
+                final_out = Path.cwd() / self.work_dir / f"{self.base_name}.vdw{i}.{potResolution}A.pot.dx"
                 
                 shutil.copy(last_map, temp_out)
                 Bound_grid(inFile=temp_out, outFile=final_out, lowerBound=-20, upperBound=20)
