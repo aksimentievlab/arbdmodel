@@ -658,6 +658,8 @@ class ArbdEngine(SimEngine):
             params['pairlist_distance'] = 10
         else:
             params['pairlist_distance'] -= params['cutoff'] 
+        if params['pairlist_distance'] < 0:
+            raise ValueError('Pairlist distance is smaller than cutoff')
 
         if params['integrator'] == 'MD':
             params['integrator'] = 'Langevin'
